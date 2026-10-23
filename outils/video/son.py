@@ -5,8 +5,8 @@ tambour sur cadre façon daf, clochettes, nappe grave, souffles de transition.
 Mode : hijaz sur ré (ré, mi bémol, fa dièse, sol, la, si bémol, do).
 Les effets suivent le minutage de index.html (render(t)).
 
-    python3 son.py sortie.wav            (version daf seul, celle du site)
-    python3 son.py sortie.wav --complet  (version avec oud, clochettes et nappe)
+    python3 son.py sortie.wav            (version avec oud, clochettes et nappe, celle du site)
+    python3 son.py sortie.wav --daf      (version daf seul)
 """
 import sys
 import numpy as np
@@ -16,7 +16,7 @@ SR = 44100
 T = 16.0
 N = int(SR * T)
 rng = np.random.default_rng(1447)          # graine fixe : la bande-son est toujours la même
-DAF = '--complet' not in sys.argv          # par défaut : percussions seules (daf), sans instrument mélodique
+DAF = '--daf' in sys.argv                  # --daf : percussions seules, sans instrument mélodique
 mix = np.zeros((2, N))
 
 D3 = 146.83

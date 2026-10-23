@@ -563,7 +563,7 @@ const PAGES = {
       'Récitations du Coran : cheikh Maḥmoûd Khalîl al-Ḥouṣarî, lecture d’enseignement (al-mou‘allim), diffusées par everyayah.com.',
       'Voix de lecture : la synthèse vocale de votre appareil.',
       'Export des listes au format Excel : SheetJS (licence Apache 2.0) ; codes QR des certificats : qrcode-generator de Kazuhiko Arase (licence MIT).',
-      'Vidéo de présentation et son accompagnement au daf : créations originales des Éditions Lisân.'] },
+      'Vidéo de présentation et sa musique : créations originales des Éditions Lisân.'] },
     { p: '© Mouhamadou CISSEMA — Éditions Lisân. Tous droits réservés.' },
   ] },
 };
