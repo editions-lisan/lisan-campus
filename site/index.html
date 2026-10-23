@@ -25,9 +25,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Lisân Campus">
 <style>html{box-sizing:border-box;-webkit-text-size-adjust:100%}body{margin:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}img{max-width:100%}[hidden]{display:none!important}</style>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,600;7..72,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Noto+Sans:wght@400&display=swap">
+<link rel="preload" href="fonts/atkinson-400.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/literata-800.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="fonts/LisanNaskh-R.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="styles.css">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"EducationalOrganization","name":"Lisân Campus — Éditions Lisân","url":"https://lisan-campus.netlify.app/","logo":"https://lisan-campus.netlify.app/icon-512.png","founder":{"@type":"Person","name":"Mouhamadou CISSEMA"},"address":{"@type":"PostalAddress","addressLocality":"Abidjan","addressCountry":"CI"},"description":"Apprendre l'arabe, lire le Coran pas à pas, réviser la Licence 1 Droit et se former à l'intelligence artificielle avec Claude.","inLanguage":"fr"}</script>
@@ -37,6 +36,7 @@
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#accueil"><img class="brand-logo" src="logo.png" alt="Logo des Éditions Lisân" width="46" height="46"><span class="brand-t"><small>Éditions Lisân</small><b>Lisân <span>Campus</span></b></span></a>
+    <nav class="quick" aria-label="Accès rapide"><a href="#accueil">Accueil</a><a href="#glossaire">Glossaire</a><a href="#verifier">Certificats</a><a href="#contact">Contact</a></nav>
     <div class="tools">
       <button type="button" class="pill" id="install-btn" data-install="1" hidden>Installer</button>
       <button type="button" class="menu-btn" id="menu-btn" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="drawer">
@@ -44,14 +44,22 @@
     </div>
   </div>
 </header>
+<div id="readbar" aria-hidden="true"></div>
 <div class="scrim" id="scrim" hidden></div>
 <aside class="drawer" id="drawer" hidden></aside>
 <div class="wrap install-help" id="ios-help" hidden><div class="notice"></div></div>
 <main><div class="wrap" id="view"></div></main>
+<button type="button" class="totop" id="totop" aria-label="Revenir en haut de la page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button>
 <footer class="site"><div class="wrap">
-  <nav class="foot-links" aria-label="Liens utiles"><a href="#apropos">À propos</a><a href="#contact">Contact</a><a href="#confidentialite">Confidentialité</a><a href="#conditions">Conditions d’utilisation</a><a href="#mentions">Mentions légales</a></nav>
-  <div><b>Lisân Campus</b> est le site d’apprentissage des Éditions Lisân, fondées à Abidjan par Mouhamadou CISSEMA : l’arabe, le Coran, la Licence 1 Droit et l’intelligence artificielle.</div>
-  <div>© Mouhamadou CISSEMA — Éditions Lisân. Tous droits réservés.</div>
+  <div class="ft-grid">
+    <div class="ft-brand"><a class="brand" href="#accueil"><img class="brand-logo" src="logo.png" alt="" width="46" height="46"><span class="brand-t"><small>Éditions Lisân</small><b>Lisân <span>Campus</span></b></span></a>
+      <p class="ft-ar" lang="ar" dir="rtl">ٱللُّغَةُ ٱلَّتِي تَفْتَحُ ٱلْأَبْوَابَ</p>
+      <p><b>Lisân Campus</b> est le site d’apprentissage des Éditions Lisân, fondées à Abidjan par Mouhamadou CISSEMA : l’arabe, le Coran, la Licence 1 Droit et l’intelligence artificielle.</p></div>
+    <nav class="ft-col" aria-label="Les espaces"><b>Les espaces</b><a href="#espace-arabe">Apprendre l’arabe</a><a href="#espace-coran">Lire le Coran pas à pas</a><a href="#espace-droit">Droit · Licence 1</a><a href="#espace-ia">Formation à l’IA avec Claude</a></nav>
+    <nav class="ft-col" aria-label="Outils"><b>Outils</b><a href="#glossaire">Glossaire</a><a href="#verifier">Vérifier un certificat</a><a href="#suggestion">Suggérer une idée</a><a href="#parametres">Paramètres</a></nav>
+    <nav class="ft-col" aria-label="Liens utiles"><b>Informations</b><a href="#apropos">À propos</a><a href="#contact">Contact</a><a href="#confidentialite">Confidentialité</a><a href="#conditions">Conditions d’utilisation</a><a href="#mentions">Mentions légales</a></nav>
+  </div>
+  <div class="ft-bottom"><span>© Mouhamadou CISSEMA — Éditions Lisân. Tous droits réservés.</span><span>Abidjan, Côte d’Ivoire</span></div>
 </div></footer>
 <form name="contact" data-netlify="true" netlify-honeypot="bot-field" hidden>
   <input name="nom"><input name="email"><input name="sujet"><textarea name="message"></textarea><input name="bot-field">
