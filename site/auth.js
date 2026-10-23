@@ -52,12 +52,52 @@
         Object.entries(x.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date), reponses: v.reponses || {} }; });
         const info = x.profile ? Object.assign({}, x.profile) : null; if (info) delete info.updatedAt;
         return { uid: d.id, name: x.name || '', email: x.email || '', createdAt: iso(x.createdAt), lastLogin: iso(x.lastLogin), info, spaces: sp,
-          done: Object.keys((x.progress && x.progress.done) || {}).length };
+          done: Object.keys((x.progress && x.progress.done) || {}).length,
+          certs: Object.values(x.certificats || {}).filter(c => c && c.num).map(c => Object.assign({}, c, { date: iso(c.date) })),
+          sugg: Object.entries(x.suggestions || {}).filter(([, v]) => v && v.texte).map(([id, v]) => Object.assign({ id }, v, { date: iso(v.date) })) };
       });
     },
     uid: () => user && user.uid,
+    async adminRegistry() {                              // administration : numéros présents au registre des certificats
+      const snap = await fb.firestore().collection('certificats').get({ source: 'server' }); return new Set(snap.docs.map(d => d.id));
+    },
+    adminRevoke: num => within(fb.firestore().collection('certificats').doc(num).delete()),
+    certs: () => Object.values((user && profile && profile.certs) || {}).sort((a, b) => String(b.date).localeCompare(String(a.date))),
+    certFor: key => Object.values((user && profile && profile.certs) || {}).find(c => c.key === key) || null,
+    async issueCert(c) {                                 // certificat : registre public (vérification) + copie dans la fiche de l'élève
+      if (!user) throw Object.assign(new Error('non connecté'), { code: 'unauthenticated' });
+      let h = 5381; for (const ch of user.uid + '|' + c.key) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0;
+      let h2 = 52711; for (const ch of c.key + '|' + user.uid) h2 = ((h2 * 31) ^ ch.charCodeAt(0)) >>> 0;
+      const num = `LCC-${new Date().getFullYear()}-${(h.toString(36) + h2.toString(36)).toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8).padEnd(8, '0')}`;
+      const db = fb.firestore(), ref = db.collection('certificats').doc(num);
+      const old = await ref.get();
+      if (old.exists) { const o = old.data(); const out = Object.assign({}, o, { date: iso(o.date) }); profile.certs = profile.certs || {}; profile.certs[num] = out; cache.set('profile', profile); return out; }
+      const rec = Object.assign({}, c, { num, uid: user.uid, date: fb.firestore.FieldValue.serverTimestamp(), v: 1 });
+      const batch = db.batch(); batch.set(ref, rec); batch.set(doc(), { certificats: { [num]: rec } }, { merge: true });
+      await within(batch.commit(), 15000);
+      const out = Object.assign({}, rec, { date: new Date().toISOString() });
+      profile.certs = profile.certs || {}; profile.certs[num] = out; cache.set('profile', profile); return out;
+    },
+    async getCert(num) {                                 // vérification publique d'un certificat
+      if (!/^LCC-\d{4}-[A-Z0-9]{8}$/.test(num)) return null;
+      const snap = await fb.firestore().collection('certificats').doc(num).get({ source: 'server' });
+      if (!snap.exists) return null; const o = snap.data(); return Object.assign({}, o, { date: iso(o.date) });
+    },
+    async certRulesOk() {                                // les règles Firestore autorisent-elles déjà les certificats ?
+      try { await fb.firestore().collection('certificats').doc('LCC-0000-VERIFIER').get({ source: 'server' }); return true; }
+      catch (e) { return !/permission/.test((e && (e.code || e.message)) || ''); }
+    },
+    suggestions: () => Object.values((user && profile && profile.sugg) || {}).sort((a, b) => String(b.date).localeCompare(String(a.date))),
+    suggest(x) {                                         // suggestion : enregistrée dans la fiche de l'élève, lue par l'administrateur
+      if (!user) return Promise.reject(new Error('non connecté'));
+      const id = 's' + Date.now().toString(36);
+      const rec = { type: String(x.type || '').slice(0, 80), texte: String(x.texte || '').slice(0, 2000), contexte: String(x.contexte || '').slice(0, 200), date: fb.firestore.FieldValue.serverTimestamp() };
+      return within(doc().set({ suggestions: { [id]: rec } }, { merge: true })).then(() => {
+        profile = profile || { spaces: {} }; profile.sugg = profile.sugg || {}; profile.sugg[id] = Object.assign({}, rec, { date: new Date().toISOString() }); cache.set('profile', profile); });
+    },
     async deleteAccount() {                              // efface la fiche, les inscriptions et la progression, puis le compte
       if (!user) return;
+      for (const num of Object.keys((profile && profile.certs) || {})) { try { await within(fb.firestore().collection('certificats').doc(num).delete()); } catch (e) {} }
       await within(doc().delete());
       try { await user.delete(); }
       catch (e) {
@@ -109,7 +149,9 @@
             const sp = {};
             Object.entries(d.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date) || new Date().toISOString(), reponses: v.reponses || {} }; });
             const info = d.profile ? Object.assign({}, d.profile) : null; if (info) delete info.updatedAt;
-            profile = { spaces: sp, info };
+            const certs = {}; Object.entries(d.certificats || {}).forEach(([k, v]) => { if (v && v.num) certs[k] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() }); });
+            const sugg = {}; Object.entries(d.suggestions || {}).forEach(([k, v]) => { if (v && v.texte) sugg[k] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() }); });
+            profile = { spaces: sp, info, certs, sugg };
             cache.set('profile', profile);
             mergeProgress(d.progress);
             await doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp(),

@@ -220,7 +220,7 @@ function drawEnroll() {
         ['Adresse e-mail', A.user().email], ...infoRows(info).filter(r => r[0] !== 'Recevoir les nouveautés'), ...answerRows(R.id, en.reponses || R.rep)])}
       <p class="meta">Conservez votre numéro d’inscription : il vous sera demandé si vous nous écrivez au sujet de votre inscription.</p></section>
     <div class="actions noprint">${firstSub ? `<a class="btn" href="#m-${firstSub.id}">${done ? 'Commencer' : 'Continuer'} mes leçons</a>` : ''}<a class="btn ghost" href="#espace-${sp.id}">Voir l’espace</a>
-      <button type="button" class="btn ghost" onclick="window.print()">Imprimer ma fiche</button><a class="btn ghost" href="#compte">Mon compte</a></div>`;
+      <button type="button" class="btn ghost" data-print="1">Imprimer ma fiche</button><a class="btn ghost" href="#compte">Mon compte</a></div>`;
   if (done) R.step = 'fiche';
 }
 
@@ -254,6 +254,7 @@ const dangerPanel = () => `<section class="panel danger"><h2>Supprimer mon compt
   <p>La suppression efface définitivement votre fiche, vos inscriptions et votre progression enregistrée dans votre compte.</p>
   <div id="del-zone"><button type="button" class="btn ghost small bad-b" data-delacct="ask">Supprimer mon compte</button></div></section>`;
 document.addEventListener('click', e => {
+  if (e.target.closest('[data-print]')) { window.print(); return; }
   const A = AUTH(); if (!A) return;
   const u = e.target.closest('[data-unenroll]');
   if (u) { const id = u.dataset.unenroll, z = document.getElementById('ins-' + id), sp = space(id);

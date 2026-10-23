@@ -61,16 +61,13 @@
 <script src="data/ia.js"></script>
 <script src="data/arabe.js"></script>
 <script src="data/coran.js"></script>
-<script>
-const SUBJECTS = [M_INTRO, M_DC, M_DM, M_OJ, M_METHO, M_TEE, M_EN, M_INFO, M_IA, M_A0, M_A1, M_A2, M_A3, M_QR];
-</script>
+<script src="boot.js"></script>
 <script src="config.js"></script>
 <script src="auth.js"></script>
 <script src="inscription.js"></script>
 <script src="admin.js"></script>
+<script src="vendor/qrcode.min.js"></script>
+<script src="certificats.js"></script>
 <script src="app.js"></script>
-<script>
-if ('serviceWorker' in navigator) window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
-</script>
 </body>
 </html>

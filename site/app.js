@@ -269,7 +269,9 @@ function viewHome() {
     </section>`;
 }
 // ---------- vidéo de présentation (accueil) : lecture automatique sans le son, sauf économie de données ou animations réduites
-const HV_ICON = { pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>', play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>' };
+const HV_ICON = { pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>', play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
+  mute: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16.5 9.5l5 5M21.5 9.5l-5 5" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>',
+  sound: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>' };
 function heroAuto() {
   const c = navigator.connection; let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   return !reduce && !(c && c.saveData);
@@ -281,13 +283,17 @@ function heroVideo() {
       aria-label="Lisân Campus en 16 secondes : les livres des Éditions Lisân, les quatre espaces et le Campus sur téléphone">
       <source src="media/campus-720.mp4" type="video/mp4" media="(min-width: 700px)"><source src="media/campus-720.webm" type="video/webm" media="(min-width: 700px)">
       <source src="media/campus-480.mp4" type="video/mp4"><source src="media/campus-480.webm" type="video/webm"></video>
-    <button type="button" class="hv-btn" id="hv-btn" aria-label="${auto ? 'Mettre la vidéo en pause' : 'Lire la vidéo'}">${auto ? HV_ICON.pause : HV_ICON.play}</button></div></section>`;
+    <div class="hv-ctrl"><button type="button" class="hv-btn hv-snd" id="hv-snd" aria-label="Activer le son" aria-pressed="false">${HV_ICON.mute}<span>Son</span></button>
+    <button type="button" class="hv-btn" id="hv-btn" aria-label="${auto ? 'Mettre la vidéo en pause' : 'Lire la vidéo'}">${auto ? HV_ICON.pause : HV_ICON.play}</button></div></div></section>`;
 }
 function bindHeroVideo() {
   const v = document.getElementById('hv'), b = document.getElementById('hv-btn'); if (!v || !b) return;
   const sync = () => { const on = !v.paused; b.innerHTML = on ? HV_ICON.pause : HV_ICON.play; b.setAttribute('aria-label', on ? 'Mettre la vidéo en pause' : 'Lire la vidéo'); };
   v.addEventListener('play', sync); v.addEventListener('pause', sync);
   b.onclick = () => { if (v.paused) v.play().catch(() => {}); else v.pause(); };
+  const sb = document.getElementById('hv-snd');
+  if (sb) sb.onclick = () => { v.muted = !v.muted; if (!v.muted) { v.volume = 0.8; if (v.paused) v.play().catch(() => {}); }
+    sb.innerHTML = (v.muted ? HV_ICON.mute : HV_ICON.sound) + '<span>Son</span>'; sb.setAttribute('aria-pressed', String(!v.muted)); sb.setAttribute('aria-label', v.muted ? 'Activer le son' : 'Couper le son'); };
   if (v.autoplay) v.play().catch(sync);
 }
 function viewSpace(sp) {
@@ -307,6 +313,7 @@ function viewSpace(sp) {
       ${sp.intro.map(t => `<p class="lead">${md(t)}</p>`).join('')}
       <div class="bar"><i style="width:${p.pct}%"></i></div><span class="meta">${p.d} / ${p.n} leçons terminées</span></div>
     ${reg}
+    ${certPanelSpace(sp)}
     <section class="subjects">${ss.map(card).join('')}</section>`;
 }
 function findLesson(key) {
@@ -321,6 +328,7 @@ function viewSubject(s) {
     <div class="subject-head c-${s.color}"><span class="eyebrow">${p.d} / ${p.n} leçons terminées</span><h1>${esc(s.title)}</h1><p class="lead">${esc(s.subtitle)}</p>
       <div class="bar"><i style="width:${p.pct}%"></i></div>
       <div class="actions"><a class="btn" href="#q-${s.id}">Quiz (${s.quiz.length} questions)</a><a class="btn ghost" href="#f-${s.id}">Cartes de révision (${s.cards.length})</a></div></div>
+    ${certPanelSubject(s)}
     <div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok';
       return `<a class="lesson-link${d ? ' done' : ''}" href="#l-${s.id}.${l.id}"><span class="num">${d ? '✓' : i + 1}</span><span class="t">${esc(l.title)}${l.ar ? ` <span class="ara" lang="ar">${esc(l.ar)}</span>` : ''}</span>${d ? '<small>Terminée</small>' : (lock ? '<small class="lock">🔒</small>' : (i === 0 && AUTH() ? '<small>Aperçu libre</small>' : ''))}</a>`; }).join('')}</div>`;
 }
@@ -352,6 +360,7 @@ function viewLesson(found) {
       ${l.body.map(b => renderBlock(b, s)).join('')}
       <div class="lesson-foot">
         <button type="button" class="btn done-toggle" data-done="${key}" aria-pressed="${d}">${d ? '✓ Leçon terminée' : 'Marquer comme terminée'}</button>
+        <button type="button" class="linkbtn sugg-link" data-suggest="${esc(s.title + ' · ' + l.title)}">💡 Suggérer une amélioration</button>
         <div class="actions">${prev ? `<a class="btn ghost small" href="#l-${s.id}.${prev.id}">← Précédente</a>` : ''}${next ? `<a class="btn small" href="#l-${s.id}.${next.id}">Suivante →</a>` : `<a class="btn small" href="#q-${s.id}">Faire le quiz →</a>`}</div>
       </div>
     </article>`;
@@ -368,6 +377,7 @@ function viewQuiz(s) {
       <p class="expl" hidden>${md(q.e)}</p></div>`).join('')}
       <div class="score" id="score">0 / ${s.quiz.length}</div>
       <div class="actions" id="quiz-end" hidden><a class="btn" href="#q-${s.id}" data-reload="1">Recommencer</a><a class="btn ghost" href="#m-${s.id}">Retour au parcours</a></div>
+      <div class="cert-panel ok" id="quiz-cert" hidden><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Parcours réussi !</b><small>Toutes les leçons sont terminées et le quiz est réussi : votre certificat vous attend.</small></div><a class="btn small" href="#m-${s.id}">Obtenir mon certificat</a></div>
     </div>`;
 }
 let flashRun = null;
@@ -480,6 +490,7 @@ function viewAccount() {
     <div class="account">${u.photoURL ? `<img src="${esc(u.photoURL)}" alt="" width="64" height="64" referrerpolicy="no-referrer">` : '<span class="sp-icon">👤</span>'}
       <div><h1>${esc(u.displayName || 'Mon compte')}</h1><p class="meta">${esc(u.email || '')}</p></div></div>
     ${accountPanels(A)}
+    ${certAccountPanel(A)}
     <section class="panel"><h2>Session</h2><div class="actions"><button type="button" class="btn ghost small" data-auth="signout">Se déconnecter</button></div></section>
     ${dangerPanel()}`;
 }
@@ -507,6 +518,8 @@ const PAGES = {
     { ul: ['**Votre progression** (leçons terminées, scores, cartes sues) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Ils ne nous sont pas transmis.',
       '**Si vous vous connectez avec Google** : le nom, l’adresse e-mail et la photo de votre compte Google.',
       '**Si vous vous inscrivez à un espace** : votre fiche d’inscription (civilité, nom, prénoms, date de naissance, téléphone, pays et ville de résidence, profil, manière dont vous avez connu le site et, pour les moins de 18 ans, le nom et le téléphone d’un parent ou tuteur), vos réponses aux questions de l’espace, vos inscriptions et votre progression.',
+      '**Si vous obtenez un certificat** : vos civilité, prénom et nom, le parcours réussi, le nombre de leçons, le score au quiz et la date. Ces informations sont inscrites au registre des certificats : **toute personne qui connaît le numéro du certificat** (ou scanne son code QR) peut les consulter, afin de vérifier qu’il est authentique. Aucune autre donnée n’y figure.',
+      '**Si vous envoyez une suggestion** : son texte, son type et la leçon concernée, enregistrés avec votre fiche pour que nous puissions vous répondre.',
       '**Qui y a accès** : seuls les Éditions Lisân, administrateur du site, consultent les fiches d’inscription, pour gérer les inscriptions et contacter les élèves au sujet de leurs cours.',
       '**Si vous nous écrivez** par le formulaire de contact : votre nom, votre adresse e-mail et votre message, uniquement pour vous répondre.'] },
     { p: 'Ces données servent à **gérer vos inscriptions**, à **adapter les cours** à nos élèves et à **vous contacter au sujet de vos cours**. Vous ne recevez nos nouveautés que si vous l’avez demandé dans votre fiche. Vos données ne sont **ni vendues, ni cédées**.' },
@@ -531,11 +544,13 @@ const PAGES = {
     { p: 'La page d’accueil, la présentation des espaces et la première leçon de chaque parcours sont en accès libre. L’accès au reste des contenus demande une connexion avec un compte Google et une inscription gratuite à chaque espace, avec une fiche d’inscription dont vous certifiez l’exactitude. Le site peut être interrompu pour maintenance ou évoluer sans préavis.' },
     { h: '3. Les contenus' },
     { p: 'Les contenus sont proposés à des fins d’apprentissage. Les leçons de droit ne constituent pas des consultations juridiques ; pour une situation personnelle, adressez-vous à un professionnel. La lecture du Coran s’apprend auprès d’un maître ; le Campus sert à réviser.' },
-    { h: '4. Propriété intellectuelle' },
+    { h: '4. Les certificats' },
+    { p: 'Un certificat de réussite est délivré à l’élève inscrit qui termine toutes les leçons d’un parcours et réussit son quiz avec au moins 70 %. Le grand certificat d’un espace récompense celui qui réussit tous les parcours de cet espace. Chaque certificat porte un numéro et un code QR, vérifiables sur la page [Vérifier un certificat](#verifier). Il atteste le travail accompli sur Lisân Campus ; ce n’est pas un diplôme d’État. Tout certificat obtenu de manière frauduleuse peut être annulé.' },
+    { h: '5. Propriété intellectuelle' },
     { p: 'Les textes, exercices, illustrations, le nom et le logo « Lisân » sont la propriété de Mouhamadou CISSEMA et des Éditions Lisân. Ils sont réservés à votre usage personnel et pédagogique : toute reproduction ou diffusion, même partielle, demande une autorisation écrite. Les récitations du Coran appartiennent à leurs ayants droit et sont diffusées par everyayah.com.' },
-    { h: '5. Votre compte' },
+    { h: '6. Votre compte' },
     { p: 'Votre compte est personnel. Vous vous engagez à utiliser le site de manière loyale, sans chercher à en perturber le fonctionnement. Les Éditions Lisân peuvent suspendre un compte en cas d’abus.' },
-    { h: '6. Droit applicable' },
+    { h: '7. Droit applicable' },
     { p: 'Les présentes conditions sont régies par le droit ivoirien. En cas de litige, et à défaut d’accord amiable, les juridictions d’Abidjan sont compétentes.' },
   ] },
   mentions: { title: 'Mentions légales', body: [
@@ -547,7 +562,8 @@ const PAGES = {
     { ul: ['Polices : Literata, Atkinson Hyperlegible et Noto Sans (licence SIL Open Font) ; **Lisan Naskh**, dérivée de Noto Naskh Arabic, avec le code couleur des voyelles des Éditions Lisân (licence SIL Open Font).',
       'Récitations du Coran : cheikh Maḥmoûd Khalîl al-Ḥouṣarî, lecture d’enseignement (al-mou‘allim), diffusées par everyayah.com.',
       'Voix de lecture : la synthèse vocale de votre appareil.',
-      'Export des listes au format Excel : SheetJS (licence Apache 2.0).'] },
+      'Export des listes au format Excel : SheetJS (licence Apache 2.0) ; codes QR des certificats : qrcode-generator de Kazuhiko Arase (licence MIT).',
+      'Vidéo de présentation et sa musique : créations originales des Éditions Lisân.'] },
     { p: '© Mouhamadou CISSEMA — Éditions Lisân. Tous droits réservés.' },
   ] },
 };
@@ -590,6 +606,9 @@ function route() {
   else if (h.startsWith('inscription-') && space(h.slice(12)) && AUTH()) { html = viewEnroll(space(h.slice(12))); after = bindEnroll; }
   else if (h === 'profil' && AUTH() && AUTH().user()) { html = viewProfil(); after = bindProfil; }
   else if (h === 'admin' && AUTH()) { html = viewAdmin(); after = bindAdmin; }
+  else if (h.startsWith('certificat-') && AUTH()) { const n = h.slice(11); html = viewCert(n); after = () => bindCert(n); }
+  else if (h === 'verifier' || h.startsWith('verifier-')) { const n = h.slice(9); html = viewVerify(n); after = () => bindVerify(n); }
+  else if (h === 'suggestion') { html = viewSuggest(); after = bindSuggest; }
   else if (h === 'contact') { html = viewContact(); after = bindContact; }
   else if (PAGES[h]) html = viewPage(h);
   else { html = viewHome(); after = bindHeroVideo; }
@@ -710,6 +729,8 @@ function renderDrawer() {
       ${item('glossaire', '🔎', 'Glossaire')}
       ${A ? item('compte', '👤', 'Mon compte') : ''}
       ${A && u && isAdminCached() ? item('admin', '📋', 'Administration') : ''}
+      ${item('suggestion', '💡', 'Suggérer une idée')}
+      ${item('verifier', '✅', 'Vérifier un certificat')}
       ${item('parametres', '⚙️', 'Paramètres')}
       <div class="dr-sec">Informations</div>
       ${item('apropos', 'ℹ️', 'À propos')}
@@ -773,7 +794,8 @@ document.addEventListener('click', e => {
     const sc = document.getElementById('score'); sc.textContent = `${quizRun.right} / ${quizRun.qs.length}`;
     if (quizRun.answered === quizRun.qs.length) { const pct = Math.round(quizRun.right / quizRun.qs.length * 100);
       if (state.quiz[quizRun.s.id] === undefined || pct > state.quiz[quizRun.s.id]) { state.quiz[quizRun.s.id] = pct; save('quiz'); }
-      sc.textContent = `Score final : ${quizRun.right} / ${quizRun.qs.length} (${pct} %)`; document.getElementById('quiz-end').hidden = false; }
+      sc.textContent = `Score final : ${quizRun.right} / ${quizRun.qs.length} (${pct} %)`; document.getElementById('quiz-end').hidden = false;
+      if (AUTH() && parcoursStatus(quizRun.s).ok) document.getElementById('quiz-cert').hidden = false; }
     return; }
   if (t.closest('#cardface') && flashRun) { flashRun.flipped = !flashRun.flipped; drawFlash(); return; }
   const fb = t.closest('[data-flash]');
