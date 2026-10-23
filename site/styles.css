@@ -433,3 +433,75 @@ details.panel summary { cursor: pointer; }
 }
 
 .adm-card.revoked { opacity: .65; }
+
+/* ===== couleurs pleines : cartes, en-têtes et pages de cours dans la couleur de chaque matière
+   --solid : la couleur de la matière (assombrie en mode sombre pour garder le texte blanc lisible)
+   --tint  : un fond teinté clair de la même couleur (jamais de fond blanc avec une simple bordure) */
+:root { --d-a: #23468f; --d-b: #0f6b5f; --d-c: #7a3d8f; --d-d: #a3501c; --d-e: #8b1d3f; --d-f: #3a5f1c; --d-g: #6b4a12; --d-h: #1f5f7a; --d-i: #5a3fc0; --d-j: #c44a2d; --d-k: #2b3f8f; --d-l: #9e2e46; --d-m: #a85a14; --d-n: #0e6b4f; }
+.c-a { --scd: var(--d-a); } .c-b { --scd: var(--d-b); } .c-c { --scd: var(--d-c); } .c-d { --scd: var(--d-d); } .c-e { --scd: var(--d-e); } .c-f { --scd: var(--d-f); } .c-g { --scd: var(--d-g); } .c-h { --scd: var(--d-h); } .c-i { --scd: var(--d-i); } .c-j { --scd: var(--d-j); } .c-k { --scd: var(--d-k); } .c-l { --scd: var(--d-l); } .c-m { --scd: var(--d-m); } .c-n { --scd: var(--d-n); }
+:root { --solid-k: 100%; }
+:root[data-theme="dark"] { --solid-k: 82%; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --solid-k: 82%; } }
+.spacecard, .subj, .subject-head, article.lesson, .quiz, .flash, .lessons, .glist, .gate, .letters, .vocab, .dialog, .verse {
+  --solid: color-mix(in srgb, var(--scd, #23468f) var(--solid-k), #0c1220);
+  --solid-dk: color-mix(in srgb, var(--solid) 70%, #000);
+  --tint: color-mix(in srgb, var(--sc, var(--accent)) 11%, var(--surface));
+  --tint-2: color-mix(in srgb, var(--sc, var(--accent)) 20%, var(--surface));
+  --edge: color-mix(in srgb, var(--sc, var(--accent)) 35%, var(--surface));
+}
+/* cartes des espaces et des parcours : couleur pleine */
+.spacecard, .subj { border: 0; color: #fff; overflow: hidden; isolation: isolate;
+  background: radial-gradient(circle at 92% 8%, rgba(255,255,255,.16) 0 54px, transparent 55px), radial-gradient(circle at 100% 100%, rgba(255,255,255,.10) 0 90px, transparent 91px),
+    linear-gradient(140deg, var(--solid) 0%, var(--solid-dk) 100%);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--solid) 28%, transparent); transition: transform .15s ease, box-shadow .15s ease; }
+.spacecard:hover, .subj:hover { transform: translateY(-2px); box-shadow: 0 14px 30px color-mix(in srgb, var(--solid) 36%, transparent); }
+.spacecard h2, .subj h3 { color: #fff; }
+.spacecard p, .subj p { color: rgba(255,255,255,.9); }
+.spacecard .eyebrow, .subj .eyebrow { color: rgba(255,255,255,.82); }
+.spacecard .meta, .subj .meta { color: rgba(255,255,255,.88); }
+.spacecard .bar, .subj .bar, .subject-head .bar { background: rgba(255,255,255,.28); }
+.spacecard .bar i, .subj .bar i, .subject-head .bar i { background: #fff; }
+.spacecard .tag, .subj .tag { background: rgba(255,255,255,.22); color: #fff; }
+.spacecard .tag.ok, .subj .tag.ok { background: #fff; color: var(--good); }
+.spacecard .sp-icon { filter: drop-shadow(0 3px 6px rgba(0,0,0,.25)); }
+/* en-tête d'un espace, d'un parcours, d'un quiz ou des cartes : bandeau plein */
+.subject-head { border: 0; color: #fff; padding: 20px 22px; border-radius: 18px;
+  background: radial-gradient(circle at 95% 0%, rgba(255,255,255,.15) 0 80px, transparent 81px), linear-gradient(140deg, var(--solid) 0%, var(--solid-dk) 100%);
+  box-shadow: 0 10px 24px color-mix(in srgb, var(--solid) 25%, transparent); }
+.subject-head h1 { color: #fff; }
+.subject-head .eyebrow, .subject-head .meta { color: rgba(255,255,255,.85); }
+.subject-head .lead { color: rgba(255,255,255,.93); }
+.subject-head a:not(.btn) { color: #fff; }
+.subject-head .btn { background: #fff; color: var(--solid-dk); }
+.subject-head .btn.ghost { background: transparent; color: #fff; border-color: rgba(255,255,255,.8); }
+/* liste des leçons : lignes teintées, numéro dans une pastille pleine */
+.lesson-link { background: var(--tint); border: 1px solid var(--edge); }
+.lesson-link:hover { background: var(--tint-2); }
+.lesson-link .num { background: var(--solid); color: #fff; }
+.lesson-link.done { background: color-mix(in srgb, var(--good) 12%, var(--surface)); border-color: color-mix(in srgb, var(--good) 35%, var(--surface)); }
+.lesson-link small.lock { filter: grayscale(.2); }
+/* page de leçon : fond teinté, titre dans un bandeau plein, intertitres colorés */
+article.lesson { background: var(--tint); border-radius: 20px; padding: 18px 18px 22px; }
+article.lesson > h1 { color: #fff; padding: 16px 18px; border-radius: 14px; background: linear-gradient(140deg, var(--solid) 0%, var(--solid-dk) 100%); }
+article.lesson > .eyebrow { color: var(--sc); }
+article.lesson h3 { border: 0; padding: 8px 12px; border-radius: 10px; background: var(--tint-2); color: var(--solid-dk); }
+:root[data-theme="dark"] article.lesson h3 { color: #fff; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) article.lesson h3 { color: #fff; } }
+article.lesson .lesson-foot { border-top-color: var(--edge); }
+article.lesson.page { --sc: var(--accent); }
+/* blocs des leçons : fonds teintés au lieu du blanc bordé */
+.verse, .dialog, .letter, .word, .sylb, .voc, .qw, .qv, .sent, .tool, .q { background: var(--surface); border-color: var(--edge); }
+article.lesson .verse, article.lesson .dialog, article.lesson .letter, article.lesson .word, article.lesson .qw, article.lesson .qv, article.lesson .sent, article.lesson .tool,
+article.lesson .sylb, article.lesson .voc { background: color-mix(in srgb, var(--surface) 72%, var(--tint)); border: 1px solid var(--edge); }
+.letter, .qw { border-top: 0; box-shadow: inset 0 5px 0 var(--sc); }
+.sylb, .voc { border-bottom: 0; box-shadow: inset 0 -3px 0 var(--sc); }
+.sent { border-left: 0; box-shadow: inset 4px 0 0 var(--sc); }
+/* quiz et cartes de révision */
+.quiz .q { background: var(--tint); border: 1px solid var(--edge); }
+.quiz .opt { background: var(--surface); }
+.cardface { border: 0; background: radial-gradient(circle at 90% 10%, color-mix(in srgb, var(--sc) 22%, transparent) 0 70px, transparent 71px), var(--tint-2, var(--surface)); box-shadow: inset 0 6px 0 var(--sc), 0 10px 24px rgba(20,28,46,.1); }
+.flash { --tint-2: color-mix(in srgb, var(--sc) 16%, var(--surface)); }
+/* glossaire */
+.gloss-item { border: 0; background: color-mix(in srgb, var(--sc) 10%, var(--surface)); box-shadow: inset 4px 0 0 var(--sc); }
+/* page d'accès réservé */
+.gate[class*="c-"] { border: 0; background: var(--tint); }
