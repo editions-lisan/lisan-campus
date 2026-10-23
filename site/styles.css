@@ -571,9 +571,9 @@ body.scrolled header.top { box-shadow: 0 6px 22px rgba(20, 28, 46, .10); }
 .btn.gold { background: linear-gradient(135deg, #e0aa3e, #b8811f); color: #1b1404; box-shadow: 0 6px 16px rgba(184, 129, 31, .35); }
 
 /* apparition douce de chaque page */
-@keyframes viewin { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-#view.enter > * { animation: viewin .35s ease both; }
-#view.enter > *:nth-child(2) { animation-delay: .04s; } #view.enter > *:nth-child(3) { animation-delay: .08s; } #view.enter > *:nth-child(4) { animation-delay: .12s; } #view.enter > *:nth-child(n+5) { animation-delay: .16s; }
+@keyframes viewin { from { opacity: 0; transform: translateY(14px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+#view.enter > :not(.rvg) { animation: viewin .7s cubic-bezier(.2, .7, .2, 1) both; }
+#view.enter > :nth-child(2) { animation-delay: .08s; } #view.enter > :nth-child(3) { animation-delay: .16s; } #view.enter > :nth-child(4) { animation-delay: .24s; } #view.enter > :nth-child(n+5) { animation-delay: .3s; }
 
 /* ---------- accueil */
 .home-hero { display: grid; gap: 22px; align-items: center; margin-top: 10px; }
@@ -700,3 +700,61 @@ footer.site .wrap { position: relative; padding-block: 34px 26px; gap: 22px; col
   .read { margin-inline: auto; width: 100%; }
   #view:has(> .read) > .crumbs, #view:has(> .read) > .subject-head, #view:has(> .read) > .notice { width: 100%; max-width: 760px; margin-inline: auto; }
 }
+
+/* =====================================================================
+   Apparitions en douceur : écran d'ouverture, titre mot à mot, sections
+   révélées au fil du défilement, fondu entre les pages.
+   ===================================================================== */
+:root { --ease-soft: cubic-bezier(.2, .7, .2, 1); }
+/* écran d'ouverture (une fois par visite) */
+#veil { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; color: #fff; text-align: center;
+  background: radial-gradient(700px 420px at 50% 42%, rgba(80, 120, 230, .35), transparent 70%), linear-gradient(160deg, #1e2c66 0%, #141c3f 55%, #0c1230 100%);
+  transition: opacity .9s ease, visibility .9s ease; animation: veilauto .9s ease 3.2s forwards; }
+#veil.out { opacity: 0; visibility: hidden; }
+#veil.out .vl-in { transform: scale(1.04); opacity: 0; }
+@keyframes veilauto { to { opacity: 0; visibility: hidden; } }
+.vl-in { display: flex; flex-direction: column; align-items: center; gap: 14px; transition: transform .9s var(--ease-soft), opacity .7s ease; }
+.vl-in img { width: 96px; height: 96px; border-radius: 24px; box-shadow: 0 16px 40px rgba(0, 0, 0, .35); animation: vlogo 1.1s var(--ease-soft) both; }
+.vl-in b { font-family: var(--font-display); font-weight: 800; font-size: 34px; letter-spacing: .01em; animation: vtext 1s var(--ease-soft) .3s both; }
+.vl-in b span { color: #9fb7f5; }
+.vl-in i { display: block; height: 2px; width: 170px; background: linear-gradient(90deg, transparent, #e8b44f, transparent); transform-origin: 50% 50%; animation: vline 1s var(--ease-soft) .5s both; }
+.vl-in small { font-size: 12px; font-weight: 700; letter-spacing: .32em; text-transform: uppercase; color: #e8b44f; animation: vtext 1s var(--ease-soft) .65s both; }
+@keyframes vlogo { from { opacity: 0; transform: scale(.82) translateY(10px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes vtext { from { opacity: 0; transform: translateY(10px); letter-spacing: .12em; } to { opacity: 1; transform: none; } }
+@keyframes vline { from { transform: scaleX(0); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* accueil : chorégraphie du haut de page */
+@keyframes wordin { from { opacity: 0; transform: translateY(.42em); filter: blur(8px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes softin { from { opacity: 0; transform: translateY(16px); filter: blur(5px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes mediain { from { opacity: 0; transform: translateX(34px) scale(.965); filter: blur(10px); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes linein { from { width: 0; } to { width: 26px; } }
+.home-hero h1 .wd { display: inline-block; animation: wordin 1s var(--ease-soft) both; animation-delay: calc(.2s + var(--i) * .075s); }
+.home-hero h1 em { background: none; color: inherit; }
+.home-hero h1 em .wd { background: linear-gradient(120deg, var(--accent), color-mix(in srgb, var(--accent) 55%, var(--saffron))); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hz { animation: softin .95s var(--ease-soft) both; animation-delay: var(--hd, 0s); }
+.home-hero .hero-video { animation: mediain 1.3s var(--ease-soft) .55s both; }
+.home-hero .hero .eyebrow::before { animation: linein .8s var(--ease-soft) .15s both; }
+body.veiled .home-hero .wd, body.veiled .home-hero .hz, body.veiled .home-hero .hero-video, body.veiled .home-hero .eyebrow::before { animation-play-state: paused; }
+/* vidéo : fondu depuis l'image d'attente */
+.hv-frame { background: #16204a url("media/poster.webp") center / cover no-repeat; }
+.hv-frame video { opacity: 0; transition: opacity 1.2s ease; }
+.hv-frame video.ready { opacity: 1; }
+/* sections révélées au défilement */
+.rv { opacity: 0; transform: translateY(22px); filter: blur(6px); transition: opacity .9s var(--ease-soft), transform .9s var(--ease-soft), filter .9s var(--ease-soft); transition-delay: var(--d, 0s); }
+.rv.in { opacity: 1; transform: none; filter: none; }
+.rv .bar i { transform: scaleX(0); transform-origin: 0 50%; transition: transform 1.2s var(--ease-soft); transition-delay: calc(var(--d, 0s) + .35s); }
+.rv.in .bar i { transform: none; }
+.book img { opacity: 0; transition: opacity .8s ease, transform .25s ease, box-shadow .25s ease; }
+.book img.ok { opacity: 1; }
+/* fondu entre deux pages */
+#view { transition: opacity .2s ease, transform .2s ease; }
+#view.leave { opacity: 0; transform: translateY(-6px); }
+
+@media (prefers-reduced-motion: reduce) {
+  #veil { display: none !important; }
+  .home-hero .wd, .hz, .home-hero .hero-video, .home-hero .hero .eyebrow::before { animation: none !important; }
+  .rv, .rv .bar i, .book img, .hv-frame video { opacity: 1 !important; transform: none !important; filter: none !important; transition: none !important; }
+  #view.leave { opacity: 1; transform: none; }
+}
+@media print { #veil { display: none !important; } }
+.home-hero h1 .nw { white-space: nowrap; }

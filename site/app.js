@@ -254,21 +254,23 @@ const BOOKS = [['je-lis-l-arabe', 'Je lis l’arabe !', 'Niveau 0 · les lettres
   ['je-parle-arabe-2', 'Je parle arabe ! 2', 'Niveau 2 · A2 – B1', 'm-a2'], ['je-parle-arabe-3', 'Je parle arabe ! 3', 'Niveau 3 · B1 – B2', 'm-a3'],
   ['lire-le-coran', 'Lire le Coran pas à pas', '10 étapes · 43 leçons', 'm-qr'], ['vivre-l-islam-1', 'Vivre l’islam en famille', 'Niveau 1 · L’Islâm', '']];
 const nf = n => n.toLocaleString('fr-FR');
+// découpe un titre en mots animés un à un (la virgule reste collée au mot précédent)
+const words = (t, i0) => t.split(' ').filter(Boolean).map((w, k) => `<span class="wd" style="--i:${i0 + k}">${esc(w)}</span>`).join(' ');
 function viewHome() {
   const last = lastLesson();
   const totalL = SUBJECTS.reduce((a, s) => a + s.lessons.length, 0);
   const doneL = SUBJECTS.reduce((a, s) => a + subjectProgress(s).d, 0);
   const nQ = SUBJECTS.reduce((a, s) => a + s.quiz.length, 0), nC = SUBJECTS.reduce((a, s) => a + s.cards.length, 0);
   const pct = totalL ? Math.round(doneL / totalL * 100) : 0;
-  const kpi = (ic, b, t, c) => `<div class="kpi" style="--kc:var(--s-${c})"><i aria-hidden="true">${ic}</i><b>${b}</b><span>${t}</span></div>`;
+  const kpi = (ic, b, t, c) => `<div class="kpi" style="--kc:var(--s-${c})"><i aria-hidden="true">${ic}</i><b${typeof b === 'number' ? ` data-count="${b}"` : ''}>${typeof b === 'number' ? nf(b) : b}</b><span>${t}</span></div>`;
   const step = (ic, t, d) => `<div class="step"><span class="ic" aria-hidden="true">${ic}</span><h3>${t}</h3><p>${d}</p></div>`;
   return `<div class="home-hero"><section class="hero">
-      <span class="eyebrow">Éditions Lisân · la langue qui ouvre les portes</span>
-      <h1>Apprendre, réviser et <em>se former</em>, à son rythme</h1>
-      <p class="lead">L’arabe du niveau 0 au niveau 3, la lecture du Coran, la Licence 1 Droit et une formation à l’intelligence artificielle : des leçons courtes, la voix pour écouter, des quiz corrigés et des cartes de révision, sur téléphone et même hors connexion.</p>
-      <div class="hero-cta"><button type="button" class="btn" data-scrollto="espaces">Choisir un espace</button>${last ? `<a class="btn ghost" href="#${state.last.route}">Reprendre ma leçon</a>` : '<a class="btn ghost" href="#apropos">Découvrir Lisân</a>'}</div>
+      <span class="eyebrow hz" style="--hd:.05s">Éditions Lisân · la langue qui ouvre les portes</span>
+      <h1>${words('Apprendre, réviser et', 0)} <em>${words('se', 3)}</em> <span class="nw"><em>${words('former', 4)}</em>${words(',', 5)}</span> ${words('à son rythme', 6)}</h1>
+      <p class="lead hz" style="--hd:.85s">L’arabe du niveau 0 au niveau 3, la lecture du Coran, la Licence 1 Droit et une formation à l’intelligence artificielle : des leçons courtes, la voix pour écouter, des quiz corrigés et des cartes de révision, sur téléphone et même hors connexion.</p>
+      <div class="hero-cta hz" style="--hd:1.05s"><button type="button" class="btn" data-scrollto="espaces">Choisir un espace</button>${last ? `<a class="btn ghost" href="#${state.last.route}">Reprendre ma leçon</a>` : '<a class="btn ghost" href="#apropos">Découvrir Lisân</a>'}</div>
     </section>${heroVideo()}</div>
-    <section class="kpis" aria-label="Lisân Campus en chiffres">${kpi('🧭', SPACES.length, 'espaces', 'a')}${kpi('📚', nf(totalL), 'leçons', 'n')}${kpi('✍️', nf(nQ), 'questions de quiz', 'i')}${kpi('🃏', nf(nC), 'cartes de révision', 'l')}${kpi('📶', 'Hors ligne', 'fonctionne même sans internet', 'm').replace('<b>', '<b class="txt">')}</section>
+    <section class="kpis" aria-label="Lisân Campus en chiffres">${kpi('🧭', SPACES.length, 'espaces', 'a')}${kpi('📚', totalL, 'leçons', 'n')}${kpi('✍️', nQ, 'questions de quiz', 'i')}${kpi('🃏', nC, 'cartes de révision', 'l')}${kpi('📶', 'Hors ligne', 'fonctionne même sans internet', 'm').replace('<b>', '<b class="txt">')}</section>
     ${doneL || last ? `<section class="mine"><span class="ring" style="--p:${pct}">${pct} %</span><div><b>Votre progression</b><p>${doneL} leçon${doneL > 1 ? 's' : ''} terminée${doneL > 1 ? 's' : ''} sur ${totalL}${last ? ` · dernière leçon : ${esc(last.s.title)}, ${esc(last.l.title)}` : ''}</p></div>${last ? `<a class="btn" href="#${state.last.route}">Reprendre</a>` : ''}</section>` : ''}
     <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les quatre espaces</h2><p>Choisissez votre espace : la première leçon de chaque parcours est en accès libre.</p></div>
     <section class="spaces">${SPACES.map(sp => { const p = spaceProgress(sp); const A = AUTH();
@@ -307,6 +309,8 @@ function heroVideo() {
 }
 function bindHeroVideo() {
   const v = document.getElementById('hv'), b = document.getElementById('hv-btn'); if (!v || !b) return;
+  const ready = () => v.classList.add('ready');
+  if (v.readyState >= 2) ready(); else { v.addEventListener('loadeddata', ready, { once: true }); setTimeout(ready, 2500); }
   const sync = () => { const on = !v.paused; b.innerHTML = on ? HV_ICON.pause : HV_ICON.play; b.setAttribute('aria-label', on ? 'Mettre la vidéo en pause' : 'Lire la vidéo'); };
   v.addEventListener('play', sync); v.addEventListener('pause', sync);
   b.onclick = () => { if (v.paused) v.play().catch(() => {}); else v.pause(); };
@@ -635,7 +639,8 @@ function route() {
   else if (PAGES[h]) html = viewPage(h);
   else { html = viewHome(); after = bindHeroVideo; }
   V.innerHTML = html;
-  V.classList.remove('enter'); void V.offsetWidth; V.classList.add('enter');
+  V.classList.remove('enter', 'leave'); void V.offsetWidth; if (V.firstElementChild && !V.querySelector('.home-hero')) V.classList.add('enter');
+  revealAll();
   document.body.classList.toggle('reading', h.startsWith('l-') && keep);
   document.querySelectorAll('.quick a').forEach(a => { const on = a.getAttribute('href') === '#' + h || (h === 'accueil' && a.getAttribute('href') === '#accueil') || (h.startsWith('verifier') && a.getAttribute('href') === '#verifier');
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
@@ -773,7 +778,13 @@ menuBtn.onclick = () => drawer.hidden ? openMenu() : closeMenu();
 scrim.onclick = closeMenu;
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
 
-window.addEventListener('hashchange', route);
+let navT = null;
+function navigate() {
+  if (!MOTION || !V.firstElementChild) { route(); return; }
+  clearTimeout(navT); V.classList.add('leave');
+  navT = setTimeout(route, 200);
+}
+window.addEventListener('hashchange', navigate);
 let st = null;
 // en-tête, bouton « haut de page » et barre de lecture
 const readbar = document.getElementById('readbar'), totop = document.getElementById('totop');
@@ -787,6 +798,36 @@ function onScroll() {
 window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } }, { passive: true });
 window.addEventListener('hashchange', () => requestAnimationFrame(onScroll));
 const smooth = () => { try { return matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'; } catch (e) { return 'auto'; } };
+// apparitions en douceur : sections révélées au défilement, compteurs, images
+const MOTION = (() => { try { return !matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return true; } })();
+let revealIO = null;
+function countUp(el) {
+  const n = +el.dataset.count; if (!n || !MOTION) return; const t0 = performance.now(), D = 1400;
+  (function f(t) { const k = Math.min(1, (t - t0) / D), e = 1 - Math.pow(1 - k, 3); el.textContent = nf(Math.round(n * e)); if (k < 1) requestAnimationFrame(f); })(t0);
+}
+function revealAll() {
+  V.querySelectorAll('img[loading="lazy"]').forEach(im => { const ok = () => im.classList.add('ok'); if (im.complete) ok(); else { im.addEventListener('load', ok, { once: true }); im.addEventListener('error', ok, { once: true }); } });
+  if (revealIO) { revealIO.disconnect(); revealIO = null; }
+  if (!MOTION || !('IntersectionObserver' in window)) return;
+  revealIO = new IntersectionObserver(es => es.forEach(e => { if (!e.isIntersecting) return; const el = e.target; el.classList.add('in'); revealIO.unobserve(el);
+    el.querySelectorAll('[data-count]').forEach(c => setTimeout(() => countUp(c), parseFloat(getComputedStyle(el).getPropertyValue('--d')) * 1000 || 0)); }),
+    { rootMargin: '0px 0px -6% 0px', threshold: .06 });
+  const add = (el, i) => { el.classList.add('rv'); el.style.setProperty('--d', (Math.min(i, 7) * .09).toFixed(2) + 's'); revealIO.observe(el); };
+  V.querySelectorAll(':scope > .sec-h, :scope > .mine').forEach(el => add(el, 0));
+  V.querySelectorAll(':scope > .kpis, :scope > .spaces, :scope > .steps, :scope > .books, :scope > .subjects, :scope > .lessons').forEach(g => { g.classList.add('rvg'); [...g.children].forEach(add); });
+  if (document.body.classList.contains('veiled')) V.querySelectorAll('.home-hero ~ .kpis > *').forEach(el => el.style.setProperty('--d', (parseFloat(el.style.getPropertyValue('--d')) + 1.1).toFixed(2) + 's'));
+  else V.querySelectorAll('.home-hero ~ .kpis > *').forEach(el => el.style.setProperty('--d', (parseFloat(el.style.getPropertyValue('--d')) + .9).toFixed(2) + 's'));
+}
+// écran d'ouverture : logo en douceur, puis la page se dévoile
+const veil = document.getElementById('veil');
+function liftVeil() { if (!veil || veil.classList.contains('out')) return; veil.classList.add('out'); document.body.classList.remove('veiled'); setTimeout(() => veil.remove(), 1000); }
+if (veil) {
+  let seen = false; try { seen = sessionStorage.getItem('lc-intro') === '1'; sessionStorage.setItem('lc-intro', '1'); } catch (e) {}
+  if (!MOTION) veil.remove();
+  else if (seen) liftVeil();
+  else { document.body.classList.add('veiled'); const go = () => setTimeout(liftVeil, Math.max(0, 1500 - performance.now()));
+    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(go, go); setTimeout(liftVeil, 2800); }
+}
 // confettis : petite fête quand une leçon est terminée ou un quiz réussi
 function confetti(from) {
   try { if (matchMedia('(prefers-reduced-motion: reduce)').matches) return; } catch (e) {}
