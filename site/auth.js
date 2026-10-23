@@ -11,7 +11,9 @@
   const LisanAuth = {
     enabled: true,
     user: () => user,
-    enrolled: id => !!(user && profile && profile.spaces && profile.spaces[id]),
+    enrolled: id => !!(user && profile && profile.spaces && profile.spaces[id] && profile.spaces[id].num),
+    enrollment: id => (user && profile && profile.spaces && profile.spaces[id] && profile.spaces[id].num) ? profile.spaces[id] : null,
+    info: () => (user && profile && profile.info) || null,
     signIn() {
       if (!fb) return Promise.reject(new Error('Connexion indisponible'));
       const p = new fb.auth.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' });
@@ -22,11 +24,37 @@
       });
     },
     signOut() { return fb ? fb.auth().signOut() : Promise.resolve(); },
-    enroll(id) {
-      if (!user) return LisanAuth.signIn();
-      profile = profile || { spaces: {} }; profile.spaces = profile.spaces || {};
-      profile.spaces[id] = new Date().toISOString(); cache.set('profile', profile);
-      return doc().set({ spaces: { [id]: fb.firestore.FieldValue.serverTimestamp() } }, { merge: true }).catch(() => {});
+    enroll(id, info, reponses) {                         // fiche personnelle + inscription à un espace
+      if (!user) return Promise.reject(new Error('non connecté'));
+      const num = numero(id), date = new Date().toISOString();
+      const data = { profile: Object.assign({}, info, { updatedAt: fb.firestore.FieldValue.serverTimestamp() }),
+        spaces: { [id]: { num, date: fb.firestore.FieldValue.serverTimestamp(), reponses: reponses || {}, attestation: true, conditions: true } } };
+      return within(doc().set(data, { merge: true })).then(() => {
+        profile = profile || { spaces: {} }; profile.spaces = profile.spaces || {};
+        profile.info = Object.assign({}, info); profile.spaces[id] = { num, date, reponses: reponses || {} };
+        cache.set('profile', profile); return profile.spaces[id];
+      });
+    },
+    saveInfo(info) {
+      if (!user) return Promise.reject(new Error('non connecté'));
+      return within(doc().set({ profile: Object.assign({}, info, { updatedAt: fb.firestore.FieldValue.serverTimestamp() }) }, { merge: true }))
+        .then(() => { profile = profile || { spaces: {} }; profile.info = Object.assign({}, info); cache.set('profile', profile); });
+    },
+    unenroll(id) {
+      if (!user) return Promise.resolve();
+      return within(doc().update({ ['spaces.' + id]: fb.firestore.FieldValue.delete() }))
+        .then(() => { if (profile && profile.spaces) delete profile.spaces[id]; cache.set('profile', profile); });
+    },
+    async deleteAccount() {                              // efface la fiche, les inscriptions et la progression, puis le compte
+      if (!user) return;
+      await within(doc().delete());
+      try { await user.delete(); }
+      catch (e) {
+        if (e && /requires-recent-login/.test(e.code || '')) { const p = new fb.auth.GoogleAuthProvider(); await user.reauthenticateWithPopup(p); await user.delete(); }
+        else throw e;
+      }
+      profile = null; cache.set('profile', null);
+      ['done', 'quiz', 'known', 'words'].forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null);
     },
     onSave(k, v) {                                       // progression : envoyée au compte (regroupée toutes les 3 s)
       if (!user || !['done', 'quiz', 'known', 'words'].includes(k)) return;
@@ -35,6 +63,14 @@
     },
   };
   const doc = () => fb.firestore().collection('users').doc(user.uid);
+  // une écriture sans réponse du serveur au bout de 10 s (hors connexion) reste en file d'attente : on continue
+  const within = (p, ms = 10000) => Promise.race([p, new Promise(r => setTimeout(r, ms))]);
+  function numero(id) {                                  // numéro d'inscription stable : LC-2026-QR-4F7K2A
+    const code = { droit: 'DR', ia: 'IA', arabe: 'AR', coran: 'QR' }[id] || 'XX';
+    let h = 5381; for (const c of user.uid + id) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0;
+    return `LC-${new Date().getFullYear()}-${code}-${h.toString(36).toUpperCase().padStart(6, '0').slice(-6)}`;
+  }
+  const iso = v => v && v.toDate ? v.toDate().toISOString() : (typeof v === 'string' ? v : null);
   function alertMsg(t) { const n = document.getElementById('ios-help'); if (n) { n.querySelector('.notice').textContent = t; n.hidden = false; setTimeout(() => { n.hidden = true; }, 6000); } }
   function mergeProgress(remote) {
     if (!remote) return;
@@ -59,7 +95,10 @@
           try {
             const snap = await doc().get();
             const d = snap.exists ? snap.data() : {};
-            profile = { spaces: Object.fromEntries(Object.entries(d.spaces || {}).map(([k, v]) => [k, v && v.toDate ? v.toDate().toISOString() : String(v)])) };
+            const sp = {};
+            Object.entries(d.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date) || new Date().toISOString(), reponses: v.reponses || {} }; });
+            const info = d.profile ? Object.assign({}, d.profile) : null; if (info) delete info.updatedAt;
+            profile = { spaces: sp, info };
             cache.set('profile', profile);
             mergeProgress(d.progress);
             await doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp(),

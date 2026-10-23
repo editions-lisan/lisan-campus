@@ -277,8 +277,8 @@ function viewSpace(sp) {
   let reg = '';
   if (A) {
     if (!A.user()) reg = `<div class="notice">La première leçon de chaque parcours est en accès libre. Pour la suite, <button type="button" class="linkbtn" data-auth="signin">connectez-vous avec Google</button> puis inscrivez-vous à cet espace.</div>`;
-    else if (!A.enrolled(sp.id)) reg = `<div class="notice">Vous n’êtes pas encore inscrit à cet espace. <button type="button" class="btn small" data-enroll="${sp.id}">M’inscrire à « ${esc(sp.title)} »</button></div>`;
-    else reg = `<div class="notice ok">Vous êtes inscrit à cet espace : toutes les leçons sont ouvertes.</div>`;
+    else if (!A.enrolled(sp.id)) reg = `<div class="notice reg-n"><span>Vous n’êtes pas encore inscrit à cet espace. L’inscription est gratuite et ouvre toutes les leçons.</span> <a class="btn small" href="#inscription-${sp.id}">M’inscrire à « ${esc(sp.title)} »</a></div>`;
+    else reg = `<div class="notice ok">Vous êtes inscrit à cet espace (n° <b>${esc(A.enrollment(sp.id).num)}</b>) : toutes les leçons sont ouvertes. <a href="#inscription-${sp.id}">Ma fiche d’inscription</a></div>`;
   }
   return `${crumbs([sp.title])}
     <div class="subject-head c-${sp.color}"><span class="eyebrow">${esc(sp.eyebrow)}</span><h1>${sp.icon} ${esc(sp.title)}</h1>
@@ -312,8 +312,8 @@ function viewGate(s, why, i) {
       <div class="actions"><button type="button" class="btn" data-auth="signin">Se connecter avec Google</button></div>
       <p class="meta">En vous connectant, vous acceptez les <a href="#conditions">conditions d’utilisation</a> et la <a href="#confidentialite">politique de confidentialité</a>.</p>`
     : `<h1>Inscription à l’espace « ${esc(sp.title)} »</h1>
-      <p class="lead">Bonjour ${esc(u ? (u.displayName || '').split(' ')[0] : '')} ! Chaque espace demande une inscription séparée. Inscrivez-vous pour ouvrir toutes les leçons de cet espace ; vos autres inscriptions ne changent pas.</p>
-      <div class="actions"><button type="button" class="btn" data-enroll="${sp.id}">M’inscrire à « ${esc(sp.title)} »</button><a class="btn ghost" href="#espace-${sp.id}">Voir l’espace</a></div>`}
+      <p class="lead">Bonjour ${esc(u ? (u.displayName || '').split(' ')[0] : '')} ! Pour ouvrir toutes les leçons de cet espace, remplissez votre fiche d’inscription. Chaque espace demande une inscription séparée ; vos autres inscriptions ne changent pas.</p>
+      <div class="actions"><a class="btn" href="#inscription-${sp.id}">Remplir ma fiche d’inscription</a><a class="btn ghost" href="#espace-${sp.id}">Voir l’espace</a></div>`}
     </div>`;
 }
 function viewLesson(found) {
@@ -457,13 +457,9 @@ function viewAccount() {
   return `${crumbs(['Mon compte'])}
     <div class="account">${u.photoURL ? `<img src="${esc(u.photoURL)}" alt="" width="64" height="64" referrerpolicy="no-referrer">` : '<span class="sp-icon">👤</span>'}
       <div><h1>${esc(u.displayName || 'Mon compte')}</h1><p class="meta">${esc(u.email || '')}</p></div></div>
-    <section class="panel"><h2>Mes espaces</h2><p>Chaque espace demande une inscription séparée.</p>
-      ${SPACES.map(sp => `<div class="setrow"><span>${sp.icon} ${esc(sp.title)}</span>${A.enrolled(sp.id)
-        ? `<span class="actions"><span class="tag ok">Inscrit</span><a class="btn ghost small" href="#espace-${sp.id}">Ouvrir</a></span>`
-        : `<button type="button" class="btn small" data-enroll="${sp.id}">M’inscrire</button>`}</div>`).join('')}
-    </section>
-    <section class="panel"><h2>Session</h2><div class="actions"><button type="button" class="btn ghost small" data-auth="signout">Se déconnecter</button></div>
-      <p class="meta">Pour supprimer votre compte et vos données, écrivez-nous depuis la page <a href="#contact">Contact</a>.</p></section>`;
+    ${accountPanels(A)}
+    <section class="panel"><h2>Session</h2><div class="actions"><button type="button" class="btn ghost small" data-auth="signout">Se déconnecter</button></div></section>
+    ${dangerPanel()}`;
 }
 
 // ---------- pages d'information
@@ -487,8 +483,10 @@ const PAGES = {
     { p: 'Éditions Lisân, représentées par Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Contact : la page [Contact](#contact) du site.' },
     { h: '2. Les données que nous traitons' },
     { ul: ['**Votre progression** (leçons terminées, scores, cartes sues) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Ils ne nous sont pas transmis.',
-      '**Si vous vous connectez avec Google** : votre nom, votre adresse e-mail, votre photo de profil, vos inscriptions aux espaces et votre progression, afin de vous donner accès aux contenus et de retrouver votre progression sur vos appareils.',
+      '**Si vous vous connectez avec Google** : le nom, l’adresse e-mail et la photo de votre compte Google.',
+      '**Si vous vous inscrivez à un espace** : votre fiche d’inscription (civilité, nom, prénoms, date de naissance, téléphone, pays et ville de résidence, profil, manière dont vous avez connu le site et, pour les moins de 18 ans, le nom et le téléphone d’un parent ou tuteur), vos réponses aux questions de l’espace, vos inscriptions et votre progression.',
       '**Si vous nous écrivez** par le formulaire de contact : votre nom, votre adresse e-mail et votre message, uniquement pour vous répondre.'] },
+    { p: 'Ces données servent à **gérer vos inscriptions**, à **adapter les cours** à nos élèves et à **vous contacter au sujet de vos cours**. Vous ne recevez nos nouveautés que si vous l’avez demandé dans votre fiche. Vos données ne sont **ni vendues, ni cédées**.' },
     { p: 'Lisân Campus n’utilise **ni publicité, ni cookies de suivi, ni outil de mesure d’audience**.' },
     { h: '3. Les prestataires' },
     { ul: ['**Netlify** (hébergement du site et réception des messages du formulaire de contact).',
@@ -496,18 +494,18 @@ const PAGES = {
       '**everyayah.com** : diffusion des récitations du Coran ; votre navigateur s’y connecte quand vous écoutez un verset.'] },
     { p: 'Ces prestataires peuvent traiter des données hors de Côte d’Ivoire. La voix de lecture est celle de votre appareil : les textes lus ne nous sont pas envoyés.' },
     { h: '4. Durée de conservation' },
-    { p: 'Les données de compte sont conservées tant que le compte est actif, puis supprimées sur demande. Les messages du formulaire de contact sont conservés le temps nécessaire pour y répondre.' },
+    { p: 'Les données de compte sont conservées tant que votre compte existe : elles sont effacées dès que vous supprimez votre compte. Les messages du formulaire de contact sont conservés le temps nécessaire pour y répondre.' },
     { h: '5. Vos droits' },
-    { p: 'Vous pouvez demander l’accès à vos données, leur rectification ou leur suppression, et vous opposer à leur traitement, en nous écrivant depuis la page [Contact](#contact). Vous pouvez aussi saisir l’**ARTCI**, l’autorité ivoirienne de protection des données personnelles. Pour effacer la progression enregistrée sur votre appareil : **Paramètres → Effacer ma progression**.' },
+    { p: 'Dans **Mon compte**, vous pouvez à tout moment consulter et modifier votre fiche, vous désinscrire d’un espace et supprimer votre compte. Vous pouvez aussi demander l’accès à vos données, leur rectification ou leur suppression, et vous opposer à leur traitement, en nous écrivant depuis la page [Contact](#contact). Vous pouvez aussi saisir l’**ARTCI**, l’autorité ivoirienne de protection des données personnelles. Pour effacer la progression enregistrée sur votre appareil : **Paramètres → Effacer ma progression**.' },
     { h: '6. Les mineurs' },
-    { p: 'Les élèves de moins de 18 ans utilisent Lisân Campus avec l’accord et sous la responsabilité de leurs parents ou de leur établissement.' },
+    { p: 'Les élèves de moins de 18 ans s’inscrivent avec l’accord d’un parent ou d’un tuteur, dont le nom et le téléphone sont demandés dans la fiche d’inscription. Ils utilisent Lisân Campus sous la responsabilité de leurs parents ou de leur établissement.' },
   ] },
   conditions: { title: 'Conditions d’utilisation', body: [
     { p: '*Dernière mise à jour : 23 octobre 2026.*' },
     { h: '1. Objet' },
     { p: 'Lisân Campus est un site d’apprentissage gratuit édité par les Éditions Lisân. En l’utilisant, vous acceptez les présentes conditions.' },
     { h: '2. Accès' },
-    { p: 'La page d’accueil, la présentation des espaces et la première leçon de chaque parcours sont en accès libre. L’accès au reste des contenus peut demander une connexion avec un compte Google et une inscription à chaque espace. Le site peut être interrompu pour maintenance ou évoluer sans préavis.' },
+    { p: 'La page d’accueil, la présentation des espaces et la première leçon de chaque parcours sont en accès libre. L’accès au reste des contenus demande une connexion avec un compte Google et une inscription gratuite à chaque espace, avec une fiche d’inscription dont vous certifiez l’exactitude. Le site peut être interrompu pour maintenance ou évoluer sans préavis.' },
     { h: '3. Les contenus' },
     { p: 'Les contenus sont proposés à des fins d’apprentissage. Les leçons de droit ne constituent pas des consultations juridiques ; pour une situation personnelle, adressez-vous à un professionnel. La lecture du Coran s’apprend auprès d’un maître ; le Campus sert à réviser.' },
     { h: '4. Propriété intellectuelle' },
@@ -565,6 +563,8 @@ function route() {
   else if (h === 'glossaire') { html = viewGlossary(); after = () => { drawGlossary(''); document.getElementById('gsearch').addEventListener('input', e => drawGlossary(e.target.value)); }; }
   else if (h === 'parametres') { html = viewSettings(); after = voiceStatus; }
   else if (h === 'compte') html = viewAccount();
+  else if (h.startsWith('inscription-') && space(h.slice(12)) && AUTH()) { html = viewEnroll(space(h.slice(12))); after = bindEnroll; }
+  else if (h === 'profil' && AUTH() && AUTH().user()) { html = viewProfil(); after = bindProfil; }
   else if (h === 'contact') { html = viewContact(); after = bindContact; }
   else if (PAGES[h]) html = viewPage(h);
   else html = viewHome();
@@ -729,7 +729,7 @@ document.addEventListener('click', e => {
   const aut = t.closest('[data-auth]');
   if (aut && AUTH()) { closeMenu(); if (aut.dataset.auth === 'signin') AUTH().signIn().then(route, () => {}); else AUTH().signOut().then(() => { location.hash = '#accueil'; route(); }); return; }
   const en = t.closest('[data-enroll]');
-  if (en && AUTH()) { AUTH().enroll(en.dataset.enroll).then(route); return; }
+  if (en && AUTH()) { location.hash = '#inscription-' + en.dataset.enroll; return; }
   const rel = t.closest('[data-reload]');
   if (rel && rel.getAttribute('href') === location.hash) { e.preventDefault(); route(); return; }
   const dt = t.closest('[data-done]');
