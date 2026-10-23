@@ -43,6 +43,8 @@ const QUESTIONS = {
 // ---------- outils
 const ageOf = d => { if (!d) return null; const b = new Date(d + 'T00:00:00'); if (isNaN(b)) return null; const n = new Date();
   let a = n.getFullYear() - b.getFullYear(); if (n.getMonth() < b.getMonth() || (n.getMonth() === b.getMonth() && n.getDate() < b.getDate())) a--; return a; };
+// Prénoms : une majuscule à chaque prénom (« MOUHAMADOU » ou « mouhamadou » → « Mouhamadou », « jean-paul » → « Jean-Paul »)
+const prenomFmt = p => String(p || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase('fr-FR').replace(/(^|[\s\-'’])(\p{L})/gu, (m, a, b) => a + b.toLocaleUpperCase('fr-FR'));
 const dateFr = iso => { try { return new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } };
 const telFr = (ind, num) => `${ind || ''} ${String(num || '').replace(/\s+/g, '').replace(/(\d{2})(?=\d)/g, '$1 ')}`.trim();
 function splitName(full) {
@@ -108,7 +110,7 @@ function bindInfoFields(f) {
 function readInfo(f) {
   const g = k => (f.elements[k] && f.elements[k].value || '').trim();
   const minor = (ageOf(g('naissance')) ?? 99) < 18;
-  return { civilite: (f.querySelector('[name=civilite]:checked') || {}).value || '', prenom: g('prenom').replace(/\s+/g, ' '), nom: g('nom').replace(/\s+/g, ' ').toUpperCase(),
+  return { civilite: (f.querySelector('[name=civilite]:checked') || {}).value || '', prenom: prenomFmt(g('prenom')), nom: g('nom').replace(/\s+/g, ' ').toUpperCase(),
     naissance: g('naissance'), ind: g('ind'), tel: g('tel').replace(/[^\d]/g, ''), pays: g('pays'), paysAutre: g('pays') === 'Autre pays' ? g('paysAutre') : '', ville: g('ville'),
     statut: g('statut'), source: g('source'), news: !!(f.elements.news && f.elements.news.checked),
     tuteur: minor ? { nom: g('tNom'), tel: g('tTel').replace(/[^\d+]/g, ''), accord: !!f.elements.tAccord.checked } : null };
@@ -140,7 +142,7 @@ function validate(f) {
 const paysOf = i => i.pays === 'Autre pays' ? (i.paysAutre || 'Autre pays') : i.pays;
 function infoRows(i) {
   const a = ageOf(i.naissance);
-  const rows = [['Nom et prénom(s)', `${i.civilite === 'Madame' ? 'Mme' : 'M.'} ${i.nom} ${i.prenom}`], ['Date de naissance', `${dateFr(i.naissance)}${a !== null ? ` (${a} ans)` : ''}`],
+  const rows = [['Nom et prénom(s)', `${i.civilite === 'Madame' ? 'Mme' : 'M.'} ${String(i.nom || '').toUpperCase()} ${prenomFmt(i.prenom)}`], ['Date de naissance', `${dateFr(i.naissance)}${a !== null ? ` (${a} ans)` : ''}`],
     ['Téléphone', telFr(i.ind, i.tel)], ['Résidence', `${i.ville}, ${paysOf(i)}`], ['Profil', i.statut]];
   if (i.source) rows.push(['Connu par', i.source]);
   if (i.tuteur) rows.push(['Parent ou tuteur', `${i.tuteur.nom} · ${telFr('', i.tuteur.tel)}${i.tuteur.accord ? ' · accord donné' : ''}`]);
@@ -212,7 +214,7 @@ function drawEnroll() {
   const en = A.enrollment(R.id) || {}, info = A.info() || R.info, done = R.step === 'done';
   const firstSub = SUBJECTS.find(s => spaceOf(s) === R.id);
   box.innerHTML = `${title}<h1>${done ? 'Inscription confirmée' : 'Ma fiche d’inscription'}</h1>${done ? stepper(4) : ''}
-    ${done ? `<div class="notice ok big-ok"><b>✓ Bienvenue, ${esc(info.prenom)} !</b> Votre inscription à l’espace « ${esc(sp.title)} » est enregistrée. Toutes les leçons de cet espace sont maintenant ouvertes.</div>` : ''}
+    ${done ? `<div class="notice ok big-ok"><b>✓ Bienvenue, ${esc(prenomFmt(info.prenom).split(' ')[0])} !</b> Votre inscription à l’espace « ${esc(sp.title)} » est enregistrée. Toutes les leçons de cet espace sont maintenant ouvertes.</div>` : ''}
     <section class="panel fiche"><div class="fiche-head"><img src="logo.png" alt="" width="44" height="44"><div><b>Lisân Campus · Éditions Lisân</b><small>Fiche d’inscription</small></div></div>
       ${dl([['Numéro d’inscription', en.num || R.num], ['Espace', sp.title], ['Date d’inscription', dateFr(en.date || R.date || new Date().toISOString())],
         ['Adresse e-mail', A.user().email], ...infoRows(info).filter(r => r[0] !== 'Recevoir les nouveautés'), ...answerRows(R.id, en.reponses || R.rep)])}

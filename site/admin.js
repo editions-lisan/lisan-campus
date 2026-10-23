@@ -90,7 +90,7 @@ function adminCards(rows) {
   if (!rows.length) return '<p class="meta">Aucune inscription pour le moment.</p>';
   return rows.map(({ u, id, en }) => { const i = u.info || {}, sp = space(id), a = ageOf(i.naissance), wa = waLink(i);
     return `<article class="adm-card c-${sp.color}">
-      <div class="adm-top"><b>${esc(civ(i))} ${esc(i.nom || '')} ${esc(i.prenom || u.name)}</b><span class="tag">${sp.icon} ${esc(sp.title)}</span></div>
+      <div class="adm-top"><b>${esc(civ(i))} ${esc(String(i.nom || '').toUpperCase())} ${esc(prenomFmt(i.prenom || u.name))}</b><span class="tag">${sp.icon} ${esc(sp.title)}</span></div>
       <small>N° ${esc(en.num)} · inscrit le ${dateFr(en.date)}</small>
       <p>${[a !== null ? a + ' ans' : '', i.statut, [i.ville, paysOf(i)].filter(Boolean).join(', ')].filter(Boolean).map(esc).join(' · ')}</p>
       <div class="actions">${wa ? `<a class="btn small" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${i.tel ? `<a class="btn ghost small" href="${telLink(i)}">Appeler ${esc(telFr(i.ind, i.tel))}</a>` : ''}
@@ -104,7 +104,7 @@ const COLS = [['N° d’inscription', 14], ['Espace', 18], ['Date d’inscriptio
   ['Téléphone', 16], ['Lien WhatsApp', 30], ['E-mail', 28], ['Pays', 14], ['Ville', 14], ['Profil', 16], ['Connu par', 20], ['Nouveautés', 10], ['Parent ou tuteur', 20], ['Tél. parent', 14]];
 function baseLine({ u, id, en }) {
   const i = u.info || {}, a = ageOf(i.naissance), d = en.date ? new Date(en.date) : null;
-  return [en.num, space(id).title, d ? d.toLocaleDateString('fr-FR') : '', i.civilite || '', i.nom || '', i.prenom || u.name, i.naissance ? new Date(i.naissance + 'T00:00:00').toLocaleDateString('fr-FR') : '',
+  return [en.num, space(id).title, d ? d.toLocaleDateString('fr-FR') : '', i.civilite || '', String(i.nom || '').toUpperCase(), prenomFmt(i.prenom || u.name), i.naissance ? new Date(i.naissance + 'T00:00:00').toLocaleDateString('fr-FR') : '',
     a === null ? '' : a, telFr(i.ind, i.tel), waLink(i), u.email, paysOf(i) || '', i.ville || '', i.statut || '', i.source || '', i.news ? 'Oui' : 'Non',
     i.tuteur ? i.tuteur.nom : '', i.tuteur ? i.tuteur.tel : ''];
 }
