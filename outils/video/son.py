@@ -5,7 +5,8 @@ tambour sur cadre façon daf, clochettes, nappe grave, souffles de transition.
 Mode : hijaz sur ré (ré, mi bémol, fa dièse, sol, la, si bémol, do).
 Les effets suivent le minutage de index.html (render(t)).
 
-    python3 son.py sortie.wav
+    python3 son.py sortie.wav            (version daf seul, celle du site)
+    python3 son.py sortie.wav --complet  (version avec oud, clochettes et nappe)
 """
 import sys
 import numpy as np
@@ -15,6 +16,7 @@ SR = 44100
 T = 16.0
 N = int(SR * T)
 rng = np.random.default_rng(1447)          # graine fixe : la bande-son est toujours la même
+DAF = '--complet' not in sys.argv          # par défaut : percussions seules (daf), sans instrument mélodique
 mix = np.zeros((2, N))
 
 D3 = 146.83
@@ -89,16 +91,23 @@ def pad(f, dur, att=1.5, rel=1.5):
     return lowpass(s * env, 900) * 0.10
 
 # ---------- nappe de fond (ré + la), du début à la fin
-place(pad(hz(-12), T - 0.2, 2.0, 1.4), 0.0, 1.0, -0.2)
-place(pad(hz(-5), T - 1.0, 2.5, 1.4), 0.8, 0.7, 0.25)
+if not DAF:
+    place(pad(hz(-12), T - 0.2, 2.0, 1.4), 0.0, 1.0, -0.2)
+    place(pad(hz(-5), T - 1.0, 2.5, 1.4), 0.8, 0.7, 0.25)
 
 # ---------- scène 1 : la marque
 place(dum(1.0), 0.15, 1.1)
-for k, deg in enumerate([0, 7, 12, 16]):                    # clochettes à l'apparition du logo
-    place(bell(hz(deg, D3 * 2)), 0.18 + k * 0.07, 0.55, -0.4 + k * 0.27)
-place(oud(hz(12), 2.0, .6), 0.95, 0.6, 0.1)                 # le titre
-place(oud(hz(16), 2.0, .5), 1.35, 0.5, -0.1)                # le texte arabe
-place(oud(hz(19), 2.4, .5), 1.7, 0.45, 0.2)                 # la devise
+if DAF:
+    place(tak(0.4), 0.15, 0.5, 0.0)                         # le logo : coup grave et anneaux
+    for tt, pan in ((0.95, 0.3), (1.35, -0.3), (1.7, 0.2)): # le titre, le texte arabe, la devise
+        place(tak(bright=0.8), tt, 0.38, pan)
+    place(dum(0.8), 1.7, 0.45)
+else:
+    for k, deg in enumerate([0, 7, 12, 16]):                # clochettes à l'apparition du logo
+        place(bell(hz(deg, D3 * 2)), 0.18 + k * 0.07, 0.55, -0.4 + k * 0.27)
+    place(oud(hz(12), 2.0, .6), 0.95, 0.6, 0.1)             # le titre
+    place(oud(hz(16), 2.0, .5), 1.35, 0.5, -0.1)            # le texte arabe
+    place(oud(hz(19), 2.4, .5), 1.7, 0.45, 0.2)             # la devise
 
 # ---------- rythme du daf (environ 96 battements par minute), de 2,0 s à 15,1 s
 beat = 60 / 96
@@ -123,21 +132,31 @@ place(whoosh(0.9, up=False), 10.4, 0.8, 0.5)                # le téléphone gli
 
 # ---------- scène 2 : les cinq livres arrivent, une note par livre (mélodie montante)
 for k, deg in enumerate([0, 4, 5, 7, 12]):
-    place(oud(hz(deg), 1.6, .55), 3.6 + k * 0.13 + 0.2, 0.55, -0.6 + k * 0.3)
+    if DAF: place(tak(bright=0.5 + 0.1 * k), 3.6 + k * 0.13 + 0.2, 0.42, -0.6 + k * 0.3)
+    else: place(oud(hz(deg), 1.6, .55), 3.6 + k * 0.13 + 0.2, 0.55, -0.6 + k * 0.3)
+if DAF: place(dum(), 3.6 + 4 * 0.13 + 0.2, 0.5)
 for k, deg in enumerate([16, 17, 19]):                      # les trois étiquettes
-    place(bell(hz(deg, D3)), 4.75 + k * 0.22, 0.35, -0.3 + k * 0.3)
+    if DAF: place(tak(0.12, bright=1.0), 4.75 + k * 0.22, 0.3, -0.3 + k * 0.3)
+    else: place(bell(hz(deg, D3)), 4.75 + k * 0.22, 0.35, -0.3 + k * 0.3)
 
 # ---------- scène 3 : les quatre espaces
 for k, deg in enumerate([7, 8, 12, 13]):
-    place(oud(hz(deg), 1.8, .5), 7.7 + k * 0.16 + 0.15, 0.55, -0.5 + k * 0.33)
-place(oud(hz(0), 2.4, .3), 8.6, 0.4, 0.0)
+    if DAF: place(dum(0.5) if k % 2 == 0 else tak(), 7.7 + k * 0.16 + 0.15, 0.5 if k % 2 == 0 else 0.4, -0.5 + k * 0.33)
+    else: place(oud(hz(deg), 1.8, .5), 7.7 + k * 0.16 + 0.15, 0.55, -0.5 + k * 0.33)
+if not DAF: place(oud(hz(0), 2.4, .3), 8.6, 0.4, 0.0)
 
 # ---------- scène 4 : les quatre atouts, puis l'adresse du site
 for k, deg in enumerate([12, 16, 17, 19]):
-    place(bell(hz(deg, D3 * 2)), 11.3 + k * 0.38 + 0.1, 0.4, -0.3 + k * 0.2)
-for k, deg in enumerate([0, 7, 12]):                         # accord final sur l'adresse
-    place(oud(hz(deg), 2.6, .6), 13.15 + k * 0.05, 0.55, -0.3 + k * 0.3)
-place(bell(hz(12, D3 * 2), 3.0), 13.2, 0.5, 0.0)
+    if DAF: place(tak(bright=0.9), 11.3 + k * 0.38 + 0.1, 0.4, -0.3 + k * 0.2)
+    else: place(bell(hz(deg, D3 * 2)), 11.3 + k * 0.38 + 0.1, 0.4, -0.3 + k * 0.2)
+if DAF:                                                      # roulement de daf, puis coup final sur l'adresse
+    for k in range(10):
+        place(tak(0.1, bright=0.7), 12.55 + k * 0.06, 0.12 + 0.03 * k, -0.2 + 0.04 * k)
+    place(tak(0.6), 13.15, 0.55, 0.0)
+else:
+    for k, deg in enumerate([0, 7, 12]):                     # accord final sur l'adresse
+        place(oud(hz(deg), 2.6, .6), 13.15 + k * 0.05, 0.55, -0.3 + k * 0.3)
+    place(bell(hz(12, D3 * 2), 3.0), 13.2, 0.5, 0.0)
 place(dum(1.2), 13.15, 0.8)
 
 # ---------- réverbération légère, fondu final pour boucler avec le début
