@@ -1,0 +1,778 @@
+// ===== Lisân Campus · application (Éditions Lisân)
+// ---------- stockage local (confort de chaque appareil)
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('lc.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('lc.' + k, JSON.stringify(v)); } catch (e) {} },
+};
+const state = {
+  done: store.get('done', {}), quiz: store.get('quiz', {}), known: store.get('known', {}),
+  words: store.get('words', {}), rate: store.get('rate', 1), last: store.get('last', null),
+  theme: store.get('theme', 'auto'), size: store.get('size', 'm'),
+};
+const save = k => { store.set(k, state[k]); if (window.LisanAuth && window.LisanAuth.onSave) window.LisanAuth.onSave(k, state[k]); };
+
+// ---------- outils de texte
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const md = s => esc(s).replace(/\[\[(.+?)\]\]/g, '<span class="ara" lang="ar" dir="rtl">$1</span>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>');
+const plain = s => String(s).replace(/\[\[.+?\]\]/g, '').replace(/\*\*|\*/g, '');
+const arOnly = s => String(s).replace(/\[\[|\]\]/g, '');
+const ICON = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1l7 4-7 4z"/></svg>';
+const subj = id => SUBJECTS.find(s => s.id === id);
+const spaceOf = s => s.space || 'droit';
+const cardLang = s => s.lang === 'ar' ? 'ar' : (s.id === 'en' ? 'en' : 'fr');
+
+// ---------- les espaces
+const SPACES = [
+  { id: 'droit', title: 'Droit · Licence 1', eyebrow: 'Université Musulmane Africaine', icon: '⚖️', color: 'a',
+    lead: 'Les matières de la Licence 1 Droit, enrichies au fil des cours : leçons, quiz et cartes de révision.',
+    intro: ['Huit matières de la première année de droit, rédigées à partir des cours et des textes officiels : introduction au droit, droit civil, droit musulman, organisation judiciaire, méthodologie, expression écrite, anglais et informatique.',
+      'Chaque leçon s’écoute à voix haute. Le quiz et les cartes de révision de chaque matière servent à vérifier ce que vous avez retenu. Vérifiez toujours avec le cours de vos enseignants.'] },
+  { id: 'ia', title: 'Formation à l’IA avec Claude', eyebrow: 'Ouvert à tous', icon: '🤖', color: 'i',
+    lead: 'Comprendre l’intelligence artificielle et maîtriser Claude pour étudier, travailler et produire, en toute sécurité.',
+    intro: ['Dix leçons pour comprendre ce qu’est l’intelligence artificielle, bien formuler ses demandes, étudier, produire et traduire avec Claude, et l’utiliser avec prudence.',
+      'Un atelier interactif vous aide à composer vos consignes ; le quiz et les cartes vérifient vos acquis.'] },
+  { id: 'arabe', title: 'Apprendre l’arabe', eyebrow: 'Collections « Je lis l’arabe ! » et « Je parle arabe ! »', icon: '🗣️', color: 'k',
+    lead: 'Les compagnons des livres, du niveau 0 au niveau 3 : écouter les lettres, les mots et les dialogues, s’exercer et réviser.',
+    intro: ['Ces quatre espaces accompagnent les livres des Éditions Lisân. Vous y écoutez les lettres, les syllabes, le vocabulaire et les dialogues de chaque leçon, vous vous entraînez avec les quiz et révisez avec les cartes.',
+      'Le cours complet, les règles, les exercices écrits et leurs corrigés sont dans les livres : chaque leçon indique les pages correspondantes du livre et du cahier d’exercices.',
+      'La voix arabe est celle de votre téléphone : vérifiez dans les **Paramètres** qu’elle est bien installée.'] },
+  { id: 'coran', title: 'Lire le Coran pas à pas', eyebrow: 'Collection « Lire le Coran pas à pas »', icon: '📖', color: 'n',
+    lead: 'Le compagnon du livre : 43 leçons, des lignes de lecture et la récitation lente d’al-Ḥouṣarî pour vérifier.',
+    intro: ['Ce compagnon suit les dix étapes et les 43 leçons du livre : objectifs, lettres et signes étudiés, lignes de lecture, mots du Coran et sourates courtes.',
+      'Les récitations sont celles du cheikh **Maḥmoûd Khalîl al-Ḥouṣarî**, en lecture lente d’enseignement (Ḥafṣ ‘an ‘Âṣim). Aucune voix de synthèse n’est utilisée pour le Coran.',
+      'La lecture du Coran s’apprend auprès d’un maître : ce compagnon sert à réviser entre deux séances.'] },
+];
+const space = id => SPACES.find(x => x.id === id);
+
+// ---------- voix (synthèse du téléphone) : français, anglais, arabe
+const synth = window.speechSynthesis || null;
+let voices = { fr: null, en: null, ar: null }, playingBtn = null, voicesLoaded = false;
+function pickVoices() {
+  if (!synth) return;
+  const vs = synth.getVoices();
+  if (vs.length) voicesLoaded = true;
+  voices.en = vs.find(v => v.lang === 'en-US' && /Google|Samantha|Aaron|Ava|Allison/i.test(v.name)) || vs.find(v => /^en[-_]US/i.test(v.lang)) || vs.find(v => /^en/i.test(v.lang)) || null;
+  voices.fr = vs.find(v => /^fr[-_]FR/i.test(v.lang) && /Google|Thomas|Amélie|Audrey/i.test(v.name)) || vs.find(v => /^fr/i.test(v.lang)) || null;
+  voices.ar = vs.find(v => /^ar[-_]SA/i.test(v.lang) && /Google/i.test(v.name)) || vs.find(v => /^ar/i.test(v.lang)) || null;
+}
+if (synth) { pickVoices(); synth.onvoiceschanged = () => { pickVoices(); checkArVoice(); }; }
+function stopVoice() { if (synth) synth.cancel(); if (playingBtn) { playingBtn.classList.remove('playing'); playingBtn = null; } stopAudio(); }
+function speak(text, lang, btn) {
+  if (!synth) { showNoVoice(); return; }
+  if (btn && btn === playingBtn) { stopVoice(); return; }
+  stopVoice();
+  const chunks = String(text).match(/[^.!?;:؟،]+[.!?;:؟،]*/g) || [text];
+  const v = voices[lang] || null;
+  if (btn) { btn.classList.add('playing'); playingBtn = btn; }
+  const loc = { en: 'en-US', ar: 'ar-SA', fr: 'fr-FR' }[lang] || 'fr-FR';
+  const slow = state.rate !== 1;
+  chunks.forEach((c, i) => {
+    const u = new SpeechSynthesisUtterance(c.trim());
+    u.lang = loc; if (v) u.voice = v;
+    u.rate = lang === 'ar' ? (slow ? 0.55 : 0.8) : (slow ? 0.65 : (lang === 'en' ? 0.95 : 1));
+    if (i === chunks.length - 1) u.onend = () => { if (btn && playingBtn === btn) { btn.classList.remove('playing'); playingBtn = null; } };
+    u.onerror = () => { if (btn) btn.classList.remove('playing'); };
+    synth.speak(u);
+  });
+}
+function showNoVoice() { const n = document.getElementById('novoice'); if (n) n.hidden = false; }
+function checkArVoice() { const n = document.getElementById('noar'); if (n && synth && voicesLoaded) n.hidden = !!voices.ar; }
+
+// ---------- récitations (fichiers audio)
+const player = new Audio();
+let audioBtn = null, playlist = [];
+player.preload = 'none';
+function stopAudio() { try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove('playing'); audioBtn = null; playlist = []; }
+function playAudio(urls, btn) {
+  if (btn && btn === audioBtn) { stopAudio(); if (synth) synth.cancel(); return; }
+  if (synth) synth.cancel(); if (playingBtn) { playingBtn.classList.remove('playing'); playingBtn = null; }
+  stopAudio();
+  playlist = urls.slice(); audioBtn = btn || null; if (audioBtn) audioBtn.classList.add('playing');
+  const next = () => { if (!playlist.length) { stopAudio(); return; } player.src = playlist.shift(); player.play().catch(() => { audioError(); }); };
+  player.onended = next; player.onerror = audioError; next();
+}
+function audioError() { stopAudio(); const n = document.getElementById('noaudio'); if (n) n.hidden = false; }
+
+// ---------- calculs de progression
+function subjectProgress(s) {
+  const n = s.lessons.length, d = s.lessons.filter(l => state.done[s.id + '/' + l.id]).length;
+  return { n, d, pct: n ? Math.round(d / n * 100) : 0 };
+}
+function spaceProgress(sp) {
+  const ss = SUBJECTS.filter(s => spaceOf(s) === sp.id);
+  const n = ss.reduce((a, s) => a + s.lessons.length, 0), d = ss.reduce((a, s) => a + subjectProgress(s).d, 0);
+  return { n, d, pct: n ? Math.round(d / n * 100) : 0, count: ss.length };
+}
+
+// ---------- accès : aperçu libre, puis connexion et inscription par espace (si la connexion est configurée)
+const AUTH = () => window.LisanAuth && window.LisanAuth.enabled ? window.LisanAuth : null;
+function access(s, lessonIndex) {
+  const A = AUTH(); if (!A) return 'ok';
+  if (lessonIndex === 0) return 'ok';
+  if (!A.user()) return 'login';
+  if (!A.enrolled(spaceOf(s))) return 'enroll';
+  return 'ok';
+}
+
+// ---------- blocs de contenu
+function renderBlock(b, s) {
+  if (b.p) return `<p>${md(b.p)}</p>`;
+  if (b.h) return `<h3>${md(b.h)}</h3>`;
+  if (b.ul) return `<ul>${b.ul.map(x => `<li>${md(x)}</li>`).join('')}</ul>`;
+  if (b.ol) return `<ol>${b.ol.map(x => `<li>${md(x)}</li>`).join('')}</ol>`;
+  if (b.table) return `<div class="tablewrap"><table><thead><tr>${b.table.h.map(x => `<th>${md(x)}</th>`).join('')}</tr></thead><tbody>${b.table.r.map(r => `<tr>${r.map(x => `<td>${md(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  if (b.box) return `<div class="box ${b.kind || 'marge'}"><b class="k">${esc(b.title || 'En marge')}</b><div>${md(b.box)}</div></div>`;
+  if (b.quote) return `<div class="quote">${md(b.quote)}</div>`;
+  if (b.verse) return `<div class="verse"><header><div><h3>${esc(b.title)}</h3><small>${esc(b.src)}</small></div>
+      <button type="button" class="btn small" data-say="${esc(b.verse.join(' '))}" data-lang="fr">${ICON}Écouter la fable</button></header>
+      <div class="lines">${b.verse.map(l => `<div>${esc(l)}</div>`).join('')}</div></div>`;
+  if (b.schema === 'oj') {
+    const col = (h, top, rest, cls) => `<div class="scol"><div class="h">${h}</div><div class="n ${cls || 'top'}">${top}</div>${rest.map(([ar, n]) => `<div class="ar">${ar}</div><div class="n">${n}</div>`).join('')}</div>`;
+    return `<div class="schema">${col('Ordre judiciaire', 'Cour de cassation', [['▲ pourvoi', "Cours d'appel"], ['▲ appel', 'Tribunaux de première instance et de commerce']])}${col('Ordre administratif', "Conseil d'État", [['▲ recours', 'Tribunaux administratifs']])}${col('Juridictions financières', 'Cour des comptes', [['▲ recours', 'Chambres régionales des comptes']])}${col('À part', 'Conseil constitutionnel', [], 'cc')}</div>`;
+  }
+  if (b.rules) return `<div class="tablewrap"><table><thead><tr><th>Règle</th><th>Explication</th><th>Exemples</th></tr></thead><tbody>${RULES.map(([r, e, ex]) =>
+      `<tr><td><b>${esc(r)}</b></td><td>${esc(e)}</td><td>${ex.map(w => `<button type="button" class="say" data-say="${esc(w)}" data-lang="en">${esc(w)}</button>`).join(', ')}</td></tr>`).join('')}</tbody></table></div>`;
+  if (b.words) {
+    const list = WORDS[b.words] || [];
+    return `<h3>${esc(WORD_TITLES[b.words])}</h3><p class="meta" data-wcount="${b.words}"></p><div class="words">${list.map(w => {
+      const id = b.words + ':' + w.word, m = !!state.words[id];
+      return `<div class="word${m ? ' mastered' : ''}" data-wid="${esc(id)}">
+        <div class="w"><b>${esc(w.word)}</b><span class="ipa">${esc(w.ipa)}</span></div>
+        <div class="fig">${esc(w.fig)}</div><div>${esc(w.sens)}</div><div class="tip">${esc(w.tip)}</div>
+        <div class="row"><button type="button" class="btn small" data-say="${esc(w.word.replace(/^to /, 'to '))}" data-lang="en">${ICON}Écouter</button>
+        <a class="ext" href="${esc(w.url)}" target="_blank" rel="noopener">Cambridge ↗</a>
+        <button type="button" class="mark" aria-pressed="${m}">${m ? '✓ Maîtrisé' : 'Maîtrisé ?'}</button></div></div>`;
+    }).join('')}</div>`;
+  }
+  if (b.sents) {
+    const list = WORDS[b.sents] || [];
+    return `<div class="sents">${list.map((x, i) => `${b.paras.includes(i) ? `<div class="para">${b.labels ? esc(b.labels[b.paras.indexOf(i)]) : 'Paragraphe ' + (b.paras.indexOf(i) + 1)}</div>` : ''}
+      <div class="sent"><p>${esc(x.text)}</p><button type="button" class="btn small" data-say="${esc(x.text)}" data-lang="en">${ICON}Écouter</button></div>`).join('')}</div>`;
+  }
+  if (b.tool === 'conception') return `<div class="tool"><b>Calculateur de la période légale de conception</b>
+      <div class="grid2"><label for="cc-birth">Date de naissance<input id="cc-birth" type="date" value="2008-05-30"></label>
+      <label for="cc-death">Décès du père (facultatif)<input id="cc-death" type="date" value="2007-11-18"></label></div>
+      <div class="res" id="cc-res"></div></div>`;
+  if (b.tool === 'nom') return `<div class="tool"><label for="nom-sel"><b>Quel nom porte l'enfant ?</b></label>
+      <p class="meta">Exemple : le père s'appelle KOUASSI, la mère TRAORÉ.</p>
+      <select id="nom-sel" class="search" style="font-size:16px">
+        <option value="mar">Parents mariés</option>
+        <option value="m1">Hors mariage : reconnu par la mère seulement</option>
+        <option value="p1">Hors mariage : reconnu par le père seulement</option>
+        <option value="both">Hors mariage : reconnu par les deux en même temps</option>
+        <option value="mp">Hors mariage : reconnu par la mère, puis par le père</option>
+        <option value="adp">Enfant adultérin du père (père marié à une autre femme)</option>
+        <option value="adm">Enfant adultérin de la mère (mère mariée à un autre homme)</option>
+        <option value="inc">Parents inconnus (enfant trouvé)</option>
+      </select><div class="res" id="nom-res"></div></div>`;
+  if (b.tool === 'mineur') return `<div class="tool"><label for="min-sel"><b>Le mineur peut-il faire cet acte seul ?</b></label>
+      <select id="min-sel" class="search" style="font-size:16px">
+        <option value="cahier">Acheter un cahier ou un livre</option>
+        <option value="taxi">Prendre un taxi wôrô-wôrô</option>
+        <option value="assur">Assurer la maison dont il est propriétaire</option>
+        <option value="bail">Mettre sa maison en location</option>
+        <option value="vente">Vendre sa maison</option>
+        <option value="voiture">Acheter une voiture</option>
+        <option value="testament">Rédiger un testament</option>
+        <option value="reco">Reconnaître son enfant</option>
+        <option value="t17">Signer un contrat de travail (17 ans)</option>
+        <option value="t15">Signer un contrat de travail (15 ans)</option>
+        <option value="adop">Être adopté (17 ans)</option>
+        <option value="proces">Engager un procès</option>
+      </select><div class="res" id="min-res"></div></div>`;
+  if (b.tool === 'prompt') return `<div class="tool"><b>Atelier : compose ta consigne</b>
+      <label class="prompt-field" for="pr-role">1. Rôle<textarea id="pr-role" rows="2">Tu es un professeur de droit civil, patient et rigoureux.</textarea></label>
+      <label class="prompt-field" for="pr-ctx">2. Contexte<textarea id="pr-ctx" rows="2">Je suis étudiant en L1 Droit à Abidjan ; mon examen est dans deux semaines.</textarea></label>
+      <label class="prompt-field" for="pr-task">3. Tâche<textarea id="pr-task" rows="2">Explique-moi la différence entre abrogation expresse et abrogation tacite.</textarea></label>
+      <label class="prompt-field" for="pr-fmt">4. Format<textarea id="pr-fmt" rows="2">Un tableau comparatif, puis deux exemples de la vie courante.</textarea></label>
+      <label class="prompt-field" for="pr-cst">5. Contraintes<textarea id="pr-cst" rows="2">En droit ivoirien, 250 mots au plus. Signale ce que je dois vérifier dans mon cours.</textarea></label>
+      <b>Ta consigne</b><div class="prompt-out" id="pr-out"></div>
+      <div class="actions"><button type="button" class="btn small" id="pr-copy">Copier la consigne</button><a class="btn ghost small" href="https://claude.ai/new" target="_blank" rel="noopener">Ouvrir Claude ↗</a></div>
+      <p class="meta" id="pr-msg" aria-live="polite"></p></div>`;
+  if (b.tool === 'binary') return `<div class="tool"><label for="bin-in"><b>Convertisseur décimal → binaire</b></label>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input id="bin-in" type="number" min="0" max="1023" value="13" inputmode="numeric"><span class="out" id="bin-out"></span></div>
+      <div class="meta" id="bin-steps"></div></div>`;
+  // ---- blocs des compagnons de livres (arabe et Coran)
+  const SAY = (t, label) => `<button type="button" class="btn small" data-say="${esc(t)}" data-lang="ar">${ICON}${label || 'Écouter'}</button>`;
+  if (b.ref) return `<div class="bookref"><b class="k">📘 Dans le livre</b><ul>${b.ref.map(([k, v]) => `<li><b>${esc(k)}</b> : ${md(v)}</li>`).join('')}</ul></div>`;
+  if (b.syl) return `<div class="syl">${b.syl.map(([a, fr]) => `<button type="button" class="sylb" data-say="${esc(a)}" data-lang="ar"><span class="ara" lang="ar" dir="rtl">${esc(a)}</span>${fr ? `<small>${md(fr)}</small>` : ''}</button>`).join('')}</div>`;
+  if (b.letters) return `<div class="letters">${b.letters.map(x => `<div class="letter">
+      <div class="lt-top"><span class="ara big" lang="ar">${esc(x.c)}</span><div><b>${esc(x.name)}</b><span class="meta">${x.sound === 'support' ? 'support de la hamza · « â »' : `se prononce « ${esc(x.sound)} »`}</span></div></div>
+      <div class="lt-forms" dir="rtl">${x.forms.map(f => `<span class="ara" lang="ar">${esc(f)}</span>`).join('')}</div>
+      <p>${md(x.how)}</p><p class="meta">${md(x.shape)}</p>
+      <div class="lt-word"><span class="emo" aria-hidden="true">${x.word.e}</span><span class="ara" lang="ar">${esc(x.word.ar)}</span><span>${esc(x.word.fr)} <i>(${esc(x.word.tr)})</i></span></div>
+      <div class="actions">${SAY(x.name_ar, 'Le nom')}${SAY(x.word.ar, 'Le mot')}</div></div>`).join('')}</div>`;
+  if (b.qletters) return `<div class="letters">${b.qletters.map(x => `<div class="letter">
+      <div class="lt-top"><span class="ara big" lang="ar">${esc(x.c)}</span><div><b>${esc(x.name)}</b><span class="meta">${x.sound === 'support' ? 'support de la hamza · « â »' : `se prononce « ${esc(x.sound)} »`}</span></div></div>
+      <div class="lt-forms" dir="rtl">${x.forms.map(f => `<span class="ara" lang="ar">${esc(f)}</span>`).join('')}</div>
+      <p>${md(x.how)}</p><p class="meta">${md(x.shape)}</p></div>`).join('')}</div>`;
+  if (b.vocab) return `<div class="vocab">${b.vocab.map(([e, a, fr]) => `<button type="button" class="voc" data-say="${esc(a)}" data-lang="ar">${e ? `<span class="emo" aria-hidden="true">${e}</span>` : ''}<span class="ara" lang="ar" dir="rtl">${esc(a)}</span><small>${md(fr)}</small></button>`).join('')}</div>`;
+  if (b.dialog) {
+    const all = b.dialog.lines.map(l => l[2]).join(' ');
+    return `<div class="dialog"><p class="situ">${md(b.dialog.situation)}</p>
+      <div class="actions">${SAY(all, 'Écouter tout le dialogue')}<button type="button" class="btn ghost small" data-trad="1" aria-pressed="false">Traduction</button></div>
+      ${b.dialog.lines.map(([who, col, a, fr]) => `<div class="dl"><span class="who" style="color:${esc(col)}">${esc(who)}</span>
+        <button type="button" class="dl-ar" data-say="${esc(a)}" data-lang="ar"><span class="ara" lang="ar" dir="rtl">${esc(a)}</span></button>
+        <span class="fr">${md(fr)}</span></div>`).join('')}</div>`;
+  }
+  if (b.texte) return `<div class="dialog texte"><div class="emo big" aria-hidden="true">${b.texte.e}</div>
+      <div class="actions">${SAY(b.texte.lines.join(' '), 'Écouter tout le texte')}<button type="button" class="btn ghost small" data-trad="1" aria-pressed="false">Traduction</button></div>
+      ${b.texte.lines.map(a => `<button type="button" class="dl-ar" data-say="${esc(a)}" data-lang="ar"><span class="ara" lang="ar" dir="rtl">${esc(a)}</span></button>`).join('')}
+      <p class="fr">${md(b.texte.fr)}</p></div>`;
+  if (b.lines) return `<div class="rlines" dir="rtl">${b.lines.map(r => `<div class="rline">${(Array.isArray(r) ? r : [r]).map(w => `<span class="ara" lang="ar">${esc(w)}</span>`).join('')}</div>`).join('')}</div>`;
+  if (b.qwords) return `<div class="qwords">${b.qwords.map(([w, r, u]) => `<div class="qw"><span class="ara" lang="ar" dir="rtl">${esc(w)}</span><span class="meta">${esc(r)}</span>
+      <button type="button" class="btn small" data-audio="${esc(JSON.stringify([u]))}">${ICON}Écouter le verset</button></div>`).join('')}</div>`;
+  if (b.qverses) return `<div class="qverses"><div class="actions"><button type="button" class="btn small" data-audio="${esc(JSON.stringify(b.qverses.verses.map(v => v[2])))}">${ICON}Écouter toute la sourate</button></div>
+      ${b.qverses.verses.map(([v, r, u], i) => `<div class="qv"><span class="ara" lang="ar" dir="rtl">${esc(v)} <span class="vnum">﴿${(i + 1).toLocaleString('ar-EG')}﴾</span></span>
+      <button type="button" class="btn ghost small" data-audio="${esc(JSON.stringify([u]))}">${ICON}Verset ${i + 1}</button></div>`).join('')}</div>`;
+  return '';
+}
+const WORD_TITLES = { law: "Vocabulaire de la définition du droit", jur: "Mots juridiques à prononcer", pres: "Les mots de la présentation", c21: "Le procès, les métiers et les faux amis" };
+const RULES = [
+  ["L'accent tonique", "Chaque mot a une syllabe plus forte.", ["lawyer", "evidence", "defendant"]],
+  ["Le r prononcé", "Le r se prononce partout, langue recourbée.", ["court", "lawyer", "clerk"]],
+  ["Le t « flap »", "Entre deux voyelles, le t devient un d léger.", ["beautiful", "university", "community"]],
+  ["Le o court = « â »", "Le o de not, job, contract se dit comme un a ouvert.", ["knowledge", "contract", "process"]],
+  ["Le « th »", "Langue entre les dents, en soufflant.", ["the", "thank", "think"]],
+  ["Le h soufflé", "On expire de l'air.", ["hello", "have", "hearing"]],
+  ["Voyelles longues et courtes", "La durée change le sens.", ["ship", "sheep", "live", "leave"]],
+  ["La terminaison -ed", "« t », « d », ou « id » après t et d.", ["worked", "signed", "motivated"]],
+  ["Les lettres muettes", "Lettres écrites non prononcées.", ["knowledge", "island", "Wednesday"]],
+];
+
+// ---------- vues
+const V = document.getElementById('view');
+const noVoice = `<div class="notice" id="novoice" hidden>La voix n'est pas disponible dans ce navigateur. Ouvrez Lisân Campus dans <b>Chrome</b> (Android) ou <b>Safari</b> (iPhone).</div>`;
+const noAr = `<div class="notice" id="noar" hidden>La voix arabe n’est pas installée sur cet appareil. Voir <a href="#parametres">Paramètres → Voix arabe</a>.</div>`;
+const noAudio = `<div class="notice" id="noaudio" hidden>La récitation n’a pas pu être chargée : vérifiez votre connexion internet, puis réessayez.</div>`;
+const crumbs = (...parts) => `<nav class="crumbs"><a href="#accueil">Accueil</a>${parts.map(([t, h]) => ` › ${h ? `<a href="#${h}">${esc(t)}</a>` : `<span>${esc(t)}</span>`}`).join('')}</nav>`;
+
+function lastLesson() {
+  return state.last && state.last.route && state.last.route.startsWith('l-') ? findLesson(state.last.route.slice(2)) : null;
+}
+function viewHome() {
+  const last = lastLesson();
+  const totalL = SUBJECTS.reduce((a, s) => a + s.lessons.length, 0);
+  const doneL = SUBJECTS.reduce((a, s) => a + subjectProgress(s).d, 0);
+  return `<section class="hero">
+      <span class="eyebrow">Éditions Lisân · la langue qui ouvre les portes</span>
+      <h1>Apprendre, réviser et <em>se former</em>, à son rythme</h1>
+      <p class="lead">L’arabe du niveau 0 au niveau 3, la lecture du Coran, la Licence 1 Droit et une formation à l’intelligence artificielle : des leçons courtes, la voix pour écouter, des quiz corrigés et des cartes de révision, sur téléphone et même hors connexion.</p>
+      ${last ? `<div class="resume"><p>Reprendre là où vous vous êtes arrêté : <b>${esc(last.s.title)}</b>, ${esc(last.l.title)}</p><a class="btn" href="#${state.last.route}">Reprendre</a></div>` : ''}
+      <p class="meta">${doneL} leçon${doneL > 1 ? 's' : ''} terminée${doneL > 1 ? 's' : ''} sur ${totalL}</p>
+    </section>
+    <section class="spaces">${SPACES.map(sp => { const p = spaceProgress(sp); const A = AUTH();
+      const ins = A && A.user() ? (A.enrolled(sp.id) ? '<span class="tag ok">Inscrit</span>' : '<span class="tag">Non inscrit</span>') : '';
+      return `<a class="spacecard c-${sp.color}" href="#espace-${sp.id}"><span class="sp-icon" aria-hidden="true">${sp.icon}</span>
+        <span class="eyebrow">${esc(sp.eyebrow)}</span><h2>${esc(sp.title)}</h2><p>${esc(sp.lead)}</p>
+        <div class="bar"><i style="width:${p.pct}%"></i></div><span class="meta">${p.count} ${p.count > 1 ? 'parcours' : 'parcours'} · ${p.d} / ${p.n} leçons ${ins}</span></a>`; }).join('')}
+    </section>`;
+}
+function viewSpace(sp) {
+  const ss = SUBJECTS.filter(s => spaceOf(s) === sp.id), p = spaceProgress(sp), A = AUTH();
+  const card = s => { const q = subjectProgress(s); const best = state.quiz[s.id];
+    return `<a class="subj c-${s.color}" href="#m-${s.id}"><h3>${esc(s.title)}</h3><p>${esc(s.subtitle)}</p>
+      <div class="bar"><i style="width:${q.pct}%"></i></div>
+      <span class="meta">${q.d} / ${q.n} leçons${best !== undefined ? ` · meilleur quiz ${best} %` : ''}</span></a>`; };
+  let reg = '';
+  if (A) {
+    if (!A.user()) reg = `<div class="notice">La première leçon de chaque parcours est en accès libre. Pour la suite, <button type="button" class="linkbtn" data-auth="signin">connectez-vous avec Google</button> puis inscrivez-vous à cet espace.</div>`;
+    else if (!A.enrolled(sp.id)) reg = `<div class="notice">Vous n’êtes pas encore inscrit à cet espace. <button type="button" class="btn small" data-enroll="${sp.id}">M’inscrire à « ${esc(sp.title)} »</button></div>`;
+    else reg = `<div class="notice ok">Vous êtes inscrit à cet espace : toutes les leçons sont ouvertes.</div>`;
+  }
+  return `${crumbs([sp.title])}
+    <div class="subject-head c-${sp.color}"><span class="eyebrow">${esc(sp.eyebrow)}</span><h1>${sp.icon} ${esc(sp.title)}</h1>
+      ${sp.intro.map(t => `<p class="lead">${md(t)}</p>`).join('')}
+      <div class="bar"><i style="width:${p.pct}%"></i></div><span class="meta">${p.d} / ${p.n} leçons terminées</span></div>
+    ${reg}
+    <section class="subjects">${ss.map(card).join('')}</section>`;
+}
+function findLesson(key) {
+  const [sid, lid] = key.split('.');
+  const s = subj(sid); if (!s) return null;
+  const i = s.lessons.findIndex(l => l.id === lid); if (i < 0) return null;
+  return { s, l: s.lessons[i], i };
+}
+function viewSubject(s) {
+  const p = subjectProgress(s), sp = space(spaceOf(s));
+  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title])}
+    <div class="subject-head c-${s.color}"><span class="eyebrow">${p.d} / ${p.n} leçons terminées</span><h1>${esc(s.title)}</h1><p class="lead">${esc(s.subtitle)}</p>
+      <div class="bar"><i style="width:${p.pct}%"></i></div>
+      <div class="actions"><a class="btn" href="#q-${s.id}">Quiz (${s.quiz.length} questions)</a><a class="btn ghost" href="#f-${s.id}">Cartes de révision (${s.cards.length})</a></div></div>
+    <div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok';
+      return `<a class="lesson-link${d ? ' done' : ''}" href="#l-${s.id}.${l.id}"><span class="num">${d ? '✓' : i + 1}</span><span class="t">${esc(l.title)}${l.ar ? ` <span class="ara" lang="ar">${esc(l.ar)}</span>` : ''}</span>${d ? '<small>Terminée</small>' : (lock ? '<small class="lock">🔒</small>' : (i === 0 && AUTH() ? '<small>Aperçu libre</small>' : ''))}</a>`; }).join('')}</div>`;
+}
+function viewGate(s, why, i) {
+  const sp = space(spaceOf(s)), A = AUTH();
+  const u = A && A.user();
+  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [i === undefined ? 'Accès' : (i + 1) + ' / ' + s.lessons.length])}
+    <div class="gate c-${sp.color}"><span class="sp-icon" aria-hidden="true">🔒</span>
+    ${why === 'login' ? `<h1>Connectez-vous pour continuer</h1>
+      <p class="lead">La première leçon de chaque parcours est en accès libre. Pour la suite, connectez-vous avec votre compte Google, puis inscrivez-vous à l’espace « ${esc(sp.title)} ». C’est gratuit.</p>
+      <div class="actions"><button type="button" class="btn" data-auth="signin">Se connecter avec Google</button></div>
+      <p class="meta">En vous connectant, vous acceptez les <a href="#conditions">conditions d’utilisation</a> et la <a href="#confidentialite">politique de confidentialité</a>.</p>`
+    : `<h1>Inscription à l’espace « ${esc(sp.title)} »</h1>
+      <p class="lead">Bonjour ${esc(u ? (u.displayName || '').split(' ')[0] : '')} ! Chaque espace demande une inscription séparée. Inscrivez-vous pour ouvrir toutes les leçons de cet espace ; vos autres inscriptions ne changent pas.</p>
+      <div class="actions"><button type="button" class="btn" data-enroll="${sp.id}">M’inscrire à « ${esc(sp.title)} »</button><a class="btn ghost" href="#espace-${sp.id}">Voir l’espace</a></div>`}
+    </div>`;
+}
+function viewLesson(found) {
+  const { s, l, i } = found;
+  const prev = s.lessons[i - 1], next = s.lessons[i + 1], sp = space(spaceOf(s));
+  const key = s.id + '/' + l.id, d = !!state.done[key];
+  const text = [l.title, ...l.body.map(b => b.p || b.h || (b.ul || b.ol || []).join('. ') || b.box || b.quote || '')].filter(Boolean).map(plain).join('. ');
+  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [(i + 1) + ' / ' + s.lessons.length])}
+    <article class="lesson read c-${s.color}">
+      <span class="eyebrow">${esc(s.title)} · ${i + 1} / ${s.lessons.length}</span>
+      <h1>${esc(l.title)}</h1>${l.ar ? `<p class="ara title-ar" lang="ar" dir="rtl">${esc(l.ar)}</p>` : ''}
+      ${noVoice}${s.lang === 'ar' && !s.noVoice ? noAr : ''}${s.noVoice ? noAudio : ''}
+      ${!s.noLessonVoice && s.id !== 'en' ? `<div class="actions"><button type="button" class="btn ghost small" data-say="${esc(text)}" data-lang="fr">${ICON}Écouter la leçon</button></div>` : ''}
+      ${l.body.map(b => renderBlock(b, s)).join('')}
+      <div class="lesson-foot">
+        <button type="button" class="btn done-toggle" data-done="${key}" aria-pressed="${d}">${d ? '✓ Leçon terminée' : 'Marquer comme terminée'}</button>
+        <div class="actions">${prev ? `<a class="btn ghost small" href="#l-${s.id}.${prev.id}">← Précédente</a>` : ''}${next ? `<a class="btn small" href="#l-${s.id}.${next.id}">Suivante →</a>` : `<a class="btn small" href="#q-${s.id}">Faire le quiz →</a>`}</div>
+      </div>
+    </article>`;
+}
+function shuffle(a) { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
+let quizRun = null;
+function viewQuiz(s) {
+  quizRun = { s, answered: 0, right: 0, qs: s.quiz.map(q => ({ ...q, order: shuffle(q.a.map((_, k) => k)) })) };
+  const best = state.quiz[s.id], sp = space(spaceOf(s));
+  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], ['Quiz'])}
+    <div class="subject-head c-${s.color}"><h1>Quiz : ${esc(s.title)}</h1><p class="lead">Touchez une réponse : la correction s'affiche aussitôt.${best !== undefined ? ` Votre meilleur score : ${best} %.` : ''}</p></div>
+    <div class="quiz read c-${s.color}">${quizRun.qs.map((q, n) => `<div class="q" data-q="${n}"><b>${n + 1}. ${md(q.q)}</b>
+      <div class="opts">${q.order.map(k => `<button type="button" class="opt" data-k="${k}">${md(q.a[k])}</button>`).join('')}</div>
+      <p class="expl" hidden>${md(q.e)}</p></div>`).join('')}
+      <div class="score" id="score">0 / ${s.quiz.length}</div>
+      <div class="actions" id="quiz-end" hidden><a class="btn" href="#q-${s.id}" data-reload="1">Recommencer</a><a class="btn ghost" href="#m-${s.id}">Retour au parcours</a></div>
+    </div>`;
+}
+let flashRun = null;
+function viewFlash(s) {
+  const deck = shuffle(s.cards.map((c, i) => i)).sort((a, b) => (state.known[s.id + ':' + a] ? 1 : 0) - (state.known[s.id + ':' + b] ? 1 : 0));
+  flashRun = { s, deck, pos: 0, flipped: false };
+  const sp = space(spaceOf(s));
+  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], ['Cartes'])}
+    <div class="subject-head c-${s.color}"><h1>Cartes : ${esc(s.title)}</h1><p class="lead">Touchez la carte pour voir la réponse, puis dites si vous la saviez. Les cartes à revoir reviennent en premier.</p></div>
+    ${s.lang === 'ar' && !s.noVoice ? noAr : ''}
+    <div class="flash c-${s.color}" id="flash"></div>`;
+}
+function drawFlash() {
+  const el = document.getElementById('flash'); if (!el || !flashRun) return;
+  const { s, deck, pos, flipped } = flashRun;
+  const knownN = s.cards.filter((_, i) => state.known[s.id + ':' + i]).length;
+  if (pos >= deck.length) {
+    el.innerHTML = `<div class="cardface"><div class="term">Paquet terminé</div><div class="def">${knownN} carte${knownN > 1 ? 's' : ''} sue${knownN > 1 ? 's' : ''} sur ${s.cards.length}</div></div>
+      <div class="controls"><a class="btn" href="#f-${s.id}" data-reload="1">Rejouer</a><a class="btn ghost" href="#m-${s.id}">Retour</a></div>`;
+    return;
+  }
+  const [term, def] = s.cards[deck[pos]];
+  const lang = cardLang(s);
+  el.innerHTML = `<p class="meta">Carte ${pos + 1} sur ${deck.length} · ${knownN} sue${knownN > 1 ? 's' : ''}</p>
+    <div class="cardface" id="cardface" role="button" tabindex="0" aria-label="Retourner la carte">
+      <div class="term">${md(term)}</div>${flipped ? `<div class="def">${md(def)}</div>` : '<div class="hint">Touchez pour voir la réponse</div>'}</div>
+    <div class="controls">${s.noVoice ? '' : `<button type="button" class="btn ghost small" data-say="${esc(lang === 'ar' ? arOnly(term) : plain(term))}" data-lang="${lang}">${ICON}Écouter</button>`}
+      ${flipped ? `<button type="button" class="btn bad" data-flash="0">À revoir</button><button type="button" class="btn good" data-flash="1">Je savais</button>` : ''}</div>`;
+}
+let glossSpace = 'all';
+function viewGlossary() {
+  return `${crumbs(['Glossaire'])}
+    <div><h1>Glossaire</h1><p class="lead">Tous les termes et tous les mots des espaces. Choisissez un espace, puis tapez un mot pour filtrer.</p></div>
+    <div class="chips" role="group" aria-label="Espace">${[['all', 'Tous'], ...SPACES.map(sp => [sp.id, sp.title])].map(([id, t]) => `<button type="button" class="chip" data-gspace="${id}" aria-pressed="${glossSpace === id}">${esc(t)}</button>`).join('')}</div>
+    <input class="search" id="gsearch" type="search" placeholder="Rechercher (ex. : servitude, prompt, كِتَابٌ)" aria-label="Rechercher un terme">
+    <div class="gloss" id="glist"></div>`;
+}
+function drawGlossary(q) {
+  const el = document.getElementById('glist'); if (!el) return;
+  const n = s => s.normalize('NFD').replace(/[\u0300-\u036f\u064b-\u0655\u0670]/g, '').replace(/[\u0671\u0623\u0625\u0622]/g, '\u0627').toLowerCase();
+  const items = SUBJECTS.filter(s => glossSpace === 'all' || spaceOf(s) === glossSpace).flatMap(s => s.cards.map(c => ({ s, t: c[0], d: c[1] })))
+    .sort((a, b) => plain(a.t).localeCompare(plain(b.t), 'fr'));
+  const f = q ? items.filter(x => n(arOnly(x.t) + ' ' + x.d).includes(n(q))) : items;
+  const shown = f.slice(0, 300);
+  el.innerHTML = shown.length ? shown.map(x => `<div class="gloss-item c-${x.s.color}"><b>${md(x.t)}</b>
+      ${x.s.noVoice ? '<span></span>' : `<button type="button" class="say" data-say="${esc(cardLang(x.s) === 'ar' ? arOnly(x.t) : plain(x.t))}" data-lang="${cardLang(x.s)}">Écouter</button>`}
+      <div style="grid-column:1/-1">${md(x.d)}</div><span class="s">${esc(x.s.title)}</span></div>`).join('') + (f.length > shown.length ? `<p class="meta">${f.length - shown.length} autres résultats : précisez votre recherche.</p>` : '')
+    : `<p class="lead">Aucun terme ne correspond à « ${esc(q)} ».</p>`;
+}
+
+// ---------- paramètres
+function seg(name, cur, opts) {
+  return `<div class="seg" role="group" aria-label="${esc(name)}">${opts.map(([v, t]) => `<button type="button" data-set="${name}" data-val="${v}" aria-pressed="${String(cur) === String(v)}">${esc(t)}</button>`).join('')}</div>`;
+}
+function viewSettings() {
+  const A = AUTH();
+  return `${crumbs(['Paramètres'])}
+    <div><h1>Paramètres</h1><p class="lead">Réglez Lisân Campus à votre convenance. Ces réglages sont enregistrés sur cet appareil.</p></div>
+    <section class="panel"><h2>Voix</h2>
+      <div class="setrow"><span>Vitesse de lecture</span>${seg('rate', state.rate, [[1, 'Normale'], [0.65, 'Lente']])}</div>
+      <div class="setrow"><span>Essayer les voix</span><div class="actions">
+        <button type="button" class="btn ghost small" data-say="Bienvenue sur Lisân Campus." data-lang="fr">${ICON}Français</button>
+        <button type="button" class="btn ghost small" data-say="Welcome to Lisan Campus." data-lang="en">${ICON}Anglais</button>
+        <button type="button" class="btn ghost small" data-say="مَرْحَبًا بِكُمْ فِي حَرَمِ لِسَانٍ." data-lang="ar">${ICON}Arabe</button></div></div>
+      <div class="notice" id="voice-status"></div>
+      <details class="help"><summary>Installer la voix arabe sur Android</summary>
+        <ol><li>Ouvrez les <b>Paramètres</b> du téléphone, puis <b>Accessibilité</b> (ou <b>Gestion générale</b>, ou <b>Langues et saisie</b>).</li>
+        <li>Touchez <b>Synthèse vocale</b> (ou « Sortie de la synthèse vocale »), puis l’icône ⚙️ à côté de <b>Services Google</b>.</li>
+        <li>Touchez <b>Installer les données vocales</b>, choisissez <b>Arabe</b> et téléchargez la voix.</li>
+        <li>Revenez sur Lisân Campus et touchez « Arabe » ci-dessus pour vérifier.</li></ol>
+        <p>Sur iPhone : Réglages → Accessibilité → Contenu énoncé → Voix → Arabe.</p></details>
+    </section>
+    <section class="panel"><h2>Affichage</h2>
+      <div class="setrow"><span>Thème</span>${seg('theme', state.theme, [['auto', 'Automatique'], ['light', 'Clair'], ['dark', 'Sombre']])}</div>
+      <div class="setrow"><span>Taille du texte</span>${seg('size', state.size, [['m', 'Normale'], ['l', 'Grande'], ['xl', 'Très grande']])}</div>
+    </section>
+    <section class="panel"><h2>Application</h2>
+      <p>Installez Lisân Campus sur votre téléphone : il s’ouvrira comme une application, même sans connexion.</p>
+      <div class="actions"><button type="button" class="btn small" data-install="1">Installer l’application</button></div>
+      <p class="meta" id="install-msg"></p>
+    </section>
+    ${A ? `<section class="panel"><h2>Compte</h2><p>Gérez votre connexion et vos inscriptions dans <a href="#compte">Mon compte</a>.</p></section>` : ''}
+    <section class="panel"><h2>Ma progression</h2>
+      <p>Leçons terminées, scores des quiz et cartes sues sont enregistrés sur cet appareil${A ? ' et, si vous êtes connecté, sur votre compte' : ''}.</p>
+      <div class="actions" id="reset-zone"><button type="button" class="btn ghost small" data-reset="ask">Effacer ma progression</button></div>
+    </section>`;
+}
+function voiceStatus() {
+  const el = document.getElementById('voice-status'); if (!el) return;
+  if (!synth) { el.innerHTML = 'La voix n’est pas disponible dans ce navigateur. Ouvrez Lisân Campus dans <b>Chrome</b> (Android) ou <b>Safari</b> (iPhone).'; return; }
+  pickVoices();
+  const ok = x => x ? '✓ installée' : '✗ non trouvée';
+  el.innerHTML = `Voix française : <b>${ok(voices.fr)}</b> · anglaise : <b>${ok(voices.en)}</b> · arabe : <b>${ok(voices.ar)}</b>`;
+}
+function applyDisplay() {
+  const r = document.documentElement;
+  if (state.theme === 'auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', state.theme);
+  r.classList.remove('fs-l', 'fs-xl'); if (state.size !== 'm') r.classList.add('fs-' + state.size);
+}
+
+// ---------- mon compte (visible quand la connexion est configurée)
+function viewAccount() {
+  const A = AUTH(); if (!A) return viewHome();
+  const u = A.user();
+  if (!u) return `${crumbs(['Mon compte'])}<div class="gate"><span class="sp-icon" aria-hidden="true">👤</span><h1>Mon compte</h1>
+    <p class="lead">Connectez-vous avec votre compte Google pour vous inscrire aux espaces et retrouver votre progression sur tous vos appareils.</p>
+    <div class="actions"><button type="button" class="btn" data-auth="signin">Se connecter avec Google</button></div>
+    <p class="meta">En vous connectant, vous acceptez les <a href="#conditions">conditions d’utilisation</a> et la <a href="#confidentialite">politique de confidentialité</a>.</p></div>`;
+  return `${crumbs(['Mon compte'])}
+    <div class="account">${u.photoURL ? `<img src="${esc(u.photoURL)}" alt="" width="64" height="64" referrerpolicy="no-referrer">` : '<span class="sp-icon">👤</span>'}
+      <div><h1>${esc(u.displayName || 'Mon compte')}</h1><p class="meta">${esc(u.email || '')}</p></div></div>
+    <section class="panel"><h2>Mes espaces</h2><p>Chaque espace demande une inscription séparée.</p>
+      ${SPACES.map(sp => `<div class="setrow"><span>${sp.icon} ${esc(sp.title)}</span>${A.enrolled(sp.id)
+        ? `<span class="actions"><span class="tag ok">Inscrit</span><a class="btn ghost small" href="#espace-${sp.id}">Ouvrir</a></span>`
+        : `<button type="button" class="btn small" data-enroll="${sp.id}">M’inscrire</button>`}</div>`).join('')}
+    </section>
+    <section class="panel"><h2>Session</h2><div class="actions"><button type="button" class="btn ghost small" data-auth="signout">Se déconnecter</button></div>
+      <p class="meta">Pour supprimer votre compte et vos données, écrivez-nous depuis la page <a href="#contact">Contact</a>.</p></section>`;
+}
+
+// ---------- pages d'information
+const PAGES = {
+  apropos: { title: 'À propos', body: [
+    { p: '**Lisân Campus** est le site d’apprentissage des **Éditions Lisân**, maison d’édition fondée à Abidjan par **Mouhamadou CISSEMA**, enseignant et auteur de méthodes. Sa devise : « la langue qui ouvre les portes ».' },
+    { h: 'Quatre espaces' },
+    { ul: ['**Droit · Licence 1** : les matières de la première année de droit, pour les étudiants de l’Université Musulmane Africaine et tous les étudiants en droit.',
+      '**Formation à l’IA avec Claude** : comprendre l’intelligence artificielle et s’en servir avec méthode et prudence.',
+      '**Apprendre l’arabe** : les compagnons des livres « Je lis l’arabe ! » (niveau 0) et « Je parle arabe ! » (niveaux 1 à 3).',
+      '**Lire le Coran pas à pas** : le compagnon du livre, avec la récitation lente d’al-Ḥouṣarî.'] },
+    { h: 'Comment utiliser le Campus' },
+    { ol: ['Choisissez un espace sur la page d’accueil, puis un parcours.', 'Lisez ou écoutez chaque leçon, puis marquez-la comme terminée.', 'Vérifiez vos acquis avec le quiz, et révisez avec les cartes.',
+      'Installez l’application depuis les **Paramètres** pour l’utiliser hors connexion.'] },
+    { box: 'Lisân Campus est une initiative indépendante : ce n’est pas un site officiel de l’Université Musulmane Africaine. Les contenus de droit résument les cours et des textes publics ; vérifiez toujours avec vos enseignants.', title: 'À savoir', kind: 'marge' },
+  ] },
+  confidentialite: { title: 'Politique de confidentialité', body: [
+    { p: '*Dernière mise à jour : 23 octobre 2026.*' },
+    { p: 'Les Éditions Lisân attachent une grande importance à la protection de vos données personnelles, conformément à la **loi ivoirienne n° 2013-450 du 19 juin 2013** relative à la protection des données à caractère personnel.' },
+    { h: '1. Responsable du traitement' },
+    { p: 'Éditions Lisân, représentées par Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Contact : la page [Contact](#contact) du site.' },
+    { h: '2. Les données que nous traitons' },
+    { ul: ['**Votre progression** (leçons terminées, scores, cartes sues) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Ils ne nous sont pas transmis.',
+      '**Si vous vous connectez avec Google** : votre nom, votre adresse e-mail, votre photo de profil, vos inscriptions aux espaces et votre progression, afin de vous donner accès aux contenus et de retrouver votre progression sur vos appareils.',
+      '**Si vous nous écrivez** par le formulaire de contact : votre nom, votre adresse e-mail et votre message, uniquement pour vous répondre.'] },
+    { p: 'Lisân Campus n’utilise **ni publicité, ni cookies de suivi, ni outil de mesure d’audience**.' },
+    { h: '3. Les prestataires' },
+    { ul: ['**Netlify** (hébergement du site et réception des messages du formulaire de contact).',
+      '**Google** : connexion avec un compte Google et stockage des comptes (Firebase), ainsi que les polices de caractères (Google Fonts).',
+      '**everyayah.com** : diffusion des récitations du Coran ; votre navigateur s’y connecte quand vous écoutez un verset.'] },
+    { p: 'Ces prestataires peuvent traiter des données hors de Côte d’Ivoire. La voix de lecture est celle de votre appareil : les textes lus ne nous sont pas envoyés.' },
+    { h: '4. Durée de conservation' },
+    { p: 'Les données de compte sont conservées tant que le compte est actif, puis supprimées sur demande. Les messages du formulaire de contact sont conservés le temps nécessaire pour y répondre.' },
+    { h: '5. Vos droits' },
+    { p: 'Vous pouvez demander l’accès à vos données, leur rectification ou leur suppression, et vous opposer à leur traitement, en nous écrivant depuis la page [Contact](#contact). Vous pouvez aussi saisir l’**ARTCI**, l’autorité ivoirienne de protection des données personnelles. Pour effacer la progression enregistrée sur votre appareil : **Paramètres → Effacer ma progression**.' },
+    { h: '6. Les mineurs' },
+    { p: 'Les élèves de moins de 18 ans utilisent Lisân Campus avec l’accord et sous la responsabilité de leurs parents ou de leur établissement.' },
+  ] },
+  conditions: { title: 'Conditions d’utilisation', body: [
+    { p: '*Dernière mise à jour : 23 octobre 2026.*' },
+    { h: '1. Objet' },
+    { p: 'Lisân Campus est un site d’apprentissage gratuit édité par les Éditions Lisân. En l’utilisant, vous acceptez les présentes conditions.' },
+    { h: '2. Accès' },
+    { p: 'La page d’accueil, la présentation des espaces et la première leçon de chaque parcours sont en accès libre. L’accès au reste des contenus peut demander une connexion avec un compte Google et une inscription à chaque espace. Le site peut être interrompu pour maintenance ou évoluer sans préavis.' },
+    { h: '3. Les contenus' },
+    { p: 'Les contenus sont proposés à des fins d’apprentissage. Les leçons de droit ne constituent pas des consultations juridiques ; pour une situation personnelle, adressez-vous à un professionnel. La lecture du Coran s’apprend auprès d’un maître ; le Campus sert à réviser.' },
+    { h: '4. Propriété intellectuelle' },
+    { p: 'Les textes, exercices, illustrations, le nom et le logo « Lisân » sont la propriété de Mouhamadou CISSEMA et des Éditions Lisân. Ils sont réservés à votre usage personnel et pédagogique : toute reproduction ou diffusion, même partielle, demande une autorisation écrite. Les récitations du Coran appartiennent à leurs ayants droit et sont diffusées par everyayah.com.' },
+    { h: '5. Votre compte' },
+    { p: 'Votre compte est personnel. Vous vous engagez à utiliser le site de manière loyale, sans chercher à en perturber le fonctionnement. Les Éditions Lisân peuvent suspendre un compte en cas d’abus.' },
+    { h: '6. Droit applicable' },
+    { p: 'Les présentes conditions sont régies par le droit ivoirien. En cas de litige, et à défaut d’accord amiable, les juridictions d’Abidjan sont compétentes.' },
+  ] },
+  mentions: { title: 'Mentions légales', body: [
+    { h: 'Éditeur' },
+    { p: '**Éditions Lisân**, marque de Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Directeur de la publication : Mouhamadou CISSEMA. Contact : page [Contact](#contact).' },
+    { h: 'Hébergement' },
+    { p: '**Netlify, Inc.**, San Francisco, États-Unis — www.netlify.com. Le code du site est conservé sur GitHub.' },
+    { h: 'Crédits' },
+    { ul: ['Polices : Literata, Atkinson Hyperlegible et Noto Sans (licence SIL Open Font) ; **Lisan Naskh**, dérivée de Noto Naskh Arabic, avec le code couleur des voyelles des Éditions Lisân (licence SIL Open Font).',
+      'Récitations du Coran : cheikh Maḥmoûd Khalîl al-Ḥouṣarî, lecture d’enseignement (al-mou‘allim), diffusées par everyayah.com.',
+      'Voix de lecture : la synthèse vocale de votre appareil.'] },
+    { p: '© Mouhamadou CISSEMA — Éditions Lisân. Tous droits réservés.' },
+  ] },
+};
+function viewPage(k) {
+  const P = PAGES[k];
+  const mdl = s => md(s).replace(/\[([^\]]+)\]\((#[a-z-]+)\)/g, '<a href="$2">$1</a>');
+  const block = b => b.p ? `<p>${mdl(b.p)}</p>` : renderBlock(b, null);
+  return `${crumbs([P.title])}<article class="lesson read page"><h1>${esc(P.title)}</h1>${P.body.map(block).join('')}</article>`;
+}
+function viewContact() {
+  return `${crumbs(['Contact'])}<article class="lesson read page"><h1>Contact</h1>
+    <p>Une question sur un cours ou sur les livres, une erreur à signaler, une demande concernant vos données ? Écrivez-nous : nous vous répondrons à l’adresse que vous indiquez.</p>
+    <form class="form" id="contact-form" name="contact">
+      <label>Votre nom<input name="nom" required autocomplete="name"></label>
+      <label>Votre adresse e-mail<input name="email" type="email" required autocomplete="email" inputmode="email"></label>
+      <label>Sujet<select name="sujet"><option>Une question sur un cours</option><option>Les livres des Éditions Lisân</option><option>Signaler une erreur</option><option>Mon compte et mes données</option><option>Autre</option></select></label>
+      <label>Votre message<textarea name="message" rows="6" required></textarea></label>
+      <p class="hp" aria-hidden="true"><label>Ne pas remplir<input name="bot-field" tabindex="-1" autocomplete="off"></label></p>
+      <div class="actions"><button type="submit" class="btn">Envoyer</button></div>
+      <p class="meta" id="contact-msg" aria-live="polite"></p>
+    </form>
+    <p class="meta">Vos informations servent uniquement à vous répondre (voir la <a href="#confidentialite">politique de confidentialité</a>).</p></article>`;
+}
+
+// ---------- routeur
+function route() {
+  stopVoice(); closeMenu();
+  const h = decodeURIComponent(location.hash.slice(1)) || 'accueil';
+  let html = '', after = null, keep = false;
+  const gate = (s, i) => { const a = access(s, i); return a === 'ok' ? null : viewGate(s, a, i); };
+  if (h.startsWith('espace-') && space(h.slice(7))) html = viewSpace(space(h.slice(7)));
+  else if (h.startsWith('m-') && subj(h.slice(2))) html = viewSubject(subj(h.slice(2)));
+  else if (h.startsWith('l-') && findLesson(h.slice(2))) { const f = findLesson(h.slice(2)); const g = gate(f.s, f.i);
+    if (g) html = g; else { html = viewLesson(f); keep = true; after = afterLesson; } }
+  else if (h.startsWith('q-') && subj(h.slice(2))) { const s = subj(h.slice(2)); html = gate(s, 1) || viewQuiz(s); }
+  else if (h.startsWith('f-') && subj(h.slice(2))) { const s = subj(h.slice(2)); const g = gate(s, 1); if (g) html = g; else { html = viewFlash(s); after = () => { drawFlash(); checkArVoice(); }; } }
+  else if (h === 'glossaire') { html = viewGlossary(); after = () => { drawGlossary(''); document.getElementById('gsearch').addEventListener('input', e => drawGlossary(e.target.value)); }; }
+  else if (h === 'parametres') { html = viewSettings(); after = voiceStatus; }
+  else if (h === 'compte') html = viewAccount();
+  else if (h === 'contact') { html = viewContact(); after = bindContact; }
+  else if (PAGES[h]) html = viewPage(h);
+  else html = viewHome();
+  V.innerHTML = html;
+  if (after) after();
+  checkArVoice();
+  if (keep) {
+    const saved = state.last && state.last.route === h ? state.last.y : 0;
+    window.scrollTo(0, saved || 0);
+    state.last = { route: h, y: saved || 0 }; save('last');
+  } else window.scrollTo(0, 0);
+}
+function bindContact() {
+  const f = document.getElementById('contact-form'), msg = document.getElementById('contact-msg');
+  f.addEventListener('submit', e => {
+    e.preventDefault();
+    const data = new URLSearchParams(new FormData(f)); data.append('form-name', 'contact');
+    msg.textContent = 'Envoi en cours…';
+    fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: data.toString() })
+      .then(r => { if (!r.ok) throw new Error(r.status); f.reset(); msg.textContent = 'Merci ! Votre message a bien été envoyé. Nous vous répondrons dès que possible.'; })
+      .catch(() => { msg.textContent = 'L’envoi n’a pas abouti. Vérifiez votre connexion internet et réessayez.'; });
+  });
+}
+
+function afterLesson() {
+  document.querySelectorAll('[data-wcount]').forEach(updateWordCount);
+  const ns = document.getElementById('nom-sel');
+  if (ns) {
+    const R = {
+      mar: "<b>KOUASSI</b>. Le père peut demander d'y ajouter le nom de la mère : <b>KOUASSI TRAORÉ</b> (article 2).",
+      m1: "<b>TRAORÉ</b>, le nom du seul parent à l'égard duquel la filiation est établie (article 3).",
+      p1: "<b>KOUASSI</b>, le nom du seul parent à l'égard duquel la filiation est établie (article 3).",
+      both: "<b>KOUASSI</b> : quand la filiation est établie en même temps à l'égard des deux parents, l'enfant prend le nom du père (article 3).",
+      mp: "<b>TRAORÉ KOUASSI</b> : le nom du père s'ajoute après celui de la mère, sans son accord. Avec le <b>consentement de la mère</b>, l'enfant peut porter <b>KOUASSI</b> seul ou <b>KOUASSI TRAORÉ</b> (article 3 al. 3).",
+      adp: "<b>KOUASSI</b>, à condition que le père ait informé son épouse de la reconnaissance par acte de commissaire de justice. Sans cette information, la reconnaissance est <b>nulle</b> (article 22 de la loi sur la filiation).",
+      adm: "Le nom du <b>mari</b> de la mère, présumé père. L'amant ne peut reconnaître l'enfant et lui donner son nom qu'après le <b>désaveu</b> par le mari (article 22 al. 2).",
+      inc: "Un nom attribué par l'<b>officier de l'état civil</b>, en accord avec l'établissement qui a recueilli l'enfant.",
+    };
+    const f = () => { document.getElementById('nom-res').innerHTML = R[ns.value]; };
+    ns.addEventListener('change', f); f();
+  }
+  const ms = document.getElementById('min-sel');
+  if (ms) {
+    const Y = '<b style="color:var(--good)">Oui.</b> ', N = '<b style="color:var(--bad)">Non.</b> ', P = '<b style="color:var(--saffron)">Oui, mais pas seul.</b> ';
+    const R = {
+      cahier: Y + "C'est un acte de la vie courante, un menu achat.",
+      taxi: Y + "Le contrat de transport est un acte de la vie courante.",
+      assur: Y + "C'est un acte conservatoire : il évite une perte (article 34).",
+      bail: Y + "C'est un acte d'administration, de gestion courante.",
+      vente: N + "C'est un acte de disposition. Son représentant ne peut lui-même vendre qu'avec l'autorisation du juge des tutelles ou du conseil de famille.",
+      voiture: N + "C'est un acte de disposition, qui engage gravement son patrimoine.",
+      testament: N + "Le mineur non émancipé ne peut pas rédiger de testament.",
+      reco: Y + "Le mineur peut reconnaître seul son enfant.",
+      t17: P + "À partir de 16 ans, il conclut lui-même le contrat, assisté de son représentant légal (article 35).",
+      t15: N + "Avant 16 ans, c'est son représentant légal qui conclut le contrat en son nom (article 35).",
+      adop: P + "Après 16 ans, son consentement personnel est indispensable : personne ne peut consentir à sa place (article 6 de la loi sur l'adoption).",
+      proces: N + "Il n'agit en justice qu'assisté de son représentant légal (article 33).",
+    };
+    const f = () => { document.getElementById('min-res').innerHTML = R[ms.value]; };
+    ms.addEventListener('change', f); f();
+  }
+  const cb = document.getElementById('cc-birth');
+  if (cb) {
+    const cd = document.getElementById('cc-death'), out = document.getElementById('cc-res');
+    const parse = v => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v || ''); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : null; };
+    const fmt = t => new Date(t).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+    const DAY = 864e5;
+    const calc = () => {
+      const b = parse(cb.value), d = parse(cd.value);
+      if (b === null) { out.textContent = 'Saisis une date de naissance.'; return; }
+      const start = b - 300 * DAY, end = b - 180 * DAY;
+      let html = `Période légale de conception : du <b>${fmt(start)}</b> (300e jour) au <b>${fmt(end)}</b> (180e jour).`;
+      if (d !== null) {
+        if (d < start) html += `<br>Le père est décédé le ${fmt(d)}, <b>avant</b> le début de la période : l'enfant n'était pas encore conçu à son décès et ne peut pas lui succéder.`;
+        else if (d <= end) html += `<br>Le père est décédé le ${fmt(d)}, <b>pendant</b> la période : la conception se situe entre le ${fmt(start)} et le ${fmt(d - DAY)}. L'enfant est considéré comme conçu au décès et peut hériter, à condition de naître vivant.`;
+        else if (d < b) html += `<br>Le père est décédé le ${fmt(d)}, <b>après</b> la période : l'enfant était déjà conçu et peut hériter, à condition de naître vivant.`;
+        else html += `<br>Le père est décédé après la naissance : l'enfant était déjà né et hérite selon le principe.`;
+      }
+      out.innerHTML = html;
+    };
+    cb.addEventListener('input', calc); cd.addEventListener('input', calc); calc();
+  }
+  const pr = document.getElementById('pr-out');
+  if (pr) {
+    const ids = ['pr-role', 'pr-ctx', 'pr-task', 'pr-fmt', 'pr-cst'];
+    const build = () => { pr.textContent = ids.map(i => document.getElementById(i).value.trim()).filter(Boolean).join('\n\n'); };
+    ids.forEach(i => document.getElementById(i).addEventListener('input', build)); build();
+    document.getElementById('pr-copy').addEventListener('click', () => {
+      const msg = document.getElementById('pr-msg'), txt = pr.textContent;
+      const done = () => { msg.textContent = 'Consigne copiée : colle-la dans une conversation avec Claude.'; };
+      const fallback = () => { const r = document.createRange(); r.selectNodeContents(pr); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); msg.textContent = 'Le texte est sélectionné : copie-le avec ton appareil.'; };
+      try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback(); } catch (e) { fallback(); }
+    });
+  }
+  const inp = document.getElementById('bin-in');
+  if (inp) { const f = () => { let n = Math.max(0, Math.min(1023, parseInt(inp.value, 10) || 0)); const out = n.toString(2); const steps = []; let m = n; if (m === 0) steps.push('0 ÷ 2 = 0, reste 0'); while (m > 0) { steps.push(`${m} ÷ 2 = ${Math.floor(m / 2)}, reste ${m % 2}`); m = Math.floor(m / 2); } document.getElementById('bin-out').textContent = out; document.getElementById('bin-steps').textContent = steps.join(' · ') + ' → restes lus de bas en haut'; }; inp.addEventListener('input', f); f(); }
+}
+function updateWordCount(p) {
+  const key = p.dataset.wcount, list = WORDS[key] || [];
+  const k = list.filter(w => state.words[key + ':' + w.word]).length;
+  p.textContent = `${k} mot${k > 1 ? 's' : ''} maîtrisé${k > 1 ? 's' : ''} sur ${list.length}`;
+}
+
+// ---------- menu ☰
+const drawer = document.getElementById('drawer'), scrim = document.getElementById('scrim'), menuBtn = document.getElementById('menu-btn');
+function renderDrawer() {
+  const A = AUTH(), u = A && A.user();
+  const item = (h, icon, t) => `<a href="#${h}"><span aria-hidden="true">${icon}</span>${esc(t)}</a>`;
+  drawer.innerHTML = `<div class="dr-head"><img src="logo.png" alt="" width="40" height="40"><div><b>Lisân Campus</b><small>Éditions Lisân</small></div>
+      <button type="button" class="dr-close" id="menu-close" aria-label="Fermer le menu">✕</button></div>
+    ${A ? (u ? `<a href="#compte" class="dr-user">${u.photoURL ? `<img src="${esc(u.photoURL)}" alt="" width="32" height="32" referrerpolicy="no-referrer">` : '<span aria-hidden="true">👤</span>'}<span>${esc(u.displayName || 'Mon compte')}<small>Mon compte</small></span></a>`
+      : `<button type="button" class="dr-login" data-auth="signin">Se connecter avec Google</button>`) : ''}
+    <nav aria-label="Menu principal">
+      ${item('accueil', '🏠', 'Accueil')}
+      <div class="dr-sec">Les espaces</div>
+      ${SPACES.map(sp => item('espace-' + sp.id, sp.icon, sp.title)).join('')}
+      <div class="dr-sec">Outils</div>
+      ${item('glossaire', '🔎', 'Glossaire')}
+      ${A ? item('compte', '👤', 'Mon compte') : ''}
+      ${item('parametres', '⚙️', 'Paramètres')}
+      <div class="dr-sec">Informations</div>
+      ${item('apropos', 'ℹ️', 'À propos')}
+      ${item('contact', '✉️', 'Contact')}
+      ${item('confidentialite', '🔐', 'Confidentialité')}
+      ${item('conditions', '📄', 'Conditions d’utilisation')}
+      ${item('mentions', '⚖️', 'Mentions légales')}
+    </nav>`;
+  document.getElementById('menu-close').onclick = closeMenu;
+}
+function openMenu() { renderDrawer(); drawer.hidden = false; scrim.hidden = false; requestAnimationFrame(() => document.body.classList.add('menu-open')); menuBtn.setAttribute('aria-expanded', 'true'); const f = drawer.querySelector('a, button'); if (f) f.focus(); }
+function closeMenu() { if (!drawer || drawer.hidden) return; document.body.classList.remove('menu-open'); menuBtn.setAttribute('aria-expanded', 'false'); setTimeout(() => { drawer.hidden = true; scrim.hidden = true; }, 200); }
+menuBtn.onclick = () => drawer.hidden ? openMenu() : closeMenu();
+scrim.onclick = closeMenu;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeMenu(); });
+
+window.addEventListener('hashchange', route);
+let st = null;
+window.addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(() => { if (state.last && location.hash.slice(1) === state.last.route) { state.last.y = Math.round(window.scrollY); save('last'); } }, 300); }, { passive: true });
+
+// ---------- interactions
+document.addEventListener('click', e => {
+  const t = e.target;
+  const au = t.closest('[data-audio]');
+  if (au) { playAudio(JSON.parse(au.dataset.audio), au); return; }
+  const sayB = t.closest('[data-say]');
+  if (sayB) { speak(sayB.dataset.say, sayB.dataset.lang, sayB.classList.contains('btn') ? sayB : null); return; }
+  const tr = t.closest('[data-trad]');
+  if (tr) { const box = tr.closest('.dialog'); const on = !box.classList.contains('show-fr'); box.classList.toggle('show-fr', on); tr.setAttribute('aria-pressed', on); return; }
+  const setB = t.closest('[data-set]');
+  if (setB) { const k = setB.dataset.set; let v = setB.dataset.val; if (k === 'rate') v = +v; state[k] = v; save(k); applyDisplay();
+    setB.parentElement.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === setB)); return; }
+  const rs = t.closest('[data-reset]');
+  if (rs) { const z = document.getElementById('reset-zone');
+    if (rs.dataset.reset === 'ask') z.innerHTML = `<p><b>Effacer toute votre progression sur cet appareil ?</b> Cette action est définitive.</p><button type="button" class="btn bad small" data-reset="yes">Oui, tout effacer</button><button type="button" class="btn ghost small" data-reset="no">Annuler</button>`;
+    else if (rs.dataset.reset === 'yes') { ['done', 'quiz', 'known', 'words'].forEach(k => { state[k] = {}; save(k); }); state.last = null; save('last'); z.innerHTML = '<p class="meta">Votre progression a été effacée.</p>'; }
+    else z.innerHTML = '<button type="button" class="btn ghost small" data-reset="ask">Effacer ma progression</button>';
+    return; }
+  const ins = t.closest('[data-install]');
+  if (ins) { installApp(); return; }
+  const gs = t.closest('[data-gspace]');
+  if (gs) { glossSpace = gs.dataset.gspace; document.querySelectorAll('[data-gspace]').forEach(b => b.setAttribute('aria-pressed', b === gs)); drawGlossary(document.getElementById('gsearch').value); return; }
+  const aut = t.closest('[data-auth]');
+  if (aut && AUTH()) { closeMenu(); if (aut.dataset.auth === 'signin') AUTH().signIn().then(route, () => {}); else AUTH().signOut().then(() => { location.hash = '#accueil'; route(); }); return; }
+  const en = t.closest('[data-enroll]');
+  if (en && AUTH()) { AUTH().enroll(en.dataset.enroll).then(route); return; }
+  const rel = t.closest('[data-reload]');
+  if (rel && rel.getAttribute('href') === location.hash) { e.preventDefault(); route(); return; }
+  const dt = t.closest('[data-done]');
+  if (dt) { const k = dt.dataset.done; if (state.done[k]) delete state.done[k]; else state.done[k] = 1; save('done');
+    dt.setAttribute('aria-pressed', !!state.done[k]); dt.textContent = state.done[k] ? '✓ Leçon terminée' : 'Marquer comme terminée'; return; }
+  const mk = t.closest('.mark');
+  if (mk) { const card = mk.closest('.word'), id = card.dataset.wid; if (state.words[id]) delete state.words[id]; else state.words[id] = 1; save('words');
+    const m = !!state.words[id]; card.classList.toggle('mastered', m); mk.setAttribute('aria-pressed', m); mk.textContent = m ? '✓ Maîtrisé' : 'Maîtrisé ?';
+    const p = card.parentElement.previousElementSibling; if (p && p.dataset.wcount) updateWordCount(p); return; }
+  const opt = t.closest('.opt');
+  if (opt && quizRun) { const box = opt.closest('.q'), n = +box.dataset.q, q = quizRun.qs[n];
+    box.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.k === q.c) b.classList.add('right'); });
+    const ok = +opt.dataset.k === q.c; if (!ok) opt.classList.add('wrong');
+    box.querySelector('.expl').hidden = false; quizRun.answered++; if (ok) quizRun.right++;
+    const sc = document.getElementById('score'); sc.textContent = `${quizRun.right} / ${quizRun.qs.length}`;
+    if (quizRun.answered === quizRun.qs.length) { const pct = Math.round(quizRun.right / quizRun.qs.length * 100);
+      if (state.quiz[quizRun.s.id] === undefined || pct > state.quiz[quizRun.s.id]) { state.quiz[quizRun.s.id] = pct; save('quiz'); }
+      sc.textContent = `Score final : ${quizRun.right} / ${quizRun.qs.length} (${pct} %)`; document.getElementById('quiz-end').hidden = false; }
+    return; }
+  if (t.closest('#cardface') && flashRun) { flashRun.flipped = !flashRun.flipped; drawFlash(); return; }
+  const fb = t.closest('[data-flash]');
+  if (fb && flashRun) { const idx = flashRun.deck[flashRun.pos], key = flashRun.s.id + ':' + idx;
+    if (fb.dataset.flash === '1') state.known[key] = 1; else delete state.known[key]; save('known');
+    flashRun.pos++; flashRun.flipped = false; drawFlash(); return; }
+});
+document.addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.id === 'cardface') { e.preventDefault(); flashRun.flipped = !flashRun.flipped; drawFlash(); } });
+
+// ---------- installation de l'application
+let deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredInstall = e; const b = document.getElementById('install-btn'); if (b) b.hidden = false; });
+window.addEventListener('appinstalled', () => { deferredInstall = null; const b = document.getElementById('install-btn'); if (b) b.hidden = true; });
+function installApp() {
+  const msg = document.getElementById('install-msg');
+  const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (standalone) { if (msg) msg.textContent = 'Lisân Campus est déjà installé sur cet appareil.'; return; }
+  if (deferredInstall) { deferredInstall.prompt(); deferredInstall.userChoice.finally(() => { deferredInstall = null; }); return; }
+  const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const t = ios ? 'Sur iPhone : touchez le bouton Partager de Safari, puis « Sur l’écran d’accueil ».' : 'Ouvrez le menu ⋮ de Chrome, puis « Installer l’application » (ou « Ajouter à l’écran d’accueil »).';
+  if (msg) msg.textContent = t; else alertInline(t);
+}
+function alertInline(t) { const n = document.getElementById('ios-help'); if (n) { n.querySelector('.notice').textContent = t; n.hidden = false; } }
+
+// ---------- démarrage
+applyDisplay();
+if (!synth) setTimeout(showNoVoice, 0);
+if (window.LisanAuth && window.LisanAuth.ready) window.LisanAuth.ready.then(route, route); else route();

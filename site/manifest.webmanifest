@@ -1,7 +1,7 @@
 {
   "name": "Lisân Campus",
   "short_name": "Lisân Campus",
-  "description": "Réviser la Licence 1 Droit et se former à l'IA avec Claude : leçons, voix, quiz et cartes de révision.",
+  "description": "Apprendre l'arabe, lire le Coran pas à pas, réviser la Licence 1 Droit et se former à l'IA avec Claude : leçons audio, quiz et cartes de révision.",
   "lang": "fr",
   "start_url": "./",
   "scope": "./",
