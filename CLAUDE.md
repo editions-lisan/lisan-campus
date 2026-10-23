@@ -6,3 +6,4 @@
 - Les matières sont des objets `M_*` (leçons `body`, `quiz`, `cards`) listés dans `SUBJECTS` ; `space: "ia"` place une matière dans l'espace « Formation à l'IA ».
 - À chaque mise à jour du site, changer la constante `VERSION` de `site/sw.js` pour que les applications installées reçoivent la nouvelle version.
 - Avant chaque envoi : ouvrir la page dans un navigateur sans erreur de console, vérifier l'accueil, une leçon, un quiz et les cartes.
+- Ne jamais supprimer `site/googlea0fc3a4fa095fe5d.html` : il prouve à Google Search Console que le site appartient aux Éditions Lisân.
