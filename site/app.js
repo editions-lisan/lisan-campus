@@ -492,7 +492,7 @@ const PAGES = {
     { p: 'Lisân Campus n’utilise **ni publicité, ni cookies de suivi, ni outil de mesure d’audience**.' },
     { h: '3. Les prestataires' },
     { ul: ['**Netlify** (hébergement du site et réception des messages du formulaire de contact).',
-      '**Google** : connexion avec un compte Google et stockage des comptes (Firebase), ainsi que les polices de caractères (Google Fonts).',
+      '**Google** : connexion avec un compte Google et stockage des comptes (Firebase, serveurs situés en Europe), ainsi que les polices de caractères (Google Fonts).',
       '**everyayah.com** : diffusion des récitations du Coran ; votre navigateur s’y connecte quand vous écoutez un verset.'] },
     { p: 'Ces prestataires peuvent traiter des données hors de Côte d’Ivoire. La voix de lecture est celle de votre appareil : les textes lus ne nous sont pas envoyés.' },
     { h: '4. Durée de conservation' },
