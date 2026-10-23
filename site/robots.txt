@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://lisan-campus.netlify.app/sitemap.xml
