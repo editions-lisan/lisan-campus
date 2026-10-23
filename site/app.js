@@ -332,12 +332,12 @@ function viewSpace(sp) {
     else reg = `<div class="notice ok">Vous êtes inscrit à cet espace (n° <b>${esc(A.enrollment(sp.id).num)}</b>) : toutes les leçons sont ouvertes. <a href="#inscription-${sp.id}">Ma fiche d’inscription</a></div>`;
   }
   return `${crumbs([sp.title])}
-    <div class="subject-head c-${sp.color}"><span class="eyebrow">${esc(sp.eyebrow)}</span><h1>${sp.icon} ${esc(sp.title)}</h1>
+    <div class="duo"><aside class="duo-side"><div class="subject-head c-${sp.color}"><span class="eyebrow">${esc(sp.eyebrow)}</span><h1>${sp.icon} ${esc(sp.title)}</h1>
       ${sp.intro.map(t => `<p class="lead">${md(t)}</p>`).join('')}
       <div class="bar"><i style="width:${p.pct}%"></i></div><span class="meta">${p.d} / ${p.n} leçons terminées</span></div>
     ${reg}
-    ${certPanelSpace(sp)}
-    <section class="subjects">${ss.map(card).join('')}</section>`;
+    ${certPanelSpace(sp)}</aside>
+    <div class="duo-main"><section class="subjects">${ss.map(card).join('')}</section></div></div>`;
 }
 function findLesson(key) {
   const [sid, lid] = key.split('.');
@@ -348,13 +348,13 @@ function findLesson(key) {
 function viewSubject(s) {
   const p = subjectProgress(s), sp = space(spaceOf(s));
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title])}
-    <div class="subject-head c-${s.color}"><span class="eyebrow">${p.d} / ${p.n} leçons terminées</span><h1>${esc(s.title)}</h1><p class="lead">${esc(s.subtitle)}</p>
+    <div class="duo"><aside class="duo-side"><div class="subject-head c-${s.color}"><span class="eyebrow">${p.d} / ${p.n} leçons terminées</span><h1>${esc(s.title)}</h1><p class="lead">${esc(s.subtitle)}</p>
       <div class="bar"><i style="width:${p.pct}%"></i></div>
       <div class="actions"><a class="btn" href="#q-${s.id}">Quiz (${s.quiz.length} questions)</a><a class="btn ghost" href="#f-${s.id}">Cartes de révision (${s.cards.length})</a></div></div>
-    ${certPanelSubject(s)}
-    <div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok';
+    ${certPanelSubject(s)}</aside>
+    <div class="duo-main"><div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok';
       const cur = !d && state.last && state.last.route === 'l-' + s.id + '.' + l.id;
-      return `<a class="lesson-link${d ? ' done' : ''}${cur ? ' cur' : ''}" href="#l-${s.id}.${l.id}"><span class="num">${d ? '✓' : i + 1}</span><span class="t">${esc(l.title)}${l.ar ? ` <span class="ara" lang="ar">${esc(l.ar)}</span>` : ''}</span>${d ? '<small>Terminée</small>' : cur ? '<small class="now">En cours</small>' : (lock ? '<small class="lock">🔒</small>' : (i === 0 && AUTH() ? '<small>Aperçu libre</small>' : ''))}</a>`; }).join('')}</div>`;
+      return `<a class="lesson-link${d ? ' done' : ''}${cur ? ' cur' : ''}" href="#l-${s.id}.${l.id}"><span class="num">${d ? '✓' : i + 1}</span><span class="t">${esc(l.title)}${l.ar ? ` <span class="ara" lang="ar">${esc(l.ar)}</span>` : ''}</span>${d ? '<small>Terminée</small>' : cur ? '<small class="now">En cours</small>' : (lock ? '<small class="lock">🔒</small>' : (i === 0 && AUTH() ? '<small>Aperçu libre</small>' : ''))}</a>`; }).join('')}</div></div></div>`;
 }
 function viewGate(s, why, i) {
   const sp = space(spaceOf(s)), A = AUTH();
@@ -375,8 +375,14 @@ function viewLesson(found) {
   const prev = s.lessons[i - 1], next = s.lessons[i + 1], sp = space(spaceOf(s));
   const key = s.id + '/' + l.id, d = !!state.done[key];
   const text = [l.title, ...l.body.map(b => b.p || b.h || (b.ul || b.ol || []).join('. ') || b.box || b.quote || '')].filter(Boolean).map(plain).join('. ');
+  const P = subjectProgress(s);
+  const side = `<aside class="lside c-${s.color}" aria-label="Le parcours"><div class="ls-head"><span class="eyebrow">Le parcours</span><a href="#m-${s.id}"><b>${esc(s.title)}</b></a>
+      <div class="bar"><i style="width:${P.pct}%"></i></div><span class="meta">${P.d} / ${P.n} leçons terminées</span></div>
+    <nav class="ls-list">${s.lessons.map((x, j) => { const dn = !!state.done[s.id + '/' + x.id];
+      return `<a href="#l-${s.id}.${x.id}" class="${j === i ? 'on' : ''}${dn ? ' done' : ''}"${j === i ? ' aria-current="page"' : ''}><span>${dn ? '✓' : j + 1}</span>${esc(x.title)}</a>`; }).join('')}</nav>
+    <div class="ls-act"><a class="btn small" href="#q-${s.id}">Quiz</a><a class="btn ghost small" href="#f-${s.id}">Cartes</a></div></aside>`;
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [(i + 1) + ' / ' + s.lessons.length])}
-    <article class="lesson read c-${s.color}">
+    <div class="duo duo-r"><article class="lesson read c-${s.color}">
       <span class="eyebrow">${esc(s.title)} · ${i + 1} / ${s.lessons.length}</span>
       <h1>${esc(l.title)}</h1>${l.ar ? `<p class="ara title-ar" lang="ar" dir="rtl">${esc(l.ar)}</p>` : ''}
       ${noVoice}${s.lang === 'ar' && !s.noVoice ? noAr : ''}${s.noVoice ? noAudio : ''}
@@ -387,7 +393,7 @@ function viewLesson(found) {
         <button type="button" class="linkbtn sugg-link" data-suggest="${esc(s.title + ' · ' + l.title)}">💡 Suggérer une amélioration</button>
         <div class="actions">${prev ? `<a class="btn ghost small" href="#l-${s.id}.${prev.id}">← Précédente</a>` : ''}${next ? `<a class="btn small" href="#l-${s.id}.${next.id}">Suivante →</a>` : `<a class="btn small" href="#q-${s.id}">Faire le quiz →</a>`}</div>
       </div>
-    </article>`;
+    </article>${side}</div>`;
 }
 function shuffle(a) { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
 let quizRun = null;
@@ -396,14 +402,18 @@ function viewQuiz(s) {
   const best = state.quiz[s.id], sp = space(spaceOf(s));
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], ['Quiz'])}
     <div class="subject-head c-${s.color}"><h1>Quiz : ${esc(s.title)}</h1><p class="lead">Touchez une réponse : la correction s'affiche aussitôt.${best !== undefined ? ` Votre meilleur score : ${best} %.` : ''}</p></div>
-    <div class="quiz read c-${s.color}"><div class="qbar" aria-hidden="true"><i id="qbar"></i></div>${quizRun.qs.map((q, n) => `<div class="q" data-q="${n}"><b>${n + 1}. ${md(q.q)}</b>
+    <div class="duo duo-r"><div class="quiz read c-${s.color}"><div class="qbar" aria-hidden="true"><i id="qbar"></i></div>${quizRun.qs.map((q, n) => `<div class="q" data-q="${n}"><b>${n + 1}. ${md(q.q)}</b>
       <div class="opts">${q.order.map((k, j) => `<button type="button" class="opt" data-k="${k}"><span class="ol" aria-hidden="true">${'ABCDEF'[j]}</span><span class="ot${/^[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\s]+$/.test(q.a[k]) ? ' ara" lang="ar" dir="rtl' : ''}">${md(q.a[k])}</span></button>`).join('')}</div>
       <p class="expl" hidden>${md(q.e)}</p></div>`).join('')}
       <div class="qresult" id="qresult" hidden></div>
       <div class="score" id="score">0 / ${s.quiz.length}</div>
       <div class="actions" id="quiz-end" hidden><a class="btn" href="#q-${s.id}" data-reload="1">Recommencer</a><a class="btn ghost" href="#m-${s.id}">Retour au parcours</a></div>
       <div class="cert-panel ok" id="quiz-cert" hidden><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Parcours réussi !</b><small>Toutes les leçons sont terminées et le quiz est réussi : votre certificat vous attend.</small></div><a class="btn small" href="#m-${s.id}">Obtenir mon certificat</a></div>
-    </div>`;
+    </div>
+    <aside class="qside c-${s.color}" aria-label="Votre score"><span class="eyebrow">Votre score</span><span class="ring" id="qs-ring" style="--p:0">0 %</span>
+      <b id="qs-t">0 / ${s.quiz.length} questions</b><span class="meta" id="qs-m">Répondez aux questions : le score se met à jour.</span>
+      <div class="bar"><i id="qs-bar" style="width:0%"></i></div>${best !== undefined ? `<span class="meta">Meilleur score : ${best} %</span>` : ''}
+      <span class="meta">Seuil du certificat : 70 %</span><a class="btn ghost small" href="#m-${s.id}">Retour au parcours</a></aside></div>`;
 }
 let flashRun = null;
 function viewFlash(s) {
@@ -814,7 +824,7 @@ function revealAll() {
     { rootMargin: '0px 0px -6% 0px', threshold: .06 });
   const add = (el, i) => { el.classList.add('rv'); el.style.setProperty('--d', (Math.min(i, 7) * .09).toFixed(2) + 's'); revealIO.observe(el); };
   V.querySelectorAll(':scope > .sec-h, :scope > .mine').forEach(el => add(el, 0));
-  V.querySelectorAll(':scope > .kpis, :scope > .spaces, :scope > .steps, :scope > .books, :scope > .subjects, :scope > .lessons').forEach(g => { g.classList.add('rvg'); [...g.children].forEach(add); });
+  V.querySelectorAll('.kpis, .spaces, .steps, .books, .subjects, .lessons').forEach(g => { g.classList.add('rvg'); [...g.children].forEach(add); });
   if (document.body.classList.contains('veiled')) V.querySelectorAll('.home-hero ~ .kpis > *').forEach(el => el.style.setProperty('--d', (parseFloat(el.style.getPropertyValue('--d')) + 1.1).toFixed(2) + 's'));
   else V.querySelectorAll('.home-hero ~ .kpis > *').forEach(el => el.style.setProperty('--d', (parseFloat(el.style.getPropertyValue('--d')) + .9).toFixed(2) + 's'));
 }
@@ -888,6 +898,9 @@ document.addEventListener('click', e => {
     box.querySelector('.expl').hidden = false; box.classList.add('done-q'); quizRun.answered++; if (ok) quizRun.right++;
     const sc = document.getElementById('score'); sc.textContent = `${quizRun.right} / ${quizRun.qs.length}`;
     const qb = document.getElementById('qbar'); if (qb) qb.style.width = (quizRun.answered / quizRun.qs.length * 100) + '%';
+    const N = quizRun.qs.length, rp = Math.round(quizRun.right / N * 100), rg = document.getElementById('qs-ring');
+    if (rg) { rg.style.setProperty('--p', rp); rg.textContent = rp + ' %'; document.getElementById('qs-t').textContent = `${quizRun.answered} / ${N} questions`;
+      document.getElementById('qs-m').textContent = `${quizRun.right} bonne${quizRun.right > 1 ? 's' : ''} réponse${quizRun.right > 1 ? 's' : ''}`; document.getElementById('qs-bar').style.width = (quizRun.answered / N * 100) + '%'; }
     if (quizRun.answered === quizRun.qs.length) { const pct = Math.round(quizRun.right / quizRun.qs.length * 100);
       if (state.quiz[quizRun.s.id] === undefined || pct > state.quiz[quizRun.s.id]) { state.quiz[quizRun.s.id] = pct; save('quiz'); }
       sc.textContent = `Score final : ${quizRun.right} / ${quizRun.qs.length} (${pct} %)`; document.getElementById('quiz-end').hidden = false;
