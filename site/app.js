@@ -23,7 +23,7 @@ const cardLang = s => s.lang === 'ar' ? 'ar' : (s.id === 'en' ? 'en' : 'fr');
 
 // ---------- les espaces
 const SPACES = [
-  { id: 'droit', title: 'Droit · Licence 1', eyebrow: 'Université Musulmane Africaine', icon: '⚖️', color: 'a',
+  { id: 'droit', title: 'Droit · Licence 1', eyebrow: 'Première année de droit', icon: '⚖️', color: 'a',
     lead: 'Les matières de la Licence 1 Droit, enrichies au fil des cours : leçons, quiz et cartes de révision.',
     intro: ['Huit matières de la première année de droit, rédigées à partir des cours et des textes officiels : introduction au droit, droit civil, droit musulman, organisation judiciaire, méthodologie, expression écrite, anglais et informatique.',
       'Chaque leçon s’écoute à voix haute. Le quiz et les cartes de révision de chaque matière servent à vérifier ce que vous avez retenu. Vérifiez toujours avec le cours de vos enseignants.'] },
@@ -500,14 +500,14 @@ const PAGES = {
   apropos: { title: 'À propos', body: [
     { p: '**Lisân Campus** est le site d’apprentissage des **Éditions Lisân**, maison d’édition fondée à Abidjan par **Mouhamadou CISSEMA**, enseignant et auteur de méthodes. Sa devise : « la langue qui ouvre les portes ».' },
     { h: 'Quatre espaces' },
-    { ul: ['**Droit · Licence 1** : les matières de la première année de droit, pour les étudiants de l’Université Musulmane Africaine et tous les étudiants en droit.',
+    { ul: ['**Droit · Licence 1** : les matières de la première année de droit, pour tous les étudiants en droit.',
       '**Formation à l’IA avec Claude** : comprendre l’intelligence artificielle et s’en servir avec méthode et prudence.',
       '**Apprendre l’arabe** : les compagnons des livres « Je lis l’arabe ! » (niveau 0) et « Je parle arabe ! » (niveaux 1 à 3).',
       '**Lire le Coran pas à pas** : le compagnon du livre, avec la récitation lente d’al-Ḥouṣarî.'] },
     { h: 'Comment utiliser le Campus' },
     { ol: ['Choisissez un espace sur la page d’accueil, puis un parcours.', 'Lisez ou écoutez chaque leçon, puis marquez-la comme terminée.', 'Vérifiez vos acquis avec le quiz, et révisez avec les cartes.',
       'Installez l’application depuis les **Paramètres** pour l’utiliser hors connexion.'] },
-    { box: 'Lisân Campus est une initiative indépendante : ce n’est pas un site officiel de l’Université Musulmane Africaine. Les contenus de droit résument les cours et des textes publics ; vérifiez toujours avec vos enseignants.', title: 'À savoir', kind: 'marge' },
+    { box: 'Les contenus de droit résument des cours et des textes publics : vérifiez toujours avec vos enseignants.', title: 'À savoir', kind: 'marge' },
   ] },
   confidentialite: { title: 'Politique de confidentialité', body: [
     { p: '*Dernière mise à jour : 23 octobre 2026.*' },

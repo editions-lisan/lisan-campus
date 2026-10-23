@@ -136,7 +136,7 @@ const M_IA = {
       { ol: [
         "Crée un projet « L1 Droit ».",
         "Ajoute-y le **plan de chaque cours** et tes **fiches**.",
-        "Écris les instructions du projet : « Je suis étudiant en L1 Droit à l'UMA. Réponds en droit ivoirien, cite les articles, signale tes incertitudes. »",
+        "Écris les instructions du projet : « Je suis étudiant en L1 Droit. Réponds en droit ivoirien, cite les articles, signale tes incertitudes. »",
         "Chaque nouvelle conversation du projet connaît alors ton contexte.",
       ] },
       { h: "La méthode active" },

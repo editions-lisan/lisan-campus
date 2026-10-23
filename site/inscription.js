@@ -28,7 +28,7 @@ const QUESTIONS = {
     { k: 'livre', t: 'radio', l: 'Avez-vous le livre « Lire le Coran pas à pas » ?', req: 1, o: ['Oui', 'Pas encore'] },
   ],
   droit: [
-    { k: 'etab', t: 'text', l: 'Établissement', req: 1, def: 'Université Musulmane Africaine' },
+    { k: 'etab', t: 'text', l: 'Établissement', req: 1 },
     { k: 'niveau', t: 'select', l: 'Niveau d’études', req: 1, o: ['Licence 1', 'Licence 2', 'Licence 3', 'Master', 'Pas encore inscrit(e)', 'Autre'] },
     { k: 'annee', t: 'select', l: 'Année universitaire', req: 1, o: ['2026-2027', '2025-2026', 'Autre'] },
     { k: 'matricule', t: 'text', l: 'Numéro matricule', hint: 'Facultatif' },
