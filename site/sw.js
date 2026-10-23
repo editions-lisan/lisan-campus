@@ -1,7 +1,7 @@
 // Lisân Campus : lecture hors connexion.
 // Changez VERSION à chaque mise à jour du site pour renouveler le cache.
-const VERSION = 'lisan-campus-2026-10-23f';
-const CORE = ['./', 'index.html', 'styles.css', 'app.js', 'config.js', 'auth.js', 'inscription.js', 'logo.png',
+const VERSION = 'lisan-campus-2026-10-23h';
+const CORE = ['./', 'index.html', 'styles.css', 'app.js', 'config.js', 'auth.js', 'inscription.js', 'admin.js', 'logo.png',
   'data/droit.js', 'data/ia.js', 'data/arabe.js', 'data/coran.js', 'fonts/LisanNaskh-R.woff2', 'fonts/LisanNaskh-B.woff2',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-192.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'favicon-32.png'];
 
@@ -15,6 +15,8 @@ self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
+  // Vidéos : laissées au navigateur (lecture par morceaux), jamais mises en cache.
+  if (/\.(mp4|webm)$/.test(url.pathname)) return;
   // Pages : le réseau d'abord (pour recevoir les mises à jour), le cache si l'on est hors connexion.
   if (req.mode === 'navigate') {
     e.respondWith(fetch(req).then(r => { const copy = r.clone(); caches.open(VERSION).then(c => c.put('index.html', copy)); return r; })

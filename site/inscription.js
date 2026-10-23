@@ -83,7 +83,7 @@ function infoFieldsets(i, opts = {}) {
       ${fieldCheck('tAccord', 'Mon parent ou tuteur est d’accord avec cette inscription.', !!t.accord, true)}
     </fieldset>
     <fieldset class="group"><legend>Coordonnées</legend>
-      ${fieldText('email', 'Adresse e-mail (compte Google)', u ? u.email : '', { ro: 1 })}
+      ${fieldText('email', 'Adresse e-mail (compte Google)', u ? u.email : '', { ro: 1, hint: 'C’est l’adresse de votre compte Google : elle identifie votre compte et ne peut pas être modifiée ici. Pour en utiliser une autre, déconnectez-vous et reconnectez-vous avec un autre compte Google.' })}
       <div class="fld tel-row" data-f="tel"><span class="lbl">Téléphone (WhatsApp de préférence)${reqMark(1)}</span>
         <div class="tel-in"><select name="ind" aria-label="Indicatif">${[...new Set(PAYS.map(p => p[1]).filter(Boolean))].map(c => `<option${c === i.ind ? ' selected' : ''}>${c}</option>`).join('')}</select>
         <input name="tel" type="tel" inputmode="tel" autocomplete="tel-national" value="${esc(i.tel || '')}" required aria-label="Numéro de téléphone" placeholder="07 00 00 00 00"></div><small class="err" hidden></small></div>

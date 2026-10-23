@@ -24,7 +24,11 @@ Les espaces de droit sont une initiative indépendante ; Lisân Campus n'est pas
 | `site/styles.css` | La mise en page |
 | `site/data/*.js` | Les contenus des quatre espaces |
 | `site/fonts/` | La police arabe Lisan Naskh (voyelles en couleur) |
+| `site/inscription.js` | La fiche d'inscription de chaque espace et « Mon compte » |
+| `site/admin.js`, `site/vendor/` | La page d'administration des inscrits et l'export Excel |
+| `site/media/` | La vidéo de présentation de l'accueil |
 | `site/auth.js`, `site/config.js` | Connexion Google et inscription par espace |
+| `outils/video/` | La source de la vidéo de présentation |
 | `site/manifest.webmanifest`, `site/sw.js` | Application installable et lecture hors connexion |
 | `site/logo.png`, `site/icon-*.png`, `site/apple-touch-icon.png`, `site/favicon-32.png` | Logo et icônes Lisân |
 | `site/robots.txt`, `site/sitemap.xml` | Moteurs de recherche |

@@ -45,6 +45,17 @@
       return within(doc().update({ ['spaces.' + id]: fb.firestore.FieldValue.delete() }))
         .then(() => { if (profile && profile.spaces) delete profile.spaces[id]; cache.set('profile', profile); });
     },
+    async adminList() {                                  // administration : toutes les fiches (règle Firestore réservée à l'administrateur)
+      if (!user) throw Object.assign(new Error('non connecté'), { code: 'unauthenticated' });
+      const snap = await fb.firestore().collection('users').get({ source: 'server' });
+      return snap.docs.map(d => { const x = d.data() || {}, sp = {};
+        Object.entries(x.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date), reponses: v.reponses || {} }; });
+        const info = x.profile ? Object.assign({}, x.profile) : null; if (info) delete info.updatedAt;
+        return { uid: d.id, name: x.name || '', email: x.email || '', createdAt: iso(x.createdAt), lastLogin: iso(x.lastLogin), info, spaces: sp,
+          done: Object.keys((x.progress && x.progress.done) || {}).length };
+      });
+    },
+    uid: () => user && user.uid,
     async deleteAccount() {                              // efface la fiche, les inscriptions et la progression, puis le compte
       if (!user) return;
       await within(doc().delete());

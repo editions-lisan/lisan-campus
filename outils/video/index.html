@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Lisân Campus · vidéo</title>
+<link rel="stylesheet" href="../fonts/fontsource-literata-5.1.0/package/800.css">
+<link rel="stylesheet" href="../fonts/fontsource-literata-5.1.0/package/600.css">
+<link rel="stylesheet" href="../fonts/fontsource-atkinson-hyperlegible-5.1.0/package/400.css">
+<link rel="stylesheet" href="../fonts/fontsource-atkinson-hyperlegible-5.1.0/package/700.css">
+<link rel="stylesheet" href="../fonts/fontsource-atkinson-hyperlegible-5.1.0/package/400-italic.css">
+<style>
+@font-face { font-family: "Lisan Naskh"; src: url(../../site/fonts/LisanNaskh-R.woff2) format("woff2"); font-weight: 400; }
+@font-face { font-family: "Lisan Naskh"; src: url(../../site/fonts/LisanNaskh-B.woff2) format("woff2"); font-weight: 700; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #000; }
+#stage { position: relative; width: 1280px; height: 720px; overflow: hidden; font-family: "Atkinson Hyperlegible", sans-serif; color: #fff; background: #16204a; }
+.abs { position: absolute; will-change: transform, opacity; }
+.bg-navy { inset: 0; background: radial-gradient(1200px 700px at 30% 20%, #2a3a7a 0%, #1e2a5a 45%, #131b3f 100%); }
+.bg-light { inset: 0; background: linear-gradient(160deg, #f6f7fb 0%, #eef1f4 55%, #e4e9f2 100%); opacity: 0; }
+#pattern { inset: -200px; opacity: .10; }
+.eyebrow { font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #f0b24a; font-size: 22px; }
+h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-height: 1.08; }
+/* scène 1 */
+#logo { left: 50%; top: 112px; width: 150px; height: 150px; margin-left: -75px; filter: drop-shadow(0 18px 30px rgba(0,0,0,.35)); }
+#s1-eyebrow { left: 0; right: 0; top: 290px; text-align: center; }
+#s1-title { left: 0; right: 0; top: 328px; text-align: center; font-size: 96px; }
+#s1-title span { color: #9fbaf5; }
+#s1-ar { left: 0; right: 0; top: 446px; line-height: 1.5; text-align: center; font-family: "Lisan Naskh"; font-size: 54px; direction: rtl; color: #fff; }
+#s1-slogan { left: 0; right: 0; top: 560px; text-align: center; font-size: 30px; font-style: italic; color: #d9e2f7; }
+/* scène 2 */
+#s2-title { left: 80px; right: 80px; top: 58px; text-align: center; font-size: 54px; }
+#s2-sub { left: 80px; right: 80px; top: 132px; text-align: center; font-size: 28px; color: #d9e2f7; }
+.cover { width: 200px; height: 283px; top: 232px; border-radius: 8px; box-shadow: 0 22px 40px rgba(0,0,0,.45); background-size: cover; }
+.chips { left: 0; right: 0; top: 600px; display: flex; justify-content: center; gap: 16px; }
+.chip { position: relative; height: 52px; padding: 0 22px; border-radius: 999px; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.28); display: flex; align-items: center; gap: 10px; font-size: 24px; font-weight: 700; white-space: nowrap; }
+.chip i { display: inline-block; width: 12px; height: 12px; border-radius: 50%; }
+.wave { display: inline-flex; gap: 4px; align-items: center; height: 26px; }
+.wave b { display: block; width: 5px; border-radius: 3px; background: #6fd6b1; }
+/* scène 3 */
+#s3-title { left: 0; right: 0; top: 70px; text-align: center; font-size: 58px; color: #141c2e; }
+#s3-sub { left: 0; right: 0; top: 150px; text-align: center; font-size: 28px; color: #586174; }
+.card { top: 236px; width: 272px; height: 330px; background: #fff; border-radius: 22px; border-top: 10px solid var(--c); box-shadow: 0 18px 40px rgba(20,28,46,.12); padding: 26px 22px; color: #141c2e; display: flex; flex-direction: column; gap: 14px; }
+.card .ic { width: 86px; height: 86px; border-radius: 50%; background: color-mix(in srgb, var(--c) 14%, #fff); display: grid; place-items: center; }
+.card .ic svg { width: 52px; height: 52px; stroke: var(--c); fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
+.card h3 { font-family: "Literata", serif; font-weight: 800; font-size: 29px; line-height: 1.12; margin: 0; color: var(--c); }
+.card p { margin: 0; font-size: 22px; line-height: 1.35; color: #3b4558; }
+/* scène 4 */
+#s4-title { left: 84px; top: 96px; width: 740px; font-size: 58px; color: #141c2e; }
+#s4-title span { color: #23468f; }
+.feat { left: 88px; width: 620px; display: flex; align-items: center; gap: 18px; font-size: 31px; font-weight: 700; color: #141c2e; }
+.feat svg { width: 44px; height: 44px; flex: none; }
+#cta { left: 88px; top: 588px; height: 68px; padding: 0 30px; border-radius: 999px; background: #1e2a5a; color: #fff; display: flex; align-items: center; gap: 14px; font-size: 28px; font-weight: 700; box-shadow: 0 14px 30px rgba(30,42,90,.3); }
+#cta b { color: #f0b24a; }
+#phone { left: 846px; top: 44px; width: 318px; height: 640px; border-radius: 46px; background: #0d1226; padding: 14px; box-shadow: 0 30px 60px rgba(20,28,46,.35); }
+#screen { position: relative; width: 290px; height: 612px; border-radius: 34px; overflow: hidden; background: #eef1f4; }
+#screen img { position: absolute; left: 0; top: 0; width: 290px; }
+#notch { position: absolute; left: 50%; top: 22px; width: 92px; height: 22px; margin-left: -46px; background: #0d1226; border-radius: 12px; z-index: 3; }
+#fade { inset: 0; background: #16204a; opacity: 0; }
+</style></head><body>
+<div id="stage">
+  <div class="abs bg-navy"></div>
+  <svg id="pattern" class="abs" width="1680" height="1120" aria-hidden="true"><defs><pattern id="st" width="120" height="120" patternUnits="userSpaceOnUse">
+    <g fill="none" stroke="#f0b24a" stroke-width="1.6" transform="translate(60 60)"><rect x="-30" y="-30" width="60" height="60"/><rect x="-30" y="-30" width="60" height="60" transform="rotate(45)"/><circle r="12"/></g>
+    <path d="M0 60H30M90 60H120M60 0V30M60 90V120" stroke="#f0b24a" stroke-width="1.2"/></pattern></defs><rect width="100%" height="100%" fill="url(#st)"/></svg>
+  <div class="abs bg-light" id="light"></div>
+
+  <!-- scène 1 : la marque -->
+  <img id="logo" class="abs" src="img/logo.png" alt="">
+  <div id="s1-eyebrow" class="abs eyebrow">Éditions Lisân</div>
+  <h1 id="s1-title" class="abs">Lisân <span>Campus</span></h1>
+  <div id="s1-ar" class="abs">لِسَانٌ عَرَبِيٌّ مُبِينٌ</div>
+  <div id="s1-slogan" class="abs">La langue qui ouvre les portes</div>
+
+  <!-- scène 2 : les livres -->
+  <h2 id="s2-title" class="abs">Apprendre l’arabe, lire le Coran</h2>
+  <div id="s2-sub" class="abs">avec les compagnons des livres des Éditions Lisân</div>
+  <div class="abs cover" id="c0" style="background-image:url(img/c0.jpg)"></div>
+  <div class="abs cover" id="c1" style="background-image:url(img/c1.jpg)"></div>
+  <div class="abs cover" id="c2" style="background-image:url(img/c2.jpg)"></div>
+  <div class="abs cover" id="c3" style="background-image:url(img/c3.jpg)"></div>
+  <div class="abs cover" id="c4" style="background-image:url(img/c4.jpg)"></div>
+  <div class="abs chips"><div class="chip" id="ch0"><i style="background:#f0b24a"></i>Du niveau 0 au niveau 3</div>
+  <div class="chip" id="ch1"><i style="background:#ef6b5b"></i>Voyelles en couleur</div>
+  <div class="chip" id="ch2"><span class="wave" id="wave"><b></b><b></b><b></b><b></b><b></b><b></b></span>Récitation d’al-Ḥouṣarî</div></div>
+
+  <!-- scène 3 : les espaces -->
+  <h2 id="s3-title" class="abs">Quatre espaces pour apprendre</h2>
+  <div id="s3-sub" class="abs">Une première leçon offerte dans chaque parcours</div>
+  <div class="abs card" id="k0" style="--c:#2b3f8f"><div class="ic"><svg viewBox="0 0 52 52"><path d="M8 10h36a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4H24l-10 8v-8H8a4 4 0 0 1-4-4V14a4 4 0 0 1 4-4z"/><path d="M17 23h18M17 29h11"/></svg></div>
+    <h3>Apprendre l’arabe</h3><p>Lire, écrire et parler, du niveau 0 au niveau 3</p></div>
+  <div class="abs card" id="k1" style="--c:#0e6b4f"><div class="ic"><svg viewBox="0 0 52 52"><path d="M26 14c-5-4-12-5-20-4v28c8-1 15 0 20 4 5-4 12-5 20-4V10c-8-1-15 0-20 4z"/><path d="M26 14v28"/></svg></div>
+    <h3>Lire le Coran pas à pas</h3><p>Lettres, signes de lecture, mots et versets</p></div>
+  <div class="abs card" id="k2" style="--c:#23468f"><div class="ic"><svg viewBox="0 0 52 52"><path d="M26 8v36M14 44h24M10 14h32"/><path d="M10 14l-6 14a7 7 0 0 0 12 0zM42 14l-6 14a7 7 0 0 0 12 0z"/></svg></div>
+    <h3>Droit · Licence&nbsp;1</h3><p>Huit matières de la première année de droit</p></div>
+  <div class="abs card" id="k3" style="--c:#5a3fc0"><div class="ic"><svg viewBox="0 0 52 52"><path d="M26 6c1.5 9 5 12.5 14 14-9 1.5-12.5 5-14 14-1.5-9-5-12.5-14-14 9-1.5 12.5-5 14-14z"/><path d="M40 32c.7 4 2.4 5.6 6 6-3.6.7-5.3 2.4-6 6-.7-3.6-2.4-5.3-6-6 3.6-.4 5.3-2 6-6z"/></svg></div>
+    <h3>Formation à l’IA avec Claude</h3><p>Comprendre l’IA et bien s’en servir</p></div>
+
+  <!-- scène 4 : le téléphone -->
+  <h2 id="s4-title" class="abs">Tout le Campus <span>dans votre téléphone</span></h2>
+  <div class="abs feat" id="f0" style="top:272px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Des leçons courtes, à écouter</div>
+  <div class="abs feat" id="f1" style="top:338px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Des quiz corrigés aussitôt</div>
+  <div class="abs feat" id="f2" style="top:404px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Des cartes pour réviser</div>
+  <div class="abs feat" id="f3" style="top:470px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Même hors connexion</div>
+  <div class="abs" id="cta">Gratuit · <b>lisan-campus.netlify.app</b></div>
+  <div class="abs" id="phone"><div id="screen"><div id="notch"></div>
+    <img id="sc0" src="img/s_lesson.png" alt=""><img id="sc1" src="img/s_quiz.png" alt=""><img id="sc2" src="img/s_coran.png" alt=""></div></div>
+
+  <div class="abs" id="fade"></div>
+</div>
+<script>
+const T = 16;
+const $ = id => document.getElementById(id);
+const clamp = x => Math.max(0, Math.min(1, x));
+const ease = x => 1 - Math.pow(1 - x, 3);                 // sortie douce
+const easeIO = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const back = x => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const prog = (t, a, d) => clamp((t - a) / d);
+// élément : apparition [a, a+d], disparition [o, o+od], décalages dx/dy, échelle de départ, rotation finale
+function anim(id, t, a, d, o, od, opt = {}) {
+  const el = $(id), pi = (opt.back ? back : ease)(prog(t, a, d)), po = easeIO(prog(t, o, od));
+  const dx = (opt.dx || 0) * (1 - pi) + (opt.ox || 0) * po, dy = (opt.dy === undefined ? 30 : opt.dy) * (1 - pi) + (opt.oy || 0) * po;
+  const sc = (opt.s === undefined ? 1 : opt.s + (1 - opt.s) * pi) * (1 + (opt.os || 0) * po);
+  el.style.opacity = Math.min(1, prog(t, a, d) * 1.6) * (1 - po);
+  el.style.transform = `translate(${dx}px, ${dy}px) scale(${sc}) rotate(${(opt.r || 0) * (opt.rIn ? pi : 1)}deg)`;
+}
+function render(t) {
+  // fonds
+  $('pattern').style.transform = `translate(${-t * 9}px, ${-t * 5}px) rotate(${t * .4}deg)`;
+  $('light').style.opacity = easeIO(prog(t, 6.9, .6)) * (1 - easeIO(prog(t, 15.35, .5)));
+  $('fade').style.opacity = easeIO(prog(t, 15.35, .6));
+  // scène 1
+  anim('logo', t, .15, .8, 3.0, .45, { dy: 0, s: .55, back: true, oy: -40 });
+  anim('s1-eyebrow', t, .75, .6, 3.0, .45, { oy: -40 });
+  anim('s1-title', t, .95, .7, 3.05, .45, { oy: -40 });
+  anim('s1-ar', t, 1.35, .7, 3.1, .45, { oy: -40 });
+  anim('s1-slogan', t, 1.7, .7, 3.15, .45, { oy: -40 });
+  // scène 2
+  anim('s2-title', t, 3.45, .6, 6.7, .4, { oy: -30 });
+  anim('s2-sub', t, 3.7, .6, 6.75, .4, { oy: -30 });
+  const X = [150, 345, 540, 735, 930], R = [-10, -5, 0, 5, 10], Y = [26, 8, 0, 8, 26];
+  X.forEach((x, k) => { const el = $('c' + k); el.style.left = x + 'px'; el.style.top = (232 + Y[k]) + 'px';
+    anim('c' + k, t, 3.6 + k * .13, .75, 6.6 + k * .04, .45, { dy: 420, r: R[k], back: true, oy: 340 }); });
+  [['ch0'], ['ch1'], ['ch2']].forEach(([id], k) => { anim(id, t, 4.75 + k * .22, .5, 6.65, .4, { dy: 24, oy: 40 }); });
+  [...$('wave').children].forEach((b, k) => { b.style.height = (8 + 16 * Math.abs(Math.sin(t * 6 + k * .9))) + 'px'; });
+  // scène 3
+  anim('s3-title', t, 7.25, .6, 10.15, .45, { oy: -30 });
+  anim('s3-sub', t, 7.5, .6, 10.2, .45, { oy: -30 });
+  [70, 362, 654, 946].forEach((x, k) => { $('k' + k).style.left = x + 'px';
+    anim('k' + k, t, 7.7 + k * .16, .7, 10.1 + k * .05, .45, { dy: 70, back: true, oy: 40, os: -.04 });
+    if (t > 8.6 && t < 10.1) $('k' + k).style.transform += ` translateY(${Math.sin((t - 8.6) * 2.2 + k) * 4}px)`; });
+  // scène 4
+  anim('s4-title', t, 10.55, .65, 15.2, .4);
+  ['f0', 'f1', 'f2', 'f3'].forEach((id, k) => anim(id, t, 11.3 + k * .38, .5, 15.2, .4, { dx: -30, dy: 0 }));
+  anim('cta', t, 13.15, .6, 15.2, .4, { dy: 20, s: .9, back: true });
+  anim('phone', t, 10.45, .9, 15.25, .4, { dx: 380, dy: 0, r: 0 });
+  const scr = [[10.9, 12.85, 470], [12.85, 14.3, 260], [14.3, 15.6, 420]];
+  scr.forEach(([a, b, dist], k) => { const el = $('sc' + k);
+    const vis = k === 0 ? 1 - prog(t, b - .3, .3) : prog(t, a - .3, .3) * (k === 2 ? 1 : 1 - prog(t, b - .3, .3));
+    el.style.opacity = vis; el.style.transform = `translateY(${-dist * easeIO(prog(t, a + .4, b - a - .5))}px)`; });
+}
+window.render = render; window.T = T;
+render(+(location.hash.slice(1) || 2.6));
+</script>
+</body></html>

@@ -254,7 +254,7 @@ function viewHome() {
   const last = lastLesson();
   const totalL = SUBJECTS.reduce((a, s) => a + s.lessons.length, 0);
   const doneL = SUBJECTS.reduce((a, s) => a + subjectProgress(s).d, 0);
-  return `<section class="hero">
+  return `${heroVideo()}<section class="hero">
       <span class="eyebrow">Éditions Lisân · la langue qui ouvre les portes</span>
       <h1>Apprendre, réviser et <em>se former</em>, à son rythme</h1>
       <p class="lead">L’arabe du niveau 0 au niveau 3, la lecture du Coran, la Licence 1 Droit et une formation à l’intelligence artificielle : des leçons courtes, la voix pour écouter, des quiz corrigés et des cartes de révision, sur téléphone et même hors connexion.</p>
@@ -267,6 +267,28 @@ function viewHome() {
         <span class="eyebrow">${esc(sp.eyebrow)}</span><h2>${esc(sp.title)}</h2><p>${esc(sp.lead)}</p>
         <div class="bar"><i style="width:${p.pct}%"></i></div><span class="meta">${p.count} ${p.count > 1 ? 'parcours' : 'parcours'} · ${p.d} / ${p.n} leçons ${ins}</span></a>`; }).join('')}
     </section>`;
+}
+// ---------- vidéo de présentation (accueil) : lecture automatique sans le son, sauf économie de données ou animations réduites
+const HV_ICON = { pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>', play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>' };
+function heroAuto() {
+  const c = navigator.connection; let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+  return !reduce && !(c && c.saveData);
+}
+function heroVideo() {
+  const auto = heroAuto();
+  return `<section class="hero-video" aria-label="Présentation de Lisân Campus en vidéo"><div class="hv-frame">
+    <video id="hv" ${auto ? 'autoplay preload="auto"' : 'preload="none"'} muted loop playsinline poster="media/poster.webp" disablepictureinpicture
+      aria-label="Lisân Campus en 16 secondes : les livres des Éditions Lisân, les quatre espaces et le Campus sur téléphone">
+      <source src="media/campus-720.mp4" type="video/mp4" media="(min-width: 700px)"><source src="media/campus-720.webm" type="video/webm" media="(min-width: 700px)">
+      <source src="media/campus-480.mp4" type="video/mp4"><source src="media/campus-480.webm" type="video/webm"></video>
+    <button type="button" class="hv-btn" id="hv-btn" aria-label="${auto ? 'Mettre la vidéo en pause' : 'Lire la vidéo'}">${auto ? HV_ICON.pause : HV_ICON.play}</button></div></section>`;
+}
+function bindHeroVideo() {
+  const v = document.getElementById('hv'), b = document.getElementById('hv-btn'); if (!v || !b) return;
+  const sync = () => { const on = !v.paused; b.innerHTML = on ? HV_ICON.pause : HV_ICON.play; b.setAttribute('aria-label', on ? 'Mettre la vidéo en pause' : 'Lire la vidéo'); };
+  v.addEventListener('play', sync); v.addEventListener('pause', sync);
+  b.onclick = () => { if (v.paused) v.play().catch(() => {}); else v.pause(); };
+  if (v.autoplay) v.play().catch(sync);
 }
 function viewSpace(sp) {
   const ss = SUBJECTS.filter(s => spaceOf(s) === sp.id), p = spaceProgress(sp), A = AUTH();
@@ -485,6 +507,7 @@ const PAGES = {
     { ul: ['**Votre progression** (leçons terminées, scores, cartes sues) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Ils ne nous sont pas transmis.',
       '**Si vous vous connectez avec Google** : le nom, l’adresse e-mail et la photo de votre compte Google.',
       '**Si vous vous inscrivez à un espace** : votre fiche d’inscription (civilité, nom, prénoms, date de naissance, téléphone, pays et ville de résidence, profil, manière dont vous avez connu le site et, pour les moins de 18 ans, le nom et le téléphone d’un parent ou tuteur), vos réponses aux questions de l’espace, vos inscriptions et votre progression.',
+      '**Qui y a accès** : seuls les Éditions Lisân, administrateur du site, consultent les fiches d’inscription, pour gérer les inscriptions et contacter les élèves au sujet de leurs cours.',
       '**Si vous nous écrivez** par le formulaire de contact : votre nom, votre adresse e-mail et votre message, uniquement pour vous répondre.'] },
     { p: 'Ces données servent à **gérer vos inscriptions**, à **adapter les cours** à nos élèves et à **vous contacter au sujet de vos cours**. Vous ne recevez nos nouveautés que si vous l’avez demandé dans votre fiche. Vos données ne sont **ni vendues, ni cédées**.' },
     { p: 'Lisân Campus n’utilise **ni publicité, ni cookies de suivi, ni outil de mesure d’audience**.' },
@@ -523,7 +546,8 @@ const PAGES = {
     { h: 'Crédits' },
     { ul: ['Polices : Literata, Atkinson Hyperlegible et Noto Sans (licence SIL Open Font) ; **Lisan Naskh**, dérivée de Noto Naskh Arabic, avec le code couleur des voyelles des Éditions Lisân (licence SIL Open Font).',
       'Récitations du Coran : cheikh Maḥmoûd Khalîl al-Ḥouṣarî, lecture d’enseignement (al-mou‘allim), diffusées par everyayah.com.',
-      'Voix de lecture : la synthèse vocale de votre appareil.'] },
+      'Voix de lecture : la synthèse vocale de votre appareil.',
+      'Export des listes au format Excel : SheetJS (licence Apache 2.0).'] },
     { p: '© Mouhamadou CISSEMA — Éditions Lisân. Tous droits réservés.' },
   ] },
 };
@@ -565,9 +589,10 @@ function route() {
   else if (h === 'compte') html = viewAccount();
   else if (h.startsWith('inscription-') && space(h.slice(12)) && AUTH()) { html = viewEnroll(space(h.slice(12))); after = bindEnroll; }
   else if (h === 'profil' && AUTH() && AUTH().user()) { html = viewProfil(); after = bindProfil; }
+  else if (h === 'admin' && AUTH()) { html = viewAdmin(); after = bindAdmin; }
   else if (h === 'contact') { html = viewContact(); after = bindContact; }
   else if (PAGES[h]) html = viewPage(h);
-  else html = viewHome();
+  else { html = viewHome(); after = bindHeroVideo; }
   V.innerHTML = html;
   if (after) after();
   checkArVoice();
@@ -684,6 +709,7 @@ function renderDrawer() {
       <div class="dr-sec">Outils</div>
       ${item('glossaire', '🔎', 'Glossaire')}
       ${A ? item('compte', '👤', 'Mon compte') : ''}
+      ${A && u && isAdminCached() ? item('admin', '📋', 'Administration') : ''}
       ${item('parametres', '⚙️', 'Paramètres')}
       <div class="dr-sec">Informations</div>
       ${item('apropos', 'ℹ️', 'À propos')}
