@@ -933,8 +933,11 @@ const veil = document.getElementById('veil');
 function liftVeil() { if (!veil || veil.classList.contains('out')) return; veil.classList.add('out'); document.body.classList.remove('veiled'); setTimeout(() => veil.remove(), 1000); }
 if (veil) {
   let seen = false; try { seen = sessionStorage.getItem('lc-intro') === '1'; sessionStorage.setItem('lc-intro', '1'); } catch (e) {}
+  // rechargement : pas d'écran d'ouverture complet, la page revient tout de suite
+  try { const n = performance.getEntriesByType('navigation')[0]; if (n && n.type === 'reload') seen = true; } catch (e) {}
   if (!MOTION) veil.remove();
   else if (!seen) document.body.classList.add('veiled');
+  else { veil.style.transition = 'opacity .25s ease, visibility .25s ease'; const vi = veil.querySelector('.vl-in'); if (vi) vi.style.animation = 'none'; }
   // le voile se lève quand la page est prête (et les polices chargées), jamais sur une page vide
   const fontsOk = document.fonts && document.fonts.ready ? document.fonts.ready.catch(() => {}) : Promise.resolve();
   const pageOk = new Promise(res => { if (document.body.classList.contains('ready')) res(); else window.addEventListener('lc-ready', res, { once: true }); });

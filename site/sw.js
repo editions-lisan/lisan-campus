@@ -1,6 +1,6 @@
 // Lisân Campus : lecture hors connexion.
 // Changez VERSION à chaque mise à jour du site pour renouveler le cache.
-const VERSION = 'lisan-campus-2026-10-24j';
+const VERSION = 'lisan-campus-2026-10-24k';
 const CORE = ['./', 'styles.css', 'app.js', 'config.js', 'auth.js', 'inscription.js', 'admin.js', 'certificats.js', 'boot.js', 'emoji.js', 'vendor/qrcode.min.js', 'logo.png',
   'data/droit.js', 'data/ia.js', 'data/arabe.js', 'data/coran.js', 'data/islam.js', 'fonts/LisanNaskh-R.woff2', 'fonts/LisanNaskh-B.woff2',
   'fonts/literata-600.woff2', 'fonts/literata-800.woff2', 'fonts/literata-600-ext.woff2', 'fonts/literata-800-ext.woff2', 'fonts/atkinson-400.woff2', 'fonts/atkinson-700.woff2', 'fonts/atkinson-400i.woff2',
