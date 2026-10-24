@@ -156,6 +156,12 @@ const subjectPassed = s => firstUndone(s) === -1 && (state.quiz[s.id] || 0) >= P
 function prevSubject(s) { const ss = spaceSubjects(s), k = ss.indexOf(s); return k > 0 ? ss[k - 1] : null; }
 function blockingSubject(s) { const ss = spaceSubjects(s); for (const x of ss) { if (x === s) return null; if (!subjectPassed(x)) return x; } return null; }
 const subjectOpen = s => !blockingSubject(s);
+// prochaine étape d'un espace : première leçon non terminée du premier parcours non réussi, sinon son quiz
+function nextStep(spId) {
+  const x = SUBJECTS.filter(s => spaceOf(s) === spId).find(s => !subjectPassed(s)); if (!x) return null;
+  const f = firstUndone(x);
+  return f === -1 ? { s: x, href: '#q-' + x.id, label: `Quiz : ${x.title}` } : { s: x, href: `#l-${x.id}.${x.lessons[f].id}`, label: `${x.title} — ${/^\d/.test(x.lessons[f].title) ? '' : `leçon ${f + 1} : `}${x.lessons[f].title}` };
+}
 function access(s, lessonIndex) {
   const A = AUTH();
   if (!subjectOpen(s)) return 'prev';
@@ -312,6 +318,9 @@ const nf = n => n.toLocaleString('fr-FR');
 const words = (t, i0) => t.split(' ').filter(Boolean).map((w, k) => `<span class="wd" style="--i:${i0 + k}">${esc(w)}</span>`).join(' ');
 function viewHome() {
   const last = lastLesson();
+  // reprendre : la dernière leçon si elle n'est pas terminée, sinon la prochaine étape de son espace
+  const ns = last && state.done[last.s.id + '/' + last.l.id] ? nextStep(spaceOf(last.s)) : null;
+  const resumeHref = ns ? ns.href : last ? '#' + state.last.route : '#accueil';
   const totalL = SUBJECTS.reduce((a, s) => a + s.lessons.length, 0);
   const doneL = SUBJECTS.reduce((a, s) => a + subjectProgress(s).d, 0);
   const nQ = SUBJECTS.reduce((a, s) => a + s.quiz.length, 0), nC = SUBJECTS.reduce((a, s) => a + s.cards.length, 0);
@@ -322,10 +331,10 @@ function viewHome() {
       <span class="eyebrow hz" style="--hd:.05s">Éditions Lisân · la langue qui ouvre les portes</span>
       <h1>${words('Apprendre, réviser et', 0)} <em>${words('se', 3)}</em> <span class="nw"><em>${words('former', 4)}</em>${words(',', 5)}</span> ${words('à son rythme', 6)}</h1>
       <p class="lead hz" style="--hd:.85s">L’arabe du niveau 0 au niveau 3, la lecture du Coran, la Licence 1 Droit et une formation à l’intelligence artificielle : des leçons courtes, la voix pour écouter, des quiz corrigés et des cartes de révision, sur téléphone et même hors connexion.</p>
-      <div class="hero-cta hz" style="--hd:1.05s"><button type="button" class="btn" data-scrollto="espaces">Choisir un espace</button>${last ? `<a class="btn ghost" href="#${state.last.route}">Reprendre ma leçon</a>` : '<a class="btn ghost" href="#apropos">Découvrir Lisân</a>'}</div>
+      <div class="hero-cta hz" style="--hd:1.05s"><button type="button" class="btn" data-scrollto="espaces">Choisir un espace</button>${last ? `<a class="btn ghost" href="${resumeHref}">Reprendre ma leçon</a>` : '<a class="btn ghost" href="#apropos">Découvrir Lisân</a>'}</div>
     </section>${heroVideo()}</div>
     <section class="kpis" aria-label="Lisân Campus en chiffres">${kpi('🧭', SPACES.length, 'espaces', 'a')}${kpi('📚', totalL, 'leçons', 'n')}${kpi('✍️', nQ, 'questions de quiz', 'i')}${kpi('🃏', nC, 'cartes de révision', 'l')}${kpi('📶', 'Hors ligne', 'fonctionne même sans internet', 'm').replace('<b>', '<b class="txt">')}</section>
-    ${doneL || last ? `<section class="mine"><span class="ring" style="--p:${pct}">${pct} %</span><div><b>Votre progression</b><p>${doneL} leçon${doneL > 1 ? 's' : ''} terminée${doneL > 1 ? 's' : ''} sur ${totalL}${last ? ` · dernière leçon : ${esc(last.s.title)}, ${esc(last.l.title)}` : ''}</p></div>${last ? `<a class="btn" href="#${state.last.route}">Reprendre</a>` : ''}</section>` : ''}
+    ${doneL || last ? `<section class="mine"><span class="ring" style="--p:${pct}">${pct} %</span><div><b>Votre progression</b><p>${doneL} leçon${doneL > 1 ? 's' : ''} terminée${doneL > 1 ? 's' : ''} sur ${totalL}${last ? ` · dernière leçon : ${esc(last.s.title)}, ${esc(last.l.title)}` : ''}</p></div>${last ? `<a class="btn" href="${resumeHref}">Reprendre</a>` : ''}</section>` : ''}
     <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les cinq espaces</h2><p>Choisissez votre espace : la première leçon de chaque espace est en accès libre.</p></div>
     <section class="spaces">${SPACES.map(sp => { const p = spaceProgress(sp); const A = AUTH();
       const ins = A && A.user() ? (A.enrolled(sp.id) ? '<span class="tag ok">Inscrit</span>' : '<span class="tag">Non inscrit</span>') : '';
@@ -383,10 +392,14 @@ function viewSpace(sp) {
   if (A) {
     if (!A.user()) reg = `<div class="notice">La première leçon de l’espace est en accès libre. Pour la suite, <button type="button" class="linkbtn" data-auth="signin">connectez-vous avec Google</button> puis inscrivez-vous à cet espace.</div>`;
     else if (!A.enrolled(sp.id)) reg = `<div class="notice reg-n"><span>Vous n’êtes pas encore inscrit à cet espace. L’inscription est gratuite et ouvre toutes les leçons.</span> <a class="btn small" href="#inscription-${sp.id}">M’inscrire à « ${esc(sp.title)} »</a></div>`;
-    else reg = `<div class="notice ok">Vous êtes inscrit à cet espace (n° <b>${esc(A.enrollment(sp.id).num)}</b>) : toutes les leçons sont ouvertes. <a href="#inscription-${sp.id}">Ma fiche d’inscription</a></div>`;
+    else reg = `<div class="notice ok">Vous êtes inscrit à cet espace (n° <b>${esc(A.enrollment(sp.id).num)}</b>) : les leçons s’ouvrent au fil de votre progression. <a href="#inscription-${sp.id}">Ma fiche d’inscription</a></div>`;
   }
+  const ns = nextStep(sp.id);
+  const nextBox = ns ? `<div class="next-step c-${ns.s.color}"><span class="eyebrow">Votre prochaine étape</span><b>${esc(ns.label)}</b><a class="btn small" href="${ns.href}">${p.d ? 'Continuer' : 'Commencer'} →</a></div>`
+    : `<div class="next-step done-all"><span class="eyebrow">Espace terminé</span><b>Tous les parcours de cet espace sont réussis. Bravo !</b></div>`;
   return `${crumbs([sp.title])}
     <div class="duo"><aside class="duo-side"><div class="subject-head c-${sp.color}"><span class="eyebrow">${esc(sp.eyebrow)}</span><h1>${sp.icon} ${esc(sp.title)}</h1>
+      ${nextBox}
       ${sp.intro.map(t => `<p class="lead">${md(t)}</p>`).join('')}
       <div class="bar"><i style="width:${p.pct}%"></i></div><span class="meta">${p.d} / ${p.n} leçons terminées</span></div>
     ${reg}
@@ -992,7 +1005,8 @@ document.addEventListener('click', e => {
     if (!state.done[k] && left > 0) {
       if (m) m.textContent = `Prenez le temps de lire la leçon jusqu’au bout : il reste environ ${fmtLeft(left)} de lecture avant de pouvoir la terminer. Le temps avance quand la leçon est ouverte et que vous lisez ou l’écoutez.`;
       dt.classList.remove('nudge'); void dt.offsetWidth; dt.classList.add('nudge'); return; }
-    if (state.done[k]) delete state.done[k]; else state.done[k] = 1; save('done'); if (m) m.textContent = '';
+    if (state.done[k]) { if (m) m.textContent = 'Cette leçon est terminée : elle reste ouverte pour la relire quand vous voulez.'; return; }
+    state.done[k] = 1; save('done'); if (m) m.textContent = '';
     doneBtnState(dt); const nb = document.querySelector('[data-next]'); if (nb) nb.classList.toggle('is-locked', !state.done[k]);
     if (state.done[k]) confetti(dt); return; }
   const mk = t.closest('.mark');
@@ -1013,7 +1027,9 @@ document.addEventListener('click', e => {
       if (state.quiz[quizRun.s.id] === undefined || pct > state.quiz[quizRun.s.id]) { state.quiz[quizRun.s.id] = pct; save('quiz'); }
       sc.textContent = `Score final : ${quizRun.right} / ${quizRun.qs.length} (${pct} %)`; document.getElementById('quiz-end').hidden = false;
       const qr = document.getElementById('qresult');
-      if (qr) { qr.innerHTML = `<span class="ring" style="--p:${pct}">${pct} %</span><div><h2>${pct >= 70 ? (pct === 100 ? 'Parfait, sans faute !' : 'Quiz réussi, bravo !') : 'Continuez, vous progressez !'}</h2><p>${quizRun.right} bonne${quizRun.right > 1 ? 's' : ''} réponse${quizRun.right > 1 ? 's' : ''} sur ${quizRun.qs.length}. ${pct >= 70 ? 'Vous atteignez le seuil de 70 % du certificat.' : 'Relisez les leçons puis recommencez : il faut 70 % pour le certificat.'}</p></div>`;
+      if (qr) { qr.innerHTML = `<span class="ring" style="--p:${pct}">${pct} %</span><div><h2>${pct >= 70 ? (pct === 100 ? 'Parfait, sans faute !' : 'Quiz réussi, bravo !') : 'Continuez, vous progressez !'}</h2><p>${quizRun.right} bonne${quizRun.right > 1 ? 's' : ''} réponse${quizRun.right > 1 ? 's' : ''} sur ${quizRun.qs.length}. ${pct >= 70 ? 'Vous atteignez le seuil de 70 % du certificat.' : 'Relisez les leçons puis recommencez : il faut 70 % pour réussir le parcours, obtenir le certificat et ouvrir le parcours suivant.'}</p>${(() => {
+          const ss = spaceSubjects(quizRun.s), nx = ss[ss.indexOf(quizRun.s) + 1];
+          return pct >= 70 && nx && subjectOpen(nx) ? `<p class="unlock">🔓 Le parcours suivant est ouvert : <b>${esc(nx.title)}</b></p><a class="btn small" href="#l-${nx.id}.${nx.lessons[0].id}">Commencer « ${esc(nx.title)} » →</a>` : ''; })()}</div>`;
         qr.hidden = false; qr.scrollIntoView({ behavior: smooth(), block: 'center' }); }
       if (pct >= 70) confetti();
       if (AUTH() && parcoursStatus(quizRun.s).ok) document.getElementById('quiz-cert').hidden = false; }
