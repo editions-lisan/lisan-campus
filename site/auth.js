@@ -84,7 +84,7 @@
       if (!snap.exists) return null; const o = snap.data(); return Object.assign({}, o, { date: iso(o.date) });
     },
     async certRulesOk() {                                // les règles Firestore autorisent-elles déjà les certificats ?
-      try { await fb.firestore().collection('certificats').doc('LCC-0000-VERIFIER').get({ source: 'server' }); return true; }
+      try { await fb.firestore().collection('regles').doc('v3').get({ source: 'server' }); return true; }
       catch (e) { return !/permission/.test((e && (e.code || e.message)) || ''); }
     },
     suggestions: () => Object.values((user && profile && profile.sugg) || {}).sort((a, b) => String(b.date).localeCompare(String(a.date))),
@@ -105,12 +105,12 @@
         else throw e;
       }
       profile = null; cache.set('profile', null);
-      ['done', 'quiz', 'known', 'words'].forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null);
+      ['done', 'quiz', 'known', 'words', 'time'].forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null);
     },
     onSave(k, v) {                                       // progression : envoyée au compte (regroupée toutes les 3 s)
-      if (!user || !['done', 'quiz', 'known', 'words'].includes(k)) return;
+      if (!user || !['done', 'quiz', 'known', 'words', 'time'].includes(k)) return;
       clearTimeout(timer);
-      timer = setTimeout(() => { doc().set({ progress: { done: state.done, quiz: state.quiz, known: state.known, words: state.words } }, { merge: true }).catch(() => {}); }, 3000);
+      timer = setTimeout(() => { doc().set({ progress: { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time } }, { merge: true }).catch(() => {}); }, 3000);
     },
   };
   const doc = () => fb.firestore().collection('users').doc(user.uid);
@@ -126,6 +126,9 @@
   function mergeProgress(remote) {
     if (!remote) return;
     ['done', 'known', 'words'].forEach(k => { state[k] = Object.assign({}, remote[k] || {}, state[k] || {}); store.set(k, state[k]); });
+    const tm = Object.assign({}, remote.time || {});
+    Object.entries(state.time || {}).forEach(([k, v]) => { if (tm[k] === undefined || v > tm[k]) tm[k] = v; });
+    state.time = tm; store.set('time', tm);
     const q = Object.assign({}, remote.quiz || {});
     Object.entries(state.quiz || {}).forEach(([k, v]) => { if (q[k] === undefined || v > q[k]) q[k] = v; });
     state.quiz = q; store.set('quiz', q);
@@ -156,7 +159,7 @@
             mergeProgress(d.progress);
             await doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp(),
               ...(snap.exists ? {} : { createdAt: fb.firestore.FieldValue.serverTimestamp() }),
-              progress: { done: state.done, quiz: state.quiz, known: state.known, words: state.words } }, { merge: true });
+              progress: { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time } }, { merge: true });
           } catch (e) { /* hors connexion : on garde les inscriptions en cache */ }
         } else { profile = null; cache.set('profile', null); }
         if (first) { first = false; res(); } else if (typeof route === 'function') route();

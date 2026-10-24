@@ -67,33 +67,86 @@ function qrSvg(text) {
   for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) if (q.isDark(r, c)) d += `M${c} ${r}h1v1h-1z`;
   return `<svg viewBox="-2 -2 ${n + 4} ${n + 4}" role="img" aria-label="Code QR de vérification"><rect x="-2" y="-2" width="${n + 4}" height="${n + 4}" fill="#fff"/><path d="${d}" fill="#141c2e"/></svg>`;
 }
-const SEAL = `<svg viewBox="0 0 200 200" aria-hidden="true"><defs><path id="seal-c" d="M100 100m-74 0a74 74 0 1 1 148 0a74 74 0 1 1-148 0"/></defs>
-  <circle cx="100" cy="100" r="96" fill="#1e2a5a"/><circle cx="100" cy="100" r="88" fill="none" stroke="#e6b450" stroke-width="2.5"/>
-  <circle cx="100" cy="100" r="58" fill="none" stroke="#e6b450" stroke-width="1.5"/>
-  <text font-size="15.5" font-weight="700" letter-spacing="2.6" fill="#f5d48a" font-family="Atkinson Hyperlegible, sans-serif"><textPath href="#seal-c">LISÂN CAMPUS · CERTIFIÉ · ÉDITIONS LISÂN ·</textPath></text>
-  <image href="icon-192.png" x="58" y="58" width="84" height="84"/></svg>`;
-const gq = t => `«\u00a0${esc(t)}\u00a0»`;   // espaces insécables à l'intérieur des guillemets
+// ---------- éléments de sécurité du certificat
+// Code d'authenticité : empreinte des données du registre (numéro, titulaire, parcours, résultats).
+// Recalculé sur la page de vérification à partir du registre : un document modifié n'a plus le même code.
+function certCode(c) {
+  const str = [c.num, String(c.prenom || '').trim().toLowerCase(), String(c.nom || '').trim().toUpperCase(), c.type, c.titre, c.espace, Number(c.lecons) || 0, c.quiz === null || c.quiz === undefined ? '-' : Number(c.quiz)].join('|');
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < str.length; i++) { const ch = str.charCodeAt(i); h1 = Math.imul(h1 ^ ch, 2654435761); h2 = Math.imul(h2 ^ ch, 1597334677); }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  const hex = ((h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0')).toUpperCase().slice(0, 12);
+  return hex.match(/.{4}/g).join('-');
+}
+// fond guilloché (comme sur les billets de banque) : rosace et ondes très fines, difficiles à reproduire à la photocopieuse
+const GUIL = (() => {
+  let g = '';
+  for (let k = 0; k < 48; k++) g += `<ellipse cx="500" cy="372" rx="330" ry="118" transform="rotate(${(k * 3.75).toFixed(2)} 500 372)"/>`;
+  for (let k = 0; k < 24; k++) g += `<ellipse cx="500" cy="372" rx="190" ry="62" transform="rotate(${(k * 7.5).toFixed(2)} 500 372)"/>`;
+  let w = '';
+  for (let r = 0; r < 34; r++) { const y0 = 20 + r * 20; let d = `M0 ${y0}`;
+    for (let x = 0; x <= 1000; x += 10) d += ` L${x} ${(y0 + 6 * Math.sin(x / 38 + r * .7) + 3 * Math.sin(x / 11 + r)).toFixed(1)}`;
+    w += `<path d="${d}"/>`; }
+  return `<g class="g-waves">${w}</g><g class="g-rose">${g}</g>`;
+})();
+const STAR8 = (cx, cy, r) => { let d = ''; for (let k = 0; k < 16; k++) { const a = Math.PI / 8 * k - Math.PI / 2, rr = k % 2 ? r * .62 : r; d += (k ? 'L' : 'M') + (cx + rr * Math.cos(a)).toFixed(1) + ' ' + (cy + rr * Math.sin(a)).toFixed(1); } return d + 'Z'; };
+const CORNER = `<svg class="cert-corner" viewBox="0 0 100 100" aria-hidden="true"><path d="M4 96V30Q4 4 30 4H96" fill="none" stroke="currentColor" stroke-width="2.2"/><path d="M12 96V36Q12 12 36 12H96" fill="none" stroke="currentColor" stroke-width=".9"/>
+  <path d="${STAR8(34, 34, 16)}" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="34" cy="34" r="4.2" fill="currentColor"/></svg>`;
+// le sceau doré, façon autocollant à bord festonné, avec ses rubans
+function sticker(id, year, grand) {
+  const R1 = 92, R2 = 84, N = 36; let d = '';
+  for (let k = 0; k <= N; k++) { const a = 2 * Math.PI * k / N, b = 2 * Math.PI * (k - .5) / N;
+    const x = 100 + R1 * Math.cos(a), y = 100 + R1 * Math.sin(a), qx = 100 + (R2 - 6) * Math.cos(b), qy = 100 + (R2 - 6) * Math.sin(b);
+    d += k ? ` Q${qx.toFixed(1)} ${qy.toFixed(1)} ${x.toFixed(1)} ${y.toFixed(1)}` : `M${x.toFixed(1)} ${y.toFixed(1)}`; }
+  const rib = grand ? '#7a1f35' : '#1e2a5a';
+  return `<svg class="cert-sticker" viewBox="0 0 200 250" role="img" aria-label="Sceau d’authenticité de Lisân Campus">
+  <defs><linearGradient id="${id}-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbe7a1"/><stop offset=".28" stop-color="#d9a842"/><stop offset=".5" stop-color="#fff2c2"/><stop offset=".72" stop-color="#c38f2c"/><stop offset="1" stop-color="#f3d27a"/></linearGradient>
+    <linearGradient id="${id}-s" x1="0" y1="0" x2="1" y2="0" gradientTransform="rotate(35)"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".45" stop-color="#fff" stop-opacity=".55"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/></linearGradient>
+    <path id="${id}-c" d="M100 100m-60 0a60 60 0 1 1 120 0a60 60 0 1 1-120 0"/>
+    <filter id="${id}-f" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#3b2a05" flood-opacity=".35"/></filter></defs>
+  <path d="M62 150L40 240L66 222L80 248L98 160Z" fill="${rib}"/><path d="M138 150L160 240L134 222L120 248L102 160Z" fill="${rib}"/>
+  <path d="M62 150L40 240L66 222L80 248L98 160Z" fill="none" stroke="#e6b450" stroke-width="2"/><path d="M138 150L160 240L134 222L120 248L102 160Z" fill="none" stroke="#e6b450" stroke-width="2"/>
+  <g filter="url(#${id}-f)"><path d="${d}Z" fill="url(#${id}-g)" stroke="#a87a22" stroke-width="1.2"/></g>
+  <circle cx="100" cy="100" r="74" fill="none" stroke="#8a6214" stroke-width="1.4" stroke-dasharray="2 2.4"/>
+  <circle cx="100" cy="100" r="70" fill="${rib}"/><circle cx="100" cy="100" r="66" fill="none" stroke="#e6b450" stroke-width="1.6"/>
+  <circle cx="100" cy="100" r="44" fill="none" stroke="#e6b450" stroke-width="1"/>
+  <text font-size="11.2" font-weight="700" letter-spacing="1.6" fill="#f5d48a" font-family="Atkinson Hyperlegible, sans-serif"><textPath href="#${id}-c">AUTHENTIQUE · LISÂN CAMPUS · VÉRIFIABLE EN LIGNE ·</textPath></text>
+  <path d="${STAR8(100, 84, 22)}" fill="#e6b450"/><circle cx="100" cy="84" r="8" fill="${rib}"/>
+  <text x="100" y="121" text-anchor="middle" font-size="14" font-weight="700" letter-spacing="2" fill="#f5d48a" font-family="Atkinson Hyperlegible, sans-serif">${grand ? 'GRAND' : 'CERTIFIÉ'}</text>
+  <text x="100" y="135" text-anchor="middle" font-size="10" letter-spacing="1.5" fill="#f5d48a" font-family="Atkinson Hyperlegible, sans-serif">${esc(year)}</text>
+  <path d="${d}Z" fill="url(#${id}-s)" opacity=".9" pointer-events="none"/></svg>`;
+}
+const gq = t => `« ${esc(t)} »`;   // espaces insécables à l'intérieur des guillemets
 function certHTML(c) {
   const name = `${c.civilite === 'Madame' ? 'Madame ' : c.civilite === 'Monsieur' ? 'Monsieur ' : ''}${prenomFmt(c.prenom)} ${String(c.nom || '').toUpperCase()}`.trim();
   const what = c.type === 'espace'
     ? (SUBJECTS.filter(s => spaceOf(s) === c.spaceId).length === 1 ? `a suivi avec succès le parcours ${gq(c.titre)}` : `a terminé avec succès l’ensemble des parcours de l’espace ${gq(c.espace)}`)
     : `a suivi avec succès le parcours ${gq(c.titre)} de l’espace ${gq(c.espace)}`;
   const grand = c.type === 'espace' && SUBJECTS.filter(s => spaceOf(s) === c.spaceId).length > 1;
+  const id = 'k' + String(c.num || 'x').replace(/[^A-Za-z0-9]/g, ''), code = certCode(c), year = String(c.date || '').slice(0, 4) || String(new Date().getFullYear());
+  const micro = `LISÂN CAMPUS · CERTIFICAT N° ${c.num} · ${name.toUpperCase()} · CODE ${code} · `.repeat(14);
   return `<div class="cert-wrap"><article class="cert${c.type === 'espace' ? ' grand' : ''}" id="cert" aria-label="Certificat ${esc(c.num)}">
     <div class="cert-in">
+      <svg class="cert-guil" viewBox="0 0 1000 744" preserveAspectRatio="none" aria-hidden="true">${GUIL}</svg>
+      <svg class="cert-micro" viewBox="0 0 1000 744" preserveAspectRatio="none" aria-hidden="true"><path id="${id}-m" d="M14 14H986V730H14Z" fill="none"/>
+        <text font-size="6.2" letter-spacing=".4" font-family="Atkinson Hyperlegible, sans-serif"><textPath href="#${id}-m">${esc(micro)}</textPath></text></svg>
+      <img class="cert-wm" src="logo.png" alt="">
+      ${CORNER}${CORNER.replace('cert-corner', 'cert-corner tr')}${CORNER.replace('cert-corner', 'cert-corner bl')}${CORNER.replace('cert-corner', 'cert-corner br')}
       <header class="cert-head"><img src="logo.png" alt="" width="96" height="96"><div><b>Éditions Lisân</b><span>Lisân Campus · la langue qui ouvre les portes</span></div></header>
       <p class="cert-kicker">${grand ? 'Grand certificat' : 'Certificat de réussite'}</p>
       <p class="cert-ar ara" lang="ar" dir="rtl">${grand ? 'الشَّهَادَةُ الكُبْرَى' : 'شَهَادَةُ نَجَاحٍ'}</p>
       <p class="cert-lead">Ce certificat atteste que</p>
       <h2 class="cert-name">${esc(name)}</h2>
-      <p class="cert-text">${what} sur Lisân Campus : ${Number(c.lecons) || 0}\u00a0leçons terminées${c.quiz !== null && c.quiz !== undefined ? `, quiz réussi${c.type === 'espace' ? 's avec une moyenne de' : ' avec'} ${Number(c.quiz)}\u00a0%` : ''}.</p>
-      <p class="cert-orn" aria-hidden="true">✦ ✦ ✦</p>
+      <p class="cert-text">${what} sur Lisân Campus : ${Number(c.lecons) || 0} leçons terminées${c.quiz !== null && c.quiz !== undefined ? `, quiz réussi${c.type === 'espace' ? 's avec une moyenne de' : ' avec'} ${Number(c.quiz)} %` : ''}.</p>
+      <svg class="cert-orn" viewBox="0 0 240 16" aria-hidden="true"><path d="M0 8H96M144 8H240" stroke="currentColor" stroke-width="1.2"/><path d="${STAR8(120, 8, 7.5)}" fill="currentColor"/><circle cx="104" cy="8" r="2.2" fill="currentColor"/><circle cx="136" cy="8" r="2.2" fill="currentColor"/></svg>
       <footer class="cert-foot">
-        <div class="cert-meta"><span>Délivré le</span><b>${dateFr(c.date)}</b><span>Certificat n°</span><b>${esc(c.num)}</b></div>
-        <div class="cert-seal">${SEAL}</div>
+        <div class="cert-meta"><span>Délivré le</span><b>${dateFr(c.date)}</b><span>Certificat n°</span><b>${esc(c.num)}</b><span>Code d’authenticité</span><b class="cert-code">${code}</b></div>
+        <div class="cert-seal">${sticker(id, year, grand)}</div>
         <div class="cert-sign"><b>Mouhamadou CISSEMA</b><span>Fondateur des Éditions Lisân</span></div>
-        <div class="cert-qr">${qrSvg(verifUrl(c.num))}<span>Vérifier ce certificat</span></div>
+        <div class="cert-qr">${qrSvg(verifUrl(c.num))}<span>Scannez pour vérifier</span></div>
       </footer>
+      <p class="cert-check">Authenticité vérifiable sur lisan-campus.netlify.app/#verifier : le numéro, le titulaire et le code d’authenticité doivent correspondre exactement.</p>
     </div></article></div>`;
 }
 const certActions = c => `<div class="actions cert-actions"><button type="button" class="btn" data-cert-print="1">Imprimer ou enregistrer en PDF</button>
@@ -121,14 +174,15 @@ function viewVerify(num) {
     <form class="form verify-form" id="verify-form"><label>Numéro du certificat<input name="num" value="${esc(num || '')}" placeholder="LCC-2026-XXXXXXXX" autocomplete="off" autocapitalize="characters" required></label>
       <div class="actions"><button type="submit" class="btn">Vérifier</button></div></form>
     <div id="verify-out" aria-live="polite">${A ? '' : '<p class="notice">La vérification n’est pas disponible sur cet aperçu : ouvrez lisan-campus.netlify.app.</p>'}</div>
-    <p class="meta">Un certificat Lisân Campus atteste que son titulaire a terminé les leçons et réussi les quiz du parcours sur le site. Ce n’est pas un diplôme d’État.</p></div>`;
+    <p class="meta">Chaque certificat est inscrit dans le registre de Lisân Campus au moment où il est délivré ; il ne peut plus être modifié ensuite. Il porte un numéro unique, un code d’authenticité, un code QR, un micro-texte au nom du titulaire et un fond de sécurité. Un certificat Lisân Campus atteste que son titulaire a terminé les leçons et réussi les quiz du parcours sur le site. Ce n’est pas un diplôme d’État.</p></div>`;
 }
 function bindVerify(num) {
   const f = document.getElementById('verify-form'), out = document.getElementById('verify-out'), A = AUTH();
   const check = n => { n = String(n || '').trim().toUpperCase().replace(/\s+/g, '');
     if (!A) return; if (!/^LCC-\d{4}-[A-Z0-9]{8}$/.test(n)) { out.innerHTML = '<p class="notice bad-n">Ce numéro n’a pas le bon format : il ressemble à LCC-2026-AB12CD34.</p>'; return; }
     out.innerHTML = '<p class="meta">Vérification…</p>';
-    A.getCert(n).then(c => { out.innerHTML = c ? `<p class="notice ok verify-ok"><b>✓ Certificat authentique.</b> Il a été délivré par Lisân Campus le ${dateFr(c.date)} à ${esc(prenomFmt(c.prenom))} ${esc(String(c.nom || '').toUpperCase())}.</p>${certHTML(c)}`
+    A.getCert(n).then(c => { out.innerHTML = c ? `<p class="notice ok verify-ok"><b>✓ Certificat authentique.</b> Il a été délivré par Lisân Campus le ${dateFr(c.date)} à ${esc(prenomFmt(c.prenom))} ${esc(String(c.nom || '').toUpperCase())}.
+        Code d’authenticité : <b class="cert-code">${certCode(c)}</b>. Le document présenté doit porter exactement le même nom, le même parcours, les mêmes résultats et le même code ; sinon, il a été modifié.</p>${certHTML(c)}`
       : `<p class="notice bad-n"><b>✗ Aucun certificat ne porte le numéro ${esc(n)}.</b> Vérifiez le numéro, ou écrivez-nous depuis la page Contact.</p>`; })
       .catch(() => { out.innerHTML = '<p class="notice bad-n">La vérification n’a pas abouti. Vérifiez votre connexion internet et réessayez.</p>'; }); };
   f.addEventListener('submit', e => { e.preventDefault(); const n = f.elements.num.value.trim().toUpperCase(); history.replaceState(null, '', '#verifier-' + n); check(n); });

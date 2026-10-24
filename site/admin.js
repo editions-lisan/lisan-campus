@@ -65,13 +65,27 @@ service cloud.firestore {
     match /certificats/{num} {
       allow get: if true;
       allow list: if isAdmin();
+      // un certificat est écrit une seule fois, à la date du serveur, par un élève inscrit à l'espace ; il ne peut plus être modifié
       allow create: if request.auth != null
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.num == num
         && num.matches('LCC-[0-9]{4}-[A-Z0-9]{8}')
         && request.resource.data.type in ['parcours', 'espace']
-        && request.resource.data.keys().hasOnly(['num', 'uid', 'key', 'type', 'titre', 'espace', 'spaceId', 'subjectId', 'lecons', 'quiz', 'civilite', 'nom', 'prenom', 'date', 'v']);
+        && request.resource.data.keys().hasOnly(['num', 'uid', 'key', 'type', 'titre', 'espace', 'spaceId', 'subjectId', 'lecons', 'quiz', 'civilite', 'nom', 'prenom', 'date', 'v'])
+        && request.resource.data.date == request.time
+        && request.resource.data.nom is string && request.resource.data.nom.size() <= 80
+        && request.resource.data.prenom is string && request.resource.data.prenom.size() <= 80
+        && request.resource.data.titre is string && request.resource.data.titre.size() <= 120
+        && request.resource.data.espace is string && request.resource.data.espace.size() <= 120
+        && request.resource.data.lecons is int && request.resource.data.lecons > 0 && request.resource.data.lecons <= 2000
+        && (request.resource.data.quiz == null || (request.resource.data.quiz is int && request.resource.data.quiz >= 70 && request.resource.data.quiz <= 100))
+        && request.resource.data.spaceId in get(/databases/$(database)/documents/users/$(request.auth.uid)).data.spaces;
+      allow update: if false;
       allow delete: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
+    }
+    // repère de version des règles (vérifié par la page d'administration)
+    match /regles/{v} {
+      allow get: if v == 'v3';
     }
   }
 }`;

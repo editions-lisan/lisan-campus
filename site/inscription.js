@@ -10,7 +10,7 @@ const PAYS = [
 ];
 const STATUTS = ['Élève', 'Étudiant(e)', 'Enseignant(e) ou maître', 'Parent', 'Professionnel(le)', 'Sans emploi ou au foyer', 'Autre'];
 const SOURCES = ['Un enseignant ou un maître', 'Un livre des Éditions Lisân', 'Un ami ou la famille', 'WhatsApp', 'Facebook', 'Une recherche sur Google', 'Mon université', 'Autre'];
-const SPACE_CODE = { droit: 'DR', ia: 'IA', arabe: 'AR', coran: 'QR' };
+const SPACE_CODE = { droit: 'DR', ia: 'IA', arabe: 'AR', coran: 'QR', islam: 'IS' };
 
 // Questions propres à chaque espace
 const QUESTIONS = {
@@ -33,8 +33,15 @@ const QUESTIONS = {
     { k: 'annee', t: 'select', l: 'Année universitaire', req: 1, o: ['2026-2027', '2025-2026', 'Autre'] },
     { k: 'matricule', t: 'text', l: 'Numéro matricule', hint: 'Facultatif' },
   ],
+  islam: [
+    { k: 'role', t: 'radio', l: 'Vous suivez ce programme comme…', req: 1, o: ['Parent', 'Enfant ou adolescent', 'Animateur, oustaz ou enseignant', 'Adulte qui apprend pour lui-même'] },
+    { k: 'niveau', t: 'radio', l: 'Par quel niveau commencez-vous ?', req: 1, o: ['Niveau 1 · L’Islâm', 'Niveau 2 · L’Îmân', 'Je ne sais pas encore'] },
+    { k: 'cadre', t: 'radio', l: 'Vous suivez le programme…', req: 1, o: ['En famille, à la maison', 'Dans une mosquée, une école ou un centre', 'Seul(e)'] },
+    { k: 'livre', t: 'radio', l: 'Avez-vous les livres « Vivre l’islam en famille » ?', req: 1, o: ['Oui', 'Pas encore'] },
+  ],
   ia: [
     { k: 'objectif', t: 'radio', l: 'Pourquoi vous former à l’IA ?', req: 1, o: ['Pour mes études', 'Pour enseigner', 'Pour mon travail', 'Pour créer des contenus', 'Pour découvrir'] },
+    { k: 'domaine', t: 'select', l: 'Votre domaine principal', req: 1, o: ['Études (collège, lycée, université)', 'Enseignement ou formation', 'Droit', 'Commerce ou entreprise', 'Santé', 'Agriculture', 'Administration', 'Sciences islamiques', 'Association', 'Autre'] },
     { k: 'usage', t: 'radio', l: 'Utilisez-vous déjà un assistant d’IA ?', req: 1, o: ['Jamais', 'Un peu', 'Souvent'] },
     { k: 'compte', t: 'radio', l: 'Avez-vous un compte Claude ?', req: 1, o: ['Oui', 'Pas encore'] },
   ],

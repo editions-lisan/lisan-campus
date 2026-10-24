@@ -6,10 +6,39 @@ const store = {
 };
 const state = {
   done: store.get('done', {}), quiz: store.get('quiz', {}), known: store.get('known', {}),
-  words: store.get('words', {}), rate: store.get('rate', 1), last: store.get('last', null),
+  words: store.get('words', {}), time: store.get('time', {}), rate: store.get('rate', 1), last: store.get('last', null),
   theme: store.get('theme', 'auto'), size: store.get('size', 'm'),
 };
 const save = k => { store.set(k, state[k]); if (window.LisanAuth && window.LisanAuth.onSave) window.LisanAuth.onSave(k, state[k]); };
+
+// ---------- temps minimum de lecture : une leçon ne se marque « terminée » qu'après un vrai temps de lecture
+// Environ la moitié du temps de lecture normal (0,13 s par mot), au moins 40 secondes, au plus 6 minutes.
+// Le temps n'avance que lorsque la page de la leçon est ouverte, visible, et que le lecteur est actif (ou écoute la leçon).
+const lessonText = l => [l.title, ...l.body.map(b => b.p || b.h || (b.ul || b.ol || []).join('. ') || b.box || b.quote || '')].filter(Boolean).map(x => String(x).replace(/\[\[.+?\]\]/g, '').replace(/\*\*|\*/g, '')).join('. ');
+const needFor = l => Math.max(40, Math.min(360, Math.round(lessonText(l).split(/\s+/).filter(Boolean).length * 0.13)));
+const fmtLeft = n => n >= 60 ? `${Math.floor(n / 60)} min ${String(n % 60).padStart(2, '0')} s` : `${n} s`;
+function doneBtnState(b) {
+  const key = b.dataset.done, need = +b.dataset.need || 0, t = state.time[key] || 0, d = !!state.done[key], left = Math.max(0, need - t);
+  b.setAttribute('aria-pressed', d); b.classList.toggle('wait', !d && left > 0); b.style.setProperty('--t', (need ? Math.min(100, Math.round(t / need * 100)) : 100) + '%');
+  b.innerHTML = d ? '✓ Leçon terminée' : left > 0 ? `Marquer comme terminée <small>· encore ${fmtLeft(left)} de lecture</small>` : 'Marquer comme terminée';
+}
+let lessonClock = null, lastAct = Date.now();
+['scroll', 'pointerdown', 'keydown', 'touchstart', 'wheel', 'mousemove'].forEach(ev => window.addEventListener(ev, () => { lastAct = Date.now(); }, { passive: true }));
+function startLessonClock() {
+  clearInterval(lessonClock);
+  const b0 = document.querySelector('[data-done]'); if (!b0) return;
+  const key = b0.dataset.done, need = +b0.dataset.need || 0; let n = 0;
+  lessonClock = setInterval(() => {
+    const b = document.querySelector('[data-done]');
+    if (!b || b.dataset.done !== key) { clearInterval(lessonClock); return; }
+    const listening = (window.speechSynthesis && speechSynthesis.speaking) || !player.paused;
+    if (document.visibilityState !== 'visible' || (Date.now() - lastAct > 90000 && !listening)) return;
+    if ((state.time[key] || 0) >= need) return;
+    state.time[key] = (state.time[key] || 0) + 1; n++;
+    if (n % 10 === 0 || state.time[key] >= need) save('time');
+    doneBtnState(b);
+  }, 1000);
+}
 
 // ---------- outils de texte
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -28,14 +57,19 @@ const SPACES = [
     intro: ['Huit matières de la première année de droit, rédigées à partir des cours et des textes officiels : introduction au droit, droit civil, droit musulman, organisation judiciaire, méthodologie, expression écrite, anglais et informatique.',
       'Chaque leçon s’écoute à voix haute. Le quiz et les cartes de révision de chaque matière servent à vérifier ce que vous avez retenu. Vérifiez toujours avec le cours de vos enseignants.'] },
   { id: 'ia', title: 'Formation à l’IA avec Claude', eyebrow: 'Ouvert à tous', icon: '🤖', color: 'i',
-    lead: 'Comprendre l’intelligence artificielle et maîtriser Claude pour étudier, travailler et produire, en toute sécurité.',
-    intro: ['Dix leçons pour comprendre ce qu’est l’intelligence artificielle, bien formuler ses demandes, étudier, produire et traduire avec Claude, et l’utiliser avec prudence.',
-      'Un atelier interactif vous aide à composer vos consignes ; le quiz et les cartes vérifient vos acquis.'] },
+    lead: 'Comprendre l’intelligence artificielle et maîtriser Claude dans toutes les disciplines : étudier, enseigner, travailler, le droit, en toute sécurité.',
+    intro: ['Huit parcours pour tous les profils : comprendre l’IA, bien formuler ses demandes, étudier (sciences, lettres, sciences humaines, sciences islamiques), enseigner et former, travailler (bureau, commerce, projets), l’IA juridique, l’éthique et la sécurité, et des projets pratiques.',
+      'Chaque parcours a son quiz, ses cartes de révision et son certificat. Les consignes de la bibliothèque se copient d’un geste pour être collées dans Claude.'] },
   { id: 'arabe', title: 'Apprendre l’arabe', eyebrow: 'Collections « Je lis l’arabe ! » et « Je parle arabe ! »', icon: '🗣️', color: 'k',
     lead: 'Les compagnons des livres, du niveau 0 au niveau 3 : écouter les lettres, les mots et les dialogues, s’exercer et réviser.',
     intro: ['Ces quatre espaces accompagnent les livres des Éditions Lisân. Vous y écoutez les lettres, les syllabes, le vocabulaire et les dialogues de chaque leçon, vous vous entraînez avec les quiz et révisez avec les cartes.',
       'Le cours complet, les règles, les exercices écrits et leurs corrigés sont dans les livres : chaque leçon indique les pages correspondantes du livre et du cahier d’exercices.',
       'La voix arabe est celle de votre téléphone : vérifiez dans les **Paramètres** qu’elle est bien installée.'] },
+  { id: 'islam', title: 'Vivre l’islam en famille', eyebrow: 'Collection « Vivre l’islam en famille »', icon: '🕌', color: 'b',
+    lead: 'L’enseignement islamique pour toute la famille, rite mâlikite : les récits de Mamie Kadi, les leçons, les versets et les hadiths, niveaux 1 et 2.',
+    intro: ['Le compagnon des livres « Vivre l’islam en famille » : **niveau 1, l’Islâm** (je pratique ma religion) et **niveau 2, l’Îmân** (je crois et je comprends). Chaque séance part d’une histoire racontée par Mamie Kadi à la famille Traoré, conduit à une leçon et se termine par une pratique.',
+      'Les versets et les hadiths sont donnés en arabe vocalisé, avec leur traduction et leur référence. Les exercices écrits, les carnets et les ateliers sont dans le **cahier d’activités** ; le déroulement des séances et les précisions de fiqh mâlikite, dans le **livret de l’animateur**.',
+      'La religion se transmet auprès de maîtres qualifiés : ce compagnon accompagne les séances en famille, à la mosquée ou à l’école, il ne les remplace pas.'] },
   { id: 'coran', title: 'Lire le Coran pas à pas', eyebrow: 'Collection « Lire le Coran pas à pas »', icon: '📖', color: 'n',
     lead: 'Le compagnon du livre : 43 leçons, des lignes de lecture et la récitation lente d’al-Ḥouṣarî pour vérifier.',
     intro: ['Ce compagnon suit les dix étapes et les 43 leçons du livre : objectifs, lettres et signes étudiés, lignes de lecture, mots du Coran et sourates courtes.',
@@ -123,6 +157,8 @@ function renderBlock(b, s) {
   if (b.table) return `<div class="tablewrap"><table><thead><tr>${b.table.h.map(x => `<th>${md(x)}</th>`).join('')}</tr></thead><tbody>${b.table.r.map(r => `<tr>${r.map(x => `<td>${md(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
   if (b.box) return `<div class="box ${b.kind || 'marge'}"><b class="k">${esc(b.title || 'En marge')}</b><div>${md(b.box)}</div></div>`;
   if (b.quote) return `<div class="quote">${md(b.quote)}</div>`;
+  if (b.prompt) return `<div class="pbox"><div class="pb-h"><b>${esc(b.label || 'Consigne à copier')}</b><button type="button" class="btn ghost small" data-copy="1">Copier</button></div><pre class="pb-t">${esc(b.prompt)}</pre></div>`;
+  if (b.ayah) return `<figure class="ayah"><p class="ara" lang="ar" dir="rtl">${esc(b.ayah)}</p><figcaption><i>${md(b.fr)}</i><small>${md(b.ref)}</small></figcaption></figure>`;
   if (b.verse) return `<div class="verse"><header><div><h3>${esc(b.title)}</h3><small>${esc(b.src)}</small></div>
       <button type="button" class="btn small" data-say="${esc(b.verse.join(' '))}" data-lang="fr">${ICON}Écouter la fable</button></header>
       <div class="lines">${b.verse.map(l => `<div>${esc(l)}</div>`).join('')}</div></div>`;
@@ -252,7 +288,8 @@ function lastLesson() {
 }
 const BOOKS = [['je-lis-l-arabe', 'Je lis l’arabe !', 'Niveau 0 · les lettres', 'm-a0'], ['je-parle-arabe-1', 'Je parle arabe !', 'Niveau 1 · A1 – A2', 'm-a1'],
   ['je-parle-arabe-2', 'Je parle arabe ! 2', 'Niveau 2 · A2 – B1', 'm-a2'], ['je-parle-arabe-3', 'Je parle arabe ! 3', 'Niveau 3 · B1 – B2', 'm-a3'],
-  ['lire-le-coran', 'Lire le Coran pas à pas', '10 étapes · 43 leçons', 'm-qr'], ['vivre-l-islam-1', 'Vivre l’islam en famille', 'Niveau 1 · L’Islâm', '']];
+  ['lire-le-coran', 'Lire le Coran pas à pas', '10 étapes · 43 leçons', 'm-qr'], ['vivre-l-islam-1', 'Vivre l’islam en famille', 'Niveau 1 · L’Islâm', 'm-is1'],
+  ['vivre-l-islam-2', 'Vivre l’islam en famille 2', 'Niveau 2 · L’Îmân', 'm-is2']];
 const nf = n => n.toLocaleString('fr-FR');
 // découpe un titre en mots animés un à un (la virgule reste collée au mot précédent)
 const words = (t, i0) => t.split(' ').filter(Boolean).map((w, k) => `<span class="wd" style="--i:${i0 + k}">${esc(w)}</span>`).join(' ');
@@ -272,7 +309,7 @@ function viewHome() {
     </section>${heroVideo()}</div>
     <section class="kpis" aria-label="Lisân Campus en chiffres">${kpi('🧭', SPACES.length, 'espaces', 'a')}${kpi('📚', totalL, 'leçons', 'n')}${kpi('✍️', nQ, 'questions de quiz', 'i')}${kpi('🃏', nC, 'cartes de révision', 'l')}${kpi('📶', 'Hors ligne', 'fonctionne même sans internet', 'm').replace('<b>', '<b class="txt">')}</section>
     ${doneL || last ? `<section class="mine"><span class="ring" style="--p:${pct}">${pct} %</span><div><b>Votre progression</b><p>${doneL} leçon${doneL > 1 ? 's' : ''} terminée${doneL > 1 ? 's' : ''} sur ${totalL}${last ? ` · dernière leçon : ${esc(last.s.title)}, ${esc(last.l.title)}` : ''}</p></div>${last ? `<a class="btn" href="#${state.last.route}">Reprendre</a>` : ''}</section>` : ''}
-    <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les quatre espaces</h2><p>Choisissez votre espace : la première leçon de chaque parcours est en accès libre.</p></div>
+    <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les cinq espaces</h2><p>Choisissez votre espace : la première leçon de chaque parcours est en accès libre.</p></div>
     <section class="spaces">${SPACES.map(sp => { const p = spaceProgress(sp); const A = AUTH();
       const ins = A && A.user() ? (A.enrolled(sp.id) ? '<span class="tag ok">Inscrit</span>' : '<span class="tag">Non inscrit</span>') : '';
       return `<a class="spacecard c-${sp.color}" href="#espace-${sp.id}"><span class="sp-icon" aria-hidden="true">${sp.icon}</span>
@@ -285,7 +322,7 @@ function viewHome() {
       ${step('🎧', 'Apprenez et écoutez', 'Des leçons courtes, lues à voix haute, sur téléphone ou sur ordinateur, même sans connexion.')}
       ${step('✅', 'Vérifiez vos acquis', 'Les quiz se corrigent aussitôt ; les cartes de révision ramènent d’abord ce qu’il faut revoir.')}
       ${step('🎓', 'Recevez votre certificat', 'Toutes les leçons terminées et le quiz réussi à 70 % : votre certificat, vérifiable en ligne.')}</section>
-    <div class="sec-h"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les livres des Éditions Lisân</h2><p>Les espaces « Apprendre l’arabe » et « Lire le Coran pas à pas » accompagnent ces livres : chaque leçon renvoie aux pages du livre et du cahier.</p></div>
+    <div class="sec-h"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les livres des Éditions Lisân</h2><p>Les espaces « Apprendre l’arabe », « Lire le Coran pas à pas » et « Vivre l’islam en famille » accompagnent ces livres.</p></div>
     <section class="books" aria-label="Les livres">${BOOKS.map(([f, t, d, h]) => { const inner = `<img src="img/${f}.webp" alt="Couverture du livre « ${esc(t)} »" width="150" height="212" loading="lazy" decoding="async"><b>${esc(t)}</b><small>${esc(d)}</small>`;
       return h ? `<a class="book" href="#${h}">${inner}</a>` : `<div class="book">${inner}</div>`; }).join('')}</section>`;
 }
@@ -389,7 +426,8 @@ function viewLesson(found) {
       ${!s.noLessonVoice && s.id !== 'en' ? `<div class="actions"><button type="button" class="btn ghost small" data-say="${esc(text)}" data-lang="fr">${ICON}Écouter la leçon</button></div>` : ''}
       ${l.body.map(b => renderBlock(b, s)).join('')}
       <div class="lesson-foot">
-        <button type="button" class="btn done-toggle" data-done="${key}" aria-pressed="${d}">${d ? '✓ Leçon terminée' : 'Marquer comme terminée'}</button>
+        <button type="button" class="btn done-toggle" data-done="${key}" data-need="${needFor(l)}" aria-pressed="${d}">${d ? '✓ Leçon terminée' : 'Marquer comme terminée'}</button>
+        <p class="meta done-msg" id="done-msg" aria-live="polite"></p>
         <button type="button" class="linkbtn sugg-link" data-suggest="${esc(s.title + ' · ' + l.title)}">💡 Suggérer une amélioration</button>
         <div class="actions">${prev ? `<a class="btn ghost small" href="#l-${s.id}.${prev.id}">← Précédente</a>` : ''}${next ? `<a class="btn small" href="#l-${s.id}.${next.id}">Suivante →</a>` : `<a class="btn small" href="#q-${s.id}">Faire le quiz →</a>`}</div>
       </div>
@@ -535,9 +573,10 @@ function viewAccount() {
 const PAGES = {
   apropos: { title: 'À propos', body: [
     { p: '**Lisân Campus** est le site d’apprentissage des **Éditions Lisân**, maison d’édition fondée à Abidjan par **Mouhamadou CISSEMA**, enseignant et auteur de méthodes. Sa devise : « la langue qui ouvre les portes ».' },
-    { h: 'Quatre espaces' },
+    { h: 'Cinq espaces' },
     { ul: ['**Droit · Licence 1** : les matières de la première année de droit, pour tous les étudiants en droit.',
-      '**Formation à l’IA avec Claude** : comprendre l’intelligence artificielle et s’en servir avec méthode et prudence.',
+      '**Formation à l’IA avec Claude** : comprendre l’intelligence artificielle et s’en servir avec méthode et prudence, dans toutes les disciplines.',
+      '**Vivre l’islam en famille** : l’enseignement islamique pour toute la famille, compagnon des livres (niveaux 1 et 2).',
       '**Apprendre l’arabe** : les compagnons des livres « Je lis l’arabe ! » (niveau 0) et « Je parle arabe ! » (niveaux 1 à 3).',
       '**Lire le Coran pas à pas** : le compagnon du livre, avec la récitation lente d’al-Ḥouṣarî.'] },
     { h: 'Comment utiliser le Campus' },
@@ -551,7 +590,7 @@ const PAGES = {
     { h: '1. Responsable du traitement' },
     { p: 'Éditions Lisân, représentées par Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Contact : la page [Contact](#contact) du site.' },
     { h: '2. Les données que nous traitons' },
-    { ul: ['**Votre progression** (leçons terminées, scores, cartes sues) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Ils ne nous sont pas transmis.',
+    { ul: ['**Votre progression** (leçons terminées, temps de lecture de chaque leçon, scores, cartes sues) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Ils ne nous sont pas transmis.',
       '**Si vous vous connectez avec Google** : le nom, l’adresse e-mail et la photo de votre compte Google.',
       '**Si vous vous inscrivez à un espace** : votre fiche d’inscription (civilité, nom, prénoms, date de naissance, téléphone, pays et ville de résidence, profil, manière dont vous avez connu le site et, pour les moins de 18 ans, le nom et le téléphone d’un parent ou tuteur), vos réponses aux questions de l’espace, vos inscriptions et votre progression.',
       '**Si vous obtenez un certificat** : vos civilité, prénom et nom, le parcours réussi, le nombre de leçons, le score au quiz et la date. Ces informations sont inscrites au registre des certificats : **toute personne qui connaît le numéro du certificat** (ou scanne son code QR) peut les consulter, afin de vérifier qu’il est authentique. Aucune autre donnée n’y figure.',
@@ -625,9 +664,15 @@ function viewContact() {
 }
 
 // ---------- routeur
+// pile des pages visitées : un lien qui ramène à la page précédente fait un vrai « retour »,
+// pour que le bouton retour du téléphone ne repasse pas par la même page.
+const navStack = [];
+function trackNav(h) { const n = navStack.length; if (n > 1 && navStack[n - 2] === h) navStack.pop(); else if (navStack[n - 1] !== h) navStack.push(h); if (navStack.length > 80) navStack.shift(); }
 function route() {
-  stopVoice(); closeMenu();
+  stopVoice(); closeMenu(); clearInterval(lessonClock);
+  if (!location.hash) history.replaceState(null, '', '#accueil');
   const h = decodeURIComponent(location.hash.slice(1)) || 'accueil';
+  trackNav(h);
   let html = '', after = null, keep = false;
   const gate = (s, i) => { const a = access(s, i); return a === 'ok' ? null : viewGate(s, a, i); };
   if (h.startsWith('espace-') && space(h.slice(7))) html = viewSpace(space(h.slice(7)));
@@ -675,6 +720,11 @@ function bindContact() {
 }
 
 function afterLesson() {
+  const db = document.querySelector('[data-done]');
+  if (db) { const art = db.closest('article'), foot = art && art.querySelector('.lesson-foot');
+    const words = art ? (art.innerText.length - (foot ? foot.innerText.length : 0)) / 6 : 0;   // ≈ 6 caractères par mot
+    if (words) db.dataset.need = Math.max(40, Math.min(360, Math.round(words * 0.13)));
+    doneBtnState(db); startLessonClock(); }
   document.querySelectorAll('[data-wcount]').forEach(updateWordCount);
   const ns = document.getElementById('nom-sel');
   if (ns) {
@@ -792,9 +842,11 @@ let navT = null;
 function navigate() {
   if (!MOTION || !V.firstElementChild) { route(); return; }
   clearTimeout(navT); V.classList.add('leave');
-  navT = setTimeout(route, 200);
+  navT = setTimeout(() => { try { route(); } finally { V.classList.remove('leave'); } }, 200);
 }
 window.addEventListener('hashchange', navigate);
+// retour depuis une autre page (connexion Google, lien externe) : la page restaurée est réaffichée proprement
+window.addEventListener('pageshow', e => { if (e.persisted) { V.classList.remove('leave'); route(); } });
 let st = null;
 // en-tête, bouton « haut de page » et barre de lecture
 const readbar = document.getElementById('readbar'), totop = document.getElementById('totop');
@@ -856,6 +908,9 @@ window.addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(() =
 // ---------- interactions
 document.addEventListener('click', e => {
   const t = e.target;
+  const back = t.closest('a[href^="#"]');
+  if (back && !back.target && !back.hasAttribute('data-reload') && !e.ctrlKey && !e.metaKey && !e.shiftKey && navStack.length > 1
+      && decodeURIComponent(back.getAttribute('href').slice(1)) === navStack[navStack.length - 2]) { e.preventDefault(); history.back(); return; }
   const au = t.closest('[data-audio]');
   if (au) { playAudio(JSON.parse(au.dataset.audio), au); return; }
   const sayB = t.closest('[data-say]');
@@ -868,7 +923,7 @@ document.addEventListener('click', e => {
   const rs = t.closest('[data-reset]');
   if (rs) { const z = document.getElementById('reset-zone');
     if (rs.dataset.reset === 'ask') z.innerHTML = `<p><b>Effacer toute votre progression sur cet appareil ?</b> Cette action est définitive.</p><button type="button" class="btn bad small" data-reset="yes">Oui, tout effacer</button><button type="button" class="btn ghost small" data-reset="no">Annuler</button>`;
-    else if (rs.dataset.reset === 'yes') { ['done', 'quiz', 'known', 'words'].forEach(k => { state[k] = {}; save(k); }); state.last = null; save('last'); z.innerHTML = '<p class="meta">Votre progression a été effacée.</p>'; }
+    else if (rs.dataset.reset === 'yes') { ['done', 'quiz', 'known', 'words', 'time'].forEach(k => { state[k] = {}; save(k); }); state.last = null; save('last'); z.innerHTML = '<p class="meta">Votre progression a été effacée.</p>'; }
     else z.innerHTML = '<button type="button" class="btn ghost small" data-reset="ask">Effacer ma progression</button>';
     return; }
   const ins = t.closest('[data-install]');
@@ -882,11 +937,21 @@ document.addEventListener('click', e => {
   const sto = t.closest('[data-scrollto]');
   if (sto) { const el = document.getElementById(sto.dataset.scrollto); if (el) el.scrollIntoView({ behavior: smooth(), block: 'start' }); return; }
   if (t.closest('#totop')) { window.scrollTo({ top: 0, behavior: smooth() }); return; }
+  const cpy = t.closest('[data-copy]');
+  if (cpy) { const pre = cpy.closest('.pbox').querySelector('.pb-t'), txt = pre.textContent;
+    const ok = () => { cpy.textContent = '✓ Copié'; setTimeout(() => { cpy.textContent = 'Copier'; }, 1800); };
+    const fb = () => { const r = document.createRange(); r.selectNodeContents(pre); const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r); cpy.textContent = 'Texte sélectionné'; };
+    try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, fb); else fb(); } catch (err) { fb(); }
+    return; }
   const rel = t.closest('[data-reload]');
   if (rel && rel.getAttribute('href') === location.hash) { e.preventDefault(); route(); return; }
   const dt = t.closest('[data-done]');
-  if (dt) { const k = dt.dataset.done; if (state.done[k]) delete state.done[k]; else state.done[k] = 1; save('done');
-    dt.setAttribute('aria-pressed', !!state.done[k]); dt.textContent = state.done[k] ? '✓ Leçon terminée' : 'Marquer comme terminée'; if (state.done[k]) confetti(dt); return; }
+  if (dt) { const k = dt.dataset.done, need = +dt.dataset.need || 0, left = need - (state.time[k] || 0), m = document.getElementById('done-msg');
+    if (!state.done[k] && left > 0) {
+      if (m) m.textContent = `Prenez le temps de lire la leçon jusqu’au bout : il reste environ ${fmtLeft(left)} de lecture avant de pouvoir la terminer. Le temps avance quand la leçon est ouverte et que vous lisez ou l’écoutez.`;
+      dt.classList.remove('nudge'); void dt.offsetWidth; dt.classList.add('nudge'); return; }
+    if (state.done[k]) delete state.done[k]; else state.done[k] = 1; save('done'); if (m) m.textContent = '';
+    doneBtnState(dt); if (state.done[k]) confetti(dt); return; }
   const mk = t.closest('.mark');
   if (mk) { const card = mk.closest('.word'), id = card.dataset.wid; if (state.words[id]) delete state.words[id]; else state.words[id] = 1; save('words');
     const m = !!state.words[id]; card.classList.toggle('mastered', m); mk.setAttribute('aria-pressed', m); mk.textContent = m ? '✓ Maîtrisé' : 'Maîtrisé ?';

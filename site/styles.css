@@ -400,9 +400,20 @@ details.panel summary { cursor: pointer; }
 .cert-page h1 { margin: 0; }
 .cert-wrap { container-type: inline-size; width: 100%; max-width: 1000px; }
 .cert { --gold: #b8892b; --navy: #1e2a5a; position: relative; aspect-ratio: 297 / 210; background: #fdfaf2; color: #1a2033; border-radius: 6px; box-shadow: 0 18px 40px rgba(20, 28, 46, .18); padding: 2.2cqw; font-family: var(--font-body); }
-.cert-in { position: relative; height: 100%; border: .45cqw solid var(--navy); outline: .18cqw solid var(--gold); outline-offset: -1.1cqw; padding: 3.2cqw 5cqw 2.4cqw; display: flex; flex-direction: column; align-items: center; text-align: center;
-  background: radial-gradient(circle at 0 0, rgba(184, 137, 43, .14) 0 7cqw, transparent 7.1cqw), radial-gradient(circle at 100% 0, rgba(184, 137, 43, .14) 0 7cqw, transparent 7.1cqw),
-    radial-gradient(circle at 0 100%, rgba(184, 137, 43, .14) 0 7cqw, transparent 7.1cqw), radial-gradient(circle at 100% 100%, rgba(184, 137, 43, .14) 0 7cqw, transparent 7.1cqw); }
+.cert-in { position: relative; height: 100%; border: .45cqw solid var(--navy); outline: .18cqw solid var(--gold); outline-offset: -1.1cqw; padding: 3cqw 5.4cqw 1.6cqw; display: flex; flex-direction: column; align-items: center; text-align: center; overflow: hidden; isolation: isolate;
+  background: radial-gradient(ellipse at 50% 46%, #fffdf6 0 30%, #fbf4e2 100%); }
+.cert-in > * { position: relative; z-index: 2; }
+.cert-in > .cert-guil, .cert-in > .cert-micro, .cert-in > .cert-wm, .cert-in > .cert-corner { position: absolute; z-index: 0; pointer-events: none; }
+.cert-guil { inset: 0; width: 100%; height: 100%; fill: none; stroke-width: .55; }
+.cert-guil .g-waves { stroke: rgba(184, 137, 43, .16); }
+.cert-guil .g-rose { stroke: rgba(30, 42, 90, .075); }
+.cert.grand .cert-guil .g-rose { stroke: rgba(122, 31, 53, .08); }
+.cert-micro { inset: 0; width: 100%; height: 100%; fill: rgba(30, 42, 90, .55); }
+.cert-wm { left: 50%; top: 50%; width: 30cqw; height: 30cqw; transform: translate(-50%, -46%); opacity: .045; filter: grayscale(1); }
+.cert-corner { width: 7cqw; height: 7cqw; color: var(--gold); top: 1.4cqw; left: 1.4cqw; }
+.cert-corner.tr { left: auto; right: 1.4cqw; transform: scaleX(-1); }
+.cert-corner.bl { top: auto; bottom: 1.4cqw; transform: scaleY(-1); }
+.cert-corner.br { top: auto; left: auto; bottom: 1.4cqw; right: 1.4cqw; transform: scale(-1, -1); }
 .cert.grand .cert-in { border-color: #6b4a12; }
 .cert-head { display: flex; align-items: center; gap: 1.4cqw; }
 .cert-head img { width: 5.6cqw; height: 5.6cqw; }
@@ -412,19 +423,23 @@ details.panel summary { cursor: pointer; }
 .cert-kicker { margin: 2.2cqw 0 0; font-family: var(--font-display); font-weight: 800; font-size: 4.6cqw; line-height: 1.05; color: var(--gold); letter-spacing: .02em; }
 .cert.grand .cert-kicker { color: #8a5f12; }
 .cert-ar { margin: .2cqw 0 0; font-size: 3cqw; line-height: 1.5; color: var(--navy); }
-.cert-orn { margin: 1.6cqw 0 0; color: var(--gold); font-size: 1.5cqw; letter-spacing: .8em; }
+.cert-orn { margin: 1.4cqw 0 0; color: var(--gold); width: 22cqw; height: 1.5cqw; }
 .cert-lead { margin: .8cqw 0 0; font-size: 1.7cqw; color: #4a4a4a; }
 .cert-name { margin: .8cqw 0 0; font-family: var(--font-display); font-weight: 800; font-size: 4cqw; line-height: 1.1; color: var(--navy); border-bottom: .15cqw solid var(--gold); padding: 0 3cqw .6cqw; }
 .cert-text { margin: 1.6cqw 0 0; font-size: 1.75cqw; line-height: 1.5; max-width: 70cqw; color: #2b3040; }
-.cert-foot { margin-top: auto; width: 100%; display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: end; gap: 2.4cqw; }
+.cert-foot { margin-top: auto; width: 100%; display: grid; grid-template-columns: 1fr auto 1fr auto; align-items: end; gap: 2.2cqw; }
 .cert-meta { display: grid; grid-template-columns: auto 1fr; gap: .2cqw 1cqw; text-align: left; font-size: 1.3cqw; color: #6b6150; }
 .cert-meta b { color: #1a2033; font-size: 1.4cqw; }
-.cert-seal svg { width: 10.5cqw; height: 10.5cqw; display: block; }
+.cert-code { font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace; letter-spacing: .06em; }
+.cert-meta .cert-code { color: #7a1f35; }
+.cert-seal { margin-top: -6cqw; }
+.cert-sticker { width: 12.5cqw; height: 15.6cqw; display: block; transform: rotate(-7deg); }
 .cert-sign { display: flex; flex-direction: column; align-items: center; border-top: .12cqw solid #8a8270; padding-top: .7cqw; }
 .cert-sign b { font-family: var(--font-display); font-style: italic; font-weight: 600; font-size: 2cqw; color: var(--navy); }
 .cert-sign span { font-size: 1.2cqw; color: #6b6150; }
 .cert-qr { display: flex; flex-direction: column; align-items: center; gap: .3cqw; font-size: 1.05cqw; color: #6b6150; }
 .cert-qr svg { width: 8.5cqw; height: 8.5cqw; display: block; }
+.cert-check { margin: .9cqw 0 0; font-size: .95cqw; color: #7d735f; letter-spacing: .02em; }
 .verify-form { max-width: 460px; }
 .verify-form input { text-transform: uppercase; letter-spacing: .06em; }
 .notice.verify-ok { font-size: 16px; }
@@ -849,3 +864,23 @@ body { overflow-x: clip; }
 @media (min-width: 1500px) { .wrap { max-width: 1320px; } .duo { grid-template-columns: 430px minmax(0, 1fr); } }
 @media (prefers-reduced-motion: reduce) { .qside .ring { transition: none; } }
 @media (min-width: 1100px) { .ls-list { flex: 1 1 auto; min-height: 0; } .lside { overflow: hidden; } }
+
+/* ===== Temps minimum de lecture : le bouton se remplit pendant la lecture ===== */
+.done-toggle.wait { background: linear-gradient(90deg, color-mix(in srgb, var(--accent) 78%, #fff) var(--t, 0%), color-mix(in srgb, var(--accent) 38%, var(--surface)) var(--t, 0%)); color: #fff; }
+.done-toggle small { font-weight: 400; opacity: .92; }
+.done-toggle.nudge { animation: nudge .45s ease; }
+@keyframes nudge { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+.done-msg:empty { display: none; }
+.done-msg { margin: 6px 0 0; color: var(--muted); max-width: 60ch; }
+@media (prefers-reduced-motion: reduce) { .done-toggle.nudge { animation: none; } }
+
+/* ===== Consigne à copier (formation IA) ===== */
+.pbox { border: 1px solid var(--line); border-left: 4px solid var(--sc, var(--accent)); border-radius: 12px; background: var(--surface); margin: 14px 0; overflow: hidden; }
+.pb-h { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 12px; background: color-mix(in srgb, var(--sc, var(--accent)) 8%, var(--surface)); border-bottom: 1px solid var(--line); }
+.pb-h b { font-size: 15px; }
+.pb-t { margin: 0; padding: 12px 14px; white-space: pre-wrap; overflow-wrap: anywhere; font-family: var(--font-body); font-size: 15.5px; line-height: 1.55; color: var(--ink); }
+/* ===== Verset ou hadith (Vivre l'islam en famille) ===== */
+.ayah { margin: 14px 0; padding: 14px 16px; border: 1px solid color-mix(in srgb, #b8892b 55%, transparent); border-radius: 14px; background: color-mix(in srgb, #b8892b 7%, var(--surface)); }
+.ayah .ara { margin: 0 0 8px; font-size: 1.55em; line-height: 2; text-align: right; }
+.ayah figcaption { display: flex; flex-direction: column; gap: 6px; }
+.ayah figcaption small { color: var(--muted); }
