@@ -148,8 +148,17 @@ function inOrder(s, i) {
   if (state.done[s.id + '/' + s.lessons[i].id]) return true;
   const f = firstUndone(s); return f === -1 || i <= f;
 }
+// Espaces en ordre : un parcours ne s'ouvre qu'une fois le précédent du même espace réussi
+// (toutes ses leçons terminées et son quiz réussi, au moins 70 %).
+const PASS = () => (typeof CERT_QUIZ !== 'undefined' ? CERT_QUIZ : 70);
+const spaceSubjects = s => SUBJECTS.filter(x => spaceOf(x) === spaceOf(s));
+const subjectPassed = s => firstUndone(s) === -1 && (state.quiz[s.id] || 0) >= PASS();
+function prevSubject(s) { const ss = spaceSubjects(s), k = ss.indexOf(s); return k > 0 ? ss[k - 1] : null; }
+function blockingSubject(s) { const ss = spaceSubjects(s); for (const x of ss) { if (x === s) return null; if (!subjectPassed(x)) return x; } return null; }
+const subjectOpen = s => !blockingSubject(s);
 function access(s, lessonIndex) {
   const A = AUTH();
+  if (!subjectOpen(s)) return 'prev';
   if (lessonIndex === 0) return 'ok';
   if (A && !A.user()) return 'login';
   if (A && !A.enrolled(spaceOf(s))) return 'enroll';
@@ -317,7 +326,7 @@ function viewHome() {
     </section>${heroVideo()}</div>
     <section class="kpis" aria-label="Lisân Campus en chiffres">${kpi('🧭', SPACES.length, 'espaces', 'a')}${kpi('📚', totalL, 'leçons', 'n')}${kpi('✍️', nQ, 'questions de quiz', 'i')}${kpi('🃏', nC, 'cartes de révision', 'l')}${kpi('📶', 'Hors ligne', 'fonctionne même sans internet', 'm').replace('<b>', '<b class="txt">')}</section>
     ${doneL || last ? `<section class="mine"><span class="ring" style="--p:${pct}">${pct} %</span><div><b>Votre progression</b><p>${doneL} leçon${doneL > 1 ? 's' : ''} terminée${doneL > 1 ? 's' : ''} sur ${totalL}${last ? ` · dernière leçon : ${esc(last.s.title)}, ${esc(last.l.title)}` : ''}</p></div>${last ? `<a class="btn" href="#${state.last.route}">Reprendre</a>` : ''}</section>` : ''}
-    <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les cinq espaces</h2><p>Choisissez votre espace : la première leçon de chaque parcours est en accès libre.</p></div>
+    <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les cinq espaces</h2><p>Choisissez votre espace : la première leçon de chaque espace est en accès libre.</p></div>
     <section class="spaces">${SPACES.map(sp => { const p = spaceProgress(sp); const A = AUTH();
       const ins = A && A.user() ? (A.enrolled(sp.id) ? '<span class="tag ok">Inscrit</span>' : '<span class="tag">Non inscrit</span>') : '';
       return `<a class="spacecard c-${sp.color}" href="#espace-${sp.id}"><span class="sp-icon" aria-hidden="true">${sp.icon}</span>
@@ -326,7 +335,7 @@ function viewHome() {
         <span class="go">Entrer <span aria-hidden="true">→</span></span></a>`; }).join('')}
     </section>
     <div class="sec-h"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Comment ça marche ?</h2></div>
-    <section class="steps">${step('🧭', 'Choisissez un espace', 'L’arabe, le Coran, le droit ou l’intelligence artificielle : commencez par la première leçon, en accès libre.')}
+    <section class="steps">${step('🧭', 'Choisissez un espace', 'L’arabe, le Coran, le droit ou l’intelligence artificielle : commencez par la première leçon, en accès libre, puis suivez les étapes dans l’ordre.')}
       ${step('🎧', 'Apprenez et écoutez', 'Des leçons courtes, lues à voix haute, sur téléphone ou sur ordinateur, même sans connexion.')}
       ${step('✅', 'Vérifiez vos acquis', 'Les quiz se corrigent aussitôt ; les cartes de révision ramènent d’abord ce qu’il faut revoir.')}
       ${step('🎓', 'Recevez votre certificat', 'Toutes les leçons terminées et le quiz réussi à 70 % : votre certificat, vérifiable en ligne.')}</section>
@@ -366,13 +375,13 @@ function bindHeroVideo() {
 }
 function viewSpace(sp) {
   const ss = SUBJECTS.filter(s => spaceOf(s) === sp.id), p = spaceProgress(sp), A = AUTH();
-  const card = s => { const q = subjectProgress(s); const best = state.quiz[s.id];
-    return `<a class="subj c-${s.color}" href="#m-${s.id}"><h3>${esc(s.title)}</h3><p>${esc(s.subtitle)}</p>
+  const card = (s, k) => { const q = subjectProgress(s); const best = state.quiz[s.id], open = subjectOpen(s), ok = subjectPassed(s);
+    return `<a class="subj c-${s.color}${open ? '' : ' locked'}" href="#m-${s.id}"><span class="subj-step">${ok ? '✓ Réussi' : open ? 'Étape ' + (k + 1) : '🔒 Étape ' + (k + 1)}</span><h3>${esc(s.title)}</h3><p>${esc(s.subtitle)}</p>
       <div class="bar"><i style="width:${q.pct}%"></i></div>
       <span class="meta">${q.d} / ${q.n} leçons${best !== undefined ? ` · meilleur quiz ${best} %` : ''}</span></a>`; };
   let reg = '';
   if (A) {
-    if (!A.user()) reg = `<div class="notice">La première leçon de chaque parcours est en accès libre. Pour la suite, <button type="button" class="linkbtn" data-auth="signin">connectez-vous avec Google</button> puis inscrivez-vous à cet espace.</div>`;
+    if (!A.user()) reg = `<div class="notice">La première leçon de l’espace est en accès libre. Pour la suite, <button type="button" class="linkbtn" data-auth="signin">connectez-vous avec Google</button> puis inscrivez-vous à cet espace.</div>`;
     else if (!A.enrolled(sp.id)) reg = `<div class="notice reg-n"><span>Vous n’êtes pas encore inscrit à cet espace. L’inscription est gratuite et ouvre toutes les leçons.</span> <a class="btn small" href="#inscription-${sp.id}">M’inscrire à « ${esc(sp.title)} »</a></div>`;
     else reg = `<div class="notice ok">Vous êtes inscrit à cet espace (n° <b>${esc(A.enrollment(sp.id).num)}</b>) : toutes les leçons sont ouvertes. <a href="#inscription-${sp.id}">Ma fiche d’inscription</a></div>`;
   }
@@ -395,9 +404,10 @@ function viewSubject(s) {
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title])}
     <div class="duo"><aside class="duo-side"><div class="subject-head c-${s.color}"><span class="eyebrow">${p.d} / ${p.n} leçons terminées</span><h1>${esc(s.title)}</h1><p class="lead">${esc(s.subtitle)}</p>
       <div class="bar"><i style="width:${p.pct}%"></i></div>
-      <div class="actions"><a class="btn${inOrder(s, 'quiz') ? '' : ' is-locked'}" href="#q-${s.id}">${inOrder(s, 'quiz') ? '' : '🔒 '}Quiz (${s.quiz.length} questions)</a><a class="btn ghost" href="#f-${s.id}">Cartes de révision (${s.cards.length})</a></div></div>
+      <div class="actions"><a class="btn${inOrder(s, 'quiz') && subjectOpen(s) ? '' : ' is-locked'}" href="#q-${s.id}">${inOrder(s, 'quiz') && subjectOpen(s) ? '' : '🔒 '}Quiz (${s.quiz.length} questions)</a><a class="btn ghost${subjectOpen(s) ? '' : ' is-locked'}" href="#f-${s.id}">${subjectOpen(s) ? '' : '🔒 '}Cartes de révision (${s.cards.length})</a></div></div>
+    ${subjectOpen(s) ? '' : `<div class="notice">🔒 Ce parcours s’ouvre après « ${esc(blockingSubject(s).title)} » : terminez-en toutes les leçons et réussissez son quiz (au moins ${PASS()} %). <a href="#m-${blockingSubject(s).id}">Y aller</a></div>`}
     ${certPanelSubject(s)}</aside>
-    <div class="duo-main"><div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok' || !inOrder(s, i);
+    <div class="duo-main"><div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok' || !inOrder(s, i) || !subjectOpen(s);
       const cur = !d && state.last && state.last.route === 'l-' + s.id + '.' + l.id;
       return `<a class="lesson-link${d ? ' done' : ''}${cur ? ' cur' : ''}" href="#l-${s.id}.${l.id}"><span class="num">${d ? '✓' : i + 1}</span><span class="t">${esc(l.title)}${l.ar ? ` <span class="ara" lang="ar">${esc(l.ar)}</span>` : ''}</span>${d ? '<small>Terminée</small>' : cur ? '<small class="now">En cours</small>' : (lock ? '<small class="lock">🔒</small>' : (i === 0 && AUTH() ? '<small>Aperçu libre</small>' : ''))}</a>`; }).join('')}</div></div></div>`;
 }
@@ -406,13 +416,19 @@ function viewGate(s, why, i) {
   const u = A && A.user();
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [i === undefined ? 'Accès' : i === 'quiz' ? 'Quiz' : (i + 1) + ' / ' + s.lessons.length])}
     <div class="gate c-${sp.color}"><span class="sp-icon" aria-hidden="true">🔒</span>
-    ${why === 'order' ? (() => { const f = firstUndone(s), fl = s.lessons[f];
+    ${why === 'prev' ? (() => { const x = blockingSubject(s), f = firstUndone(x), xp = subjectProgress(x), best = state.quiz[x.id];
+      const go = f === -1 ? `#q-${x.id}` : `#l-${x.id}.${x.lessons[f].id}`;
+      return `<h1>Ce parcours s’ouvre après « ${esc(x.title)} »</h1>
+      <p class="lead">Dans l’espace « ${esc(sp.title)} », les parcours se suivent dans l’ordre. Pour ouvrir « ${esc(s.title)} », terminez d’abord toutes les leçons de « ${esc(x.title)} » et réussissez son quiz (au moins ${PASS()} %).</p>
+      <p>Où vous en êtes : <b>${xp.d} / ${xp.n} leçons</b>${best !== undefined ? ` · meilleur quiz <b>${best} %</b>` : ' · quiz pas encore fait'}.</p>
+      <div class="actions"><a class="btn" href="${go}">${f === -1 ? 'Faire le quiz' : `Reprendre à la leçon ${f + 1}`}</a><a class="btn ghost" href="#espace-${sp.id}">Voir l’espace</a></div>`; })()
+    : why === 'order' ? (() => { const f = firstUndone(s), fl = s.lessons[f];
       return `<h1>${i === 'quiz' ? 'Le quiz s’ouvre à la fin du parcours' : 'Une étape à la fois'}</h1>
       <p class="lead">Les leçons de « ${esc(s.title)} » se suivent dans l’ordre : chacune s’appuie sur la précédente. ${i === 'quiz' ? 'Terminez toutes les leçons pour ouvrir le quiz.' : 'Cette leçon s’ouvrira quand les précédentes seront terminées.'}</p>
       <p>Prochaine étape : <b>leçon ${f + 1} · ${esc(fl.title)}</b></p>
       <div class="actions"><a class="btn" href="#l-${s.id}.${fl.id}">Reprendre à la leçon ${f + 1}</a><a class="btn ghost" href="#m-${s.id}">Voir le parcours</a></div>`; })()
     : why === 'login' ? `<h1>Connectez-vous pour continuer</h1>
-      <p class="lead">La première leçon de chaque parcours est en accès libre. Pour la suite, connectez-vous avec votre compte Google, puis inscrivez-vous à l’espace « ${esc(sp.title)} ». C’est gratuit.</p>
+      <p class="lead">La première leçon de chaque espace est en accès libre. Pour la suite, connectez-vous avec votre compte Google, puis inscrivez-vous à l’espace « ${esc(sp.title)} ». C’est gratuit.</p>
       <div class="actions"><button type="button" class="btn" data-auth="signin">Se connecter avec Google</button></div>
       <p class="meta">En vous connectant, vous acceptez les <a href="#conditions">conditions d’utilisation</a> et la <a href="#confidentialite">politique de confidentialité</a>.</p>`
     : `<h1>Inscription à l’espace « ${esc(sp.title)} »</h1>
@@ -629,7 +645,7 @@ const PAGES = {
     { h: '1. Objet' },
     { p: 'Lisân Campus est un site d’apprentissage gratuit édité par les Éditions Lisân. En l’utilisant, vous acceptez les présentes conditions.' },
     { h: '2. Accès' },
-    { p: 'La page d’accueil, la présentation des espaces et la première leçon de chaque parcours sont en accès libre. L’accès au reste des contenus demande une connexion avec un compte Google et une inscription gratuite à chaque espace, avec une fiche d’inscription dont vous certifiez l’exactitude. Le site peut être interrompu pour maintenance ou évoluer sans préavis.' },
+    { p: 'La page d’accueil, la présentation des espaces et la première leçon de chaque espace sont en accès libre. Les leçons et les parcours se suivent dans l’ordre : chaque leçon s’ouvre quand la précédente est terminée, chaque parcours quand le précédent est réussi. L’accès au reste des contenus demande une connexion avec un compte Google et une inscription gratuite à chaque espace, avec une fiche d’inscription dont vous certifiez l’exactitude. Le site peut être interrompu pour maintenance ou évoluer sans préavis.' },
     { h: '3. Les contenus' },
     { p: 'Les contenus sont proposés à des fins d’apprentissage. Les leçons de droit ne constituent pas des consultations juridiques ; pour une situation personnelle, adressez-vous à un professionnel. La lecture du Coran s’apprend auprès d’un maître ; le Campus sert à réviser.' },
     { h: '4. Les certificats' },
@@ -690,7 +706,7 @@ function route() {
   let html = '', after = null, keep = false;
   const gate = (s, i) => { const a = access(s, i); return a === 'ok' ? null : viewGate(s, a, i); };
   // quiz et cartes : connexion et inscription seulement (l'ordre du quiz est vérifié à part)
-  const authGate = s => { const a = access(s, 1); return a === 'ok' || a === 'order' ? null : viewGate(s, a, 1); };
+  const authGate = s => { const a = access(s, 1); return a === 'ok' || a === 'order' ? null : viewGate(s, a, a === 'prev' ? undefined : 1); };
   if (h.startsWith('espace-') && space(h.slice(7))) html = viewSpace(space(h.slice(7)));
   else if (h.startsWith('m-') && subj(h.slice(2))) html = viewSubject(subj(h.slice(2)));
   else if (h.startsWith('l-') && findLesson(h.slice(2))) { const f = findLesson(h.slice(2)); const g = gate(f.s, f.i);
