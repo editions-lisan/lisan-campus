@@ -60,7 +60,7 @@ const SPACES = [
     lead: 'Comprendre l’intelligence artificielle et maîtriser Claude dans toutes les disciplines : étudier, enseigner, travailler, le droit, en toute sécurité.',
     intro: ['Huit parcours pour tous les profils : comprendre l’IA, bien formuler ses demandes, étudier (sciences, lettres, sciences humaines, sciences islamiques), enseigner et former, travailler (bureau, commerce, projets), l’IA juridique, l’éthique et la sécurité, et des projets pratiques.',
       'Chaque parcours a son quiz, ses cartes de révision et son certificat. Les consignes de la bibliothèque se copient d’un geste pour être collées dans Claude.'] },
-  { id: 'arabe', title: 'Apprendre l’arabe', eyebrow: 'Collections « Je lis l’arabe ! » et « Je parle arabe ! »', icon: '🗣️', color: 'k',
+  { id: 'arabe', title: 'Apprendre l’arabe', eyebrow: 'Collections « Je lis l’arabe ! » et « Je parle arabe ! »', icon: '💬', color: 'k',
     lead: 'Les compagnons des livres, du niveau 0 au niveau 3 : écouter les lettres, les mots et les dialogues, s’exercer et réviser.',
     intro: ['Ces quatre espaces accompagnent les livres des Éditions Lisân. Vous y écoutez les lettres, les syllabes, le vocabulaire et les dialogues de chaque leçon, vous vous entraînez avec les quiz et révisez avec les cartes.',
       'Le cours complet, les règles, les exercices écrits et leurs corrigés sont dans les livres : chaque leçon indique les pages correspondantes du livre et du cahier d’exercices.',
@@ -140,12 +140,20 @@ function spaceProgress(sp) {
 
 // ---------- accès : aperçu libre, puis connexion et inscription par espace (si la connexion est configurée)
 const AUTH = () => window.LisanAuth && window.LisanAuth.enabled ? window.LisanAuth : null;
+// Parcours en ordre : une leçon ne s'ouvre que si toutes les précédentes sont terminées
+// (une leçon déjà terminée reste toujours accessible, pour la relire) ; le quiz, après la dernière leçon.
+const firstUndone = s => s.lessons.findIndex(l => !state.done[s.id + '/' + l.id]);
+function inOrder(s, i) {
+  if (i === 'quiz') return firstUndone(s) === -1;
+  if (state.done[s.id + '/' + s.lessons[i].id]) return true;
+  const f = firstUndone(s); return f === -1 || i <= f;
+}
 function access(s, lessonIndex) {
-  const A = AUTH(); if (!A) return 'ok';
+  const A = AUTH();
   if (lessonIndex === 0) return 'ok';
-  if (!A.user()) return 'login';
-  if (!A.enrolled(spaceOf(s))) return 'enroll';
-  return 'ok';
+  if (A && !A.user()) return 'login';
+  if (A && !A.enrolled(spaceOf(s))) return 'enroll';
+  return inOrder(s, lessonIndex) ? 'ok' : 'order';
 }
 
 // ---------- blocs de contenu
@@ -387,18 +395,23 @@ function viewSubject(s) {
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title])}
     <div class="duo"><aside class="duo-side"><div class="subject-head c-${s.color}"><span class="eyebrow">${p.d} / ${p.n} leçons terminées</span><h1>${esc(s.title)}</h1><p class="lead">${esc(s.subtitle)}</p>
       <div class="bar"><i style="width:${p.pct}%"></i></div>
-      <div class="actions"><a class="btn" href="#q-${s.id}">Quiz (${s.quiz.length} questions)</a><a class="btn ghost" href="#f-${s.id}">Cartes de révision (${s.cards.length})</a></div></div>
+      <div class="actions"><a class="btn${inOrder(s, 'quiz') ? '' : ' is-locked'}" href="#q-${s.id}">${inOrder(s, 'quiz') ? '' : '🔒 '}Quiz (${s.quiz.length} questions)</a><a class="btn ghost" href="#f-${s.id}">Cartes de révision (${s.cards.length})</a></div></div>
     ${certPanelSubject(s)}</aside>
-    <div class="duo-main"><div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok';
+    <div class="duo-main"><div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok' || !inOrder(s, i);
       const cur = !d && state.last && state.last.route === 'l-' + s.id + '.' + l.id;
       return `<a class="lesson-link${d ? ' done' : ''}${cur ? ' cur' : ''}" href="#l-${s.id}.${l.id}"><span class="num">${d ? '✓' : i + 1}</span><span class="t">${esc(l.title)}${l.ar ? ` <span class="ara" lang="ar">${esc(l.ar)}</span>` : ''}</span>${d ? '<small>Terminée</small>' : cur ? '<small class="now">En cours</small>' : (lock ? '<small class="lock">🔒</small>' : (i === 0 && AUTH() ? '<small>Aperçu libre</small>' : ''))}</a>`; }).join('')}</div></div></div>`;
 }
 function viewGate(s, why, i) {
   const sp = space(spaceOf(s)), A = AUTH();
   const u = A && A.user();
-  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [i === undefined ? 'Accès' : (i + 1) + ' / ' + s.lessons.length])}
+  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [i === undefined ? 'Accès' : i === 'quiz' ? 'Quiz' : (i + 1) + ' / ' + s.lessons.length])}
     <div class="gate c-${sp.color}"><span class="sp-icon" aria-hidden="true">🔒</span>
-    ${why === 'login' ? `<h1>Connectez-vous pour continuer</h1>
+    ${why === 'order' ? (() => { const f = firstUndone(s), fl = s.lessons[f];
+      return `<h1>${i === 'quiz' ? 'Le quiz s’ouvre à la fin du parcours' : 'Une étape à la fois'}</h1>
+      <p class="lead">Les leçons de « ${esc(s.title)} » se suivent dans l’ordre : chacune s’appuie sur la précédente. ${i === 'quiz' ? 'Terminez toutes les leçons pour ouvrir le quiz.' : 'Cette leçon s’ouvrira quand les précédentes seront terminées.'}</p>
+      <p>Prochaine étape : <b>leçon ${f + 1} · ${esc(fl.title)}</b></p>
+      <div class="actions"><a class="btn" href="#l-${s.id}.${fl.id}">Reprendre à la leçon ${f + 1}</a><a class="btn ghost" href="#m-${s.id}">Voir le parcours</a></div>`; })()
+    : why === 'login' ? `<h1>Connectez-vous pour continuer</h1>
       <p class="lead">La première leçon de chaque parcours est en accès libre. Pour la suite, connectez-vous avec votre compte Google, puis inscrivez-vous à l’espace « ${esc(sp.title)} ». C’est gratuit.</p>
       <div class="actions"><button type="button" class="btn" data-auth="signin">Se connecter avec Google</button></div>
       <p class="meta">En vous connectant, vous acceptez les <a href="#conditions">conditions d’utilisation</a> et la <a href="#confidentialite">politique de confidentialité</a>.</p>`
@@ -415,9 +428,9 @@ function viewLesson(found) {
   const P = subjectProgress(s);
   const side = `<aside class="lside c-${s.color}" aria-label="Le parcours"><div class="ls-head"><span class="eyebrow">Le parcours</span><a href="#m-${s.id}"><b>${esc(s.title)}</b></a>
       <div class="bar"><i style="width:${P.pct}%"></i></div><span class="meta">${P.d} / ${P.n} leçons terminées</span></div>
-    <nav class="ls-list">${s.lessons.map((x, j) => { const dn = !!state.done[s.id + '/' + x.id];
-      return `<a href="#l-${s.id}.${x.id}" class="${j === i ? 'on' : ''}${dn ? ' done' : ''}"${j === i ? ' aria-current="page"' : ''}><span>${dn ? '✓' : j + 1}</span>${esc(x.title)}</a>`; }).join('')}</nav>
-    <div class="ls-act"><a class="btn small" href="#q-${s.id}">Quiz</a><a class="btn ghost small" href="#f-${s.id}">Cartes</a></div></aside>`;
+    <nav class="ls-list">${s.lessons.map((x, j) => { const dn = !!state.done[s.id + '/' + x.id], lk = !dn && !inOrder(s, j);
+      return `<a href="#l-${s.id}.${x.id}" class="${j === i ? 'on' : ''}${dn ? ' done' : ''}${lk ? ' locked' : ''}"${j === i ? ' aria-current="page"' : ''}><span>${dn ? '✓' : lk ? '🔒' : j + 1}</span>${esc(x.title)}</a>`; }).join('')}</nav>
+    <div class="ls-act"><a class="btn small" href="#q-${s.id}">${inOrder(s, 'quiz') ? '' : '🔒 '}Quiz</a><a class="btn ghost small" href="#f-${s.id}">Cartes</a></div></aside>`;
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [(i + 1) + ' / ' + s.lessons.length])}
     <div class="duo duo-r"><article class="lesson read c-${s.color}">
       <span class="eyebrow">${esc(s.title)} · ${i + 1} / ${s.lessons.length}</span>
@@ -429,7 +442,7 @@ function viewLesson(found) {
         <button type="button" class="btn done-toggle" data-done="${key}" data-need="${needFor(l)}" aria-pressed="${d}">${d ? '✓ Leçon terminée' : 'Marquer comme terminée'}</button>
         <p class="meta done-msg" id="done-msg" aria-live="polite"></p>
         <button type="button" class="linkbtn sugg-link" data-suggest="${esc(s.title + ' · ' + l.title)}">💡 Suggérer une amélioration</button>
-        <div class="actions">${prev ? `<a class="btn ghost small" href="#l-${s.id}.${prev.id}">← Précédente</a>` : ''}${next ? `<a class="btn small" href="#l-${s.id}.${next.id}">Suivante →</a>` : `<a class="btn small" href="#q-${s.id}">Faire le quiz →</a>`}</div>
+        <div class="actions">${prev ? `<a class="btn ghost small" href="#l-${s.id}.${prev.id}">← Précédente</a>` : ''}<a class="btn small${d ? '' : ' is-locked'}" data-next="1" href="${next ? `#l-${s.id}.${next.id}` : `#q-${s.id}`}">${next ? 'Suivante →' : 'Faire le quiz →'}</a></div>
       </div>
     </article>${side}</div>`;
 }
@@ -637,6 +650,7 @@ const PAGES = {
     { ul: ['Polices : Literata, Atkinson Hyperlegible et Noto Sans (licence SIL Open Font) ; **Lisan Naskh**, dérivée de Noto Naskh Arabic, avec le code couleur des voyelles des Éditions Lisân (licence SIL Open Font).',
       'Récitations du Coran : cheikh Maḥmoûd Khalîl al-Ḥouṣarî, lecture d’enseignement (al-mou‘allim), diffusées par everyayah.com.',
       'Voix de lecture : la synthèse vocale de votre appareil.',
+      'Pictogrammes : Fluent Emoji de Microsoft et, pour les drapeaux, flag-icons (licence MIT ; textes des licences dans le fichier emoji/LICENCES.txt du site).',
       'Export des listes au format Excel : SheetJS (licence Apache 2.0) ; codes QR des certificats : qrcode-generator de Kazuhiko Arase (licence MIT).',
       'Vidéo de présentation et sa musique : créations originales des Éditions Lisân.'] },
     { p: '© Mouhamadou CISSEMA — Éditions Lisân. Tous droits réservés.' },
@@ -675,12 +689,14 @@ function route() {
   trackNav(h);
   let html = '', after = null, keep = false;
   const gate = (s, i) => { const a = access(s, i); return a === 'ok' ? null : viewGate(s, a, i); };
+  // quiz et cartes : connexion et inscription seulement (l'ordre du quiz est vérifié à part)
+  const authGate = s => { const a = access(s, 1); return a === 'ok' || a === 'order' ? null : viewGate(s, a, 1); };
   if (h.startsWith('espace-') && space(h.slice(7))) html = viewSpace(space(h.slice(7)));
   else if (h.startsWith('m-') && subj(h.slice(2))) html = viewSubject(subj(h.slice(2)));
   else if (h.startsWith('l-') && findLesson(h.slice(2))) { const f = findLesson(h.slice(2)); const g = gate(f.s, f.i);
     if (g) html = g; else { html = viewLesson(f); keep = true; after = afterLesson; } }
-  else if (h.startsWith('q-') && subj(h.slice(2))) { const s = subj(h.slice(2)); html = gate(s, 1) || viewQuiz(s); }
-  else if (h.startsWith('f-') && subj(h.slice(2))) { const s = subj(h.slice(2)); const g = gate(s, 1); if (g) html = g; else { html = viewFlash(s); after = () => { drawFlash(); checkArVoice(); }; } }
+  else if (h.startsWith('q-') && subj(h.slice(2))) { const s = subj(h.slice(2)); html = authGate(s) || (inOrder(s, 'quiz') ? viewQuiz(s) : viewGate(s, 'order', 'quiz')); }
+  else if (h.startsWith('f-') && subj(h.slice(2))) { const s = subj(h.slice(2)); const g = authGate(s); if (g) html = g; else { html = viewFlash(s); after = () => { drawFlash(); checkArVoice(); }; } }
   else if (h === 'glossaire') { html = viewGlossary(); after = () => { drawGlossary(''); document.getElementById('gsearch').addEventListener('input', e => drawGlossary(e.target.value)); }; }
   else if (h === 'parametres') { html = viewSettings(); after = voiceStatus; }
   else if (h === 'compte') html = viewAccount();
@@ -951,13 +967,18 @@ document.addEventListener('click', e => {
     return; }
   const rel = t.closest('[data-reload]');
   if (rel && rel.getAttribute('href') === location.hash) { e.preventDefault(); route(); return; }
+  const nx = t.closest('[data-next].is-locked');
+  if (nx) { e.preventDefault(); const b = document.querySelector('[data-done]'), m = document.getElementById('done-msg');
+    if (m) m.textContent = 'Terminez d’abord cette leçon (bouton « Marquer comme terminée ») : les leçons se suivent dans l’ordre.';
+    if (b) { b.scrollIntoView({ block: 'center', behavior: 'smooth' }); b.classList.remove('nudge'); void b.offsetWidth; b.classList.add('nudge'); } return; }
   const dt = t.closest('[data-done]');
   if (dt) { const k = dt.dataset.done, need = +dt.dataset.need || 0, left = need - (state.time[k] || 0), m = document.getElementById('done-msg');
     if (!state.done[k] && left > 0) {
       if (m) m.textContent = `Prenez le temps de lire la leçon jusqu’au bout : il reste environ ${fmtLeft(left)} de lecture avant de pouvoir la terminer. Le temps avance quand la leçon est ouverte et que vous lisez ou l’écoutez.`;
       dt.classList.remove('nudge'); void dt.offsetWidth; dt.classList.add('nudge'); return; }
     if (state.done[k]) delete state.done[k]; else state.done[k] = 1; save('done'); if (m) m.textContent = '';
-    doneBtnState(dt); if (state.done[k]) confetti(dt); return; }
+    doneBtnState(dt); const nb = document.querySelector('[data-next]'); if (nb) nb.classList.toggle('is-locked', !state.done[k]);
+    if (state.done[k]) confetti(dt); return; }
   const mk = t.closest('.mark');
   if (mk) { const card = mk.closest('.word'), id = card.dataset.wid; if (state.words[id]) delete state.words[id]; else state.words[id] = 1; save('words');
     const m = !!state.words[id]; card.classList.toggle('mastered', m); mk.setAttribute('aria-pressed', m); mk.textContent = m ? '✓ Maîtrisé' : 'Maîtrisé ?';

@@ -889,3 +889,11 @@ body { overflow-x: clip; }
 .ayah .ara { margin: 0 0 8px; font-size: 1.55em; line-height: 2; text-align: right; }
 .ayah figcaption { display: flex; flex-direction: column; gap: 6px; }
 .ayah figcaption small { color: var(--muted); }
+
+/* émoticônes en images (emoji.js) */
+img.emo { display: inline-block; width: 1.18em; height: 1.18em; vertical-align: -.22em; margin: 0 .04em; object-fit: contain; }
+img.emo.flag { width: 1.4em; height: 1.05em; vertical-align: -.12em; border-radius: 2px; box-shadow: 0 0 0 1px rgba(0, 0, 0, .08); object-fit: cover; }
+/* parcours en ordre : étapes encore fermées */
+.btn.is-locked { opacity: .55; filter: grayscale(.4); }
+.ls-list a.locked { opacity: .55; }
+.lesson-link .lock { opacity: .8; }
