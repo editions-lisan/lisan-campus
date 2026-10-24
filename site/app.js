@@ -1063,7 +1063,20 @@ if (!synth) setTimeout(showNoVoice, 0);
 // La page s'affiche tout de suite ; on n'attend la connexion Google que si l'élève était connecté
 // lors de sa dernière visite (au plus 7 secondes), pour ne pas lui montrer des leçons verrouillées.
 let booted = false;
-function boot() { if (booted) return; booted = true; route(); document.body.classList.add('ready'); window.dispatchEvent(new Event('lc-ready')); }
+// Rechargement (tirer vers le bas, bouton Actualiser) : on revient sur la page et à l'endroit où l'on était,
+// même si le téléphone recharge l'adresse de départ de l'application sans l'ancre de la page.
+const isReload = (() => { try { const n = performance.getEntriesByType('navigation')[0]; return n ? n.type === 'reload' : performance.navigation.type === 1; } catch (e) { return false; } })();
+const keepPlace = () => { try { sessionStorage.setItem('lc-route', location.hash); sessionStorage.setItem('lc-y', String(Math.round(scrollY))); } catch (e) {} };
+window.addEventListener('pagehide', keepPlace);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') keepPlace(); });
+function restorePlace() {
+  if (!isReload) return null;
+  let r = null, y = 0; try { r = sessionStorage.getItem('lc-route'); y = +sessionStorage.getItem('lc-y') || 0; } catch (e) {}
+  if (r && r.length > 1 && (!location.hash || location.hash === '#accueil') && r !== location.hash) history.replaceState(null, '', r);
+  return r === location.hash ? y : null;
+}
+function boot() { if (booted) return; booted = true; const y = restorePlace(); route(); document.body.classList.add('ready'); window.dispatchEvent(new Event('lc-ready'));
+  if (y && !location.hash.startsWith('#l-')) setTimeout(() => scrollTo(0, y), 60); }
 const LA = window.LisanAuth;
 if (LA && LA.ready) {
   if (!LA.likely) boot();
