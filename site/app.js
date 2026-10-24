@@ -585,7 +585,7 @@ const PAGES = {
     { box: 'Les contenus de droit résument des cours et des textes publics : vérifiez toujours avec vos enseignants.', title: 'À savoir', kind: 'marge' },
   ] },
   confidentialite: { title: 'Politique de confidentialité', body: [
-    { p: '*Dernière mise à jour : 23 octobre 2026.*' },
+    { p: '*Dernière mise à jour : 24 octobre 2026.*' },
     { p: 'Les Éditions Lisân attachent une grande importance à la protection de vos données personnelles, conformément à la **loi ivoirienne n° 2013-450 du 19 juin 2013** relative à la protection des données à caractère personnel.' },
     { h: '1. Responsable du traitement' },
     { p: 'Éditions Lisân, représentées par Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Contact : la page [Contact](#contact) du site.' },
@@ -600,8 +600,8 @@ const PAGES = {
     { p: 'Ces données servent à **gérer vos inscriptions**, à **adapter les cours** à nos élèves et à **vous contacter au sujet de vos cours**. Vous ne recevez nos nouveautés que si vous l’avez demandé dans votre fiche. Vos données ne sont **ni vendues, ni cédées**.' },
     { p: 'Lisân Campus n’utilise **ni publicité, ni cookies de suivi, ni outil de mesure d’audience**.' },
     { h: '3. Les prestataires' },
-    { ul: ['**Netlify** (hébergement du site et réception des messages du formulaire de contact).',
-      '**Google** : connexion avec un compte Google et stockage des comptes (Firebase, serveurs situés en Europe). Les polices de caractères sont hébergées sur le site lui-même.',
+    { ul: ['**Cloudflare** (hébergement du site).',
+      '**Google** : connexion avec un compte Google, stockage des comptes et des messages du formulaire de contact (Firebase, serveurs situés en Europe). Les polices de caractères sont hébergées sur le site lui-même.',
       '**everyayah.com** : diffusion des récitations du Coran ; votre navigateur s’y connecte quand vous écoutez un verset.'] },
     { p: 'Ces prestataires peuvent traiter des données hors de Côte d’Ivoire. La voix de lecture est celle de votre appareil : les textes lus ne nous sont pas envoyés.' },
     { h: '4. Durée de conservation' },
@@ -632,7 +632,7 @@ const PAGES = {
     { h: 'Éditeur' },
     { p: '**Éditions Lisân**, marque de Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Directeur de la publication : Mouhamadou CISSEMA. Contact : page [Contact](#contact).' },
     { h: 'Hébergement' },
-    { p: '**Netlify, Inc.**, San Francisco, États-Unis — www.netlify.com. Le code du site est conservé sur GitHub.' },
+    { p: '**Cloudflare, Inc.** (service Cloudflare Pages), San Francisco, États-Unis — www.cloudflare.com. Le code du site est conservé sur GitHub ; les comptes et les messages sont enregistrés sur Firebase (Google), en Europe.' },
     { h: 'Crédits' },
     { ul: ['Polices : Literata, Atkinson Hyperlegible et Noto Sans (licence SIL Open Font) ; **Lisan Naskh**, dérivée de Noto Naskh Arabic, avec le code couleur des voyelles des Éditions Lisân (licence SIL Open Font).',
       'Récitations du Coran : cheikh Maḥmoûd Khalîl al-Ḥouṣarî, lecture d’enseignement (al-mou‘allim), diffusées par everyayah.com.',
@@ -711,10 +711,13 @@ function bindContact() {
   const f = document.getElementById('contact-form'), msg = document.getElementById('contact-msg');
   f.addEventListener('submit', e => {
     e.preventDefault();
-    const data = new URLSearchParams(new FormData(f)); data.append('form-name', 'contact');
+    if (f.elements['bot-field'] && f.elements['bot-field'].value) return;
+    const x = { nom: f.elements.nom.value.trim(), email: f.elements.email.value.trim(), sujet: f.elements.sujet.value, message: f.elements.message.value.trim() };
     msg.textContent = 'Envoi en cours…';
-    fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: data.toString() })
-      .then(r => { if (!r.ok) throw new Error(r.status); f.reset(); msg.textContent = 'Merci ! Votre message a bien été envoyé. Nous vous répondrons dès que possible.'; })
+    const send = AUTH() && AUTH().sendMessage ? AUTH().sendMessage(x)
+      : (() => { const data = new URLSearchParams(new FormData(f)); data.append('form-name', 'contact');
+        return fetch('/', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: data.toString() }).then(r => { if (!r.ok) throw new Error(r.status); }); })();
+    send.then(() => { f.reset(); msg.textContent = 'Merci ! Votre message a bien été envoyé. Nous vous répondrons dès que possible.'; })
       .catch(() => { msg.textContent = 'L’envoi n’a pas abouti. Vérifiez votre connexion internet et réessayez.'; });
   });
 }

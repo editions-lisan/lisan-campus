@@ -84,9 +84,20 @@
       if (!snap.exists) return null; const o = snap.data(); return Object.assign({}, o, { date: iso(o.date) });
     },
     async certRulesOk() {                                // les règles Firestore autorisent-elles déjà les certificats ?
-      try { await fb.firestore().collection('regles').doc('v3').get({ source: 'server' }); return true; }
+      try { await fb.firestore().collection('regles').doc('v4').get({ source: 'server' }); return true; }
       catch (e) { return !/permission/.test((e && (e.code || e.message)) || ''); }
     },
+    sendMessage(x) {                                     // formulaire de contact : enregistré dans Firebase, lu par l'administrateur
+      const rec = { nom: String(x.nom || '').slice(0, 100), email: String(x.email || '').slice(0, 150), sujet: String(x.sujet || '').slice(0, 80),
+        message: String(x.message || '').slice(0, 4000), date: fb.firestore.FieldValue.serverTimestamp() };
+      if (user) rec.uid = user.uid;
+      return within(fb.firestore().collection('messages').add(rec), 15000);
+    },
+    async adminMessages() {                              // administration : messages du formulaire de contact
+      const snap = await fb.firestore().collection('messages').get({ source: 'server' });
+      return snap.docs.map(d => Object.assign({ id: d.id }, d.data(), { date: iso(d.data().date) })).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+    },
+    adminDeleteMessage: id => within(fb.firestore().collection('messages').doc(id).delete()),
     suggestions: () => Object.values((user && profile && profile.sugg) || {}).sort((a, b) => String(b.date).localeCompare(String(a.date))),
     suggest(x) {                                         // suggestion : enregistrée dans la fiche de l'élève, lue par l'administrateur
       if (!user) return Promise.reject(new Error('non connecté'));

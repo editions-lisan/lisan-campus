@@ -2,7 +2,7 @@
 // Utilise app.js (esc, crumbs, space, spaceOf, subj, SUBJECTS, state, subjectProgress, AUTH, route) et inscription.js (prenomFmt, dateFr).
 
 const CERT_QUIZ = 70;                                    // score minimal au quiz pour obtenir un certificat
-const SITE_URL = 'https://lisan-campus.netlify.app/';
+const SITE_URL = 'https://lisan-campus.pages.dev/';
 const verifUrl = num => `${SITE_URL}#verifier-${num}`;
 
 // ---------- conditions
@@ -146,7 +146,7 @@ function certHTML(c) {
         <div class="cert-sign"><b>Mouhamadou CISSEMA</b><span>Fondateur des Éditions Lisân</span></div>
         <div class="cert-qr">${qrSvg(verifUrl(c.num))}<span>Scannez pour vérifier</span></div>
       </footer>
-      <p class="cert-check">Authenticité vérifiable sur lisan-campus.netlify.app/#verifier : le numéro, le titulaire et le code d’authenticité doivent correspondre exactement.</p>
+      <p class="cert-check">Authenticité vérifiable sur lisan-campus.pages.dev/#verifier : le numéro, le titulaire et le code d’authenticité doivent correspondre exactement.</p>
     </div></article></div>`;
 }
 const certActions = c => `<div class="actions cert-actions"><button type="button" class="btn" data-cert-print="1">Imprimer ou enregistrer en PDF</button>
@@ -173,7 +173,7 @@ function viewVerify(num) {
     <p class="lead">Chaque certificat de Lisân Campus porte un numéro et un code QR. Saisissez le numéro pour vérifier qu’il a bien été délivré par les Éditions Lisân.</p>
     <form class="form verify-form" id="verify-form"><label>Numéro du certificat<input name="num" value="${esc(num || '')}" placeholder="LCC-2026-XXXXXXXX" autocomplete="off" autocapitalize="characters" required></label>
       <div class="actions"><button type="submit" class="btn">Vérifier</button></div></form>
-    <div id="verify-out" aria-live="polite">${A ? '' : '<p class="notice">La vérification n’est pas disponible sur cet aperçu : ouvrez lisan-campus.netlify.app.</p>'}</div>
+    <div id="verify-out" aria-live="polite">${A ? '' : '<p class="notice">La vérification n’est pas disponible sur cet aperçu : ouvrez lisan-campus.pages.dev.</p>'}</div>
     <p class="meta">Chaque certificat est inscrit dans le registre de Lisân Campus au moment où il est délivré ; il ne peut plus être modifié ensuite. Il porte un numéro unique, un code d’authenticité, un code QR, un micro-texte au nom du titulaire et un fond de sécurité. Un certificat Lisân Campus atteste que son titulaire a terminé les leçons et réussi les quiz du parcours sur le site. Ce n’est pas un diplôme d’État.</p></div>`;
 }
 function bindVerify(num) {

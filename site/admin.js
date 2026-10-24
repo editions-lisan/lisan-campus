@@ -33,7 +33,8 @@ function bindAdmin() { if (!document.getElementById('admin')) return; if (!admin
 function loadAdmin() {
   adminRun.loading = true; adminRun.err = ''; drawAdmin();
   AUTH().adminList().then(async list => { adminRun.list = list; adminRun.rulesOk = await AUTH().certRulesOk();
-    adminRun.registry = null; if (adminRun.rulesOk) { try { adminRun.registry = await AUTH().adminRegistry(); } catch (e) {} } adminRun.loading = false; setAdminCached(true); drawAdmin(); if (typeof renderDrawer === 'function') renderDrawer(); })
+    adminRun.registry = null; if (adminRun.rulesOk) { try { adminRun.registry = await AUTH().adminRegistry(); } catch (e) {} }
+    adminRun.msgs = []; if (adminRun.rulesOk && AUTH().adminMessages) { try { adminRun.msgs = await AUTH().adminMessages(); } catch (e) {} } adminRun.loading = false; setAdminCached(true); drawAdmin(); if (typeof renderDrawer === 'function') renderDrawer(); })
     .catch(e => { adminRun.loading = false; adminRun.list = null;
       adminRun.err = e && /permission/.test(e.code || e.message || '') ? 'denied' : 'network'; if (adminRun.err === 'denied') setAdminCached(false); drawAdmin(); });
 }
@@ -83,9 +84,20 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if isAdmin() || (request.auth != null && resource.data.uid == request.auth.uid);
     }
+    // Messages du formulaire de contact : chacun peut écrire, seul l'administrateur lit
+    match /messages/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['nom', 'email', 'sujet', 'message', 'date', 'uid'])
+        && request.resource.data.nom is string && request.resource.data.nom.size() > 0 && request.resource.data.nom.size() <= 100
+        && request.resource.data.email is string && request.resource.data.email.size() <= 150 && request.resource.data.email.matches('[^@ ]+@[^@ ]+[.][^@ ]+')
+        && request.resource.data.sujet is string && request.resource.data.sujet.size() <= 80
+        && request.resource.data.message is string && request.resource.data.message.size() > 0 && request.resource.data.message.size() <= 4000
+        && request.resource.data.date == request.time
+        && (!('uid' in request.resource.data) || (request.auth != null && request.resource.data.uid == request.auth.uid));
+      allow read, delete: if isAdmin();
+    }
     // repère de version des règles (vérifié par la page d'administration)
     match /regles/{v} {
-      allow get: if v == 'v3';
+      allow get: if v == 'v4';
     }
   }
 }`;
@@ -115,7 +127,8 @@ function drawAdmin() {
   const stat = (n, t, c) => `<div class="stat${c ? ' c-' + c : ''}"><b>${n}</b><span>${esc(t)}</span></div>`;
   const tabs = `<div class="chips adm-tabs" role="group" aria-label="Rubrique"><button type="button" class="chip" data-admin-tab="ins" aria-pressed="${R.tab === 'ins'}">👥 Inscrits (${all.length})</button>
     <button type="button" class="chip" data-admin-tab="cert" aria-pressed="${R.tab === 'cert'}">🎓 Certificats (${certs.length})</button>
-    <button type="button" class="chip" data-admin-tab="sugg" aria-pressed="${R.tab === 'sugg'}">💡 Suggestions (${suggs.length})</button></div>`;
+    <button type="button" class="chip" data-admin-tab="sugg" aria-pressed="${R.tab === 'sugg'}">💡 Suggestions (${suggs.length})</button>
+    <button type="button" class="chip" data-admin-tab="msg" aria-pressed="${R.tab === 'msg'}">✉️ Messages (${(R.msgs || []).length})</button></div>`;
   const head = `<span class="eyebrow">Éditions Lisân</span><h1>Administration</h1>
     ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour pour les certificats et la sécurité renforcée.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
     <div class="stats">${stat(list.length, 'comptes créés')}${stat(all.length, 'inscriptions')}${stat(fresh, 'nouvelles (7 jours)')}${stat(noIns, 'comptes sans inscription')}
@@ -124,6 +137,8 @@ function drawAdmin() {
     <div class="actions"><button type="button" class="btn small" data-admin="xlsx">⬇ Télécharger en Excel</button>${R.tab === 'ins' ? '<button type="button" class="btn ghost small" data-admin="csv">⬇ CSV</button>' : ''}
       <button type="button" class="btn ghost small" data-admin="reload">↻ Actualiser</button></div>`;
   if (R.tab === 'cert') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${certs.length} certificat${certs.length > 1 ? 's' : ''} délivré${certs.length > 1 ? 's' : ''}.</p><div class="adm-list">${certCards(certs)}</div>`; return; }
+  if (R.tab === 'msg') { const ms = R.msgs || [];
+    box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${ms.length} message${ms.length > 1 ? 's' : ''} reçu${ms.length > 1 ? 's' : ''} par le formulaire de contact.</p><div class="adm-list">${msgCards(ms)}</div>`; return; }
   if (R.tab === 'sugg') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${suggs.length} suggestion${suggs.length > 1 ? 's' : ''}, de la plus récente à la plus ancienne.</p><div class="adm-list">${suggCards(suggs)}</div>`; return; }
   box.innerHTML = `${head}
     <div class="chips" role="group" aria-label="Filtrer par espace"><button type="button" class="chip" data-admin-sp="all" aria-pressed="${R.sp === 'all'}">Tous (${all.length})</button>
@@ -145,6 +160,13 @@ function certCards(rows) {
     <small>N° ${esc(c.num)} · délivré le ${dateFr(c.date)}</small><p>${esc(c.titre)}${c.type === 'parcours' ? ' · ' + esc(c.espace) : ''} · ${Number(c.lecons) || 0} leçons${c.quiz !== null && c.quiz !== undefined ? ' · quiz ' + Number(c.quiz) + ' %' : ''}</p>
     <div class="actions" id="rv-${esc(c.num)}"><a class="btn ghost small" href="#verifier-${esc(c.num)}">Voir le certificat</a>${waLink(u.info) ? `<a class="btn ghost small" href="${waLink(u.info)}" target="_blank" rel="noopener">Féliciter sur WhatsApp</a>` : ''}
       ${revoked || !adminRun.registry ? '' : `<button type="button" class="linkbtn small-l" data-revoke="${esc(c.num)}">Annuler ce certificat</button>`}</div></article>`; }).join('');
+}
+function msgCards(ms) {
+  if (!ms.length) return '<p class="meta">Aucun message pour le moment.</p>';
+  return ms.map(m => `<article class="adm-card c-h" id="msg-${esc(m.id)}"><div class="adm-top"><b>${esc(m.sujet || 'Message')}</b><small>${m.date ? dateFr(m.date) : ''}</small></div>
+    <p class="sugg-text">${esc(m.message)}</p><small>De ${esc(m.nom)} · ${esc(m.email)}</small>
+    <div class="actions"><a class="btn small" href="mailto:${esc(m.email)}?subject=${encodeURIComponent('Re : ' + (m.sujet || 'votre message') + ' — Lisân Campus')}">Répondre par e-mail</a>
+      <button type="button" class="linkbtn small-l" data-msg-del="${esc(m.id)}">Supprimer</button></div></article>`).join('');
 }
 function suggCards(rows) {
   if (!rows.length) return '<p class="meta">Aucune suggestion pour le moment.</p>';
@@ -215,6 +237,10 @@ function exportCsv() {
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-admin]'), c = e.target.closest('[data-admin-sp]');
   if (c) { adminRun.sp = c.dataset.adminSp; drawAdmin(); return; }
+  const md_ = e.target.closest('[data-msg-del]');
+  if (md_) { const id = md_.dataset.msgDel; md_.disabled = true;
+    AUTH().adminDeleteMessage(id).then(() => { adminRun.msgs = (adminRun.msgs || []).filter(m => m.id !== id); drawAdmin(); }, () => { md_.disabled = false; });
+    return; }
   const rv = e.target.closest('[data-revoke]');
   if (rv) { const n = rv.dataset.revoke, z = document.getElementById('rv-' + n);
     z.insertAdjacentHTML('beforeend', `<span class="meta">Annuler définitivement le certificat ${esc(n)} ? Il ne sera plus reconnu à la vérification.</span><button type="button" class="btn bad small" data-revoke-yes="${esc(n)}">Oui, annuler</button>`); rv.remove(); return; }
