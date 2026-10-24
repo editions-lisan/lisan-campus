@@ -10,6 +10,7 @@
   let fb = null, user = null, profile = cache.get('profile', null), timer = null;
   const LisanAuth = {
     enabled: true,
+    likely: !!profile,                                    // connecté lors de la dernière visite (fiche gardée en mémoire)
     user: () => user,
     enrolled: id => !!(user && profile && profile.spaces && profile.spaces[id] && profile.spaces[id].num),
     enrollment: id => (user && profile && profile.spaces && profile.spaces[id] && profile.spaces[id].num) ? profile.spaces[id] : null,

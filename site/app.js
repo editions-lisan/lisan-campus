@@ -889,9 +889,12 @@ function liftVeil() { if (!veil || veil.classList.contains('out')) return; veil.
 if (veil) {
   let seen = false; try { seen = sessionStorage.getItem('lc-intro') === '1'; sessionStorage.setItem('lc-intro', '1'); } catch (e) {}
   if (!MOTION) veil.remove();
-  else if (seen) liftVeil();
-  else { document.body.classList.add('veiled'); const go = () => setTimeout(liftVeil, Math.max(0, 1500 - performance.now()));
-    (document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(go, go); setTimeout(liftVeil, 2800); }
+  else if (!seen) document.body.classList.add('veiled');
+  // le voile se lève quand la page est prête (et les polices chargées), jamais sur une page vide
+  const fontsOk = document.fonts && document.fonts.ready ? document.fonts.ready.catch(() => {}) : Promise.resolve();
+  const pageOk = new Promise(res => { if (document.body.classList.contains('ready')) res(); else window.addEventListener('lc-ready', res, { once: true }); });
+  Promise.all([fontsOk, pageOk]).then(() => setTimeout(liftVeil, seen ? 0 : Math.max(0, 1200 - performance.now())));
+  setTimeout(liftVeil, 9000);
 }
 // confettis : petite fête quand une leçon est terminée ou un quiz réussi
 function confetti(from) {
@@ -1004,4 +1007,13 @@ function alertInline(t) { const n = document.getElementById('ios-help'); if (n) 
 // ---------- démarrage
 applyDisplay();
 if (!synth) setTimeout(showNoVoice, 0);
-if (window.LisanAuth && window.LisanAuth.ready) window.LisanAuth.ready.then(route, route); else route();
+// La page s'affiche tout de suite ; on n'attend la connexion Google que si l'élève était connecté
+// lors de sa dernière visite (au plus 7 secondes), pour ne pas lui montrer des leçons verrouillées.
+let booted = false;
+function boot() { if (booted) return; booted = true; route(); document.body.classList.add('ready'); window.dispatchEvent(new Event('lc-ready')); }
+const LA = window.LisanAuth;
+if (LA && LA.ready) {
+  if (!LA.likely) boot();
+  LA.ready.then(() => { if (!booted) boot(); else if (LA.user()) route(); }, boot);
+  setTimeout(boot, 7000);
+} else boot();
