@@ -1066,14 +1066,21 @@ let booted = false;
 // Rechargement (tirer vers le bas, bouton Actualiser) : on revient sur la page et à l'endroit où l'on était,
 // même si le téléphone recharge l'adresse de départ de l'application sans l'ancre de la page.
 const isReload = (() => { try { const n = performance.getEntriesByType('navigation')[0]; return n ? n.type === 'reload' : performance.navigation.type === 1; } catch (e) { return false; } })();
-const keepPlace = () => { try { sessionStorage.setItem('lc-route', location.hash); sessionStorage.setItem('lc-y', String(Math.round(scrollY))); } catch (e) {} };
+// La page en cours et la position sont gardées sur l'appareil (localStorage, car certains téléphones rechargent
+// l'application dans une nouvelle session) ; elles sont rétablies si l'on recharge ou rouvre dans les 30 minutes.
+const PLACE_TTL = 30 * 60 * 1000;
+const keepPlace = () => { try { if (location.hash) localStorage.setItem('lc.place', JSON.stringify({ h: location.hash, y: Math.round(scrollY), t: Date.now() })); } catch (e) {} };
 window.addEventListener('pagehide', keepPlace);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') keepPlace(); });
+window.addEventListener('hashchange', () => setTimeout(keepPlace, 400));
+let placeTimer = null; window.addEventListener('scroll', () => { clearTimeout(placeTimer); placeTimer = setTimeout(keepPlace, 800); }, { passive: true });
 function restorePlace() {
-  if (!isReload) return null;
-  let r = null, y = 0; try { r = sessionStorage.getItem('lc-route'); y = +sessionStorage.getItem('lc-y') || 0; } catch (e) {}
-  if (r && r.length > 1 && (!location.hash || location.hash === '#accueil') && r !== location.hash) history.replaceState(null, '', r);
-  return r === location.hash ? y : null;
+  let P = null; try { P = JSON.parse(localStorage.getItem('lc.place') || 'null'); } catch (e) {}
+  if (!P || !P.h || Date.now() - (P.t || 0) > PLACE_TTL) return null;
+  const here = location.hash;
+  // rechargement ou réouverture sans page précise (adresse de départ) : on revient où l'on était
+  if ((!here || (here === '#accueil' && isReload)) && P.h !== here) history.replaceState(null, '', P.h);
+  return P.h === location.hash ? P.y : null;
 }
 function boot() { if (booted) return; booted = true; const y = restorePlace(); route(); document.body.classList.add('ready'); window.dispatchEvent(new Event('lc-ready'));
   if (y && !location.hash.startsWith('#l-')) setTimeout(() => scrollTo(0, y), 60); }
