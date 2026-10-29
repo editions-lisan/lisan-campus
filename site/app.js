@@ -182,16 +182,21 @@ function checkArVoice() { const n = document.getElementById('noar'); if (n && sy
 const player = new Audio();
 let audioBtn = null, playlist = [];
 player.preload = 'none';
-function stopAudio() { try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove('playing'); audioBtn = null; playlist = []; }
-function playAudio(urls, btn) {
+function stopAudio() { try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove("playing"); audioBtn = null; playlist = []; audioFallback = null; }
+let audioFallback = null;   // fichier de secours (le verset) si l'audio du mot seul ne se charge pas
+function playAudio(urls, btn, fallback) {
   if (btn && btn === audioBtn) { stopAudio(); if (synth) synth.cancel(); return; }
   if (synth) synth.cancel(); if (playingBtn) { playingBtn.classList.remove('playing'); playingBtn = null; }
   stopAudio();
-  playlist = urls.slice(); audioBtn = btn || null; if (audioBtn) audioBtn.classList.add('playing');
-  const next = () => { if (!playlist.length) { stopAudio(); return; } player.src = playlist.shift(); player.play().catch(() => { audioError(); }); };
-  player.onended = next; player.onerror = audioError; next();
+  playlist = urls.slice(); audioBtn = btn || null; audioFallback = fallback || null; if (audioBtn) audioBtn.classList.add('playing');
+  const next = () => { if (!playlist.length) { stopAudio(); return; } const src = playlist.shift(); player.src = src; player.play().catch(e => { if (!e || e.name !== 'AbortError') audioError(src); }); };
+  player.onended = next; player.onerror = () => audioError(player.src); next();
 }
-function audioError() { stopAudio(); const n = document.getElementById('noaudio'); if (n) n.hidden = false; }
+// une erreur ne compte que pour le fichier en cours (le refus de lecture et l'événement d'erreur arrivent tous deux)
+function audioError(src) {
+  if (src && src !== player.src) return;
+  if (audioFallback) { const f = audioFallback; audioFallback = null; playlist = []; player.src = f; player.play().catch(e => { if (!e || e.name !== 'AbortError') audioError(f); }); return; }
+  stopAudio(); const n = document.getElementById('noaudio'); if (n) n.hidden = false; }
 
 // ---------- calculs de progression
 function subjectProgress(s) {
@@ -345,8 +350,9 @@ function renderBlock(b, s) {
       ${b.texte.lines.map(a => `<button type="button" class="dl-ar" data-say="${esc(a)}" data-lang="ar"><span class="ara" lang="ar" dir="rtl">${esc(a)}</span></button>`).join('')}
       <p class="fr">${md(b.texte.fr)}</p></div>`;
   if (b.lines) return `<div class="rlines" dir="rtl">${b.lines.map(r => `<div class="rline">${(Array.isArray(r) ? r : [r]).map(w => `<span class="ara" lang="ar">${esc(w)}</span>`).join('')}</div>`).join('')}</div>`;
-  if (b.qwords) return `<div class="qwords">${b.qwords.map(([w, r, u]) => `<div class="qw"><span class="ara" lang="ar" dir="rtl">${esc(w)}</span><span class="meta">${esc(r)}</span>
-      <button type="button" class="btn small" data-audio="${esc(JSON.stringify([u]))}">${ICON}Écouter le verset</button></div>`).join('')}</div>`;
+  // mot du Coran : d'abord le mot seul (audio mot à mot ; à défaut, le verset), puis le verset entier par al-Ḥouṣarî
+  if (b.qwords) return `<div class="qwords">${b.qwords.map(([w, r, u, wu]) => `<div class="qw"><span class="ara" lang="ar" dir="rtl">${esc(w)}</span><span class="meta">${esc(r)}</span>
+      <div class="qw-act">${wu ? `<button type="button" class="btn small" data-audio="${esc(JSON.stringify([wu]))}" data-fallback="${esc(u)}">${ICON}Le mot</button>` : ''}<button type="button" class="btn ${wu ? 'ghost ' : ''}small" data-audio="${esc(JSON.stringify([u]))}">${ICON}Le verset</button></div></div>`).join('')}</div>`;
   if (b.qverses) return `<div class="qverses"><div class="actions"><button type="button" class="btn small" data-audio="${esc(JSON.stringify(b.qverses.verses.map(v => v[2])))}">${ICON}Écouter toute la sourate</button></div>
       ${b.qverses.verses.map(([v, r, u], i) => `<div class="qv"><span class="ara" lang="ar" dir="rtl">${esc(v)} <span class="vnum">﴿${(i + 1).toLocaleString('ar-EG')}﴾</span></span>
       <button type="button" class="btn ghost small" data-audio="${esc(JSON.stringify([u]))}">${ICON}Verset ${i + 1}</button></div>`).join('')}</div>`;
@@ -530,7 +536,7 @@ function viewLesson(found) {
     <div class="duo duo-r"><article class="lesson read c-${s.color}">
       <span class="eyebrow">${esc(s.title)} · ${i + 1} / ${s.lessons.length}</span>
       <h1>${esc(l.title)}</h1>${l.ar ? `<p class="ara title-ar" lang="ar" dir="rtl">${esc(l.ar)}</p>` : ''}
-      ${noVoice}${s.lang === 'ar' && !s.noVoice ? noAr : ''}${s.noVoice ? noAudio : ''}
+      ${noVoice}${(s.lang === 'ar' && !s.noVoice) || (!s.noLessonVoice && /\[\[/.test(text)) ? noAr : ''}${s.noVoice ? noAudio : ''}
       ${!s.noLessonVoice && s.id !== 'en' ? `<div class="actions"><button type="button" class="btn ghost small" data-say="${esc(text)}" data-lang="fr">${ICON}Écouter la leçon <small>· ${mins} min</small></button></div>` : ''}
       ${l.body.map(b => renderBlock(b, s)).join('')}
       <div class="lesson-foot">
@@ -743,7 +749,7 @@ const PAGES = {
     { p: '**Cloudflare, Inc.** (service Cloudflare Pages), San Francisco, États-Unis — www.cloudflare.com. Le code du site est conservé sur GitHub ; les comptes et les messages sont enregistrés sur Firebase (Google), en Europe.' },
     { h: 'Crédits' },
     { ul: ['Polices : Literata, Atkinson Hyperlegible et Noto Sans (licence SIL Open Font) ; **Lisan Naskh**, dérivée de Noto Naskh Arabic, avec le code couleur des voyelles des Éditions Lisân (licence SIL Open Font).',
-      'Récitations du Coran : cheikh Maḥmoûd Khalîl al-Ḥouṣarî, lecture d’enseignement (al-mou‘allim), diffusées par everyayah.com.',
+      'Récitations du Coran : cheikh Maḥmoûd Khalîl al-Ḥouṣarî, lecture d’enseignement (al-mou‘allim), diffusées par everyayah.com ; mots du Coran prononcés seuls : audio mot à mot de Quran.com (audio.qurancdn.com).',
       'Voix de lecture : la synthèse vocale de votre appareil.',
       'Pictogrammes : Fluent Emoji de Microsoft et, pour les drapeaux, flag-icons (licence MIT ; textes des licences dans le fichier emoji/LICENCES.txt du site).',
       'Export des listes au format Excel : SheetJS (licence Apache 2.0) ; codes QR des certificats : qrcode-generator de Kazuhiko Arase (licence MIT).',
@@ -1030,7 +1036,7 @@ document.addEventListener('click', e => {
   if (back && !back.target && !back.hasAttribute('data-reload') && !e.ctrlKey && !e.metaKey && !e.shiftKey && navStack.length > 1
       && decodeURIComponent(back.getAttribute('href').slice(1)) === navStack[navStack.length - 2]) { e.preventDefault(); history.back(); return; }
   const au = t.closest('[data-audio]');
-  if (au) { playAudio(JSON.parse(au.dataset.audio), au); return; }
+  if (au) { playAudio(JSON.parse(au.dataset.audio), au, au.dataset.fallback); return; }
   const sayB = t.closest('[data-say]');
   if (sayB) { speak(sayB.dataset.say, sayB.dataset.lang, sayB.classList.contains('btn') ? sayB : null); return; }
   const tr = t.closest('[data-trad]');
@@ -1134,8 +1140,9 @@ let booted = false;
 // même si le téléphone recharge l'adresse de départ de l'application sans l'ancre de la page.
 const isReload = (() => { try { const n = performance.getEntriesByType('navigation')[0]; return n ? n.type === 'reload' : performance.navigation.type === 1; } catch (e) { return false; } })();
 // La page en cours et la position sont gardées sur l'appareil (localStorage, car certains téléphones rechargent
-// l'application dans une nouvelle session) ; elles sont rétablies si l'on recharge ou rouvre dans les 30 minutes.
-const PLACE_TTL = 30 * 60 * 1000;
+// l'application dans une nouvelle session) ; elles sont rétablies au rechargement, après une mise à jour et à la
+// réouverture de l'application (jusqu'à 7 jours après) : l'application reprend là où l'on s'était arrêté.
+const PLACE_TTL = 7 * 24 * 3600 * 1000;
 const keepPlace = () => { try { if (location.hash) localStorage.setItem('lc.place', JSON.stringify({ h: location.hash, y: Math.round(scrollY), t: Date.now() })); } catch (e) {} };
 window.addEventListener('pagehide', keepPlace);
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') keepPlace(); });

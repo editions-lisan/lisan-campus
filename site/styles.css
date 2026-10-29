@@ -912,3 +912,4 @@ img.emo.flag { width: 1.4em; height: 1.05em; vertical-align: -.12em; border-radi
 .next-step.done-all { border-left-color: var(--good); }
 .unlock { margin: 10px 0 8px; font-weight: 700; color: var(--good); }
 .next-step .eyebrow { color: var(--sc, var(--accent)); opacity: 1; }
+.qw-act { display: flex; flex-wrap: wrap; gap: 6px; }
