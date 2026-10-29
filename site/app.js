@@ -1005,6 +1005,9 @@ if (veil) {
   let seen = false; try { seen = sessionStorage.getItem('lc-intro') === '1'; sessionStorage.setItem('lc-intro', '1'); } catch (e) {}
   // rechargement : pas d'écran d'ouverture complet, la page revient tout de suite
   try { const n = performance.getEntriesByType('navigation')[0]; if (n && n.type === 'reload') seen = true; } catch (e) {}
+  // certains téléphones rechargent l'application (tirer vers le bas, mise à jour) dans une nouvelle session :
+  // si l'application était ouverte il y a moins de 30 minutes, l'écran d'ouverture complet n'est pas rejoué
+  try { const P = JSON.parse(localStorage.getItem('lc.place') || 'null'); if (P && Date.now() - (P.t || 0) < 30 * 60 * 1000) seen = true; } catch (e) {}
   if (!MOTION) veil.remove();
   else if (!seen) document.body.classList.add('veiled');
   else { veil.style.transition = 'opacity .25s ease, visibility .25s ease'; const vi = veil.querySelector('.vl-in'); if (vi) vi.style.animation = 'none'; }
@@ -1156,11 +1159,17 @@ function restorePlace() {
   if ((!here || (here === '#accueil' && isReload)) && P.h !== here) history.replaceState(null, '', P.h);
   return P.h === location.hash ? P.y : null;
 }
-function boot() { if (booted) return; booted = true; const y = restorePlace(); route(); document.body.classList.add('ready'); window.dispatchEvent(new Event('lc-ready'));
-  if (y && !location.hash.startsWith('#l-')) setTimeout(() => scrollTo(0, y), 60); }
+let bootUid = null;
+function boot() { if (booted) return; booted = true; const y = restorePlace(); bootUid = LA && LA.user && LA.user() ? LA.user().uid : null;
+  route(); document.body.classList.add('ready'); window.dispatchEvent(new Event('lc-ready'));
+  if (y && !location.hash.startsWith('#l-')) setTimeout(() => scrollTo(0, y), 60);
+  setTimeout(keepPlace, 500); }
 const LA = window.LisanAuth;
 if (LA && LA.ready) {
-  if (!LA.likely) boot();
-  LA.ready.then(() => { if (!booted) boot(); else if (LA.user()) route(); }, boot);
+  // page affichée tout de suite si l'on connaît l'élève (dernière visite) ou s'il n'était pas connecté ;
+  // on ne la redessine à la réponse de Google que si l'élève n'est pas celui que l'on croyait
+  if (!LA.likely || LA.user()) boot();
+  const sameUser = () => (LA.user() ? LA.user().uid : null) === bootUid;
+  LA.ready.then(() => { if (!booted) boot(); else if (!sameUser() || /^#(admin|certificat-)/.test(location.hash)) route(); }, boot);
   setTimeout(boot, 7000);
 } else boot();

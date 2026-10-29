@@ -7,14 +7,17 @@
   const load = src => new Promise((ok, ko) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = ko; document.head.appendChild(s); });
   const cache = { get(k, d) { try { const v = localStorage.getItem('lc.auth.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
                   set(k, v) { try { localStorage.setItem('lc.auth.' + k, JSON.stringify(v)); } catch (e) {} } };
-  let fb = null, user = null, profile = cache.get('profile', null), timer = null;
+  let fb = null, user = null, profile = cache.get('profile', null), timer = null, pending = true;
+  const me = () => user || (pending ? cache.get('user', null) : null);   // élève connu, même avant la réponse de Google
   const LisanAuth = {
     enabled: true,
     likely: !!profile,                                    // connecté lors de la dernière visite (fiche gardée en mémoire)
-    user: () => user,
-    enrolled: id => !!(user && profile && profile.spaces && profile.spaces[id] && profile.spaces[id].num),
-    enrollment: id => (user && profile && profile.spaces && profile.spaces[id] && profile.spaces[id].num) ? profile.spaces[id] : null,
-    info: () => (user && profile && profile.info) || null,
+    // avant la réponse de Google (quelques secondes au démarrage), on reprend l'élève de la dernière visite,
+    // pour afficher aussitôt sa page ; la connexion réelle confirme ou corrige dès qu'elle répond.
+    user: me,
+    enrolled: id => !!(me() && profile && profile.spaces && profile.spaces[id] && profile.spaces[id].num),
+    enrollment: id => (me() && profile && profile.spaces && profile.spaces[id] && profile.spaces[id].num) ? profile.spaces[id] : null,
+    info: () => (me() && profile && profile.info) || null,
     signIn() {
       if (!fb) return Promise.reject(new Error('Connexion indisponible'));
       const p = new fb.auth.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' });
@@ -63,8 +66,8 @@
       const snap = await fb.firestore().collection('certificats').get({ source: 'server' }); return new Set(snap.docs.map(d => d.id));
     },
     adminRevoke: num => within(fb.firestore().collection('certificats').doc(num).delete()),
-    certs: () => Object.values((user && profile && profile.certs) || {}).sort((a, b) => String(b.date).localeCompare(String(a.date))),
-    certFor: key => Object.values((user && profile && profile.certs) || {}).find(c => c.key === key) || null,
+    certs: () => Object.values((me() && profile && profile.certs) || {}).sort((a, b) => String(b.date).localeCompare(String(a.date))),
+    certFor: key => Object.values((me() && profile && profile.certs) || {}).find(c => c.key === key) || null,
     async issueCert(c) {                                 // certificat : registre public (vérification) + copie dans la fiche de l'élève
       if (!user) throw Object.assign(new Error('non connecté'), { code: 'unauthenticated' });
       let h = 5381; for (const ch of user.uid + '|' + c.key) h = ((h * 33) ^ ch.charCodeAt(0)) >>> 0;
@@ -99,7 +102,7 @@
       return snap.docs.map(d => Object.assign({ id: d.id }, d.data(), { date: iso(d.data().date) })).sort((a, b) => String(b.date).localeCompare(String(a.date)));
     },
     adminDeleteMessage: id => within(fb.firestore().collection('messages').doc(id).delete()),
-    suggestions: () => Object.values((user && profile && profile.sugg) || {}).sort((a, b) => String(b.date).localeCompare(String(a.date))),
+    suggestions: () => Object.values((me() && profile && profile.sugg) || {}).sort((a, b) => String(b.date).localeCompare(String(a.date))),
     suggest(x) {                                         // suggestion : enregistrée dans la fiche de l'élève, lue par l'administrateur
       if (!user) return Promise.reject(new Error('non connecté'));
       const id = 's' + Date.now().toString(36);
@@ -116,7 +119,7 @@
         if (e && /requires-recent-login/.test(e.code || '')) { const p = new fb.auth.GoogleAuthProvider(); await user.reauthenticateWithPopup(p); await user.delete(); }
         else throw e;
       }
-      profile = null; cache.set('profile', null);
+      profile = null; cache.set('profile', null); cache.set('user', null);
       ['done', 'quiz', 'known', 'words', 'time'].forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null);
     },
     onSave(k, v) {                                       // progression : envoyée au compte (regroupée toutes les 3 s)
@@ -156,7 +159,8 @@
     await new Promise(res => {
       let first = true;
       fb.auth().onAuthStateChanged(async u => {
-        user = u;
+        user = u; pending = false;
+        cache.set('user', u ? { uid: u.uid, displayName: u.displayName || '', email: u.email || '', photoURL: u.photoURL || '' } : null);
         if (u) {
           try {
             const snap = await doc().get();
@@ -177,5 +181,5 @@
         if (first) { first = false; res(); } else if (typeof route === 'function') route();
       });
     });
-  })().catch(() => { LisanAuth.enabled = false; });
+  })().catch(() => { LisanAuth.enabled = false; pending = false; });
 })();
