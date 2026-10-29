@@ -11,16 +11,26 @@ const state = {
 };
 const save = k => { store.set(k, state[k]); if (window.LisanAuth && window.LisanAuth.onSave) window.LisanAuth.onSave(k, state[k]); };
 
-// ---------- temps minimum de lecture : une leçon ne se marque « terminée » qu'après un vrai temps de lecture
-// Environ la moitié du temps de lecture normal (0,13 s par mot), au moins 40 secondes, au plus 6 minutes.
-// Le temps n'avance que lorsque la page de la leçon est ouverte, visible, et que le lecteur est actif (ou écoute la leçon).
-const lessonText = l => [l.title, ...l.body.map(b => b.p || b.h || (b.ul || b.ol || []).join('. ') || b.box || b.quote || '')].filter(Boolean).map(x => String(x).replace(/\[\[.+?\]\]/g, '').replace(/\*\*|\*/g, '')).join('. ');
-const needFor = l => Math.max(40, Math.min(360, Math.round(lessonText(l).split(/\s+/).filter(Boolean).length * 0.13)));
+// ---------- temps minimum d'étude : une leçon ne se marque « terminée » qu'après un temps égal à la durée
+// de son écoute (« Écouter la leçon », vitesse normale), au moins 40 secondes. Le temps n'avance que lorsque
+// la page de la leçon est ouverte et visible, et que l'élève lit (activité récente) ou écoute ; il s'arrête
+// dès qu'on quitte la page et reprend au retour.
+// texte lu à voix haute : le français, et l'arabe entre [[...]] (lu par la voix arabe, ou formule transcrite)
+const lessonSpeech = l => [l.title, ...l.body.map(b => b.p || b.h || (b.ul || b.ol || []).join('. ') || b.box || b.quote || '')].filter(Boolean).map(x => String(x).replace(/\*\*|\*/g, '').replace(/\[([^\]]+)\]\(#[^)]*\)/g, '$1')).join('. ');
+const lessonText = l => lessonSpeech(l).replace(/\[\[.+?\]\]/g, '');
+// durée de l'écoute à vitesse normale : 0,36 s par mot français, 0,7 s par mot arabe, 0,25 s de pause par phrase
+function audioSeconds(text) {
+  const t = String(text), ar = (t.match(/\[\[(.+?)\]\]/g) || []).map(x => x.slice(2, -2)).filter(x => x.split(/\s+/).length <= 8);
+  const fr = t.replace(/\[\[.+?\]\]/g, ' ').split(/\s+/).filter(w => /\p{L}/u.test(w)).length;
+  const arw = ar.reduce((n, x) => n + x.split(/\s+/).length, 0), pauses = (t.match(/[.!?;:]/g) || []).length;
+  return fr * 0.36 + arw * 0.7 + pauses * 0.25;
+}
+const needFor = l => Math.max(40, Math.min(1800, Math.round(audioSeconds(lessonSpeech(l)))));
 const fmtLeft = n => n >= 60 ? `${Math.floor(n / 60)} min ${String(n % 60).padStart(2, '0')} s` : `${n} s`;
 function doneBtnState(b) {
   const key = b.dataset.done, need = +b.dataset.need || 0, t = state.time[key] || 0, d = !!state.done[key], left = Math.max(0, need - t);
   b.setAttribute('aria-pressed', d); b.classList.toggle('wait', !d && left > 0); b.style.setProperty('--t', (need ? Math.min(100, Math.round(t / need * 100)) : 100) + '%');
-  b.innerHTML = d ? '✓ Leçon terminée' : left > 0 ? `Marquer comme terminée <small>· encore ${fmtLeft(left)} de lecture</small>` : 'Marquer comme terminée';
+  b.innerHTML = d ? '✓ Leçon terminée' : left > 0 ? `Marquer comme terminée <small>· encore ${fmtLeft(left)} d’étude</small>` : 'Marquer comme terminée';
 }
 let lessonClock = null, lastAct = Date.now();
 ['scroll', 'pointerdown', 'keydown', 'touchstart', 'wheel', 'mousemove'].forEach(ev => window.addEventListener(ev, () => { lastAct = Date.now(); }, { passive: true }));
@@ -32,7 +42,8 @@ function startLessonClock() {
     const b = document.querySelector('[data-done]');
     if (!b || b.dataset.done !== key) { clearInterval(lessonClock); return; }
     const listening = (window.speechSynthesis && speechSynthesis.speaking) || !player.paused;
-    if (document.visibilityState !== 'visible' || (Date.now() - lastAct > 90000 && !listening)) return;
+    // seulement sur la page de la leçon, visible et au premier plan (pas une autre fenêtre), en lisant ou en écoutant
+    if (document.visibilityState !== 'visible' || (!listening && (!document.hasFocus() || Date.now() - lastAct > 90000))) return;
     if ((state.time[key] || 0) >= need) return;
     state.time[key] = (state.time[key] || 0) + 1; n++;
     if (n % 10 === 0 || state.time[key] >= need) save('time');
@@ -91,23 +102,78 @@ function pickVoices() {
 }
 if (synth) { pickVoices(); synth.onvoiceschanged = () => { pickVoices(); checkArVoice(); }; }
 function stopVoice() { if (synth) synth.cancel(); if (playingBtn) { playingBtn.classList.remove('playing'); playingBtn = null; } stopAudio(); }
+// ---------- prononciation : mots arabes transcrits et formules islamiques
+// Les transcriptions (Mouḥammad, Moûsâ, rak‘a, Ismâ‘îl…) sont réécrites pour la voix française ; l'arabe entre
+// [[...]] est lu par la voix arabe de l'appareil, ou, à défaut, les formules connues sont dites en transcription.
+const ARV = /[\u064B-\u065F\u0670\u06D6-\u06ED\u0640]/g;                  // voyelles, signes coraniques, tatwîl
+const arKey = t => String(t).replace(ARV, '').replace(/[ٱأإآ]/g, 'ا').replace(/ى/g, 'ي').replace(/[.,؛،!؟?:«»"()]/g, '').replace(/\s+/g, ' ').trim();
+const LIG = { 'ﷺ': 'صَلَّى ٱللَّهُ عَلَيْهِ وَسَلَّمَ', 'ﷻ': 'جَلَّ جَلَالُهُ', '﷽': 'بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ', 'ﷲ': 'ٱللَّه' };
+const arSpeak = t => String(t).replace(/[ﷺﷻ﷽ﷲ]/g, c => ' ' + LIG[c] + ' ').replace(/ٱ/g, 'ا').replace(/\u0640/g, '');
+const FORMULES = {
+  'صلى الله عليه وسلم': 'ṣalla Llâhou ‘alayhi wa sallam', 'جل جلاله': 'jalla jalâlouh',
+  'بسم الله': 'bismi Llâh', 'بسم الله الرحمن الرحيم': 'bismi Llâhi r-raḥmâni r-raḥîm',
+  'الحمد لله': 'al-ḥamdou li-Llâh', 'الحمد لله رب العالمين': 'al-ḥamdou li-Llâhi rabbi l-‘âlamîn',
+  'سبحان الله': 'soubḥâna Llâh', 'الله اكبر': 'Allâhou akbar', 'لا اله الا الله': 'lâ ilâha illa Llâh',
+  'محمد رسول الله': 'Mouḥammadoun rasoûlou Llâh', 'ان شاء الله': 'in châ’a Llâh', 'ما شاء الله': 'mâ châ’a Llâh',
+  'استغفر الله': 'astaghfirou Llâh', 'السلام عليكم': 'as-salâmou ‘alaykoum', 'وعليكم السلام': 'wa ‘alaykoumou s-salâm',
+  'السلام عليكم ورحمة الله وبركاته': 'as-salâmou ‘alaykoum wa raḥmatou Llâhi wa barakâtouh',
+  'جزاك الله خيرا': 'jazâka Llâhou khayran', 'بارك الله فيك': 'bâraka Llâhou fîk', 'عليه السلام': '‘alayhi s-salâm',
+  'عليها السلام': '‘alayhâ s-salâm', 'رضي الله عنه': 'raḍiya Llâhou ‘anhou', 'رضي الله عنها': 'raḍiya Llâhou ‘anhâ',
+  'رضي الله عنهم': 'raḍiya Llâhou ‘anhoum', 'رحمه الله': 'raḥimahou Llâh', 'سبحانه وتعالى': 'soubḥânahou wa ta‘âlâ',
+  'تبارك وتعالى': 'tabâraka wa ta‘âlâ', 'عز وجل': '‘azza wa jall', 'لا حول ولا قوة الا بالله': 'lâ ḥawla wa lâ qouwwata illâ bi-Llâh',
+  'اعوذ بالله من الشيطان الرجيم': 'a‘oûdhou bi-Llâhi mina ch-chayṭâni r-rajîm', 'انا لله وانا اليه راجعون': 'innâ li-Llâhi wa innâ ilayhi râji‘oûn',
+  'حسبنا الله ونعم الوكيل': 'ḥasbouna Llâhou wa ni‘ma l-wakîl', 'امين': 'âmîn', 'الله': 'Allâh',
+};
+const FORM_KEYS = Object.fromEntries(Object.entries(FORMULES).map(([k, v]) => [arKey(k), v]));
+const ELIS = /^(?:jusqu|lorsqu|puisqu|quoiqu|quelqu|qu|[dlcjmnst])[’']/i;
+const TRANSCR = /[âîûÂÎÛḥṣḍṭẓḤṢḌṬẒ‘ʿʾ]/;
+function pronWord(w) {
+  const m = w.match(ELIS), pre = m ? m[0] : '', x0 = w.slice(pre.length);
+  if (!TRANSCR.test(x0)) return w;
+  // mot français à accent circonflexe (maîtrise, coûteuse…) : inchangé
+  if (!/[ḥṣḍṭẓḤṢḌṬẒ‘’ʿʾ]/.test(x0) && /(?:e|es|ent|er)$/.test(x0)) return w;
+  let x = x0.replace(/dh/g, 'z').replace(/Dh/g, 'Z');                                 // dhikr → zikr (avant ḍ + ḥ)
+  x = x.replace(/[ḥḤṣṢḍḌṭṬẓẒ]/g, c => ({ 'ḥ': 'h', 'Ḥ': 'H', 'ṣ': 's', 'Ṣ': 'S', 'ḍ': 'd', 'Ḍ': 'D', 'ṭ': 't', 'Ṭ': 'T', 'ẓ': 'z', 'Ẓ': 'Z' })[c]);
+  x = x.replace(/([aeiouâîûAEIOUÂÎÛ])[‘’ʿʾ]([iîIÎ])/g, '$1ï')        // Ismâ‘îl → Ismâïl, Isrâ’îl → Isrâïl
+       .replace(/[‘’ʿʾ]/g, '')                                         // ‘ayn et hamza : une simple attaque
+       .replace(/ay(?=[^aeiouâîûy]|$)/g, 'aï').replace(/Ay(?=[^aeiouâîûy]|$)/g, 'Aï')   // Soulaymân → Soulaïmân
+       .replace(/([aeiouâîûAEIOUÂÎÛ])s(?=[aeiouâîûAEIOUÂÎÛ])/g, '$1ss');           // Moûsâ → Moûssâ
+  return pre + x;
+}
+// article assimilé collé au mot précédent, comme on le prononce : « rabbi l-‘âlamîn » → « rabbil ‘âlamîn »,
+// « bismi Llâhi r-raḥmâni » → « bismi Llâhir raḥmâni »
+const pronFr = t => String(t).replace(/\s+·\s+/g, ', ').replace(/(\p{L})\s+([a-z]{1,2})-(?=\p{L})/gu, '$1$2 ').replace(/[^\s()«»"“”,.;:!?]+/g, pronWord);
+// découpe en morceaux : [{ lang, text }] ; l'arabe entre [[...]] devient un morceau arabe (ou une formule transcrite)
+function speechParts(text, lang) {
+  if (lang !== 'fr') return [{ lang, text: lang === 'ar' ? arSpeak(text) : text }];
+  const out = []; let last = 0; const t = String(text);
+  for (const m of t.matchAll(/\[\[(.+?)\]\]/g)) {
+    if (m.index > last) out.push({ lang: 'fr', text: pronFr(t.slice(last, m.index)) });
+    const a = m[1], f = FORM_KEYS[arKey(a.replace(/[ﷺﷻ﷽ﷲ]/g, c => LIG[c]))];
+    if (voices.ar && a.split(/\s+/).length <= 8) out.push({ lang: 'ar', text: arSpeak(a) });
+    else if (f) out.push({ lang: 'fr', text: pronFr(f) });
+    last = m.index + m[0].length;
+  }
+  if (last < t.length) out.push({ lang: 'fr', text: pronFr(t.slice(last)) });
+  return out.filter(p => /[\p{L}\p{N}]/u.test(p.text));
+}
 function speak(text, lang, btn) {
   if (!synth) { showNoVoice(); return; }
   if (btn && btn === playingBtn) { stopVoice(); return; }
   stopVoice();
-  const chunks = String(text).match(/[^.!?;:؟،]+[.!?;:؟،]*/g) || [text];
-  const v = voices[lang] || null;
+  const slow = state.rate !== 1, loc = { en: 'en-US', ar: 'ar-SA', fr: 'fr-FR' };
+  const utts = [];
+  speechParts(text, lang).forEach(p => (p.text.match(/(?:[^.!?;:؟،]|\.(?=\d))+[.!?;:؟،]*/g) || [p.text]).forEach(c => {
+    if (!/[\p{L}\p{N}]/u.test(c)) return;
+    const u = new SpeechSynthesisUtterance(c.trim()), v = voices[p.lang] || null;
+    u.lang = loc[p.lang] || 'fr-FR'; if (v) u.voice = v;
+    u.rate = p.lang === 'ar' ? (slow ? 0.55 : 0.8) : (slow ? 0.65 : (p.lang === 'en' ? 0.95 : 1));
+    utts.push(u);
+  }));
+  if (!utts.length) return;
   if (btn) { btn.classList.add('playing'); playingBtn = btn; }
-  const loc = { en: 'en-US', ar: 'ar-SA', fr: 'fr-FR' }[lang] || 'fr-FR';
-  const slow = state.rate !== 1;
-  chunks.forEach((c, i) => {
-    const u = new SpeechSynthesisUtterance(c.trim());
-    u.lang = loc; if (v) u.voice = v;
-    u.rate = lang === 'ar' ? (slow ? 0.55 : 0.8) : (slow ? 0.65 : (lang === 'en' ? 0.95 : 1));
-    if (i === chunks.length - 1) u.onend = () => { if (btn && playingBtn === btn) { btn.classList.remove('playing'); playingBtn = null; } };
-    u.onerror = () => { if (btn) btn.classList.remove('playing'); };
-    synth.speak(u);
-  });
+  utts[utts.length - 1].onend = () => { if (btn && playingBtn === btn) { btn.classList.remove('playing'); playingBtn = null; } };
+  utts.forEach(u => { u.onerror = () => { if (btn) btn.classList.remove('playing'); }; synth.speak(u); });
 }
 function showNoVoice() { const n = document.getElementById('novoice'); if (n) n.hidden = false; }
 function checkArVoice() { const n = document.getElementById('noar'); if (n && synth && voicesLoaded) n.hidden = !!voices.ar; }
@@ -453,7 +519,7 @@ function viewLesson(found) {
   const { s, l, i } = found;
   const prev = s.lessons[i - 1], next = s.lessons[i + 1], sp = space(spaceOf(s));
   const key = s.id + '/' + l.id, d = !!state.done[key];
-  const text = [l.title, ...l.body.map(b => b.p || b.h || (b.ul || b.ol || []).join('. ') || b.box || b.quote || '')].filter(Boolean).map(plain).join('. ');
+  const text = lessonSpeech(l), mins = Math.max(1, Math.round(audioSeconds(text) / 60));
   const P = subjectProgress(s);
   const side = `<aside class="lside c-${s.color}" aria-label="Le parcours"><div class="ls-head"><span class="eyebrow">Le parcours</span><a href="#m-${s.id}"><b>${esc(s.title)}</b></a>
       <div class="bar"><i style="width:${P.pct}%"></i></div><span class="meta">${P.d} / ${P.n} leçons terminées</span></div>
@@ -465,7 +531,7 @@ function viewLesson(found) {
       <span class="eyebrow">${esc(s.title)} · ${i + 1} / ${s.lessons.length}</span>
       <h1>${esc(l.title)}</h1>${l.ar ? `<p class="ara title-ar" lang="ar" dir="rtl">${esc(l.ar)}</p>` : ''}
       ${noVoice}${s.lang === 'ar' && !s.noVoice ? noAr : ''}${s.noVoice ? noAudio : ''}
-      ${!s.noLessonVoice && s.id !== 'en' ? `<div class="actions"><button type="button" class="btn ghost small" data-say="${esc(text)}" data-lang="fr">${ICON}Écouter la leçon</button></div>` : ''}
+      ${!s.noLessonVoice && s.id !== 'en' ? `<div class="actions"><button type="button" class="btn ghost small" data-say="${esc(text)}" data-lang="fr">${ICON}Écouter la leçon <small>· ${mins} min</small></button></div>` : ''}
       ${l.body.map(b => renderBlock(b, s)).join('')}
       <div class="lesson-foot">
         <button type="button" class="btn done-toggle" data-done="${key}" data-need="${needFor(l)}" aria-pressed="${d}">${d ? '✓ Leçon terminée' : 'Marquer comme terminée'}</button>
@@ -769,9 +835,7 @@ function bindContact() {
 
 function afterLesson() {
   const db = document.querySelector('[data-done]');
-  if (db) { const art = db.closest('article'), foot = art && art.querySelector('.lesson-foot');
-    const words = art ? (art.innerText.length - (foot ? foot.innerText.length : 0)) / 6 : 0;   // ≈ 6 caractères par mot
-    if (words) db.dataset.need = Math.max(40, Math.min(360, Math.round(words * 0.13)));
+  if (db) {
     doneBtnState(db); startLessonClock(); }
   document.querySelectorAll('[data-wcount]').forEach(updateWordCount);
   const ns = document.getElementById('nom-sel');
@@ -1006,7 +1070,7 @@ document.addEventListener('click', e => {
   const dt = t.closest('[data-done]');
   if (dt) { const k = dt.dataset.done, need = +dt.dataset.need || 0, left = need - (state.time[k] || 0), m = document.getElementById('done-msg');
     if (!state.done[k] && left > 0) {
-      if (m) m.textContent = `Prenez le temps de lire la leçon jusqu’au bout : il reste environ ${fmtLeft(left)} de lecture avant de pouvoir la terminer. Le temps avance quand la leçon est ouverte et que vous lisez ou l’écoutez.`;
+      if (m) m.textContent = `Prenez le temps d’étudier la leçon jusqu’au bout : le temps demandé correspond à la durée de son écoute, et il reste environ ${fmtLeft(left)}. Le temps n’avance que lorsque la leçon est ouverte à l’écran et que vous la lisez ou l’écoutez ; il s’arrête dès que vous quittez la page et reprend à votre retour.`;
       dt.classList.remove('nudge'); void dt.offsetWidth; dt.classList.add('nudge'); return; }
     if (state.done[k]) { if (m) m.textContent = 'Cette leçon est terminée : elle reste ouverte pour la relire quand vous voulez.'; return; }
     state.done[k] = 1; save('done'); if (m) m.textContent = '';
