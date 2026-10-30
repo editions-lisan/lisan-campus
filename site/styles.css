@@ -555,9 +555,6 @@ header.top { background: color-mix(in srgb, var(--surface) 82%, transparent); -w
 body.scrolled header.top { box-shadow: 0 6px 22px rgba(20, 28, 46, .10); }
 .brand-logo { border-radius: 12px; transition: transform .25s ease; }
 .brand:hover .brand-logo { transform: rotate(-6deg) scale(1.04); }
-.brand.refreshing .brand-logo { animation: lc-spin .8s linear infinite; }
-@keyframes lc-spin { to { transform: rotate(360deg); } }
-@media (prefers-reduced-motion: reduce) { .brand.refreshing .brand-logo { animation: none; opacity: .6; } }
 .quick { display: none; gap: 4px; align-items: center; }
 .quick a { color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; padding: 7px 12px; border-radius: 999px; }
 .quick a:hover { background: var(--accent-soft); color: var(--accent); }

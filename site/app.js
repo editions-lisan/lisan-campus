@@ -1188,9 +1188,9 @@ window.addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(() =
 // ---------- interactions
 document.addEventListener('click', e => {
   const t = e.target;
-  // logo de l'en-tête : actualiser (nouvelle version s'il y en a une), sans quitter la page en cours
-  const rf = t.closest('[data-refresh]');
-  if (rf && !e.ctrlKey && !e.metaKey && !e.shiftKey) { e.preventDefault(); if (rf.classList.contains('refreshing')) return; rf.classList.add('refreshing'); keepPlace(); stopVoice(); window.lcRefresh(); return; }
+  // logo de l'en-tête : retour à l'accueil, et installation de la nouvelle version s'il y en a une
+  const rf = t.closest('[data-home]');
+  if (rf && !e.ctrlKey && !e.metaKey && !e.shiftKey) { e.preventDefault(); if (location.hash !== '#accueil') location.hash = '#accueil'; else { route(); } window.lcCheckUpdate(); return; }
   const back = t.closest('a[href^="#"]');
   if (back && !back.target && !back.hasAttribute('data-reload') && !e.ctrlKey && !e.metaKey && !e.shiftKey && navStack.length > 1
       && decodeURIComponent(back.getAttribute('href').slice(1)) === navStack[navStack.length - 2]) { e.preventDefault(); history.back(); return; }
