@@ -19,6 +19,20 @@ const M_INTRO = {
         "**Deuxième partie : le droit, ensemble de prérogatives (les droits subjectifs)** : leur classification, leur preuve et leur sanction par l'action en justice.",
       ] },
       { box: "Retiens dès maintenant ce couple : **la règle** (droit objectif) et **la prérogative** (droit subjectif). Presque toutes les questions de cours s'y rattachent.", title: "Le fil conducteur", kind: "cle" },
+      { h: "Pourquoi étudier le droit : les débouchés" },
+      { p: "Le droit ouvre de nombreux métiers, presque tous accessibles par concours ou par un diplôme professionnel. Le parcours universitaire suit le système **LMD** : licence (bac + 3), master (bac + 5), doctorat (bac + 8)." },
+      { table: { h: ["Débouché", "Voie d'accès", "Rôle"], r: [
+        ["**Magistrat**", "Concours de la magistrature, puis formation à l'Institut national de formation judiciaire (INFJ)", "Juger (siège) ou poursuivre (parquet)"],
+        ["**Greffier**", "Concours de l'INFJ", "Assister le juge et authentifier les actes"],
+        ["**Avocat**", "Master en droit, puis CAPA et stage", "Conseiller, représenter, défendre"],
+        ["**Notaire**", "Études juridiques, formation et stage notarial", "Rédiger les actes authentiques"],
+        ["**Commissaire de justice**", "Études juridiques, concours et stage", "Signifier les actes, exécuter les décisions"],
+        ["**Juriste d'entreprise ou de banque**", "Master spécialisé", "Contrats, conformité, contentieux, droit OHADA"],
+        ["**Administration publique**", "Concours de l'École nationale d'administration (ENA)", "Préparer et appliquer les textes de l'État"],
+        ["**Enseignant-chercheur**", "Doctorat, puis recrutement universitaire", "Enseigner, faire avancer la doctrine"],
+        ["**Organisations internationales**", "Master, langues, expérience", "CEDEAO, UEMOA, BCEAO, Banque africaine de développement"],
+      ] } },
+      { box: "Choisis tôt une spécialisation, multiplie les stages et travaille ton anglais. Un double profil charia et droit positif est un atout rare en droit de la famille, en droit comparé, en médiation et en finance islamique.", title: "Conseil", kind: "cle" },
     ] },
 
     // ---------- PREMIÈRE PARTIE
@@ -77,6 +91,33 @@ const M_INTRO = {
         ["**Exemple**", "Mariage d'une Ivoirienne et d'un Malien célébré à Paris", "Accord de coopération entre la Côte d'Ivoire et le Ghana"],
       ] } },
       { box: "Le droit international privé est, malgré son nom, une branche du **droit interne** : chaque État a ses propres règles de conflit de lois.", title: "À savoir", kind: "marge" },
+      { h: "Les familles juridiques" },
+      { ul: [
+        "**Famille romano-germanique** (civiliste) : droit écrit et codifié ; la loi est la source principale. **La Côte d'Ivoire en fait partie.**",
+        "**Common law** (Royaume-Uni, États-Unis, Ghana, Nigeria) : le droit naît surtout des décisions des juges (règle du précédent).",
+        "**Droit musulman** : fondé sur le Coran, la Sunna, l'Idjma' et le Qiyas (voir le module Droit musulman).",
+      ] },
+      { h: "Notions de droit pénal" },
+      { table: { h: ["Infraction", "Gravité", "Peines", "Exemples"], r: [
+        ["**Crime**", "La plus grave", "Réclusion, jusqu'à la perpétuité", "Meurtre, vol à main armée"],
+        ["**Délit**", "Moyenne", "Emprisonnement, amende", "Vol simple, escroquerie"],
+        ["**Contravention**", "La moins grave", "Amende", "Tapage, certaines infractions routières"],
+      ] } },
+      { ol: [
+        "**Élément légal** : un texte prévoit l'infraction (*nullum crimen, nulla poena sine lege*).",
+        "**Élément matériel** : un acte ou une abstention ; la pensée seule n'est pas punie.",
+        "**Élément moral** : l'intention ou la faute.",
+      ] },
+      { table: { h: ["Infraction", "Définition"], r: [
+        ["**Meurtre**", "Homicide volontaire : donner volontairement la mort à autrui"],
+        ["**Assassinat**", "Meurtre commis avec **préméditation** ou guet-apens : il est plus sévèrement puni"],
+        ["**Homicide involontaire**", "Mort causée par maladresse, imprudence, négligence (accident de la route) : c'est un délit"],
+      ] } },
+      { ul: [
+        "**Tentative** : punie comme l'infraction consommée s'il y a commencement d'exécution et absence de désistement volontaire.",
+        "**Contumace** : jugement d'un accusé de crime qui ne se présente pas devant la juridiction criminelle.",
+        "**Peines privatives de droits** : interdiction des droits civiques, interdiction d'exercer une profession.",
+      ] },
     ] },
     { id: "loi", title: "La loi : notion, loi et règlement", body: [
       { p: "Chapitre III, section I : les **sources directes** de la règle de droit sont la **loi** et la **coutume**. La loi est aujourd'hui la source principale du droit ivoirien." },
@@ -99,6 +140,27 @@ const M_INTRO = {
         ["**Les circulaires** : instructions internes à l'Administration, en principe sans force obligatoire pour les citoyens", ""],
       ] } },
       { box: "Constitution → traités → lois (et ordonnances ratifiées) → règlements (décrets, puis arrêtés). Chaque norme doit respecter celle qui lui est supérieure : c'est la **pyramide de Kelsen**.", title: "La hiérarchie des normes", kind: "cle" },
+      { h: "Le Parlement et le vote de la loi" },
+      { p: "En Côte d'Ivoire, le **Parlement** comprend l'**Assemblée nationale** et le **Sénat** (article 85 de la Constitution)." },
+      { table: { h: ["", "Assemblée nationale", "Sénat"], r: [
+        ["**Membres**", "Les députés", "Les sénateurs"],
+        ["**Désignation**", "Suffrage universel direct", "Deux tiers élus au suffrage indirect, un tiers nommé par le Président de la République (article 87)"],
+        ["**Mandat**", "Cinq ans", "Cinq ans"],
+        ["**Représente**", "La nation", "Les collectivités territoriales et les Ivoiriens de l'extérieur"],
+      ] } },
+      { ol: [
+        "**L'initiative** : le Président de la République (**projet de loi**) et les parlementaires (**proposition de loi**).",
+        "**La navette** : le texte passe d'une chambre à l'autre jusqu'à l'adoption d'un texte identique (article 110).",
+        "**Le désaccord** : une commission mixte paritaire peut être réunie ; à défaut d'accord, l'Assemblée nationale statue définitivement.",
+        "**La promulgation** dans les trente jours, puis la **publication** au Journal officiel.",
+      ] },
+      { box: "Les deux chambres réunies forment le **Congrès**, notamment pour adopter une révision de la Constitution sans référendum.", title: "Le Congrès", kind: "marge" },
+      { h: "Les régimes de crise" },
+      { table: { h: ["Régime de crise", "Pouvoirs renforcés", "Situation"], r: [
+        ["**État d'urgence**", "Autorités civiles", "Troubles graves à l'ordre public ou calamité"],
+        ["**État de siège**", "Autorité militaire", "Péril imminent : guerre ou insurrection armée"],
+        ["**Pouvoirs exceptionnels**", "Président de la République", "Menace grave sur les institutions, l'indépendance ou le territoire"],
+      ] } },
     ] },
     { id: "forceloi", title: "La force obligatoire de la loi", body: [
       { p: "La loi naît, s'applique avec une force plus ou moins grande, puis meurt." },
@@ -179,6 +241,21 @@ const M_INTRO = {
       { h: "§ 2. La doctrine" },
       { p: "La **doctrine** est l'ensemble des **opinions émises par les juristes** (professeurs, magistrats, avocats) dans leurs ouvrages, articles, commentaires de décisions et thèses. Elle n'est pas obligatoire mais exerce une **autorité morale** : elle explique, systématise, critique le droit et propose des réformes. Le juge et le législateur s'en inspirent souvent." },
       { box: "Jurisprudence = ce que disent **les juges**. Doctrine = ce qu'écrivent **les auteurs**. Aucune des deux ne lie le juge comme la loi le lie.", title: "À retenir", kind: "cle" },
+      { h: "Les adages juridiques" },
+      { table: { h: ["Adage", "Sens"], r: [
+        ["*Nemo censetur ignorare legem*", "Nul n'est censé ignorer la loi"],
+        ["*Actori incumbit probatio*", "La preuve incombe au demandeur"],
+        ["*Nullum crimen, nulla poena sine lege*", "Pas de crime ni de peine sans loi"],
+        ["*Non bis in idem*", "Nul ne peut être poursuivi deux fois pour les mêmes faits"],
+        ["*Pacta sunt servanda*", "Les conventions doivent être respectées"],
+        ["*Nemo auditur propriam turpitudinem allegans*", "Nul ne peut se prévaloir de sa propre faute"],
+        ["*Specialia generalibus derogant*", "Le texte spécial l'emporte sur le texte général"],
+        ["*Res judicata pro veritate habetur*", "La chose jugée est tenue pour la vérité"],
+        ["*Dura lex, sed lex*", "La loi est dure, mais c'est la loi"],
+        ["*Locus regit actum*", "Le lieu régit la forme de l'acte"],
+        ["« Le pénal tient le civil en état »", "Le juge civil attend la décision pénale portant sur les mêmes faits"],
+        ["« La plume est serve, la parole est libre »", "Le procureur obéit par écrit mais requiert librement à l'audience"],
+      ] } },
     ] },
     { id: "espace", title: "L'application de la loi dans l'espace", body: [
       { p: "Chapitre IV, section I. Une loi s'applique-t-elle seulement sur le territoire ivoirien, ou suit-elle les Ivoiriens partout ? Deux principes se combinent." },
@@ -383,87 +460,6 @@ const M_INTRO = {
     ] },
 
     // ---------- COMPLÉMENTS
-    { id: "parlement", title: "Complément : le Parlement et le vote de la loi", body: [
-      { p: "En Côte d'Ivoire, le **Parlement** comprend l'**Assemblée nationale** et le **Sénat** (article 85 de la Constitution)." },
-      { table: { h: ["", "Assemblée nationale", "Sénat"], r: [
-        ["**Membres**", "Les députés", "Les sénateurs"],
-        ["**Désignation**", "Suffrage universel direct", "Deux tiers élus au suffrage indirect, un tiers nommé par le Président de la République (article 87)"],
-        ["**Mandat**", "Cinq ans", "Cinq ans"],
-        ["**Représente**", "La nation", "Les collectivités territoriales et les Ivoiriens de l'extérieur"],
-      ] } },
-      { ol: [
-        "**L'initiative** : le Président de la République (**projet de loi**) et les parlementaires (**proposition de loi**).",
-        "**La navette** : le texte passe d'une chambre à l'autre jusqu'à l'adoption d'un texte identique (article 110).",
-        "**Le désaccord** : une commission mixte paritaire peut être réunie ; à défaut d'accord, l'Assemblée nationale statue définitivement.",
-        "**La promulgation** dans les trente jours, puis la **publication** au Journal officiel.",
-      ] },
-      { box: "Les deux chambres réunies forment le **Congrès**, notamment pour adopter une révision de la Constitution sans référendum.", title: "Le Congrès", kind: "marge" },
-    ] },
-    { id: "familles", title: "Complément : familles juridiques et régimes de crise", body: [
-      { ul: [
-        "**Famille romano-germanique** (civiliste) : droit écrit et codifié ; la loi est la source principale. **La Côte d'Ivoire en fait partie.**",
-        "**Common law** (Royaume-Uni, États-Unis, Ghana, Nigeria) : le droit naît surtout des décisions des juges (règle du précédent).",
-        "**Droit musulman** : fondé sur le Coran, la Sunna, l'Idjma' et le Qiyas (voir le module Droit musulman).",
-      ] },
-      { table: { h: ["Régime de crise", "Pouvoirs renforcés", "Situation"], r: [
-        ["**État d'urgence**", "Autorités civiles", "Troubles graves à l'ordre public ou calamité"],
-        ["**État de siège**", "Autorité militaire", "Péril imminent : guerre ou insurrection armée"],
-        ["**Pouvoirs exceptionnels**", "Président de la République", "Menace grave sur les institutions, l'indépendance ou le territoire"],
-      ] } },
-    ] },
-    { id: "penal", title: "Complément : notions de droit pénal", body: [
-      { table: { h: ["Infraction", "Gravité", "Peines", "Exemples"], r: [
-        ["**Crime**", "La plus grave", "Réclusion, jusqu'à la perpétuité", "Meurtre, vol à main armée"],
-        ["**Délit**", "Moyenne", "Emprisonnement, amende", "Vol simple, escroquerie"],
-        ["**Contravention**", "La moins grave", "Amende", "Tapage, certaines infractions routières"],
-      ] } },
-      { ol: [
-        "**Élément légal** : un texte prévoit l'infraction (*nullum crimen, nulla poena sine lege*).",
-        "**Élément matériel** : un acte ou une abstention ; la pensée seule n'est pas punie.",
-        "**Élément moral** : l'intention ou la faute.",
-      ] },
-      { table: { h: ["Infraction", "Définition"], r: [
-        ["**Meurtre**", "Homicide volontaire : donner volontairement la mort à autrui"],
-        ["**Assassinat**", "Meurtre commis avec **préméditation** ou guet-apens : il est plus sévèrement puni"],
-        ["**Homicide involontaire**", "Mort causée par maladresse, imprudence, négligence (accident de la route) : c'est un délit"],
-      ] } },
-      { ul: [
-        "**Tentative** : punie comme l'infraction consommée s'il y a commencement d'exécution et absence de désistement volontaire.",
-        "**Contumace** : jugement d'un accusé de crime qui ne se présente pas devant la juridiction criminelle.",
-        "**Peines privatives de droits** : interdiction des droits civiques, interdiction d'exercer une profession.",
-      ] },
-    ] },
-    { id: "adages", title: "Complément : adages juridiques", body: [
-      { table: { h: ["Adage", "Sens"], r: [
-        ["*Nemo censetur ignorare legem*", "Nul n'est censé ignorer la loi"],
-        ["*Actori incumbit probatio*", "La preuve incombe au demandeur"],
-        ["*Nullum crimen, nulla poena sine lege*", "Pas de crime ni de peine sans loi"],
-        ["*Non bis in idem*", "Nul ne peut être poursuivi deux fois pour les mêmes faits"],
-        ["*Pacta sunt servanda*", "Les conventions doivent être respectées"],
-        ["*Nemo auditur propriam turpitudinem allegans*", "Nul ne peut se prévaloir de sa propre faute"],
-        ["*Specialia generalibus derogant*", "Le texte spécial l'emporte sur le texte général"],
-        ["*Res judicata pro veritate habetur*", "La chose jugée est tenue pour la vérité"],
-        ["*Dura lex, sed lex*", "La loi est dure, mais c'est la loi"],
-        ["*Locus regit actum*", "Le lieu régit la forme de l'acte"],
-        ["« Le pénal tient le civil en état »", "Le juge civil attend la décision pénale portant sur les mêmes faits"],
-        ["« La plume est serve, la parole est libre »", "Le procureur obéit par écrit mais requiert librement à l'audience"],
-      ] } },
-    ] },
-    { id: "pourquoi", title: "Complément : les débouchés des études de droit", body: [
-      { p: "Le droit ouvre de nombreux métiers, presque tous accessibles par concours ou par un diplôme professionnel. Le parcours universitaire suit le système **LMD** : licence (bac + 3), master (bac + 5), doctorat (bac + 8)." },
-      { table: { h: ["Débouché", "Voie d'accès", "Rôle"], r: [
-        ["**Magistrat**", "Concours de la magistrature, puis formation à l'Institut national de formation judiciaire (INFJ)", "Juger (siège) ou poursuivre (parquet)"],
-        ["**Greffier**", "Concours de l'INFJ", "Assister le juge et authentifier les actes"],
-        ["**Avocat**", "Master en droit, puis CAPA et stage", "Conseiller, représenter, défendre"],
-        ["**Notaire**", "Études juridiques, formation et stage notarial", "Rédiger les actes authentiques"],
-        ["**Commissaire de justice**", "Études juridiques, concours et stage", "Signifier les actes, exécuter les décisions"],
-        ["**Juriste d'entreprise ou de banque**", "Master spécialisé", "Contrats, conformité, contentieux, droit OHADA"],
-        ["**Administration publique**", "Concours de l'École nationale d'administration (ENA)", "Préparer et appliquer les textes de l'État"],
-        ["**Enseignant-chercheur**", "Doctorat, puis recrutement universitaire", "Enseigner, faire avancer la doctrine"],
-        ["**Organisations internationales**", "Master, langues, expérience", "CEDEAO, UEMOA, BCEAO, Banque africaine de développement"],
-      ] } },
-      { box: "Choisis tôt une spécialisation, multiplie les stages et travaille ton anglais. Un double profil charia et droit positif est un atout rare en droit de la famille, en droit comparé, en médiation et en finance islamique.", title: "Conseil", kind: "cle" },
-    ] },
   ],
   quiz: [
     { q: "Le droit objectif est…", a: ["l'ensemble des règles qui régissent la vie en société, sanctionnées par l'État", "une prérogative d'une personne", "l'ensemble des décisions des juges", "la morale d'une société"], c: 0, e: "Les prérogatives individuelles sont les droits subjectifs." },
@@ -599,6 +595,17 @@ const M_OJ = {
         "**La doctrine** : ouvrages et commentaires qui expliquent et critiquent le système.",
       ] },
       { box: "**Légalité, hiérarchie, spécialisation, unicité, indépendance, permanence** : « **Le Haut Sénat Unit l'Indépendance Permanente** ».", title: "Moyen mnémotechnique", kind: "cle" },
+      { h: "Le vocabulaire des juridictions" },
+      { table: { h: ["", "Tribunal", "Cour"], r: [
+        ["**Niveau**", "Premier degré", "Appel ou cassation"], ["**Décision**", "Jugement", "Arrêt"],
+        ["**Juges**", "Juges", "Conseillers"], ["**Chef**", "Président", "Premier président"],
+        ["**Parquet**", "Procureur de la République", "Procureur général"],
+      ] } },
+      { table: { h: ["Mot", "Qui l'emploie", "Sens"], r: [
+        ["**Ordonnance**", "Juge unique", "Décision d'un juge seul"],
+        ["**Confirmer / infirmer**", "Cour d'appel", "Maintenir / réformer le jugement"],
+        ["**Casser / rejeter**", "Cour de cassation", "Annuler / maintenir la décision"],
+      ] } },
     ] },
 
     // ---------- PREMIÈRE PARTIE — CHAPITRE I : PRINCIPES
@@ -715,6 +722,16 @@ const M_OJ = {
         "**D. Particularités** : magistrats **spécialisés**, compétence nationale, coopération avec les cellules de renseignement financier (CENTIF).",
       ] },
       { box: "Délits commis par un mineur → **tribunal pour enfants**. Crime commis par un majeur → **tribunal criminel**. Grande affaire de blanchiment ou de corruption → **PPEF**.", title: "Qui juge quoi ?", kind: "cle" },
+      { h: "Les étapes du procès pénal" },
+      { ol: [
+        "**Enquête** : police et gendarmerie, sous la direction du procureur.",
+        "**Poursuite** : le procureur poursuit ou classe sans suite.",
+        "**Instruction** : le juge d'instruction approfondit, obligatoire pour les crimes ; non-lieu ou renvoi.",
+        "**Jugement** : tribunal correctionnel (délits) ou tribunal criminel (crimes).",
+        "**Recours** : appel, pourvoi.",
+        "**Exécution** de la peine.",
+      ] },
+      { box: "**Relaxe** devant le tribunal correctionnel, **acquittement** devant la juridiction criminelle, **non-lieu** prononcé par le juge d'instruction.", title: "Vocabulaire", kind: "cle" },
     ] },
     { id: "appel", title: "La cour d'appel et la cour d'appel de commerce", body: [
       { p: "*Sous-section II. La juridiction d'appel.*" },
@@ -951,29 +968,6 @@ const M_OJ = {
     ] },
 
     // ---------- COMPLÉMENTS
-    { id: "vocabulaire", title: "Complément : vocabulaire et procès pénal", body: [
-      { h: "Cour ou tribunal ?" },
-      { table: { h: ["", "Tribunal", "Cour"], r: [
-        ["**Niveau**", "Premier degré", "Appel ou cassation"], ["**Décision**", "Jugement", "Arrêt"],
-        ["**Juges**", "Juges", "Conseillers"], ["**Chef**", "Président", "Premier président"],
-        ["**Parquet**", "Procureur de la République", "Procureur général"],
-      ] } },
-      { table: { h: ["Mot", "Qui l'emploie", "Sens"], r: [
-        ["**Ordonnance**", "Juge unique", "Décision d'un juge seul"],
-        ["**Confirmer / infirmer**", "Cour d'appel", "Maintenir / réformer le jugement"],
-        ["**Casser / rejeter**", "Cour de cassation", "Annuler / maintenir la décision"],
-      ] } },
-      { h: "Les étapes du procès pénal" },
-      { ol: [
-        "**Enquête** : police et gendarmerie, sous la direction du procureur.",
-        "**Poursuite** : le procureur poursuit ou classe sans suite.",
-        "**Instruction** : le juge d'instruction approfondit, obligatoire pour les crimes ; non-lieu ou renvoi.",
-        "**Jugement** : tribunal correctionnel (délits) ou tribunal criminel (crimes).",
-        "**Recours** : appel, pourvoi.",
-        "**Exécution** de la peine.",
-      ] },
-      { box: "**Relaxe** devant le tribunal correctionnel, **acquittement** devant la juridiction criminelle, **non-lieu** prononcé par le juge d'instruction.", title: "Vocabulaire", kind: "cle" },
-    ] },
   ],
   quiz: [
     { q: "Quel caractère signifie que seule la loi crée les juridictions ?", a: ["La légalité", "La permanence", "L'unicité", "La hiérarchie"], c: 0, e: "Le juge tire son pouvoir d'un texte." },

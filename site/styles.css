@@ -555,6 +555,9 @@ header.top { background: color-mix(in srgb, var(--surface) 82%, transparent); -w
 body.scrolled header.top { box-shadow: 0 6px 22px rgba(20, 28, 46, .10); }
 .brand-logo { border-radius: 12px; transition: transform .25s ease; }
 .brand:hover .brand-logo { transform: rotate(-6deg) scale(1.04); }
+.brand.refreshing .brand-logo { animation: lc-spin .8s linear infinite; }
+@keyframes lc-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .brand.refreshing .brand-logo { animation: none; opacity: .6; } }
 .quick { display: none; gap: 4px; align-items: center; }
 .quick a { color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; padding: 7px 12px; border-radius: 999px; }
 .quick a:hover { background: var(--accent-soft); color: var(--accent); }
@@ -913,3 +916,10 @@ img.emo.flag { width: 1.4em; height: 1.05em; vertical-align: -.12em; border-radi
 .unlock { margin: 10px 0 8px; font-weight: 700; color: var(--good); }
 .next-step .eyebrow { color: var(--sc, var(--accent)); opacity: 1; }
 .qw-act { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* mini-exercice de fin de leçon */
+.mini { margin: 28px 0 8px; padding: 18px; border-radius: 16px; background: var(--tint); border: 1px solid var(--edge); display: grid; gap: 12px; }
+.mini h2 { margin: 0; font-size: 1.25rem; }
+.mini > .meta { margin: 0; }
+.mini .q { background: var(--surface); }
+.mini-end { font-size: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }

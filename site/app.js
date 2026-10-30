@@ -539,6 +539,7 @@ function viewLesson(found) {
       ${noVoice}${(s.lang === 'ar' && !s.noVoice) || (!s.noLessonVoice && /\[\[/.test(text)) ? noAr : ''}${s.noVoice ? noAudio : ''}
       ${!s.noLessonVoice && s.id !== 'en' ? `<div class="actions"><button type="button" class="btn ghost small" data-say="${esc(text)}" data-lang="fr">${ICON}Écouter la leçon <small>· ${mins} min</small></button></div>` : ''}
       ${l.body.map(b => renderBlock(b, s)).join('')}
+      ${viewMini(key)}
       <div class="lesson-foot">
         <button type="button" class="btn done-toggle" data-done="${key}" data-need="${needFor(l)}" aria-pressed="${d}">${d ? '✓ Leçon terminée' : 'Marquer comme terminée'}</button>
         <p class="meta done-msg" id="done-msg" aria-live="polite"></p>
@@ -546,6 +547,16 @@ function viewLesson(found) {
         <div class="actions">${prev ? `<a class="btn ghost small" href="#l-${s.id}.${prev.id}">← Précédente</a>` : ''}<a class="btn small${d ? '' : ' is-locked'}" data-next="1" href="${next ? `#l-${s.id}.${next.id}` : `#q-${s.id}`}">${next ? 'Suivante →' : 'Faire le quiz →'}</a></div>
       </div>
     </article>${side}</div>`;
+}
+// mini-exercice de fin de leçon (data/mini.js) : quelques questions corrigées aussitôt, que l'on peut refaire
+function viewMini(key) {
+  const qs = (window.MINI || {})[key]; if (!qs || !qs.length) return '';
+  return `<section class="mini" data-mini="${esc(key)}" aria-labelledby="mini-h"><h2 id="mini-h">Mini-exercice</h2>
+    <p class="meta">Vérifiez ce que vous avez retenu : touchez une réponse, la correction s'affiche aussitôt.</p>
+    ${qs.map((q, n) => { const order = shuffle(q.a.map((_, k) => k));
+      return `<div class="q" data-mq="${n}"><b>${n + 1}. ${md(q.q)}</b><div class="opts">${order.map((k, j) => `<button type="button" class="opt" data-k="${k}"><span class="ol" aria-hidden="true">${'ABCDEF'[j]}</span><span class="ot${/^[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\s]+$/.test(q.a[k]) ? ' ara" lang="ar" dir="rtl' : ''}">${md(q.a[k])}</span></button>`).join('')}</div>
+      <p class="expl" hidden>${md(q.e || '')}</p></div>`; }).join('')}
+    <div class="mini-end" hidden aria-live="polite"></div></section>`;
 }
 function shuffle(a) { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
 let quizRun = null;
@@ -1035,6 +1046,9 @@ window.addEventListener('scroll', () => { clearTimeout(st); st = setTimeout(() =
 // ---------- interactions
 document.addEventListener('click', e => {
   const t = e.target;
+  // logo de l'en-tête : actualiser (nouvelle version s'il y en a une), sans quitter la page en cours
+  const rf = t.closest('[data-refresh]');
+  if (rf && !e.ctrlKey && !e.metaKey && !e.shiftKey) { e.preventDefault(); if (rf.classList.contains('refreshing')) return; rf.classList.add('refreshing'); keepPlace(); stopVoice(); window.lcRefresh(); return; }
   const back = t.closest('a[href^="#"]');
   if (back && !back.target && !back.hasAttribute('data-reload') && !e.ctrlKey && !e.metaKey && !e.shiftKey && navStack.length > 1
       && decodeURIComponent(back.getAttribute('href').slice(1)) === navStack[navStack.length - 2]) { e.preventDefault(); history.back(); return; }
@@ -1089,6 +1103,17 @@ document.addEventListener('click', e => {
   if (mk) { const card = mk.closest('.word'), id = card.dataset.wid; if (state.words[id]) delete state.words[id]; else state.words[id] = 1; save('words');
     const m = !!state.words[id]; card.classList.toggle('mastered', m); mk.setAttribute('aria-pressed', m); mk.textContent = m ? '✓ Maîtrisé' : 'Maîtrisé ?';
     const p = card.parentElement.previousElementSibling; if (p && p.dataset.wcount) updateWordCount(p); return; }
+  const mopt = t.closest('.mini .opt');
+  if (mopt) { const sec = mopt.closest('.mini'), box = mopt.closest('.q'), q = (window.MINI[sec.dataset.mini] || [])[+box.dataset.mq]; if (!q) return;
+    box.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.k === q.c) b.classList.add('right'); });
+    const ok = +mopt.dataset.k === q.c; if (!ok) mopt.classList.add('wrong'); box.dataset.ok = ok ? '1' : '0';
+    const ex = box.querySelector('.expl'); if (ex.textContent.trim()) ex.hidden = false;
+    const all = sec.querySelectorAll('.q'), done = sec.querySelectorAll('.q[data-ok]');
+    if (done.length === all.length) { const r = sec.querySelectorAll('.q[data-ok="1"]').length, end = sec.querySelector('.mini-end');
+      end.innerHTML = `<b>${r} / ${all.length}</b> ${r === all.length ? '— parfait, vous avez bien retenu la leçon.' : '— relisez les passages concernés, puis recommencez.'}${r === all.length ? '' : ' <button type="button" class="btn ghost small" data-mini-again>Recommencer</button>'}`;
+      end.hidden = false; if (r === all.length) confetti(end); }
+    return; }
+  if (t.closest('[data-mini-again]')) { const sec = t.closest('.mini'); sec.outerHTML = viewMini(sec.dataset.mini); return; }
   const opt = t.closest('.opt');
   if (opt && quizRun) { const box = opt.closest('.q'), n = +box.dataset.q, q = quizRun.qs[n];
     box.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.k === q.c) b.classList.add('right'); });
@@ -1170,6 +1195,6 @@ if (LA && LA.ready) {
   // on ne la redessine à la réponse de Google que si l'élève n'est pas celui que l'on croyait
   if (!LA.likely || LA.user()) boot();
   const sameUser = () => (LA.user() ? LA.user().uid : null) === bootUid;
-  LA.ready.then(() => { if (!booted) boot(); else if (!sameUser() || /^#(admin|certificat-)/.test(location.hash)) route(); }, boot);
+  LA.ready.then(() => { if (!booted) boot(); else if (!sameUser() || /^#(admin|certificat-|profil|inscription-)/.test(location.hash)) route(); }, boot);
   setTimeout(boot, 7000);
 } else boot();
