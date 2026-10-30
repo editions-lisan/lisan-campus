@@ -954,3 +954,4 @@ a.dash-c:hover { border-color: var(--accent); }
 .etimer.late, .etimer.late b { color: var(--bad); border-color: var(--bad); }
 @media (max-width: 1099.98px) { #eval-qs .qbar { display: none; } }
 @media (min-width: 1100px) { .etimer { display: none; } }
+.opt.picked::after { content: 'Votre réponse'; margin-left: auto; padding-left: 10px; font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }

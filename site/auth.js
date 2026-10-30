@@ -120,12 +120,12 @@
         else throw e;
       }
       profile = null; cache.set('profile', null); cache.set('user', null);
-      ['done', 'quiz', 'known', 'words', 'time'].forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null);
+      ['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis'].forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null);
     },
     onSave(k, v) {                                       // progression : envoyée au compte (regroupée toutes les 3 s)
-      if (!user || !['done', 'quiz', 'known', 'words', 'time'].includes(k)) return;
+      if (!user || !['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis'].includes(k)) return;
       clearTimeout(timer);
-      timer = setTimeout(() => { doc().set({ progress: { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time } }, { merge: true }).catch(() => {}); }, 3000);
+      timer = setTimeout(() => { doc().set({ progress: progressData() }, { merge: true }).catch(() => {}); }, 3000);
     },
   };
   const doc = () => fb.firestore().collection('users').doc(user.uid);
@@ -138,8 +138,20 @@
   }
   const iso = v => v && v.toDate ? v.toDate().toISOString() : (typeof v === 'string' ? v : null);
   function alertMsg(t) { const n = document.getElementById('ios-help'); if (n) { n.querySelector('.notice').textContent = t; n.hidden = false; setTimeout(() => { n.hidden = true; }, 6000); } }
+  // tout ce qui suit l'élève d'un appareil à l'autre (les questions à revoir sont limitées aux 400 plus récentes)
+  function progressData() {
+    const rev = Object.entries(state.rev || {}).sort((a, b) => (b[1].t || 0) - (a[1].t || 0)).slice(0, 400);
+    return { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time, days: state.days || {}, minis: state.minis || {}, rev: Object.fromEntries(rev) };
+  }
   function mergeProgress(remote) {
     if (!remote) return;
+    state.minis = Object.assign({}, remote.minis || {}, state.minis || {}); store.set('minis', state.minis);
+    const dy = Object.assign({}, remote.days || {});
+    Object.entries(state.days || {}).forEach(([k, v]) => { if (dy[k] === undefined || v > dy[k]) dy[k] = v; });
+    state.days = dy; store.set('days', dy);
+    const rv = Object.assign({}, remote.rev || {});
+    Object.entries(state.rev || {}).forEach(([k, v]) => { if (rv[k] === undefined || (v.t || 0) >= (rv[k].t || 0)) rv[k] = v; });
+    state.rev = rv; store.set('rev', rv);
     ['done', 'known', 'words'].forEach(k => { state[k] = Object.assign({}, remote[k] || {}, state[k] || {}); store.set(k, state[k]); });
     const tm = Object.assign({}, remote.time || {});
     Object.entries(state.time || {}).forEach(([k, v]) => { if (tm[k] === undefined || v > tm[k]) tm[k] = v; });
@@ -175,7 +187,7 @@
             mergeProgress(d.progress);
             await doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp(),
               ...(snap.exists ? {} : { createdAt: fb.firestore.FieldValue.serverTimestamp() }),
-              progress: { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time } }, { merge: true });
+              progress: progressData() }, { merge: true });
           } catch (e) { /* hors connexion : on garde les inscriptions en cache */ }
         } else { profile = null; cache.set('profile', null); }
         if (first) { first = false; res(); } else if (typeof route === 'function') route();

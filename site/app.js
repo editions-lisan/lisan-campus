@@ -74,13 +74,14 @@ function streak() {
 const REV_GAPS = [1, 3, 7, 21];
 const revId = q => { let h = 5381; for (const c of q.q + '|' + q.a[q.c]) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; return h.toString(36); };
 function revAdd(q, src) {
-  const id = revId(q); state.rev[id] = { q: q.q, a: q.a, c: q.c, e: q.e || '', src, box: 0, due: dayKey() }; save('rev');
+  const id = revId(q); state.rev[id] = { q: q.q, a: q.a, c: q.c, e: q.e || '', src, box: 0, due: dayKey(), t: Date.now() }; save('rev');
 }
-const revDue = () => Object.entries(state.rev).filter(([, r]) => r.due <= dayKey());
+const revDue = () => Object.entries(state.rev).filter(([, r]) => !r.ok && r.due <= dayKey());
+const revOpen = () => Object.values(state.rev).filter(r => !r.ok);
 function revAnswer(id, ok) {
-  const r = state.rev[id]; if (!r) return;
-  if (ok) { r.box++; if (r.box > REV_GAPS.length) delete state.rev[id]; else { const d = new Date(); d.setDate(d.getDate() + REV_GAPS[r.box - 1]); r.due = dayKey(d); } }
-  else { r.box = 0; r.due = dayKey(); }
+  const r = state.rev[id]; if (!r || r.ok) return;
+  if (ok) { r.box++; if (r.box > REV_GAPS.length) state.rev[id] = { ok: 1, t: Date.now() }; else { const d = new Date(); d.setDate(d.getDate() + REV_GAPS[r.box - 1]); r.due = dayKey(d); r.t = Date.now(); } }
+  else { r.box = 0; r.due = dayKey(); r.t = Date.now(); }
   save('rev');
 }
 
@@ -92,6 +93,11 @@ const arOnly = s => String(s).replace(/\[\[|\]\]/g, '');
 const ICON = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1l7 4-7 4z"/></svg>';
 const subj = id => SUBJECTS.find(s => s.id === id);
 const spaceOf = s => s.space || 'droit';
+// numéros des leçons : quand le parcours s'ouvre sur une introduction (« Pour commencer ») suivie de « Leçon 1 »,
+// l'introduction porte le numéro 0, pour que le numéro affiché corresponde au titre de la leçon
+const lessonOff = s => (s.lessons.length > 1 && !/^Leçon\b/.test(s.lessons[0].title) && /^Leçon 1\b/.test(s.lessons[1].title)) ? 1 : 0;
+const lessonNum = (s, i) => i + 1 - lessonOff(s);
+const lessonPos = (s, i) => lessonOff(s) && i === 0 ? 'Introduction' : lessonNum(s, i) + ' / ' + (s.lessons.length - lessonOff(s));
 const cardLang = s => s.lang === 'ar' ? 'ar' : (s.id === 'en' ? 'en' : 'fr');
 
 // ---------- les espaces
@@ -424,7 +430,6 @@ const words = (t, i0) => t.split(' ').filter(Boolean).map((w, k) => `<span class
 // tableau de bord de l'accueil : série de jours, objectif du jour, révisions à faire
 function homeDash() {
   const st = streak(), t = state.days[dayKey()] || 0, due = revDue().length, pct = Math.min(100, Math.round(t / DAY_GOAL * 100));
-  if (!st && !due && !Object.keys(state.days).length) return '';
   return `<section class="dash" aria-label="Mon tableau de bord">
     <div class="dash-c"><span class="dash-i" aria-hidden="true">🔥</span><div><b>${st} jour${st > 1 ? 's' : ''}</b><small>${st ? 'd’étude d’affilée' : 'Étudiez aujourd’hui pour lancer votre série'}</small></div></div>
     <div class="dash-c"><span class="dash-i" aria-hidden="true">🎯</span><div><b>${Math.floor(t / 60)} / ${DAY_GOAL / 60} min</b><small>objectif du jour</small><span class="bar"><i style="width:${pct}%"></i></span></div></div>
@@ -537,12 +542,12 @@ function viewSubject(s) {
     ${certPanelSubject(s)}</aside>
     <div class="duo-main"><div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok' || !inOrder(s, i) || !subjectOpen(s);
       const cur = !d && state.last && state.last.route === 'l-' + s.id + '.' + l.id;
-      return `<a class="lesson-link${d ? ' done' : ''}${cur ? ' cur' : ''}" href="#l-${s.id}.${l.id}"><span class="num">${d ? '✓' : i + 1}</span><span class="t">${esc(l.title)}${l.ar ? ` <span class="ara" lang="ar">${esc(l.ar)}</span>` : ''}</span>${d ? `<small>Terminée${state.minis[s.id + '/' + l.id] ? ' · exercice réussi' : ''}</small>` : cur ? '<small class="now">En cours</small>' : (lock ? '<small class="lock">🔒</small>' : (i === 0 && AUTH() ? '<small>Aperçu libre</small>' : ''))}</a>`; }).join('')}</div></div></div>`;
+      return `<a class="lesson-link${d ? ' done' : ''}${cur ? ' cur' : ''}" href="#l-${s.id}.${l.id}"><span class="num">${d ? '✓' : lessonNum(s, i)}</span><span class="t">${esc(l.title)}${l.ar ? ` <span class="ara" lang="ar">${esc(l.ar)}</span>` : ''}</span>${d ? `<small>Terminée${state.minis[s.id + '/' + l.id] ? ' · exercice réussi' : ''}</small>` : cur ? '<small class="now">En cours</small>' : (lock ? '<small class="lock">🔒</small>' : (i === 0 && AUTH() ? '<small>Aperçu libre</small>' : ''))}</a>`; }).join('')}</div></div></div>`;
 }
 function viewGate(s, why, i) {
   const sp = space(spaceOf(s)), A = AUTH();
   const u = A && A.user();
-  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [i === undefined ? 'Accès' : i === 'quiz' ? 'Évaluation' : (i + 1) + ' / ' + s.lessons.length])}
+  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [i === undefined ? 'Accès' : i === 'quiz' ? 'Évaluation' : lessonPos(s, i)])}
     <div class="gate c-${sp.color}"><span class="sp-icon" aria-hidden="true">🔒</span>
     ${why === 'prev' ? (() => { const x = blockingSubject(s), f = firstUndone(x), xp = subjectProgress(x), best = quizBest(x);
       const go = f === -1 ? `#q-${x.id}` : `#l-${x.id}.${x.lessons[f].id}`;
@@ -575,9 +580,9 @@ function viewLesson(found) {
     <nav class="ls-list">${s.lessons.map((x, j) => { const dn = !!state.done[s.id + '/' + x.id], lk = !dn && !inOrder(s, j);
       return `<a href="#l-${s.id}.${x.id}" class="${j === i ? 'on' : ''}${dn ? ' done' : ''}${lk ? ' locked' : ''}"${j === i ? ' aria-current="page"' : ''}><span>${dn ? '✓' : lk ? '🔒' : j + 1}</span>${esc(x.title)}</a>`; }).join('')}</nav>
     <div class="ls-act"><a class="btn small" href="#q-${s.id}">${inOrder(s, 'quiz') ? '' : '🔒 '}Évaluation</a><a class="btn ghost small" href="#f-${s.id}">Cartes</a></div></aside>`;
-  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [(i + 1) + ' / ' + s.lessons.length])}
+  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [lessonPos(s, i)])}
     <div class="duo duo-r"><article class="lesson read c-${s.color}">
-      <span class="eyebrow">${esc(s.title)} · ${i + 1} / ${s.lessons.length}</span>
+      <span class="eyebrow">${esc(s.title)} · ${lessonPos(s, i)}</span>
       <h1>${esc(l.title)}</h1>${l.ar ? `<p class="ara title-ar" lang="ar" dir="rtl">${esc(l.ar)}</p>` : ''}
       ${noVoice}${(s.lang === 'ar' && !s.noVoice) || (!s.noLessonVoice && /\[\[/.test(text)) ? noAr : ''}${s.noVoice ? noAudio : ''}
       ${!s.noLessonVoice && s.id !== 'en' ? `<div class="actions"><button type="button" class="btn ghost small" data-say="${esc(text)}" data-lang="fr">${ICON}Écouter la leçon <small>· ${mins} min</small></button></div>` : ''}
@@ -766,13 +771,13 @@ let glossSpace = 'all';
 // ---------- page « Mes révisions »
 let revRun = null;
 function viewRevisions() {
-  const due = revDue(), all = Object.keys(state.rev).length, st = streak(), today = Math.min(DAY_GOAL, state.days[dayKey()] || 0);
+  const due = revDue(), all = revOpen().length, st = streak(), today = Math.min(DAY_GOAL, state.days[dayKey()] || 0);
   const head = `${crumbs(['Mes révisions'])}<div class="subject-head"><h1>Mes révisions</h1>
     <p class="lead">Chaque question manquée dans un mini-exercice ou un quiz revient ici, puis à intervalles croissants (1, 3, 7 et 21 jours). Réussie quatre fois de suite, elle est acquise.</p></div>
     <div class="revstats"><div><b>${due.length}</b><span>à revoir aujourd’hui</span></div><div><b>${all}</b><span>en cours de révision</span></div><div><b>${st}</b><span>jour${st > 1 ? 's' : ''} d’affilée</span></div>
     <div><b>${Math.round(today / 60)} / ${DAY_GOAL / 60}</b><span>minutes aujourd’hui</span></div></div>`;
   if (!due.length) { revRun = null;
-    const next = Object.values(state.rev).map(r => r.due).sort()[0];
+    const next = revOpen().map(r => r.due).sort()[0];
     return head + `<div class="notice ok-n">${all ? `🔁 Rien à revoir aujourd’hui. Prochaine révision : <b>${new Date(next + 'T12:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</b>.` : '🔁 Aucune question à revoir pour l’instant : faites les mini-exercices et les quiz, vos erreurs viendront ici.'}</div>`; }
   revRun = { qs: shuffle(due).slice(0, 10).map(([id, r]) => ({ id, ...r, order: shuffle(r.a.map((_, k) => k)) })), n: 0, right: 0 };
   return head + `<div class="quiz rev read">${revRun.qs.map((q, n) => `<div class="q" data-rq="${n}"><span class="meta">${esc(q.src)}</span><b>${n + 1}. ${md(q.q)}</b>
@@ -908,7 +913,7 @@ const PAGES = {
     { h: '1. Responsable du traitement' },
     { p: 'Éditions Lisân, représentées par Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Contact : la page [Contact](#contact) du site.' },
     { h: '2. Les données que nous traitons' },
-    { ul: ['**Votre progression** (leçons terminées, temps de lecture de chaque leçon, scores, cartes sues) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Ils ne nous sont pas transmis.',
+    { ul: ['**Votre progression** (leçons terminées, mini-exercices réussis, temps de lecture de chaque leçon, temps d’étude de chaque jour, questions à revoir, scores, cartes sues) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Sans connexion, ils ne nous sont pas transmis ; si vous vous connectez, votre progression est aussi enregistrée dans votre compte pour la retrouver sur tous vos appareils.',
       '**Si vous vous connectez avec Google** : le nom, l’adresse e-mail et la photo de votre compte Google.',
       '**Si vous vous inscrivez à un espace** : votre fiche d’inscription (civilité, nom, prénoms, date de naissance, téléphone, pays et ville de résidence, profil, manière dont vous avez connu le site et, pour les moins de 18 ans, le nom et le téléphone d’un parent ou tuteur), vos réponses aux questions de l’espace, vos inscriptions et votre progression.',
       '**Si vous obtenez un certificat** : vos civilité, prénom et nom, le parcours réussi, le nombre de leçons, le score à l’évaluation et la date. Ces informations sont inscrites au registre des certificats : **toute personne qui connaît le numéro du certificat** (ou scanne son code QR) peut les consulter, afin de vérifier qu’il est authentique. Aucune autre donnée n’y figure.',
@@ -1261,7 +1266,7 @@ document.addEventListener('click', e => {
   const rs = t.closest('[data-reset]');
   if (rs) { const z = document.getElementById('reset-zone');
     if (rs.dataset.reset === 'ask') z.innerHTML = `<p><b>Effacer toute votre progression sur cet appareil ?</b> Cette action est définitive.</p><button type="button" class="btn bad small" data-reset="yes">Oui, tout effacer</button><button type="button" class="btn ghost small" data-reset="no">Annuler</button>`;
-    else if (rs.dataset.reset === 'yes') { ['done', 'quiz', 'known', 'words', 'time'].forEach(k => { state[k] = {}; save(k); }); state.last = null; save('last'); z.innerHTML = '<p class="meta">Votre progression a été effacée.</p>'; }
+    else if (rs.dataset.reset === 'yes') { ['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis'].forEach(k => { state[k] = {}; save(k); }); state.last = null; save('last'); z.innerHTML = '<p class="meta">Votre progression a été effacée.</p>'; }
     else z.innerHTML = '<button type="button" class="btn ghost small" data-reset="ask">Effacer ma progression</button>';
     return; }
   const ins = t.closest('[data-install]');
