@@ -8,6 +8,7 @@ const state = {
   done: store.get('done', {}), quiz: store.get('quiz', {}), known: store.get('known', {}),
   words: store.get('words', {}), time: store.get('time', {}), rate: store.get('rate', 1), last: store.get('last', null),
   theme: store.get('theme', 'auto'), size: store.get('size', 'm'),
+  rev: store.get('rev', {}), days: store.get('days', {}), minis: store.get('minis', {}),
 };
 const save = k => { store.set(k, state[k]); if (window.LisanAuth && window.LisanAuth.onSave) window.LisanAuth.onSave(k, state[k]); };
 
@@ -27,10 +28,14 @@ function audioSeconds(text) {
 }
 const needFor = l => Math.max(40, Math.min(1800, Math.round(audioSeconds(lessonSpeech(l)))));
 const fmtLeft = n => n >= 60 ? `${Math.floor(n / 60)} min ${String(n % 60).padStart(2, '0')} s` : `${n} s`;
+// le mini-exercice doit être réussi (toutes les réponses justes) pour terminer la leçon et passer à la suivante
+const miniNeeded = key => !state.minis[key] && !!document.querySelector(`.mini[data-mini="${key}"]`);
 function doneBtnState(b) {
   const key = b.dataset.done, need = +b.dataset.need || 0, t = state.time[key] || 0, d = !!state.done[key], left = Math.max(0, need - t);
   b.setAttribute('aria-pressed', d); b.classList.toggle('wait', !d && left > 0); b.style.setProperty('--t', (need ? Math.min(100, Math.round(t / need * 100)) : 100) + '%');
-  b.innerHTML = d ? '✓ Leçon terminée' : left > 0 ? `Marquer comme terminée <small>· encore ${fmtLeft(left)} d’étude</small>` : 'Marquer comme terminée';
+  const mini = !d && miniNeeded(key);
+  b.classList.toggle('wait', !d && (left > 0 || mini));
+  b.innerHTML = d ? '✓ Leçon terminée' : left > 0 ? `Marquer comme terminée <small>· encore ${fmtLeft(left)} d’étude${mini ? ' et le mini-exercice' : ''}</small>` : mini ? 'Marquer comme terminée <small>· réussissez d’abord le mini-exercice</small>' : 'Marquer comme terminée';
 }
 let lessonClock = null, lastAct = Date.now();
 ['scroll', 'pointerdown', 'keydown', 'touchstart', 'wheel', 'mousemove'].forEach(ev => window.addEventListener(ev, () => { lastAct = Date.now(); }, { passive: true }));
@@ -45,10 +50,38 @@ function startLessonClock() {
     // seulement sur la page de la leçon, visible et au premier plan (pas une autre fenêtre), en lisant ou en écoutant
     if (document.visibilityState !== 'visible' || (!listening && (!document.hasFocus() || Date.now() - lastAct > 90000))) return;
     if ((state.time[key] || 0) >= need) return;
-    state.time[key] = (state.time[key] || 0) + 1; n++;
-    if (n % 10 === 0 || state.time[key] >= need) save('time');
+    state.time[key] = (state.time[key] || 0) + 1; n++; studied(1, false);
+    if (n % 10 === 0 || state.time[key] >= need) { save('time'); save('days'); }
     doneBtnState(b);
   }, 1000);
+}
+
+// ---------- jours d'étude (sur cet appareil) : série de jours et objectif quotidien de 10 minutes
+const DAY_GOAL = 600;
+const dayKey = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+function studied(sec, now = true) {
+  const k = dayKey(); state.days[k] = (state.days[k] || 0) + sec;
+  const keys = Object.keys(state.days).sort(); while (keys.length > 120) delete state.days[keys.shift()];
+  if (now) save('days');
+}
+function streak() {
+  const d = new Date(); if (!state.days[dayKey(d)]) d.setDate(d.getDate() - 1);
+  let n = 0; while (state.days[dayKey(d)] > 0) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+// ---------- mes révisions : chaque question manquée (mini-exercice, quiz) revient à intervalles croissants
+// (1, 3, 7 puis 21 jours) ; une question réussie quatre fois de suite est acquise et quitte la liste.
+const REV_GAPS = [1, 3, 7, 21];
+const revId = q => { let h = 5381; for (const c of q.q + '|' + q.a[q.c]) h = ((h * 33) ^ c.charCodeAt(0)) >>> 0; return h.toString(36); };
+function revAdd(q, src) {
+  const id = revId(q); state.rev[id] = { q: q.q, a: q.a, c: q.c, e: q.e || '', src, box: 0, due: dayKey() }; save('rev');
+}
+const revDue = () => Object.entries(state.rev).filter(([, r]) => r.due <= dayKey());
+function revAnswer(id, ok) {
+  const r = state.rev[id]; if (!r) return;
+  if (ok) { r.box++; if (r.box > REV_GAPS.length) delete state.rev[id]; else { const d = new Date(); d.setDate(d.getDate() + REV_GAPS[r.box - 1]); r.due = dayKey(d); } }
+  else { r.box = 0; r.due = dayKey(); }
+  save('rev');
 }
 
 // ---------- outils de texte
@@ -388,6 +421,15 @@ const BOOKS = [['je-lis-l-arabe', 'Je lis l’arabe !', 'Niveau 0 · les lettres
 const nf = n => n.toLocaleString('fr-FR');
 // découpe un titre en mots animés un à un (la virgule reste collée au mot précédent)
 const words = (t, i0) => t.split(' ').filter(Boolean).map((w, k) => `<span class="wd" style="--i:${i0 + k}">${esc(w)}</span>`).join(' ');
+// tableau de bord de l'accueil : série de jours, objectif du jour, révisions à faire
+function homeDash() {
+  const st = streak(), t = state.days[dayKey()] || 0, due = revDue().length, pct = Math.min(100, Math.round(t / DAY_GOAL * 100));
+  if (!st && !due && !Object.keys(state.days).length) return '';
+  return `<section class="dash" aria-label="Mon tableau de bord">
+    <div class="dash-c"><span class="dash-i" aria-hidden="true">🔥</span><div><b>${st} jour${st > 1 ? 's' : ''}</b><small>${st ? 'd’étude d’affilée' : 'Étudiez aujourd’hui pour lancer votre série'}</small></div></div>
+    <div class="dash-c"><span class="dash-i" aria-hidden="true">🎯</span><div><b>${Math.floor(t / 60)} / ${DAY_GOAL / 60} min</b><small>objectif du jour</small><span class="bar"><i style="width:${pct}%"></i></span></div></div>
+    <a class="dash-c" href="#revisions"><span class="dash-i" aria-hidden="true">🔁</span><div><b>${due} question${due > 1 ? 's' : ''}</b><small>${due ? 'à revoir aujourd’hui' : 'rien à revoir aujourd’hui'}</small></div></a></section>`;
+}
 function viewHome() {
   const last = lastLesson();
   // reprendre : la dernière leçon si elle n'est pas terminée, sinon la prochaine étape de son espace
@@ -406,6 +448,7 @@ function viewHome() {
       <div class="hero-cta hz" style="--hd:1.05s"><button type="button" class="btn" data-scrollto="espaces">Choisir un espace</button>${last ? `<a class="btn ghost" href="${resumeHref}">Reprendre ma leçon</a>` : '<a class="btn ghost" href="#apropos">Découvrir Lisân</a>'}</div>
     </section>${heroVideo()}</div>
     <section class="kpis" aria-label="Lisân Campus en chiffres">${kpi('🧭', SPACES.length, 'espaces', 'a')}${kpi('📚', totalL, 'leçons', 'n')}${kpi('✍️', nQ, 'questions de quiz', 'i')}${kpi('🃏', nC, 'cartes de révision', 'l')}${kpi('📶', 'Hors ligne', 'fonctionne même sans internet', 'm').replace('<b>', '<b class="txt">')}</section>
+    ${homeDash()}
     ${doneL || last ? `<section class="mine"><span class="ring" style="--p:${pct}">${pct} %</span><div><b>Votre progression</b><p>${doneL} leçon${doneL > 1 ? 's' : ''} terminée${doneL > 1 ? 's' : ''} sur ${totalL}${last ? ` · dernière leçon : ${esc(last.s.title)}, ${esc(last.l.title)}` : ''}</p></div>${last ? `<a class="btn" href="${resumeHref}">Reprendre</a>` : ''}</section>` : ''}
     <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les cinq espaces</h2><p>Choisissez votre espace : la première leçon de chaque espace est en accès libre.</p></div>
     <section class="spaces">${SPACES.map(sp => { const p = spaceProgress(sp); const A = AUTH();
@@ -418,7 +461,7 @@ function viewHome() {
     <div class="sec-h"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Comment ça marche ?</h2></div>
     <section class="steps">${step('🧭', 'Choisissez un espace', 'L’arabe, le Coran, le droit ou l’intelligence artificielle : commencez par la première leçon, en accès libre, puis suivez les étapes dans l’ordre.')}
       ${step('🎧', 'Apprenez et écoutez', 'Des leçons courtes, lues à voix haute, sur téléphone ou sur ordinateur, même sans connexion.')}
-      ${step('✅', 'Vérifiez vos acquis', 'Les quiz se corrigent aussitôt ; les cartes de révision ramènent d’abord ce qu’il faut revoir.')}
+      ${step('✅', 'Vérifiez vos acquis', 'Un mini-exercice après chaque leçon, un quiz à la fin du parcours : la correction est immédiate, et vos erreurs reviennent dans « Mes révisions » jusqu’à ce qu’elles soient acquises.')}
       ${step('🎓', 'Recevez votre certificat', 'Toutes les leçons terminées et le quiz réussi à 70 % : votre certificat, vérifiable en ligne.')}</section>
     <div class="sec-h"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les livres des Éditions Lisân</h2><p>Les espaces « Apprendre l’arabe », « Lire le Coran pas à pas » et « Vivre l’islam en famille » accompagnent ces livres.</p></div>
     <section class="books" aria-label="Les livres">${BOOKS.map(([f, t, d, h]) => { const inner = `<img src="img/${f}.webp" alt="Couverture du livre « ${esc(t)} »" width="150" height="212" loading="lazy" decoding="async"><b>${esc(t)}</b><small>${esc(d)}</small>`;
@@ -494,7 +537,7 @@ function viewSubject(s) {
     ${certPanelSubject(s)}</aside>
     <div class="duo-main"><div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok' || !inOrder(s, i) || !subjectOpen(s);
       const cur = !d && state.last && state.last.route === 'l-' + s.id + '.' + l.id;
-      return `<a class="lesson-link${d ? ' done' : ''}${cur ? ' cur' : ''}" href="#l-${s.id}.${l.id}"><span class="num">${d ? '✓' : i + 1}</span><span class="t">${esc(l.title)}${l.ar ? ` <span class="ara" lang="ar">${esc(l.ar)}</span>` : ''}</span>${d ? '<small>Terminée</small>' : cur ? '<small class="now">En cours</small>' : (lock ? '<small class="lock">🔒</small>' : (i === 0 && AUTH() ? '<small>Aperçu libre</small>' : ''))}</a>`; }).join('')}</div></div></div>`;
+      return `<a class="lesson-link${d ? ' done' : ''}${cur ? ' cur' : ''}" href="#l-${s.id}.${l.id}"><span class="num">${d ? '✓' : i + 1}</span><span class="t">${esc(l.title)}${l.ar ? ` <span class="ara" lang="ar">${esc(l.ar)}</span>` : ''}</span>${d ? `<small>Terminée${state.minis[s.id + '/' + l.id] ? ' · exercice réussi' : ''}</small>` : cur ? '<small class="now">En cours</small>' : (lock ? '<small class="lock">🔒</small>' : (i === 0 && AUTH() ? '<small>Aperçu libre</small>' : ''))}</a>`; }).join('')}</div></div></div>`;
 }
 function viewGate(s, why, i) {
   const sp = space(spaceOf(s)), A = AUTH();
@@ -549,11 +592,69 @@ function viewLesson(found) {
     </article>${side}</div>`;
 }
 // mini-exercice de fin de leçon (data/mini.js) : quelques questions corrigées aussitôt, que l'on peut refaire
+// pour les leçons de vocabulaire (espace arabe), le mini-exercice est composé à partir des mots de la leçon
+const miniGen = {};
+function autoMini(key) {
+  const f = findLesson(key.replace('/', '.')); if (!f) return null;
+  const items = (l, all) => { const out = [];
+    l.body.forEach(b => {
+      if (b.letters) b.letters.forEach(x => { out.push({ ar: x.c, fr: x.name, k: 'name' }); if (x.word && x.word.ar) out.push({ ar: x.word.ar, fr: x.word.fr, k: 'w' }); });
+      if (b.vocab) b.vocab.forEach(x => out.push({ ar: x[1], fr: x[2], k: 'w' }));
+      if (b.syl) b.syl.forEach(x => { if (x[1]) out.push({ ar: x[0], fr: x[1], k: 'w' }); });
+      if (!all && b.dialog) b.dialog.lines.forEach(x => { if (x[2] && x[2].split(/\s+/).length <= 6) out.push({ ar: x[2], fr: x[3], k: 'p' }); });
+    });
+    return out; };
+  const own = items(f.l), pool = own.concat(...f.s.lessons.filter(x => x !== f.l).map(x => items(x, true)));
+  const uniq = (a, key) => a.filter((x, i) => a.findIndex(y => y[key] === x[key]) === i);
+  const pick = (a, n) => shuffle(a).slice(0, n);
+  const q = (it, dir, kind) => { const same = uniq(pool.filter(x => x.k === it.k && x.fr !== it.fr && x.ar !== it.ar), dir === 'fr' ? 'fr' : 'ar');
+    if (same.length < 2) return null; const wrong = pick(same, 2);
+    return dir === 'fr' ? { q: kind === 'name' ? `Comment s'appelle la lettre [[${it.ar}]] ?` : kind === 'p' ? `Que veut dire : [[${it.ar}]] ?` : `Que signifie [[${it.ar}]] ?`, a: [it.fr, ...wrong.map(x => x.fr)], c: 0, e: `[[${it.ar}]] : ${it.fr}.` }
+      : { q: `Comment dit-on « ${it.fr} » en arabe ?`, a: [`[[${it.ar}]]`, ...wrong.map(x => `[[${x.ar}]]`)], c: 0, e: `« ${it.fr} » : [[${it.ar}]].` }; };
+  const words = shuffle(uniq(own.filter(x => x.k === 'w'), 'ar')), names = shuffle(own.filter(x => x.k === 'name')), phr = shuffle(own.filter(x => x.k === 'p'));
+  const out = [];
+  if (words[0]) out.push(q(words[0], 'fr', 'w'));
+  if (words[1]) out.push(q(words[1], /[«:]/.test(words[1].fr) ? 'fr' : 'ar', 'w'));
+  if (names[0]) out.push(q(names[0], 'fr', 'name')); else if (phr[0]) out.push(q(phr[0], 'fr', 'p')); else if (words[2]) out.push(q(words[2], 'fr', 'w'));
+  const r = out.filter(Boolean); return r.length ? r : null;
+}
+// Chaque tentative propose des questions différentes : chaque notion de la leçon peut revenir en QCM ou en
+// « vrai ou faux » (avec une autre proposition fausse), et l'on évite ce qui vient d'être posé.
+const miniLast = {};
+function miniStatement(stem, ans) {
+  const t = String(ans), st = String(stem).trim(), blanks = (st.match(/…/g) || []).length;
+  if (/^corrigez/i.test(st)) return `${st} → correction proposée : ${t}`;
+  if (blanks && !/…$/.test(st)) { const parts = blanks > 1 ? t.split(/\s*\/\s*/) : [t];
+    if (parts.length === blanks) { let k = 0; return 'Cette phrase est correcte : ' + st.replace(/…/g, () => parts[k++]).replace(/\s*:$/, '').replace(/\s{2,}/g, ' '); } }
+  if (/…$/.test(st)) return `${st.slice(0, -1).trim()} ${t}`;
+  if (/:$/.test(st)) return `${st} ${t}`;
+  return `${st} — réponse proposée : ${t}`;
+}
+function miniVariants(q, i) {
+  const out = [{ id: i + 'm', q: q.q, a: q.a, c: q.c, e: q.e }];
+  out.push({ id: i + 't', q: 'Vrai ou faux ? ' + miniStatement(q.q, q.a[q.c]), a: ['Vrai', 'Faux'], c: 0, e: q.e, vf: 1 });
+  q.a.forEach((w, k) => { if (k !== q.c) out.push({ id: i + 'f' + k, q: 'Vrai ou faux ? ' + miniStatement(q.q, w), a: ['Vrai', 'Faux'], c: 1, e: `La bonne réponse : ${q.a[q.c]}. ${q.e || ''}`, vf: 1 }); });
+  return out;
+}
+function miniDraw(key) {
+  const base = (window.MINI || {})[key];
+  if (!base) { // leçons de vocabulaire : nouvelles questions à chaque tentative, différentes de la précédente
+    let qs = null, tries = 0; const prev = (miniLast[key] || []).join('|');
+    do { qs = autoMini(key); tries++; } while (qs && tries < 6 && qs.map(q => q.q).join('|') === prev);
+    if (qs) miniLast[key] = qs.map(q => q.q); return qs; }
+  const last = new Set(miniLast[key] || []);
+  const lastIdx = new Set([...last].map(x => parseInt(x, 10)));
+  const order = shuffle(base.map((_, i) => i)).sort((a, b) => lastIdx.has(a) - lastIdx.has(b));
+  const picked = order.slice(0, 3).map(i => { const v = miniVariants(base[i], i), fresh = v.filter(x => !last.has(x.id)); return shuffle(fresh.length ? fresh : v)[0]; });
+  miniLast[key] = picked.map(x => x.id);
+  return picked;
+}
 function viewMini(key) {
-  const qs = (window.MINI || {})[key]; if (!qs || !qs.length) return '';
+  const qs = miniDraw(key); if (qs) miniGen[key] = qs;
+  if (!qs || !qs.length) return '';
   return `<section class="mini" data-mini="${esc(key)}" aria-labelledby="mini-h"><h2 id="mini-h">Mini-exercice</h2>
-    <p class="meta">Vérifiez ce que vous avez retenu : touchez une réponse, la correction s'affiche aussitôt.</p>
-    ${qs.map((q, n) => { const order = shuffle(q.a.map((_, k) => k));
+    <p class="meta">Vérifiez ce que vous avez retenu : touchez une réponse, la correction s'affiche aussitôt. Toutes les réponses justes valident le mini-exercice et ouvrent la leçon suivante.</p>
+    ${qs.map((q, n) => { const order = q.vf ? [0, 1] : shuffle(q.a.map((_, k) => k));
       return `<div class="q" data-mq="${n}"><b>${n + 1}. ${md(q.q)}</b><div class="opts">${order.map((k, j) => `<button type="button" class="opt" data-k="${k}"><span class="ol" aria-hidden="true">${'ABCDEF'[j]}</span><span class="ot${/^[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\s]+$/.test(q.a[k]) ? ' ara" lang="ar" dir="rtl' : ''}">${md(q.a[k])}</span></button>`).join('')}</div>
       <p class="expl" hidden>${md(q.e || '')}</p></div>`; }).join('')}
     <div class="mini-end" hidden aria-live="polite"></div></section>`;
@@ -607,6 +708,43 @@ function drawFlash() {
   flashRun.anim = null;
 }
 let glossSpace = 'all';
+// ---------- page « Mes révisions »
+let revRun = null;
+function viewRevisions() {
+  const due = revDue(), all = Object.keys(state.rev).length, st = streak(), today = Math.min(DAY_GOAL, state.days[dayKey()] || 0);
+  const head = `${crumbs(['Mes révisions'])}<div class="subject-head"><h1>Mes révisions</h1>
+    <p class="lead">Chaque question manquée dans un mini-exercice ou un quiz revient ici, puis à intervalles croissants (1, 3, 7 et 21 jours). Réussie quatre fois de suite, elle est acquise.</p></div>
+    <div class="revstats"><div><b>${due.length}</b><span>à revoir aujourd’hui</span></div><div><b>${all}</b><span>en cours de révision</span></div><div><b>${st}</b><span>jour${st > 1 ? 's' : ''} d’affilée</span></div>
+    <div><b>${Math.round(today / 60)} / ${DAY_GOAL / 60}</b><span>minutes aujourd’hui</span></div></div>`;
+  if (!due.length) { revRun = null;
+    const next = Object.values(state.rev).map(r => r.due).sort()[0];
+    return head + `<div class="notice ok-n">${all ? `🔁 Rien à revoir aujourd’hui. Prochaine révision : <b>${new Date(next + 'T12:00').toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</b>.` : '🔁 Aucune question à revoir pour l’instant : faites les mini-exercices et les quiz, vos erreurs viendront ici.'}</div>`; }
+  revRun = { qs: shuffle(due).slice(0, 10).map(([id, r]) => ({ id, ...r, order: shuffle(r.a.map((_, k) => k)) })), n: 0, right: 0 };
+  return head + `<div class="quiz rev read">${revRun.qs.map((q, n) => `<div class="q" data-rq="${n}"><span class="meta">${esc(q.src)}</span><b>${n + 1}. ${md(q.q)}</b>
+      <div class="opts">${q.order.map((k, j) => `<button type="button" class="opt" data-k="${k}"><span class="ol" aria-hidden="true">${'ABCDEF'[j]}</span><span class="ot">${md(q.a[k])}</span></button>`).join('')}</div>
+      <p class="expl" hidden>${md(q.e)}</p></div>`).join('')}
+    <div class="mini-end" id="rev-end" hidden aria-live="polite"></div></div>`;
+}
+// ---------- recherche dans toutes les leçons
+function viewSearch() {
+  return `${crumbs(['Rechercher'])}<div><h1>Rechercher</h1><p class="lead">Un mot, une notion, un nom : la recherche parcourt toutes les leçons de tous les espaces.</p></div>
+    <input class="search" id="ssearch" type="search" placeholder="Ex. : servitude, prompt, ablutions, tanwîn" aria-label="Rechercher dans les leçons" autocomplete="off">
+    <div id="slist" class="slist"></div>`;
+}
+let searchIdx = null;
+const fold = t => String(t).normalize('NFD').replace(/[\u0300-\u036f\u064b-\u0655\u0670]/g, '').replace(/[\u0671\u0623\u0625\u0622]/g, '\u0627').toLowerCase();
+function drawSearch(q) {
+  const el = document.getElementById('slist'); if (!el) return;
+  if (!searchIdx) searchIdx = SUBJECTS.flatMap(s => s.lessons.map((l, i) => { const raw = lessonSpeech(l).replace(/\[\[(.+?)\]\]/g, '$1'); return { s, l, i, raw, f: fold(raw), ft: fold(l.title) }; }));
+  const w = fold(q.trim()); if (w.length < 2) { el.innerHTML = '<p class="meta">Tapez au moins deux lettres.</p>'; return; }
+  const terms = w.split(/\s+/).filter(Boolean);
+  const hits = searchIdx.filter(x => terms.every(t => x.f.includes(t))).map(x => ({ ...x, score: terms.reduce((a, t) => a + (x.ft.includes(t) ? 10 : 0) + x.f.split(t).length - 1, 0) })).sort((a, b) => b.score - a.score).slice(0, 40);
+  if (!hits.length) { el.innerHTML = `<p class="lead">Aucune leçon ne contient « ${esc(q)} ».</p>`; return; }
+  el.innerHTML = `<p class="meta">${hits.length} leçon${hits.length > 1 ? 's' : ''}</p>` + hits.map(x => {
+    const pos = x.f.indexOf(terms[0]), a = Math.max(0, pos - 70), snip = (a ? '…' : '') + x.raw.slice(a, pos + 110) + '…';
+    let hl = esc(snip); terms.forEach(t => { const i = fold(snip).indexOf(t); if (i >= 0) { const orig = snip.slice(i, i + t.length); hl = hl.replace(esc(orig), `<mark>${esc(orig)}</mark>`); } });
+    return `<a class="shit c-${x.s.color}" href="#l-${x.s.id}.${x.l.id}"><span class="eyebrow">${x.s.title.startsWith(space(spaceOf(x.s)).title) ? '' : esc(space(spaceOf(x.s)).title) + ' · '}${esc(x.s.title)} · leçon ${x.i + 1}</span><b>${esc(x.l.title)}</b><span class="snip">${hl}</span></a>`; }).join('');
+}
 function viewGlossary() {
   return `${crumbs(['Glossaire'])}
     <div><h1>Glossaire</h1><p class="lead">Tous les termes et tous les mots des espaces. Choisissez un espace, puis tapez un mot pour filtrer.</p></div>
@@ -809,6 +947,8 @@ function route() {
     if (g) html = g; else { html = viewLesson(f); keep = true; after = afterLesson; } }
   else if (h.startsWith('q-') && subj(h.slice(2))) { const s = subj(h.slice(2)); html = authGate(s) || (inOrder(s, 'quiz') ? viewQuiz(s) : viewGate(s, 'order', 'quiz')); }
   else if (h.startsWith('f-') && subj(h.slice(2))) { const s = subj(h.slice(2)); const g = authGate(s); if (g) html = g; else { html = viewFlash(s); after = () => { drawFlash(); checkArVoice(); }; } }
+  else if (h === 'revisions') html = viewRevisions();
+  else if (h === 'recherche') { html = viewSearch(); after = () => { const i = document.getElementById('ssearch'); let t; i.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => drawSearch(i.value), 150); }); drawSearch(''); }; }
   else if (h === 'glossaire') { html = viewGlossary(); after = () => { drawGlossary(''); document.getElementById('gsearch').addEventListener('input', e => drawGlossary(e.target.value)); }; }
   else if (h === 'parametres') { html = viewSettings(); after = voiceStatus; }
   else if (h === 'compte') html = viewAccount();
@@ -946,6 +1086,8 @@ function renderDrawer() {
       <div class="dr-sec">Les espaces</div>
       ${SPACES.map(sp => item('espace-' + sp.id, sp.icon, sp.title)).join('')}
       <div class="dr-sec">Outils</div>
+      ${item('revisions', '🔁', 'Mes révisions' + (revDue().length ? ` (${revDue().length})` : ''))}
+      ${item('recherche', '🔍', 'Rechercher dans les leçons')}
       ${item('glossaire', '🔎', 'Glossaire')}
       ${A ? item('compte', '👤', 'Mon compte') : ''}
       ${A && u && isAdminCached() ? item('admin', '📋', 'Administration') : ''}
@@ -1096,6 +1238,8 @@ document.addEventListener('click', e => {
       if (m) m.textContent = `Prenez le temps d’étudier la leçon jusqu’au bout : le temps demandé correspond à la durée de son écoute, et il reste environ ${fmtLeft(left)}. Le temps n’avance que lorsque la leçon est ouverte à l’écran et que vous la lisez ou l’écoutez ; il s’arrête dès que vous quittez la page et reprend à votre retour.`;
       dt.classList.remove('nudge'); void dt.offsetWidth; dt.classList.add('nudge'); return; }
     if (state.done[k]) { if (m) m.textContent = 'Cette leçon est terminée : elle reste ouverte pour la relire quand vous voulez.'; return; }
+    if (miniNeeded(k)) { if (m) m.textContent = 'Pour terminer la leçon et passer à la suivante, réussissez le mini-exercice : toutes les réponses doivent être justes. Vous pouvez le recommencer autant de fois que nécessaire.';
+      const mi = document.querySelector('.mini'); if (mi) { mi.scrollIntoView({ behavior: smooth(), block: 'start' }); mi.classList.remove('nudge'); void mi.offsetWidth; mi.classList.add('nudge'); } return; }
     state.done[k] = 1; save('done'); if (m) m.textContent = '';
     doneBtnState(dt); const nb = document.querySelector('[data-next]'); if (nb) nb.classList.toggle('is-locked', !state.done[k]);
     if (state.done[k]) confetti(dt); return; }
@@ -1103,21 +1247,32 @@ document.addEventListener('click', e => {
   if (mk) { const card = mk.closest('.word'), id = card.dataset.wid; if (state.words[id]) delete state.words[id]; else state.words[id] = 1; save('words');
     const m = !!state.words[id]; card.classList.toggle('mastered', m); mk.setAttribute('aria-pressed', m); mk.textContent = m ? '✓ Maîtrisé' : 'Maîtrisé ?';
     const p = card.parentElement.previousElementSibling; if (p && p.dataset.wcount) updateWordCount(p); return; }
-  const mopt = t.closest('.mini .opt');
-  if (mopt) { const sec = mopt.closest('.mini'), box = mopt.closest('.q'), q = (window.MINI[sec.dataset.mini] || [])[+box.dataset.mq]; if (!q) return;
+  const ropt = t.closest('.rev .opt');
+  if (ropt && revRun) { const box = ropt.closest('.q'), q = revRun.qs[+box.dataset.rq]; if (!q || box.dataset.ok) return;
     box.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.k === q.c) b.classList.add('right'); });
-    const ok = +mopt.dataset.k === q.c; if (!ok) mopt.classList.add('wrong'); box.dataset.ok = ok ? '1' : '0';
+    const ok = +ropt.dataset.k === q.c; if (!ok) ropt.classList.add('wrong'); box.dataset.ok = ok ? '1' : '0'; studied(5);
+    if (q.e) box.querySelector('.expl').hidden = false; revAnswer(q.id, ok); revRun.n++; if (ok) revRun.right++;
+    if (revRun.n === revRun.qs.length) { const end = document.getElementById('rev-end'), more = revDue().length;
+      end.innerHTML = `<b>${revRun.right} / ${revRun.n}</b> ${revRun.right === revRun.n ? '— excellent !' : '— les questions manquées reviendront.'}${more ? ` <a class="btn small" href="#revisions" data-reload="1">Nouvelle série (${more})</a>` : ' <a class="btn ghost small" href="#accueil">Terminer</a>'}`;
+      end.hidden = false; if (revRun.right === revRun.n) confetti(end); }
+    return; }
+  const mopt = t.closest('.mini .opt');
+  if (mopt) { const sec = mopt.closest('.mini'), box = mopt.closest('.q'), q = (miniGen[sec.dataset.mini] || [])[+box.dataset.mq]; if (!q) return;
+    box.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.k === q.c) b.classList.add('right'); });
+    const ok = +mopt.dataset.k === q.c; if (!ok) mopt.classList.add('wrong'); box.dataset.ok = ok ? '1' : '0'; studied(5);
+    if (!ok) { const f = findLesson(sec.dataset.mini.replace('/', '.')); revAdd(q, f ? f.s.title + ' · ' + f.l.title : 'Mini-exercice'); }
     const ex = box.querySelector('.expl'); if (ex.textContent.trim()) ex.hidden = false;
     const all = sec.querySelectorAll('.q'), done = sec.querySelectorAll('.q[data-ok]');
     if (done.length === all.length) { const r = sec.querySelectorAll('.q[data-ok="1"]').length, end = sec.querySelector('.mini-end');
-      end.innerHTML = `<b>${r} / ${all.length}</b> ${r === all.length ? '— parfait, vous avez bien retenu la leçon.' : '— relisez les passages concernés, puis recommencez.'}${r === all.length ? '' : ' <button type="button" class="btn ghost small" data-mini-again>Recommencer</button>'}`;
-      end.hidden = false; if (r === all.length) confetti(end); }
+      end.innerHTML = `<b>${r} / ${all.length}</b> ${r === all.length ? '— parfait, vous avez bien retenu la leçon.' : '— relisez les passages concernés, puis recommencez : il faut toutes les bonnes réponses pour valider le mini-exercice et passer à la suite.'}${r === all.length ? '' : ' <button type="button" class="btn ghost small" data-mini-again>Recommencer</button>'}`;
+      end.hidden = false; if (r === all.length) { confetti(end); state.minis[sec.dataset.mini] = 1; save('minis'); const db = document.querySelector('[data-done]'); if (db) doneBtnState(db);
+        end.insertAdjacentHTML('beforeend', ' <span class="ok-t">Mini-exercice validé : vous pouvez terminer la leçon.</span>'); } }
     return; }
   if (t.closest('[data-mini-again]')) { const sec = t.closest('.mini'); sec.outerHTML = viewMini(sec.dataset.mini); return; }
   const opt = t.closest('.opt');
   if (opt && quizRun) { const box = opt.closest('.q'), n = +box.dataset.q, q = quizRun.qs[n];
     box.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.k === q.c) b.classList.add('right'); });
-    const ok = +opt.dataset.k === q.c; if (!ok) opt.classList.add('wrong');
+    const ok = +opt.dataset.k === q.c; studied(5); if (!ok) { opt.classList.add('wrong'); revAdd(q, quizRun.s.title + ' · quiz'); }
     box.querySelector('.expl').hidden = false; box.classList.add('done-q'); quizRun.answered++; if (ok) quizRun.right++;
     const sc = document.getElementById('score'); sc.textContent = `${quizRun.right} / ${quizRun.qs.length}`;
     const qb = document.getElementById('qbar'); if (qb) qb.style.width = (quizRun.answered / quizRun.qs.length * 100) + '%';

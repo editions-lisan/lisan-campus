@@ -923,3 +923,27 @@ img.emo.flag { width: 1.4em; height: 1.05em; vertical-align: -.12em; border-radi
 .mini > .meta { margin: 0; }
 .mini .q { background: var(--surface); }
 .mini-end { font-size: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+/* tableau de bord de l'accueil, révisions, recherche */
+.dash { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+.dash-c { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--edge); color: var(--ink); text-decoration: none; min-width: 0; }
+a.dash-c:hover { border-color: var(--accent); }
+.dash-i { font-size: 28px; flex: none; }
+.dash-c b { display: block; font-size: 1.1rem; }
+.dash-c small { color: var(--muted); display: block; }
+.dash-c .bar { margin-top: 6px; display: block; }
+@media (max-width: 720px) { .dash { grid-template-columns: 1fr; } }
+.revstats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 14px 0 18px; }
+.revstats div { background: var(--tint); border: 1px solid var(--edge); border-radius: 14px; padding: 12px; text-align: center; }
+.revstats b { display: block; font-size: 1.5rem; font-family: var(--font-display); }
+.revstats span { color: var(--muted); font-size: 14px; }
+@media (max-width: 720px) { .revstats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.rev .q .meta { font-size: 13px; }
+.notice.ok-n { background: var(--good-soft); border-color: var(--good); }
+.slist { display: grid; gap: 10px; margin-top: 14px; }
+.shit { display: grid; gap: 4px; padding: 14px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--edge); border-left: 4px solid var(--sc, var(--accent)); color: var(--ink); text-decoration: none; }
+.shit:hover { border-color: var(--sc, var(--accent)); }
+.shit .snip { color: var(--muted); font-size: 15px; }
+.shit mark { background: var(--accent-soft); color: inherit; border-radius: 3px; padding: 0 2px; }
+.mini.nudge { animation: nudge .45s ease; }
+@media (prefers-reduced-motion: reduce) { .mini.nudge { animation: none; } }
+.mini-end .ok-t { color: var(--good); font-weight: 700; }

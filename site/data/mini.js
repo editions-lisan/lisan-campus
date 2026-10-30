@@ -499,4 +499,704 @@ window.MINI = {
     { q: "Le Renard obtient le fromage par des manœuvres flatteuses : en droit des contrats, c'est…", a: ["le dol", "la lésion", "la force majeure"], c: 0, e: "Un consentement obtenu par manœuvres trompeuses est vicié." },
     { q: "« La bise », dans la fable, désigne…", a: ["un vent froid du nord : l'hiver", "un baiser", "la moisson"], c: 0, e: "« Quand la bise fut venue »." },
   ],
+  // ===================== FORMATION À L'IA
+  "ia/comprendre": [
+    { q: "Claude est un assistant d'IA…", a: ["générative, qui produit du texte, des tableaux, du code", "qui se contente de classer des images", "qui ne fonctionne qu'en anglais"], c: 0, e: "Il a été conçu par l'entreprise américaine Anthropic." },
+    { q: "Ce qui fait foi, ce n'est pas l'IA mais…", a: ["le cours, le texte officiel, le manuel, l'avis d'un spécialiste", "la première réponse de l'IA", "le nombre de personnes qui partagent l'information"], c: 0, e: "Claude est un excellent assistant, pas une source." },
+    { q: "La demande que l'on écrit à l'assistant s'appelle…", a: ["un prompt, une consigne ou une requête", "un jeton", "un algorithme"], c: 0, e: "On l'écrit en langage courant." },
+  ],
+  "ia/fonctionnement": [
+    { q: "Claude ne lit pas des lettres mais…", a: ["des jetons, des morceaux de mots", "des images", "des phrases entières seulement"], c: 0, e: "Les limites d'utilisation se comptent en jetons." },
+    { q: "La « fenêtre de contexte », c'est…", a: ["tout ce que Claude voit dans la conversation en cours", "la fenêtre de l'application", "la liste de ses réponses vérifiées"], c: 0, e: "Ce qui n'est pas dans la conversation, il ne le connaît pas." },
+    { q: "Posée deux fois, la même question…", a: ["peut donner deux réponses différentes", "donne toujours exactement la même réponse", "bloque l'assistant"], c: 0, e: "Raison de plus pour vérifier une information." },
+  ],
+  "ia/limites": [
+    { q: "Une « hallucination » est…", a: ["une information fausse inventée avec assurance", "une panne de l'application", "une réponse trop courte"], c: 0, e: "Une date, une citation, un article de loi inventés…" },
+    { q: "Dans l'affaire Mata c. Avianca (2023), des avocats ont été sanctionnés pour…", a: ["avoir cité des décisions inventées par une IA", "avoir utilisé un ordinateur au tribunal", "avoir refusé d'utiliser l'IA"], c: 0, e: "Ils ne les avaient pas vérifiées." },
+    { q: "Pour une posologie de médicament, on se fie…", a: ["au médecin ou au pharmacien, jamais à l'IA seule", "à la première réponse de l'IA", "à un message WhatsApp"], c: 0, e: "La santé exige un professionnel." },
+  ],
+  "ia/verifier": [
+    { q: "La première étape de la vérification consiste à…", a: ["s'arrêter et se demander si c'est important et vraisemblable", "partager l'information", "demander l'avis d'un ami"], c: 0, e: "Puis identifier, chercher la source, recouper, conclure." },
+    { q: "Pour une loi ivoirienne, la source de référence est…", a: ["le Journal officiel et les sites des institutions", "un forum en ligne", "la mémoire de l'IA"], c: 0, e: "Les textes officiels font foi." },
+    { q: "Le premier signal d'alerte est…", a: ["une précision non sourcée (un numéro d'article, un pourcentage, une citation sans référence)", "une réponse en français", "une réponse courte"], c: 0, e: "Une précision sans source doit être vérifiée." },
+  ],
+  "ia/decouvrir": [
+    { q: "Un « projet » dans Claude sert à…", a: ["regrouper documents et instructions partagés par plusieurs conversations", "payer l'abonnement", "traduire automatiquement"], c: 0, e: "Un projet par matière ou par activité." },
+    { q: "Un artéfact est…", a: ["un document, une page, un tableau ou un petit outil créé par Claude", "une erreur de l'IA", "un mot de passe"], c: 0, e: "On peut l'ouvrir, le modifier et le partager." },
+    { q: "Pour une tâche difficile, on choisit…", a: ["le modèle le plus puissant", "le modèle le plus rapide", "n'importe quel modèle"], c: 0, e: "Le plus rapide convient aux demandes simples." },
+  ],
+  "iap/formuler": [
+    { q: "Les cinq ingrédients d'une bonne demande sont…", a: ["rôle, contexte, tâche, format, contraintes", "titre, date, signature, lieu, prix", "question, réponse, note, score, temps"], c: 0, e: "Écris comme à un collaborateur brillant qui ne connaît rien de ta situation." },
+    { q: "Quelle consigne est la meilleure ?", a: ["« Écris des phrases courtes »", "« Ne fais pas de longues phrases »", "« Fais bien »"], c: 0, e: "Dis ce que tu veux, pas seulement ce que tu ne veux pas." },
+    { q: "Pour une demande floue, on peut demander à Claude…", a: ["de poser d'abord les questions dont il a besoin", "de deviner", "de répondre en une ligne"], c: 0, e: "« Avant de commencer, pose-moi les questions dont tu as besoin. »" },
+  ],
+  "iap/exemples": [
+    { q: "Le moyen le plus sûr d'obtenir ce que l'on veut est…", a: ["de montrer un exemple de ce que l'on attend", "d'écrire très vite", "de répéter la même demande"], c: 0, e: "Claude imite très bien un modèle." },
+    { q: "Quand on colle un long texte, il faut…", a: ["l'encadrer (par des balises) et dire ce qu'il faut en faire", "ne rien préciser", "le couper au hasard"], c: 0, e: "Claude distingue alors la consigne du document." },
+    { q: "« Pour des parents qui lisent peu » précise…", a: ["le public", "le format", "le rôle"], c: 0, e: "Le public et le ton changent la réponse." },
+  ],
+  "iap/dialoguer": [
+    { q: "La première réponse de Claude doit être vue comme…", a: ["un brouillon à améliorer par des relances", "une réponse définitive", "une erreur"], c: 0, e: "Brouillon → critique → amélioration." },
+    { q: "Pour une grande tâche, on commence par…", a: ["demander le plan et le corriger", "tout faire rédiger d'un coup", "relire à la fin seulement"], c: 0, e: "Puis une partie à la fois." },
+    { q: "Quand une conversation devient confuse, mieux vaut…", a: ["en ouvrir une nouvelle avec un résumé clair", "continuer encore", "effacer son compte"], c: 0, e: "Une conversation par sujet." },
+  ],
+  "iap/raisonner": [
+    { q: "Pour un calcul ou un cas pratique, on écrit…", a: ["« Raisonne étape par étape, puis donne ta conclusion »", "« Réponds sans réfléchir »", "« Donne seulement le résultat »"], c: 0, e: "C'est l'une des relances les plus efficaces." },
+    { q: "La technique de « l'avocat du diable » consiste à demander…", a: ["de défendre la position opposée", "de juger un procès", "de traduire en anglais"], c: 0, e: "Utile pour les débats et les décisions importantes." },
+    { q: "Pour une décision importante (orientation, santé, argent)…", a: ["l'IA aide à réfléchir, la décision reste la tienne", "l'IA décide à ta place", "il ne faut jamais réfléchir"], c: 0, e: "Avec les conseils des personnes de confiance." },
+  ],
+  "iap/bibliotheque": [
+    { q: "Une bibliothèque de consignes, c'est…", a: ["un recueil de bons prompts à réutiliser et adapter", "une bibliothèque municipale", "l'historique des conversations"], c: 0, e: "On remplace les passages entre crochets." },
+    { q: "Dans un modèle de consigne, les passages entre crochets sont…", a: ["à remplacer par ta situation", "à recopier tels quels", "à supprimer"], c: 0, e: "Par exemple [notion], [niveau]." },
+    { q: "Le modèle « Pose-moi 10 questions… une par une » sert à…", a: ["s'entraîner et connaître ses points faibles", "rédiger une lettre", "traduire un texte"], c: 0, e: "La correction bienveillante vient après chaque réponse." },
+  ],
+  "iae/etudier": [
+    { q: "La règle d'or pour étudier avec Claude est…", a: ["Claude t'entraîne, il ne travaille pas à ta place", "Claude passe l'examen pour toi", "il faut copier ses réponses"], c: 0, e: "Sinon, tu n'apprends rien." },
+    { q: "La méthode active commence par…", a: ["lire son cours d'abord", "demander la réponse à Claude", "partager ses notes"], c: 0, e: "Puis essayer seul, se faire corriger, reformuler." },
+    { q: "En cas de doute entre tes notes et l'IA, ce qui fait foi est…", a: ["ton cours et ton enseignant", "l'IA", "un camarade"], c: 0, e: "Tes notes peuvent contenir des erreurs, et l'IA peut en ajouter." },
+  ],
+  "iae/sciences": [
+    { q: "Pour débloquer un exercice, on demande à Claude…", a: ["un indice, sans la solution", "le corrigé complet", "de faire tout l'exercice"], c: 0, e: "Demande des indices, pas des corrigés." },
+    { q: "Une vitesse de voiture de 3 000 km/h dans un résultat…", a: ["est forcément fausse : on vérifie l'ordre de grandeur", "est possible", "prouve que le calcul est juste"], c: 0, e: "Vérifie les unités et l'ordre de grandeur." },
+    { q: "Avec la photo d'un exercice, il faut vérifier que Claude…", a: ["a bien lu les nombres et les indices", "a aimé la photo", "a enregistré la photo"], c: 0, e: "Un 7 pris pour un 1 change tout." },
+  ],
+  "iae/lettres": [
+    { q: "Pour une dissertation, c'est toi qui…", a: ["choisis la problématique, fais le plan et rédiges", "demandes à Claude de tout rédiger", "copies un modèle trouvé en ligne"], c: 0, e: "Claude peut critiquer ton plan et corriger ta langue." },
+    { q: "Une citation proposée par l'IA…", a: ["se vérifie dans le livre ou une édition fiable", "est toujours exacte", "n'a pas besoin de source"], c: 0, e: "Elle peut attribuer une citation au mauvais auteur." },
+    { q: "Pour corriger ta rédaction sans la réécrire, tu demandes…", a: ["un tableau de tes fautes avec la règle", "une nouvelle rédaction", "une note sur 20 seulement"], c: 0, e: "Tu retiens ainsi les règles." },
+  ],
+  "iae/humaines": [
+    { q: "En histoire et en géographie, ce qu'il faut surtout vérifier, ce sont…", a: ["les dates, les chiffres et les statistiques", "les titres", "la mise en page"], c: 0, e: "Dans le manuel ou une source officielle." },
+    { q: "Sans recherche web, Claude…", a: ["ignore les événements récents", "connaît toute l'actualité", "lit les journaux du jour"], c: 0, e: "Active la recherche web pour l'actualité." },
+    { q: "Sur l'histoire africaine, il est utile de…", a: ["comparer avec les historiens africains et ton cours", "se fier à une seule source étrangère", "ne rien vérifier"], c: 0, e: "Certaines sources reflètent un regard extérieur." },
+  ],
+  "iae/religion": [
+    { q: "Pour une fatwa sur sa situation personnelle, on s'adresse…", a: ["à un imam ou un savant reconnu", "à l'IA", "à un réseau social"], c: 0, e: "Une fatwa tient compte de la personne et du contexte." },
+    { q: "Un hadith donné par l'IA…", a: ["se vérifie dans le recueil, avec un enseignant", "peut être cité directement", "est toujours authentique"], c: 0, e: "Elle peut inventer un hadith, une chaîne ou un numéro." },
+    { q: "Un verset en arabe se copie…", a: ["depuis un Mouṣ-ḥaf ou une application fiable", "depuis une réponse de l'IA", "de mémoire, sans contrôle"], c: 0, e: "Une lettre ou une voyelle fausse change le sens." },
+  ],
+  "iae/examens": [
+    { q: "La technique de révision la plus efficace est de…", a: ["se tester plutôt que relire", "relire dix fois le cours", "tout réviser la veille"], c: 0, e: "« Interroge-moi sur le chapitre 3, sans me donner les réponses. »" },
+    { q: "Utiliser l'IA pendant une épreuve sans autorisation, c'est…", a: ["une fraude, comme le plagiat", "une méthode de révision", "permis partout"], c: 0, e: "Renseigne-toi sur les règles de chaque établissement." },
+    { q: "Pour préparer un oral, on peut demander à Claude…", a: ["de jouer l'examinateur et de donner une note avec des conseils", "de passer l'oral à ta place", "d'écrire ton texte à lire"], c: 0, e: "Une question à la fois, comme un vrai jury." },
+  ],
+  "iaen/preparer": [
+    { q: "Dans la préparation d'une séance, l'enseignant garde…", a: ["sa connaissance de la classe et du programme", "rien : l'IA fait tout", "seulement la correction"], c: 0, e: "Claude fournit un premier jet et des idées." },
+    { q: "Pour que Claude prépare ce que les élèves doivent vraiment apprendre, on lui donne…", a: ["le programme officiel ou le passage du manuel", "le nom de l'école", "rien de particulier"], c: 0, e: "Il adapte alors sa préparation." },
+    { q: "En enseignement religieux, les textes (versets, hadiths, fiqh)…", a: ["se prennent dans les sources et se vérifient", "se prennent dans l'IA", "n'ont pas besoin de référence"], c: 0, e: "L'IA ne remplace ni le Mouṣ-ḥaf ni la transmission du maître." },
+  ],
+  "iaen/exercices": [
+    { q: "Avant de distribuer des exercices créés par l'IA, l'enseignant…", a: ["les résout lui-même", "les distribue directement", "les fait corriger par les élèves"], c: 0, e: "Les corrigés de l'IA peuvent contenir des erreurs." },
+    { q: "Dans un bon QCM, les mauvaises réponses…", a: ["correspondent à des erreurs fréquentes", "sont absurdes", "sont toutes identiques"], c: 0, e: "Elles révèlent les confusions des élèves." },
+    { q: "Il faut aussi vérifier qu'aucune question…", a: ["n'a deux bonnes réponses", "n'est trop courte", "n'est en français"], c: 0, e: "Un corrigé faux fait autant d'erreurs apprises que d'élèves." },
+  ],
+  "iaen/differencier": [
+    { q: "Différencier, c'est…", a: ["préparer plusieurs versions d'une activité selon les niveaux", "noter plus sévèrement", "séparer les élèves"], c: 0, e: "Simplifiée, standard, approfondissement." },
+    { q: "Pour parler d'un élève à l'IA, on écrit…", a: ["« l'élève A », sans nom ni note réels", "son nom complet et ses notes", "le nom de ses parents"], c: 0, e: "Les données des élèves sont protégées." },
+    { q: "Pour une réunion de parents, Claude peut rédiger…", a: ["une convocation polie et claire", "les notes des élèves", "le bulletin officiel signé"], c: 0, e: "À lire aussi à voix haute si nécessaire." },
+  ],
+  "iaen/classe": [
+    { q: "Les « détecteurs d'IA »…", a: ["se trompent souvent et peuvent accuser à tort", "sont infaillibles", "remplacent l'enseignant"], c: 0, e: "Mieux vaut évaluer autrement : oral, brouillons, sujets locaux." },
+    { q: "Pendant les évaluations en classe, la règle conseillée est…", a: ["IA interdite", "IA obligatoire", "IA pour rédiger"], c: 0, e: "À la maison : IA pour comprendre et se corriger." },
+    { q: "Une bonne activité d'esprit critique consiste à…", a: ["faire chercher par les élèves les erreurs d'une réponse de l'IA", "interdire de parler de l'IA", "recopier les réponses de l'IA"], c: 0, e: "Ils apprennent le contenu et la vigilance." },
+  ],
+  "iat/ecrire": [
+    { q: "Avant d'envoyer un courrier rédigé avec l'IA, on vérifie d'abord…", a: ["les faits : noms, dates, montants, références", "la couleur du texte", "le nombre de mots"], c: 0, e: "L'IA peut en inventer pour « remplir »." },
+    { q: "Ce qui part sous ton nom…", a: ["engage ta responsabilité", "engage celle de l'IA", "n'engage personne"], c: 0, e: "Claude écrit vite ; toi, tu signes." },
+    { q: "Un compte rendu de réunion comprend notamment…", a: ["les décisions et les actions (qui, quoi, quand)", "seulement la liste des absents", "le menu du déjeuner"], c: 0, e: "Présents, ordre du jour, échanges, décisions, actions." },
+  ],
+  "iat/donnees": [
+    { q: "Les totaux importants d'un tableau se vérifient…", a: ["dans le tableur", "de tête", "en demandant à un ami"], c: 0, e: "Un tableau joliment présenté n'est pas forcément juste." },
+    { q: "Peut-on confier à l'IA des listes de clients avec leurs coordonnées ?", a: ["Non", "Oui, sans limite", "Oui, si elles sont longues"], c: 0, e: "Ni données bancaires ni coordonnées de clients." },
+    { q: "Pour la comptabilité officielle et la fiscalité, on fait valider par…", a: ["un comptable", "l'IA seule", "un client"], c: 0, e: "L'IA aide ; le professionnel valide." },
+  ],
+  "iat/commerce": [
+    { q: "Dans une publicité rédigée avec l'IA, on ne promet…", a: ["que ce qui est vrai", "ce qui attire le plus", "des remises imaginaires"], c: 0, e: "Une publicité mensongère peut être sanctionnée." },
+    { q: "Les avis clients publiés doivent être…", a: ["réels", "écrits par l'IA", "inventés pour rassurer"], c: 0, e: "Pas de faux témoignages." },
+    { q: "Pour présenter ses produits, on utilise…", a: ["ses vraies photos", "des images générées qui embellissent", "les photos d'un concurrent"], c: 0, e: "Rester honnête avec ses clients." },
+  ],
+  "iat/projet": [
+    { q: "Dans un plan d'affaires, les chiffres doivent venir…", a: ["de ton enquête sur le terrain", "de l'imagination de l'IA", "d'un modèle étranger"], c: 0, e: "Prix, coûts et ventes prévues se vérifient." },
+    { q: "Pour la création d'entreprise en Côte d'Ivoire, le guichet officiel cité est…", a: ["le CEPICI", "l'ARTCI", "la CCJA"], c: 0, e: "Les professionnels et guichets officiels confirment." },
+    { q: "« Joue un banquier sceptique » sert à…", a: ["préparer les questions difficiles d'une présentation", "obtenir un prêt", "rédiger les statuts"], c: 0, e: "On s'entraîne avant le vrai rendez-vous." },
+  ],
+  "iat/secteurs": [
+    { q: "En santé, l'IA ne doit jamais…", a: ["remplacer le diagnostic ou la prescription d'un professionnel", "expliquer un terme médical", "aider à préparer ses questions"], c: 0, e: "Elle peut aider à comprendre, pas à soigner." },
+    { q: "Les trois réflexes professionnels sont…", a: ["confidentialité, vérification, responsabilité", "rapidité, quantité, publicité", "copie, partage, oubli"], c: 0, e: "Le professionnel répond de son travail, pas l'outil." },
+    { q: "En agriculture, les conseils de l'IA se vérifient…", a: ["avec les techniciens agricoles et les conditions locales", "sur un réseau social", "ne se vérifient pas"], c: 0, e: "Sol, pluies et pratiques locales comptent." },
+  ],
+  "iaj/juriste": [
+    { q: "Le piège principal de l'IA en droit ivoirien est…", a: ["qu'elle cite du droit français ou américain, ou une règle abrogée", "qu'elle refuse de parler de droit", "qu'elle écrit trop court"], c: 0, e: "Précise toujours « en droit ivoirien » ou « selon l'Acte uniforme OHADA »." },
+    { q: "Le secret professionnel interdit à l'avocat…", a: ["de confier à un outil grand public les informations confidentielles d'un client", "d'utiliser un ordinateur", "de lire des articles"], c: 0, e: "Cela vaut aussi pour le magistrat, le notaire, le commissaire de justice." },
+    { q: "Pour un cas pratique, Claude peut rappeler la méthode du…", a: ["syllogisme : majeure, mineure, conclusion", "résumé", "plan en trois parties"], c: 0, e: "Les textes appliqués restent les textes ivoiriens et OHADA." },
+  ],
+  "iaj/recherche": [
+    { q: "Pour une explication fiable, on donne à Claude…", a: ["le texte lui-même, copié du Journal officiel ou du code", "seulement le numéro de l'article", "aucun document"], c: 0, e: "Son explication repose alors sur le bon texte." },
+    { q: "Le site officiel pour les Actes uniformes et la jurisprudence de la CCJA est…", a: ["ohada.org", "un blog personnel", "une page de réseau social"], c: 0, e: "Les sources officielles font foi." },
+    { q: "La dernière étape de la méthode de recherche est de…", a: ["rédiger ta réponse en citant les textes que tu as lus", "copier la réponse de l'IA", "demander la solution à un camarade"], c: 0, e: "On cite ce qu'on a vérifié soi-même." },
+  ],
+  "iaj/methodes": [
+    { q: "Pour une fiche d'arrêt, Claude…", a: ["compare ta fiche avec l'arrêt et signale les oublis", "rédige la fiche à ta place", "lit l'arrêt pour toi"], c: 0, e: "C'est toi qui lis l'arrêt et rédiges." },
+    { q: "La majeure du syllogisme juridique est…", a: ["la règle de droit applicable", "les faits de l'espèce", "la conclusion"], c: 0, e: "La mineure : les faits qualifiés." },
+    { q: "Le jour de l'examen…", a: ["tu es seul avec le Code : entraîne-toi en rédigeant toi-même", "Claude est autorisé", "le plan est fourni"], c: 0, e: "Rédige toujours toi-même." },
+  ],
+  "iaj/rediger": [
+    { q: "Dans un projet d'acte rédigé avec l'IA, on demande pour chaque clause…", a: ["la règle ou le texte qui la fonde", "un synonyme", "une traduction"], c: 0, e: "Puis on vérifie chaque règle dans les textes officiels." },
+    { q: "Avant de décrire la situation à l'IA, on…", a: ["anonymise les parties", "donne les noms et adresses", "joint les pièces d'identité"], c: 0, e: "« Le bailleur A », « le locataire B »." },
+    { q: "Pour un divorce, une succession ou une affaire pénale, on consulte…", a: ["un avocat, un notaire ou un commissaire de justice", "seulement l'IA", "un forum"], c: 0, e: "Claude n'est pas avocat." },
+  ],
+  "iaeth/donnees": [
+    { q: "La loi ivoirienne sur la protection des données personnelles est…", a: ["la loi n° 2013-450 du 19 juin 2013", "la loi n° 2018-974", "le Code civil de 1804"], c: 0, e: "L'ARTCI veille à son application." },
+    { q: "Le test simple avant d'écrire une information est…", a: ["« Accepterais-je qu'un inconnu la lise ? »", "« Est-ce assez long ? »", "« Est-ce en français ? »"], c: 0, e: "Si la réponse est non, ne l'écris pas." },
+    { q: "Un lien de partage d'une conversation…", a: ["est visible par toute personne qui le reçoit", "est privé dans tous les cas", "s'efface au bout d'une heure"], c: 0, e: "Ne partage pas une conversation qui contient des informations privées." },
+  ],
+  "iaeth/integrite": [
+    { q: "Rendre comme sien un travail rédigé par l'IA sans autorisation est…", a: ["une fraude, comme le plagiat", "une bonne méthode", "obligatoire"], c: 0, e: "Ce que tu présentes comme tien doit être tien." },
+    { q: "Une image générée par l'IA ne doit pas…", a: ["imiter une œuvre, une marque ou une personne réelle", "être en couleur", "être utilisée en classe"], c: 0, e: "Respect du droit d'auteur et des personnes." },
+    { q: "Ce qui vient des autres doit être…", a: ["cité", "caché", "réécrit sans source"], c: 0, e: "On cite la source." },
+  ],
+  "iaeth/arnaques": [
+    { q: "Un « parent » appelle en urgence pour un transfert d'argent avec une voix qui lui ressemble : le bon réflexe est de…", a: ["raccrocher et le rappeler sur son numéro habituel", "envoyer l'argent tout de suite", "partager son code secret"], c: 0, e: "Les voix peuvent être clonées ; un mot de passe familial aide." },
+    { q: "Un recrutement « officiel » demande de payer : il faut…", a: ["ne jamais payer et vérifier sur le site de l'institution", "payer vite pour garder sa place", "transférer le message à tous"], c: 0, e: "Aucun recrutement sérieux n'est payant." },
+    { q: "Dans le doute sur une information…", a: ["ne pas la partager", "la partager pour prévenir", "la modifier et la partager"], c: 0, e: "Une information fausse partagée devient ta responsabilité." },
+  ],
+  "iaeth/societe": [
+    { q: "Ce qui reste profondément humain, c'est…", a: ["le jugement, la responsabilité et la relation", "le calcul rapide", "le résumé de textes"], c: 0, e: "L'IA rédige, calcule, propose ; l'humain décide." },
+    { q: "Les trois questions avant d'utiliser l'IA sont…", a: ["Ai-je le droit ? Puis-je partager ces données ? Vais-je vérifier ?", "Est-ce rapide ? Est-ce gratuit ? Est-ce joli ?", "Qui l'a créée ? Où ? Quand ?"], c: 0, e: "Droit, données, vérification." },
+    { q: "Pour ne pas devenir dépendant de l'IA, il faut…", a: ["continuer à écrire, calculer et réfléchir par soi-même", "l'utiliser pour tout", "ne jamais l'utiliser"], c: 0, e: "Garder aussi la relation humaine." },
+  ],
+  "iapr/projets": [
+    { q: "Pour un projet de fiche de révision, la vérification consiste à…", a: ["comparer chaque définition avec ton cours", "compter les pages", "demander une autre fiche"], c: 0, e: "Puis s'entraîner et noter son score." },
+    { q: "Pour un commerçant, la vérification du mois de communication porte sur…", a: ["l'absence de promesses fausses, des prix et contacts exacts", "le nombre d'emoji", "la longueur des messages"], c: 0, e: "Honnêteté et exactitude d'abord." },
+    { q: "Le conseil donné pour les projets est…", a: ["un projet terminé vaut mieux que dix projets commencés", "commencer dix projets à la fois", "attendre la fin de l'année"], c: 0, e: "Choisis-en un et va jusqu'au bout." },
+  ],
+  "iapr/grille": [
+    { q: "Selon la grille, le résultat final doit être…", a: ["le tien : tu peux l'expliquer et le défendre", "celui de l'IA, sans modification", "le plus long possible"], c: 0, e: "C'est le dernier point de la grille." },
+    { q: "Garder « un temps sans IA » signifie…", a: ["continuer à écrire, calculer et réfléchir seul chaque jour", "supprimer son compte", "n'utiliser l'IA que la nuit"], c: 0, e: "C'est l'une des habitudes conseillées." },
+    { q: "La meilleure façon de consolider ses acquis est de…", a: ["transmettre : apprendre à un proche à bien utiliser l'IA", "garder ses consignes secrètes", "changer d'outil chaque semaine"], c: 0, e: "Expliquer, c'est apprendre deux fois." },
+  ],
+  // ===================== LIRE LE CORAN PAS À PAS
+  "qr/q1": [
+    { q: "Quelle lettre a **trois points** au-dessus ?", a: ["[[ث]]", "[[ت]]", "[[ب]]"], c: 0, e: "Thâ’ : trois points ; tâ’ : deux points dessus ; bâ’ : un point dessous." },
+    { q: "Comment s'appelle la lettre [[ب]] ?", a: ["bâ’", "tâ’", "thâ’"], c: 0, e: "Elle se prononce comme le b de « bol »." },
+    { q: "Le thâ’ [[ث]] se prononce…", a: ["comme le th anglais de « think »", "comme un s", "comme un t"], c: 0, e: "Le bout de la langue sort légèrement entre les dents." },
+  ],
+  "qr/q2": [
+    { q: "Ces trois lettres ont la même forme : ce qui les distingue, c'est…", a: ["la place du point", "leur taille", "leur couleur"], c: 0, e: "Jîm : point dedans ; ḥâ’ : sans point ; khâ’ : point dessus." },
+    { q: "Comment s'appelle la lettre [[خ]] ?", a: ["khâ’", "ḥâ’", "jîm"], c: 0, e: "Un frottement rauque au haut de la gorge." },
+    { q: "Le jîm [[ج]] se prononce…", a: ["comme dj dans « djembé »", "comme un h soufflé", "comme un g dur"], c: 0, e: "Le milieu de la langue se colle au palais." },
+  ],
+  "qr/q3": [
+    { q: "Le râ’ [[ر]] se prononce…", a: ["roulé, par un battement du bout de la langue", "dans la gorge, comme le r français", "comme un l"], c: 0, e: "Comme en wolof, en dioula ou en espagnol." },
+    { q: "Comment s'appelle la lettre [[ذ]] ?", a: ["dhâl", "dâl", "zây"], c: 0, e: "Comme le th anglais de « this » ; ce n'est pas un z." },
+    { q: "Quelles lettres descendent sous la ligne ?", a: ["[[ر]] et [[ز]]", "[[د]] et [[ذ]]", "aucune"], c: 0, e: "Le dâl et le dhâl restent sur la ligne." },
+  ],
+  "qr/q4": [
+    { q: "Quelles lettres de cette leçon sont **épaisses** ?", a: ["[[ص]] et [[ض]]", "[[س]] et [[ش]]", "[[س]] et [[ص]]"], c: 0, e: "Ṣâd : s épais ; ḍâd : d épais." },
+    { q: "Comment s'appelle la lettre [[ش]] ?", a: ["chîn", "sîn", "ṣâd"], c: 0, e: "Trois points dessus ; comme le ch de « chat »." },
+    { q: "Le ḍâd [[ض]] est…", a: ["un d épais, propre à l'arabe", "un z", "un d léger"], c: 0, e: "Le côté de la langue s'appuie contre les molaires du haut." },
+  ],
+  "qr/q5": [
+    { q: "Le ‘ayn [[ع]] est…", a: ["un son serré du milieu de la gorge, sans équivalent en français", "un a ordinaire", "un r roulé"], c: 0, e: "La gorge se resserre." },
+    { q: "La lettre épaisse qui correspond au tâ’ fin [[ت]] est…", a: ["[[ط]]", "[[ظ]]", "[[غ]]"], c: 0, e: "Le ẓâ’ [[ظ]] est l'épais du dhâl [[ذ]]." },
+    { q: "Comment s'appelle la lettre [[غ]] ?", a: ["ghayn", "‘ayn", "ẓâ’"], c: 0, e: "Comme le r « grasseyé » de « Paris »." },
+  ],
+  "qr/q6": [
+    { q: "Quelle lettre est un k **profond et épais** ?", a: ["[[ق]]", "[[ك]]", "[[ف]]"], c: 0, e: "Le qâf naît plus au fond que le kâf." },
+    { q: "Combien y a-t-il de lettres épaisses ?", a: ["Sept", "Quatre", "Quatorze"], c: 0, e: "خ ص ض غ ط ق ظ." },
+    { q: "Comment s'appelle la lettre [[ل]] ?", a: ["lâm", "kâf", "fâ’"], c: 0, e: "Comme le l de « lune »." },
+  ],
+  "qr/q7": [
+    { q: "Combien de lettres compte l'alphabet arabe ?", a: ["28", "26", "32"], c: 0, e: "Plus la hamza, étudiée à la leçon 8." },
+    { q: "Le hâ’ [[ه]] se distingue du ḥâ’ [[ح]] parce qu'il est…", a: ["un souffle léger, comme un soupir", "un souffle serré", "un son du nez"], c: 0, e: "Le ḥâ’ est soufflé et serré, au milieu de la gorge." },
+    { q: "Quelles lettres font passer le son par le nez ?", a: ["[[م]] et [[ن]]", "[[و]] et [[ي]]", "[[ه]] et [[و]]"], c: 0, e: "Le mîm et le noûn." },
+  ],
+  "qr/q8": [
+    { q: "La hamza [[ء]] se prononce comme…", a: ["un arrêt net de la voix au fond de la gorge", "un h soufflé", "un a long"], c: 0, e: "Comme la petite coupure entre deux syllabes." },
+    { q: "La première lettre de l'alphabet est…", a: ["l'alif", "le bâ’", "la hamza"], c: 0, e: "Alif, bâ’, tâ’, thâ’…" },
+    { q: "La dernière lettre de l'alphabet est…", a: ["le yâ’", "le wâw", "le hâ’"], c: 0, e: "… hâ’, wâw, yâ’." },
+  ],
+  "qr/q9": [
+    { q: "Une lettre arabe peut avoir combien de formes ?", a: ["Quatre : seule, au début, au milieu, à la fin", "Une seule", "Deux"], c: 0, e: "La forme dépend de sa place dans le mot." },
+    { q: "Au milieu d'un mot, ce qui permet de reconnaître [[ب ت ث ن ي]] est…", a: ["le nombre et la place des points", "la longueur du trait", "la couleur"], c: 0, e: "Leurs formes de début et de milieu se ressemblent." },
+    { q: "[[بـ]] est la forme du bâ’…", a: ["au début du mot", "à la fin du mot", "seule"], c: 0, e: "Il se lie à la lettre suivante." },
+  ],
+  "qr/q10": [
+    { q: "Les « trois caméléons » qui changent beaucoup de forme sont…", a: ["[[ع غ ه]]", "[[ب ت ث]]", "[[د ذ ر]]"], c: 0, e: "Le ‘ayn, le ghayn et le hâ’." },
+    { q: "« Radiographier » un mot, c'est…", a: ["le décomposer lettre par lettre", "le traduire", "le réciter vite"], c: 0, e: "On reconnaît chaque lettre et sa forme." },
+    { q: "[[ـعـ]] est le ‘ayn…", a: ["au milieu du mot", "seul", "au début du mot"], c: 0, e: "Il est lié des deux côtés." },
+  ],
+  "qr/q11": [
+    { q: "Combien de lettres ne se lient jamais à la lettre suivante ?", a: ["Six", "Quatre", "Dix"], c: 0, e: "ا د ذ ر ز و." },
+    { q: "Laquelle ne se lie pas à gauche ?", a: ["[[و]]", "[[ب]]", "[[م]]"], c: 0, e: "Après elle, le mot se coupe." },
+    { q: "À cause de ces lettres, un mot peut être formé…", a: ["de plusieurs morceaux", "d'une seule lettre", "sans voyelles"], c: 0, e: "On compte les morceaux en lisant lettre par lettre." },
+  ],
+  "qr/q12": [
+    { q: "Le tâ’ marboûṭa [[ة]] se trouve…", a: ["seulement à la fin des mots", "seulement au début des mots", "partout"], c: 0, e: "Comme l'alif maqṣoûra [[ى]]." },
+    { q: "[[لا]] est…", a: ["le lâm-alif, un lâm suivi d'un alif", "une lettre à part de l'alphabet", "un signe de pause"], c: 0, e: "Les deux lettres s'écrivent ensemble." },
+    { q: "L'alif maqṣoûra [[ى]] ressemble…", a: ["à un yâ’ sans points", "à un wâw", "à un alif droit"], c: 0, e: "Elle ne se trouve qu'en fin de mot." },
+  ],
+  "qr/q13": [
+    { q: "La fatḥa est un petit trait…", a: ["au-dessus de la lettre, qui se lit « a »", "au-dessous de la lettre, qui se lit « i »", "en forme de boucle, qui se lit « ou »"], c: 0, e: "[[بَ]] se lit « ba »." },
+    { q: "Une voyelle courte dure…", a: ["un temps", "deux temps", "six temps"], c: 0, e: "Les voyelles longues durent deux temps." },
+    { q: "Avec une lettre épaisse, la fatḥa se prononce…", a: ["« a » grave", "« a » clair", "« i »"], c: 0, e: "Avec une lettre fine, le « a » est clair." },
+  ],
+  "qr/q14": [
+    { q: "La kasra se place…", a: ["sous la lettre et se lit « i »", "sur la lettre et se lit « a »", "sur la lettre et se lit « ou »"], c: 0, e: "[[بِ]] se lit « bi »." },
+    { q: "[[تِ]] se lit…", a: ["ti", "ta", "tou"], c: 0, e: "Kasra : son « i »." },
+    { q: "Pour ne pas confondre la fatḥa et la kasra, on regarde…", a: ["si le trait est au-dessus ou au-dessous", "la longueur du mot", "la couleur de la lettre"], c: 0, e: "Au-dessus : a ; au-dessous : i." },
+  ],
+  "qr/q15": [
+    { q: "La ḍamma se lit…", a: ["« ou », les lèvres arrondies", "« o »", "« u » comme en français"], c: 0, e: "Un vrai « ou », jamais « u »." },
+    { q: "[[بُ]] se lit…", a: ["bou", "ba", "bi"], c: 0, e: "La ḍamma est un petit wâw au-dessus." },
+    { q: "Les trois voyelles courtes sont…", a: ["la fatḥa, la kasra et la ḍamma", "l'alif, le wâw et le yâ’", "le soukoun, la chadda et le madd"], c: 0, e: "a, i, ou." },
+  ],
+  "qr/q16": [
+    { q: "Pour lire un mot nouveau, on le lit…", a: ["syllabe par syllabe, puis d'un seul souffle", "à l'envers", "très vite dès le début"], c: 0, e: "La fluidité vient avec la répétition." },
+    { q: "[[بَ بِ بُ]] se lit…", a: ["ba, bi, bou", "bou, bi, ba", "ba, ba, ba"], c: 0, e: "On lit de droite à gauche." },
+    { q: "L'arabe se lit…", a: ["de droite à gauche", "de gauche à droite", "de haut en bas"], c: 0, e: "Les lignes de lecture se suivent de droite à gauche." },
+  ],
+  "qr/q17": [
+    { q: "Le soukoun indique que la lettre…", a: ["n'a pas de voyelle", "est doublée", "est allongée"], c: 0, e: "La lettre s'arrête net." },
+    { q: "[[قُلْ]] se lit…", a: ["qoul", "qoula", "qouli"], c: 0, e: "On prononce le lâm sans ajouter de voyelle." },
+    { q: "Une syllabe comme « lam » [[لَمْ]] est…", a: ["fermée", "ouverte", "longue"], c: 0, e: "Elle se termine par une lettre au soukoun." },
+  ],
+  "qr/q18": [
+    { q: "[[نَشْرَحْ]] se découpe en…", a: ["nach - raḥ", "na - cha - ra - ḥa", "n - ach - raḥ"], c: 0, e: "Deux syllabes fermées." },
+    { q: "Une lettre au soukoun s'attache…", a: ["à la syllabe qui la précède", "à la syllabe qui la suit", "à aucune syllabe"], c: 0, e: "Elle ferme la syllabe." },
+    { q: "Devant une lettre au soukoun, il faut éviter…", a: ["d'ajouter une voyelle", "de la prononcer", "de respirer"], c: 0, e: "On la prononce nettement, sans voyelle." },
+  ],
+  "qr/q19": [
+    { q: "[[أَلَمْ نَشْرَحْ]] est le début de la sourate…", a: ["Ach-Charḥ", "Al-Fâtiḥa", "An-Nâs"], c: 0, e: "Sourate 94." },
+    { q: "Pour lire un verset entier, on…", a: ["lit chaque mot avec ses syllabes, puis le verset d'un trait", "lit seulement le premier mot", "devine les voyelles"], c: 0, e: "On enchaîne les mots déjà maîtrisés." },
+    { q: "Cette leçon valide…", a: ["l'étape 4 : le soukoun", "l'étape 1 : les lettres", "l'étape 10 : la lecture courante"], c: 0, e: "Après les voyelles courtes vient le soukoun." },
+  ],
+  "qr/q20": [
+    { q: "Une voyelle longue dure…", a: ["deux temps", "un temps", "quatre temps"], c: 0, e: "La voyelle courte dure un temps." },
+    { q: "[[بَا]] se lit…", a: ["bâ (a long)", "ba (a court)", "bi"], c: 0, e: "L'alif après une fatḥa prolonge le « a »." },
+    { q: "L'alif de prolongation vient après…", a: ["une fatḥa", "une kasra", "une ḍamma"], c: 0, e: "Fatḥa + alif = « â »." },
+  ],
+  "qr/q21": [
+    { q: "Le yâ’ de prolongation vient après…", a: ["une kasra", "une fatḥa", "une ḍamma"], c: 0, e: "Kasra + yâ’ sans voyelle = « î »." },
+    { q: "[[فِي]] se lit…", a: ["fî (i long)", "fa", "fiya"], c: 0, e: "Le yâ’ prolonge le « i »." },
+    { q: "Un yâ’ qui porte une voyelle se prononce…", a: ["« y »", "« î » long", "il ne se prononce pas"], c: 0, e: "Il ne prolonge que lorsqu'il n'a pas de voyelle après une kasra." },
+  ],
+  "qr/q22": [
+    { q: "Le wâw de prolongation vient après…", a: ["une ḍamma", "une fatḥa", "une kasra"], c: 0, e: "Ḍamma + wâw sans voyelle = « oû »." },
+    { q: "[[نُو]] se lit…", a: ["noû (ou long)", "nou (ou court)", "nawa"], c: 0, e: "Le wâw prolonge le « ou »." },
+    { q: "Un wâw qui porte une voyelle se prononce…", a: ["« w »", "« oû » long", "il ne se prononce pas"], c: 0, e: "Comme le w de « watt »." },
+  ],
+  "qr/q23": [
+    { q: "L'alif suscrit (petit alif au-dessus de la lettre) se lit…", a: ["« â », comme un alif de prolongation", "« i »", "il ne se lit pas"], c: 0, e: "Exemple : [[ٱلرَّحْمَٰنِ]] « ar-raḥmâni »." },
+    { q: "Le petit wâw et le petit yâ’ servent à…", a: ["allonger la voyelle (« oû », « î »)", "marquer une pause", "doubler la lettre"], c: 0, e: "Ce sont des signes du Mouss-haf." },
+    { q: "Ces petits signes allongent la voyelle de…", a: ["deux temps", "un demi-temps", "six temps"], c: 0, e: "Comme les voyelles longues écrites en grand." },
+  ],
+  "qr/q24": [
+    { q: "[[بَوْ]] se lit…", a: ["baw", "boû", "bâ"], c: 0, e: "Fatḥa + wâw au soukoun : « aw »." },
+    { q: "[[بَيْ]] se lit…", a: ["bay", "bî", "biya"], c: 0, e: "Fatḥa + yâ’ au soukoun : « ay »." },
+    { q: "« aw » et « ay » sont-ils des voyelles longues ?", a: ["Non, on ne les allonge pas", "Oui, de deux temps", "Oui, de six temps"], c: 0, e: "Ils viennent après une fatḥa, pas après la voyelle de même nature." },
+  ],
+  "qr/q25": [
+    { q: "Le tanwîn de fatḥa s'écrit…", a: ["avec deux traits au-dessus de la lettre", "avec deux traits au-dessous", "avec un petit rond"], c: 0, e: "Il se lit « an »." },
+    { q: "[[بًا]] se lit…", a: ["ban", "bâ", "bani"], c: 0, e: "L'alif qui suit le tanwîn de fatḥa est muette." },
+    { q: "Le tanwîn ajoute à la fin du mot le son…", a: ["« n »", "« m »", "« h »"], c: 0, e: "an, in, oun." },
+  ],
+  "qr/q26": [
+    { q: "[[بٍ]] se lit…", a: ["bin", "ban", "boun"], c: 0, e: "Tanwîn de kasra : deux traits au-dessous." },
+    { q: "[[بٌ]] se lit…", a: ["boun", "bin", "bou"], c: 0, e: "Tanwîn de ḍamma." },
+    { q: "Combien y a-t-il de tanwîn ?", a: ["Trois : an, in, oun", "Deux", "Un seul"], c: 0, e: "Un pour chaque voyelle courte." },
+  ],
+  "qr/q27": [
+    { q: "Quand on s'arrête sur un mot, la dernière lettre se lit généralement…", a: ["avec un soukoun", "avec une voyelle longue", "doublée"], c: 0, e: "[[أَحَدٌ]] se lit « aḥad » à l'arrêt." },
+    { q: "À l'arrêt, le tâ’ marboûṭa [[ة]] se prononce…", a: ["« h »", "« t »", "« n »"], c: 0, e: "On ne prononce pas le tanwîn." },
+    { q: "À l'arrêt, le tanwîn de fatḥa [[ـًا]] se lit…", a: ["« â »", "« an »", "il disparaît sans trace"], c: 0, e: "Exemple : [[أَفْوَاجًا]] « afwâjâ »." },
+  ],
+  "qr/q28": [
+    { q: "La chadda indique que la lettre est…", a: ["doublée", "muette", "allongée"], c: 0, e: "On la prononce deux fois : une avec soukoun, une avec la voyelle." },
+    { q: "[[رَبِّ]] se lit…", a: ["rab-bi", "ra-bi", "râbi"], c: 0, e: "Le bâ’ est doublé." },
+    { q: "La chadda a la forme…", a: ["d'un petit w au-dessus de la lettre", "d'un petit rond", "d'un trait ondulé"], c: 0, e: "Elle s'accompagne d'une voyelle." },
+  ],
+  "qr/q29": [
+    { q: "[[بَّا]] se lit…", a: ["b-bâ, doublé puis allongé", "ba", "bab"], c: 0, e: "Chadda puis voyelle longue." },
+    { q: "Dans le nom [[ٱللَّه]], le lâm porte…", a: ["une chadda", "un soukoun", "un tanwîn"], c: 0, e: "On lit « Allâh »." },
+    { q: "La chadda peut se combiner avec…", a: ["les voyelles longues et le tanwîn", "aucune autre marque", "seulement la fatḥa"], c: 0, e: "Exemple : [[بُّو]], [[بٌّ]]." },
+  ],
+  "qr/q30": [
+    { q: "La ghounna est…", a: ["un son nasal tenu sur le noûn et le mîm doublés", "un arrêt de la voix", "un allongement de la voyelle"], c: 0, e: "Elle dure environ deux temps." },
+    { q: "Elle s'applique à…", a: ["[[نّ]] et [[مّ]]", "[[بّ]] et [[تّ]]", "[[رّ]] et [[لّ]]"], c: 0, e: "Le noûn et le mîm portant une chadda." },
+    { q: "Cette leçon permet de lire…", a: ["presque toute la Fâtiḥa", "la sourate Al-Baqara", "aucun verset"], c: 0, e: "Elle valide l'étape 7." },
+  ],
+  "qr/q31": [
+    { q: "La hamza peut s'écrire sur…", a: ["un alif, un wâw, un yâ’ sans points, ou seule sur la ligne", "le bâ’ seulement", "aucun support"], c: 0, e: "[[أ إ ؤ ئ ء]]." },
+    { q: "Sous l'alif [[إ]], la hamza porte en général…", a: ["une kasra", "une ḍamma", "un soukoun"], c: 0, e: "On lit « i »." },
+    { q: "La hamza se prononce…", a: ["comme un arrêt net de la voix, avec sa voyelle", "comme un h", "elle ne se prononce jamais"], c: 0, e: "Exemple : [[سَأَلَ]] « sa-’a-la »." },
+  ],
+  "qr/q32": [
+    { q: "Le madd [[◌ٓ]] est…", a: ["un petit signe ondulé qui allonge davantage la voyelle longue", "un signe de pause", "un signe de lettre muette"], c: 0, e: "On allonge plus que deux temps." },
+    { q: "[[جَآءَ]] se lit…", a: ["jââ’a, avec un « â » prolongé", "ja’a", "jaa"], c: 0, e: "Le madd est suivi d'une hamza." },
+    { q: "Le madd se trouve…", a: ["au-dessus d'une lettre de prolongation", "sous une lettre", "à la fin de chaque verset"], c: 0, e: "Exemple : [[فِىٓ]]." },
+  ],
+  "qr/q33": [
+    { q: "L'alif de liaison [[ٱ]], en continuant la lecture…", a: ["ne se prononce pas", "se prononce « a »", "se prononce « i »"], c: 0, e: "On passe directement à la lettre suivante." },
+    { q: "Quand on commence par un mot avec [[ٱ]] suivi de l'article, on dit…", a: ["« a »", "« ou »", "rien"], c: 0, e: "[[ٱلْحَمْدُ]] se lit « al-ḥamdou » en commençant." },
+    { q: "Le premier verset révélé est…", a: ["[[ٱقْرَأْ بِٱسْمِ رَبِّكَ ٱلَّذِى خَلَقَ]]", "[[قُلْ هُوَ ٱللَّهُ أَحَدٌ]]", "[[ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ]]"], c: 0, e: "Début de la sourate Al-‘Alaq." },
+  ],
+  "qr/q34": [
+    { q: "Devant une lettre **lunaire**, le lâm de l'article…", a: ["se prononce", "ne se prononce pas", "est doublé"], c: 0, e: "[[ٱلْقَمَرُ]] « al-qamarou »." },
+    { q: "Combien y a-t-il de lettres lunaires ?", a: ["14", "7", "28"], c: 0, e: "Et 14 lettres solaires." },
+    { q: "L'article [[ٱلْ]] signifie…", a: ["le, la, les", "et", "dans"], c: 0, e: "Il se place devant le nom." },
+  ],
+  "qr/q35": [
+    { q: "Devant une lettre **solaire**, le lâm de l'article…", a: ["ne se prononce pas, et la lettre solaire porte une chadda", "se prononce fort", "devient un noûn"], c: 0, e: "[[ٱلشَّمْسُ]] « ach-chamsou »." },
+    { q: "[[ٱلنَّاسِ]] se lit…", a: ["an-nâsi", "al-nâsi", "a-l-nasi"], c: 0, e: "Le noûn est une lettre solaire." },
+    { q: "Pourquoi la lettre solaire porte-t-elle une chadda ?", a: ["Parce que le lâm s'assimile à elle et la double", "Pour l'allonger", "Pour marquer une pause"], c: 0, e: "Le lâm disparaît dans la lettre suivante." },
+  ],
+  "qr/q36": [
+    { q: "Une lettre surmontée d'un petit rond [[◌۟]]…", a: ["ne se lit jamais", "se lit toujours", "se double"], c: 0, e: "Exemple : l'alif de [[وَعَمِلُوا۟]]." },
+    { q: "Une lettre sans aucun signe (ni voyelle ni soukoun)…", a: ["ne se lit pas en continuant", "se lit avec une fatḥa", "se lit toujours longue"], c: 0, e: "Elle est écrite mais non lue." },
+    { q: "Le petit rectangle [[◌۠]] sur l'alif de [[أَنَا۠]] indique…", a: ["qu'on le lit à l'arrêt mais pas en continuant", "qu'il ne se lit jamais", "qu'il se double"], c: 0, e: "En continuant, on dit « ana »." },
+  ],
+  "qr/q37": [
+    { q: "Le petit mîm au-dessus d'un noûn ou d'un tanwîn indique…", a: ["qu'on prononce un « m » à la place du « n »", "une pause", "une lettre muette"], c: 0, e: "Exemple : [[مِنۢ بَعْدِ]] se lit « mim ba‘di »." },
+    { q: "Le petit sîn au-dessus d'un ṣâd indique…", a: ["qu'on lit un sîn", "qu'on double le ṣâd", "qu'on s'arrête"], c: 0, e: "Lecture de Ḥafṣ." },
+    { q: "Le tanwîn décalé (les deux traits l'un après l'autre) indique…", a: ["que le « n » ne se prononce pas clairement : il se fond ou se cache dans la lettre suivante", "une voyelle longue", "la fin du verset"], c: 0, e: "Les deux traits superposés indiquent un « n » net." },
+  ],
+  "qr/q38": [
+    { q: "Le signe [[۝]] marque…", a: ["la fin d'un verset, avec son numéro", "une prosternation", "le début d'un ḥizb"], c: 0, e: "On peut s'y arrêter." },
+    { q: "Combien de signes de pause compte le Mouss-haf ?", a: ["Six", "Deux", "Dix"], c: 0, e: "Ils indiquent s'il faut, si l'on peut ou si l'on ne doit pas s'arrêter." },
+    { q: "Le signe ۩ indique…", a: ["un verset de prosternation", "le début d'un ḥizb", "une lettre muette"], c: 0, e: "۞ marque le début d'un ḥizb." },
+  ],
+  "qr/q39": [
+    { q: "Les lettres isolées au début des sourates se lisent…", a: ["par leur nom", "comme des syllabes ordinaires", "elles ne se lisent pas"], c: 0, e: "[[الٓمٓ]] : « alif, lâââm, mîîîm »." },
+    { q: "Dans [[الٓمٓ]], l'alif se lit…", a: ["sans allongement", "en six temps", "en deux temps"], c: 0, e: "Le lâm et le mîm s'allongent de six temps." },
+    { q: "Dans [[يسٓ]], le yâ’ se lit…", a: ["« yâ » en deux temps", "en six temps", "sans voyelle"], c: 0, e: "Le sîn, lui, s'allonge de six temps." },
+  ],
+  "qr/q40": [
+    { q: "Combien de versets compte la Fâtiḥa ?", a: ["Sept", "Cinq", "Dix"], c: 0, e: "On la récite dans chaque rak‘a de la prière." },
+    { q: "[[ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ]] est le verset…", a: ["2", "1", "7"], c: 0, e: "Le verset 1 est la basmala." },
+    { q: "Dans [[ٱلرَّحْمَٰنِ]], le petit alif au-dessus du mîm se lit…", a: ["« â »", "il ne se lit pas", "« i »"], c: 0, e: "On lit « ar-raḥmâni »." },
+  ],
+  "qr/q41": [
+    { q: "[[قُلْ هُوَ ٱللَّهُ أَحَدٌ]] est le début de la sourate…", a: ["Al-Ikhlâṣ", "Al-Falaq", "An-Nâs"], c: 0, e: "Sourate 112." },
+    { q: "La dernière sourate du Mouss-haf est…", a: ["An-Nâs", "Al-Falaq", "Al-Fâtiḥa"], c: 0, e: "Sourate 114." },
+    { q: "Dans [[قُلْ أَعُوذُ]], le « qoul » se lit…", a: ["avec le lâm au soukoun", "« qoula »", "« qoulou »"], c: 0, e: "Puis la hamza de [[أَعُوذُ]] avec fatḥa." },
+  ],
+  "qr/q42": [
+    { q: "[[إِنَّآ أَعْطَيْنَٰكَ ٱلْكَوْثَرَ]] est le début de la sourate…", a: ["Al-Kawthar", "Al-‘Aṣr", "Quraych"], c: 0, e: "La plus courte sourate du Coran." },
+    { q: "La sourate Al-‘Aṣr commence par…", a: ["[[وَٱلْعَصْرِ]]", "[[لِإِيلَٰفِ قُرَيْشٍ]]", "[[أَلَمْ تَرَ]]"], c: 0, e: "« Par le Temps »." },
+    { q: "Pour gagner en aisance, on lit chaque sourate…", a: ["régulièrement, d'un trait, après l'avoir lue verset par verset", "une seule fois", "sans vérifier auprès du maître"], c: 0, e: "La régularité fait la fluidité." },
+  ],
+  "qr/q43": [
+    { q: "L'épreuve finale de lecture se passe…", a: ["avec un enseignant ou un lecteur compétent", "seul, sans personne", "en écoutant seulement"], c: 0, e: "La lecture du Coran s'apprend auprès d'un maître." },
+    { q: "[[اقْرَأْ وَارْتَقِ]] signifie…", a: ["« Lis et élève-toi »", "« Écris et apprends »", "« Écoute et répète »"], c: 0, e: "Parole adressée au lecteur du Coran." },
+    { q: "Après ce parcours, l'essentiel est de…", a: ["continuer à lire un peu chaque jour avec son maître", "arrêter la lecture", "ne lire qu'une fois par an"], c: 0, e: "La régularité préserve l'acquis." },
+  ],
+  // ===================== VIVRE L'ISLAM EN FAMILLE · NIVEAU 1
+  "is1/s1-1": [
+    { q: "« Bismillah » veut dire…", a: ["au nom d'Allah", "louange à Allah", "Allah est le plus grand"], c: 0, e: "On la dit avant chaque action utile." },
+    { q: "Si on a oublié la basmala au début du repas, on dit…", a: ["« Bismillâhi awwalahou wa âkhirahou »", "« Al-ḥamdou li-Llâh »", "rien, c'est trop tard"], c: 0, e: "« Au nom d'Allah, au début et à la fin »." },
+    { q: "Les anges ont été créés…", a: ["de lumière", "de feu", "d'argile"], c: 0, e: "Les djinns, de feu ; Âdam, d'argile." },
+  ],
+  "is1/s1-2": [
+    { q: "Âdam est…", a: ["le premier homme et le premier prophète", "le dernier prophète", "un ange"], c: 0, e: "Il a été créé d'argile." },
+    { q: "On répond à « As-salâmou ‘alaykoum » par…", a: ["« Wa ‘alaykoumou s-salâm »", "« Bismillah »", "« Âmîn »"], c: 0, e: "C'est la première salutation." },
+    { q: "Les trois degrés de la religion sont…", a: ["Islâm, Îmân, Iḥsân", "prière, jeûne, zakât", "Coran, Sunna, Idjma'"], c: 0, e: "Les actes, la foi, l'excellence." },
+  ],
+  "is1/s1-3": [
+    { q: "Iblîs a refusé d'obéir par…", a: ["orgueil", "oubli", "peur"], c: 0, e: "Il est devenu le diable." },
+    { q: "Combien l'islam a-t-il de piliers ?", a: ["Cinq", "Trois", "Six"], c: 0, e: "Chahâda, prière, zakât, jeûne, pèlerinage." },
+    { q: "« Les actes ne valent que par… »", a: ["les intentions", "leur nombre", "leur durée"], c: 0, e: "Chaque acte d'adoration commence par l'intention dans le cœur." },
+  ],
+  "is1/s2-1": [
+    { q: "Selon le hadith, la purification est…", a: ["la moitié de la foi", "facultative", "réservée au vendredi"], c: 0, e: "Rapporté par Mouslim." },
+    { q: "Peut-on faire ses ablutions avec l'eau de pluie ou de la pompe ?", a: ["Oui, c'est une eau pure et purifiante", "Non, jamais", "Seulement si elle est chaude"], c: 0, e: "Pluie, puits, rivière, mer, robinet, pompe." },
+    { q: "Une eau changée par du thé ou du lait…", a: ["se boit, mais ne sert pas aux ablutions", "sert aux ablutions", "est souillée et ne se boit pas"], c: 0, e: "L'eau changée par une saleté est souillée." },
+  ],
+  "is1/s2-2": [
+    { q: "On entre aux toilettes…", a: ["du pied gauche, avec l'invocation", "du pied droit", "en chantant"], c: 0, e: "On sort du pied droit en disant « Ghoufrânaka »." },
+    { q: "« Ghoufrânaka » signifie…", a: ["Ton pardon (ô Allah)", "Au nom d'Allah", "Merci"], c: 0, e: "Invocation en sortant des toilettes." },
+    { q: "Al-ḥayâ’ signifie…", a: ["la pudeur", "la propreté", "le repentir"], c: 0, e: "La pudeur fait partie de la nature humaine." },
+  ],
+  "is1/s2-3": [
+    { q: "Après leur faute, Âdam et Ḥawwâ’…", a: ["ont reconnu leur faute et demandé pardon", "ont accusé Iblîs sans se repentir", "ont quitté la religion"], c: 0, e: "Allah leur a pardonné." },
+    { q: "Se repentir, c'est…", a: ["regretter, arrêter, décider de ne pas recommencer, réparer", "seulement dire « pardon »", "attendre la vieillesse"], c: 0, e: "At-tawba : le repentir." },
+    { q: "Pendant les ablutions, l'eau…", a: ["s'économise", "se gaspille sans souci", "doit couler longtemps"], c: 0, e: "On économise l'eau, même pour les ablutions." },
+  ],
+  "is1/s3-1": [
+    { q: "« Lâ ilâha illa Llâh » signifie…", a: ["il n'y a de divinité qu'Allah", "Allah est le plus grand", "gloire à Allah"], c: 0, e: "Je refuse toute fausse divinité et j'adore Allah seul." },
+    { q: "Le plus grand des péchés est…", a: ["le chirk", "le mensonge", "la paresse"], c: 0, e: "Associer quelque chose à Allah." },
+    { q: "L'idolâtrie a commencé avec…", a: ["les statues de cinq hommes pieux", "les étoiles", "les arbres"], c: 0, e: "Par l'oubli et le murmure de Chayṭân." },
+  ],
+  "is1/s3-2": [
+    { q: "Le premier messager envoyé aux habitants de la terre est…", a: ["Noûḥ", "Ibrâhîm", "Moûsâ"], c: 0, e: "Il appela son peuple pendant 950 ans." },
+    { q: "Témoigner, c'est…", a: ["savoir, croire, dire et agir", "seulement le dire", "seulement le penser"], c: 0, e: "Ach-hadou : je témoigne." },
+    { q: "Tous les prophètes ont apporté le même message :", a: ["adorer Allah seul", "construire des temples", "suivre les ancêtres"], c: 0, e: "Le tawḥîd." },
+  ],
+  "is1/s3-3": [
+    { q: "Lors du déluge, qui fut sauvé ?", a: ["Seuls les croyants, dans l'arche", "Toute la famille de Noûḥ, même son fils", "Personne"], c: 0, e: "C'est la foi qui sauve, pas la parenté." },
+    { q: "Mouḥammad [[ﷺ]] est…", a: ["le dernier des prophètes, envoyé à toute l'humanité", "le premier des prophètes", "un roi"], c: 0, e: "Le sceau des prophètes." },
+    { q: "Témoigner que Mouḥammad [[ﷺ]] est le Messager d'Allah, c'est…", a: ["le croire, lui obéir, l'aimer, prier sur lui", "seulement connaître son nom", "visiter Médine"], c: 0, e: "Mouḥammadoun rasoûlou Llâh." },
+  ],
+  "is1/s4-1": [
+    { q: "Combien les ablutions ont-elles d'obligations (école mâlikite) ?", a: ["Sept", "Quatre", "Dix"], c: 0, e: "Intention, visage, bras, toute la tête, pieds, frotter, enchaîner." },
+    { q: "On lave les bras…", a: ["jusqu'aux coudes", "jusqu'aux poignets", "jusqu'aux épaules"], c: 0, e: "Sourate Al-Mâ'ida, verset 6." },
+    { q: "Ibrâhîm a parlé à son père…", a: ["avec douceur et respect, même en désaccord", "avec colère", "sans jamais lui parler"], c: 0, e: "Le respect des parents demeure." },
+  ],
+  "is1/s4-2": [
+    { q: "Dans les ablutions, on commence par…", a: ["la droite", "la gauche", "les pieds"], c: 0, e: "Mains, bouche, nez, visage, bras, tête, oreilles, pieds." },
+    { q: "Après les ablutions, on dit…", a: ["l'invocation de la chahâda", "« Âmîn »", "rien"], c: 0, e: "« Ach-hadou an lâ ilâha illa Llâh… »." },
+    { q: "Ibrâhîm a été sauvé…", a: ["du feu, devenu fraîcheur et paix", "du déluge", "de la mer"], c: 0, e: "Al-Anbiyâ', verset 69." },
+  ],
+  "is1/s4-3": [
+    { q: "Lequel annule les ablutions ?", a: ["Le sommeil profond", "Manger du pain", "Parler"], c: 0, e: "Aussi : urine, selles, gaz, perte de conscience…" },
+    { q: "La fiṭra, c'est…", a: ["la nature saine originelle", "le jeûne", "la prière du soir"], c: 0, e: "Circoncision, hygiène intime, moustache, ongles, aisselles." },
+    { q: "Le Prophète [[ﷺ]] aurait ordonné à chaque prière, s'il n'avait craint la difficulté…", a: ["le siwâk", "le bain", "le jeûne"], c: 0, e: "Al-Boukhârî et Mouslim." },
+  ],
+  "is1/s5-1": [
+    { q: "Le pèlerinage est le…", a: ["cinquième pilier", "premier pilier", "troisième pilier"], c: 0, e: "Une fois dans la vie, pour qui en a les moyens." },
+    { q: "Le sa‘y entre aṣ-Ṣafâ et al-Marwa rappelle…", a: ["les sept courses de Hâjar", "la construction de la Kaaba", "la bataille de Badr"], c: 0, e: "Allah fit jaillir Zamzam." },
+    { q: "Le pèlerinage a lieu au mois de…", a: ["Dhoû l-Ḥijja", "Ramadan", "Mouḥarram"], c: 0, e: "À La Mecque." },
+  ],
+  "is1/s5-2": [
+    { q: "La Tabaski (‘Îd al-Aḍḥâ) a lieu le…", a: ["10 de Dhoû l-Ḥijja", "1er de Chawwâl", "27 de Ramadan"], c: 0, e: "Bain, beaux habits, takbîrs, prière de l'‘Îd." },
+    { q: "Le sacrifice se fait…", a: ["après la prière de l'‘Îd", "avant l'aube", "la veille"], c: 0, e: "Un animal sans défaut, avec douceur." },
+    { q: "La viande du sacrifice se partage entre…", a: ["la famille, les voisins et amis, les pauvres", "la famille seulement", "les riches"], c: 0, e: "Al-uḍḥiya : le sacrifice de la fête." },
+  ],
+  "is1/s5-3": [
+    { q: "Qui a bâti la Kaaba ?", a: ["Ibrâhîm et Ismâ‘îl", "Noûḥ et ses fils", "Soulaymân"], c: 0, e: "Ils demandaient à Allah d'accepter leur travail." },
+    { q: "Les 4 piliers mâlikites du ḥajj sont…", a: ["iḥrâm, sa‘y, ‘Arafa, ṭawâf al-ifâḍa", "prière, jeûne, zakât, chahâda", "Minâ, Mouzdalifa, sacrifice, rasage"], c: 0, e: "Sans eux, le pèlerinage n'est pas valable." },
+    { q: "La talbiya commence par…", a: ["« Me voici, ô Allah, me voici ! »", "« Au nom d'Allah »", "« Allah est le plus grand »"], c: 0, e: "Labbayka Llâhoumma labbayk." },
+  ],
+  "is1/s6-1": [
+    { q: "La zakât est le…", a: ["troisième pilier", "deuxième pilier", "cinquième pilier"], c: 0, e: "Une part obligatoire de ses biens, chaque année." },
+    { q: "Le taux de la zakât sur l'argent est de…", a: ["2,5 % (diviser par 40)", "10 %", "50 %"], c: 0, e: "Si l'on possède le niṣâb pendant une année lunaire." },
+    { q: "Face au malheur, Ya‘qoûb a répondu par…", a: ["une belle patience", "la colère", "la vengeance"], c: 0, e: "Ṣabroun jamîl." },
+  ],
+  "is1/s6-2": [
+    { q: "Combien de catégories de bénéficiaires de la zakât le Coran nomme-t-il ?", a: ["Huit", "Trois", "Douze"], c: 0, e: "At-Tawba, verset 60." },
+    { q: "Peut-on donner sa zakât à ses propres enfants ?", a: ["Non, on les nourrit déjà", "Oui, toujours", "Oui, s'ils sont grands"], c: 0, e: "Ni aux parents, ni aux enfants, ni à l'épouse." },
+    { q: "Yoûsouf a préféré la prison…", a: ["plutôt que de commettre la faute", "pour se reposer", "pour fuir son père"], c: 0, e: "Il est resté honnête partout." },
+  ],
+  "is1/s6-3": [
+    { q: "Selon le hadith, ton sourire à ton frère est…", a: ["une aumône", "une obligation", "sans valeur"], c: 0, e: "Tout bien est une aumône." },
+    { q: "La meilleure aumône se donne…", a: ["en secret, sans rappeler son bienfait", "devant tout le monde", "en l'annonçant"], c: 0, e: "Aṣ-ṣadaqa : l'aumône volontaire." },
+    { q: "Yoûsouf a dit à ses frères :", a: ["« Pas de reproche contre vous aujourd'hui ! »", "« Partez d'ici ! »", "« Je me vengerai »"], c: 0, e: "Il leur a pardonné." },
+  ],
+  "is1/s7-1": [
+    { q: "Combien de rak‘a compte la prière du Maghrib ?", a: ["Trois", "Deux", "Quatre"], c: 0, e: "Ṣoubḥ 2, Ẓouhr 4, ‘Aṣr 4, Maghrib 3, ‘Ichâ' 4." },
+    { q: "On ordonne la prière aux enfants à partir de…", a: ["sept ans", "quinze ans", "trois ans"], c: 0, e: "Hadith rapporté par Abou Dâwoud." },
+    { q: "Combien de rak‘a obligatoires par jour au total ?", a: ["17", "5", "24"], c: 0, e: "2 + 4 + 4 + 3 + 4." },
+  ],
+  "is1/s7-2": [
+    { q: "Le temps de chaque prière est fixé par…", a: ["le soleil", "la lune", "l'heure de l'école"], c: 0, e: "La prière est prescrite à des temps déterminés." },
+    { q: "La meilleure action est de prier…", a: ["au début du temps", "à la fin du temps", "après le temps"], c: 0, e: "Celui qui oublie prie dès qu'il se souvient." },
+    { q: "À Madyan, Moûsâ a aidé…", a: ["sans rien attendre en retour", "contre de l'argent", "pour devenir roi"], c: 0, e: "Puis il a invoqué Allah." },
+  ],
+  "is1/s7-3": [
+    { q: "L'adhân annonce…", a: ["l'entrée du temps de la prière", "la fin de la prière", "le début du Ramadan"], c: 0, e: "L'iqâma annonce le début de la prière." },
+    { q: "Quand on entend l'adhân, on…", a: ["répète les paroles du muezzin", "parle plus fort", "s'en va"], c: 0, e: "Hadith rapporté par al-Boukhârî et Mouslim." },
+    { q: "Allah a parlé à Moûsâ…", a: ["au mont Ṭoûr", "à La Mecque", "dans la mer"], c: 0, e: "Il lui a ordonné la prière." },
+  ],
+  "is1/s8-1": [
+    { q: "Le jeûne de Ramadan est le…", a: ["quatrième pilier", "premier pilier", "cinquième pilier"], c: 0, e: "Al-Baqara, verset 183." },
+    { q: "On jeûne…", a: ["de l'aube au coucher du soleil", "du matin à midi", "toute la nuit"], c: 0, e: "Souhour avant l'aube, fouṭoûr au coucher du soleil." },
+    { q: "Moûsâ a parlé à Pharaon…", a: ["avec douceur", "avec insultes", "par la force"], c: 0, e: "« Parlez-lui avec douceur »." },
+  ],
+  "is1/s8-2": [
+    { q: "Le malade et le voyageur qui ne jeûnent pas…", a: ["rattrapent leurs jours", "n'ont rien à faire", "paient une amende"], c: 0, e: "Allah veut pour vous la facilité." },
+    { q: "La personne âgée qui ne peut pas jeûner…", a: ["nourrit un pauvre par jour", "doit jeûner malgré tout", "jeûne la nuit"], c: 0, e: "C'est la compensation." },
+    { q: "Lequel annule le jeûne ?", a: ["Le vomissement volontaire", "Se brosser les dents sans avaler", "Dormir"], c: 0, e: "Aussi : manger, boire, les menstrues…" },
+  ],
+  "is1/s8-3": [
+    { q: "La zakât al-fiṭr se donne…", a: ["avant la prière de l'‘Îd", "un mois après", "au pèlerinage"], c: 0, e: "Un ṣâ‘ d'aliment de base par personne." },
+    { q: "Il est interdit de jeûner…", a: ["le jour de l'‘Îd", "le lundi", "le jour de ‘Arafa"], c: 0, e: "Le jeûne de ‘Arafa est recommandé." },
+    { q: "Moûsâ a jeûné le jour de ‘Âchoûrâ’ pour…", a: ["remercier Allah", "se punir", "préparer un voyage"], c: 0, e: "Le Prophète [[ﷺ]] l'a jeûné aussi." },
+  ],
+  "is1/s9-1": [
+    { q: "La qibla est…", a: ["la direction de la prière, vers la Kaaba", "la prière du soir", "le tapis de prière"], c: 0, e: "À Abidjan, vers l'est-nord-est." },
+    { q: "Laquelle est une condition de la prière ?", a: ["Avoir le corps couvert", "Prier en groupe", "Porter des chaussures"], c: 0, e: "Pureté, propreté, corps couvert, qibla, temps, intention." },
+    { q: "Dâwoud a reçu le livre…", a: ["du Zaboûr", "de la Torah", "de l'Évangile"], c: 0, e: "Il mangeait du travail de ses mains." },
+  ],
+  "is1/s9-2": [
+    { q: "Une rak‘a comprend…", a: ["station debout, inclinaison, redressement, deux prosternations", "une seule prosternation", "seulement la Fâtiḥa"], c: 0, e: "On prie calmement." },
+    { q: "« Priez comme vous m'avez vu prier » est un hadith rapporté par…", a: ["al-Boukhârî", "Mâlik seul", "aucun recueil"], c: 0, e: "D'après Mâlik ibn al-Ḥouwayrith." },
+    { q: "On termine la prière par…", a: ["le tachahhoud et le salut", "l'adhân", "une prosternation"], c: 0, e: "« As-salâmou ‘alaykoum »." },
+  ],
+  "is1/s9-3": [
+    { q: "Les trois mosquées saintes sont à…", a: ["La Mecque, Médine, Jérusalem", "Le Caire, Bagdad, Istanbul", "Abidjan, Dakar, Bamako"], c: 0, e: "On n'entreprend de voyage pour prier que vers elles." },
+    { q: "En entrant à la mosquée, avant de s'asseoir, on prie…", a: ["deux rak‘a", "quatre rak‘a", "rien"], c: 0, e: "On entre du pied droit." },
+    { q: "La mort de Soulaymân a montré que…", a: ["seul Allah connaît l'invisible", "les djinns savent tout", "les rois ne meurent pas"], c: 0, e: "Al-ghayb n'appartient qu'à Allah." },
+  ],
+  "is1/s10-1": [
+    { q: "La prière en groupe surpasse la prière faite seul de…", a: ["vingt-sept degrés", "deux degrés", "cent degrés"], c: 0, e: "Al-Boukhârî et Mouslim." },
+    { q: "Derrière l'imam, on fait chaque geste…", a: ["juste après lui, jamais avant", "avant lui", "en même temps que lui"], c: 0, e: "En rangs droits." },
+    { q: "Maryam disait de sa nourriture :", a: ["« Cela vient d'Allah »", "« Je l'ai achetée »", "« Zakariyyâ l'a apportée »"], c: 0, e: "Âl ‘Imrân, verset 37." },
+  ],
+  "is1/s10-2": [
+    { q: "L'invocation (ad-dou‘â’), c'est…", a: ["parler à Allah, qui est tout proche et répond", "réciter un poème", "parler aux anges"], c: 0, e: "Al-Baqara, verset 186." },
+    { q: "Un moment privilégié pour invoquer est…", a: ["la prosternation", "le repas", "le marché"], c: 0, e: "Aussi : fin de la nuit, entre adhân et iqâma, vendredi, jeûne." },
+    { q: "Allah a donné un fils à Zakariyyâ malgré son grand âge :", a: ["Yaḥyâ", "‘Îsâ", "Ismâ‘îl"], c: 0, e: "Zakariyyâ avait invoqué en secret." },
+  ],
+  "is1/s10-3": [
+    { q: "La prière du vendredi comprend…", a: ["un sermon et deux rak‘a", "quatre rak‘a sans sermon", "trois rak‘a"], c: 0, e: "Elle remplace le Ẓouhr." },
+    { q: "Pendant le sermon du vendredi, on…", a: ["se tait", "parle doucement à son voisin", "lit son téléphone"], c: 0, e: "Même dire « Tais-toi ! » est une parole vaine." },
+    { q: "Le meilleur jour de la semaine est…", a: ["le vendredi", "le lundi", "le dimanche"], c: 0, e: "Bain, parfum, beaux habits, arriver tôt." },
+  ],
+  // ===================== VIVRE L'ISLAM EN FAMILLE · NIVEAU 2
+  "is2/s1-1": [
+    { q: "Combien la foi a-t-elle de piliers ?", a: ["Six", "Cinq", "Trois"], c: 0, e: "Allah, les anges, les livres, les messagers, le Jour dernier, le destin." },
+    { q: "L'Îmân, c'est…", a: ["croire avec le cœur, le dire et le montrer par ses actes", "seulement le dire", "seulement prier"], c: 0, e: "La foi augmente avec l'obéissance." },
+    { q: "‘Îsâ est né…", a: ["de Maryam, sans père, par la volonté d'Allah", "de Zakariyyâ", "à La Mecque"], c: 0, e: "Bébé, il a dit : « Je suis le serviteur d'Allah »." },
+  ],
+  "is2/s1-2": [
+    { q: "Combien de prophètes le Coran nomme-t-il ?", a: ["Vingt-cinq", "Dix", "Cent"], c: 0, e: "Allah a envoyé des messagers à tous les peuples." },
+    { q: "Les quatre qualités des prophètes sont…", a: ["véracité, fidélité, transmission, intelligence", "richesse, force, beauté, pouvoir", "silence, solitude, jeûne, voyage"], c: 0, e: "Ce sont des êtres humains choisis par Allah." },
+    { q: "Al-mou‘jiza désigne…", a: ["le miracle d'un prophète, accompli par Allah", "un livre révélé", "une prière"], c: 0, e: "Les miracles viennent d'Allah." },
+  ],
+  "is2/s1-3": [
+    { q: "‘Îsâ a annoncé un messager nommé…", a: ["Aḥmad", "Moûsâ", "Dâwoud"], c: 0, e: "C'est notre Prophète [[ﷺ]] (Aṣ-Ṣaff, verset 6)." },
+    { q: "Selon le Coran, ‘Îsâ…", a: ["n'a pas été crucifié : Allah l'a élevé vers Lui", "a été crucifié", "est mort de vieillesse"], c: 0, e: "Il redescendra avant la fin du monde." },
+    { q: "Khâtam an-nabiyyîn signifie…", a: ["le sceau, le dernier des prophètes", "le premier des prophètes", "l'ami d'Allah"], c: 0, e: "Il n'y aura plus de prophète après Mouḥammad [[ﷺ]]." },
+  ],
+  "is2/s2-1": [
+    { q: "L'Année de l'Éléphant, Allah a protégé la Kaaba…", a: ["par des oiseaux", "par une armée", "par un tremblement de terre"], c: 0, e: "Abraha voulait la détruire." },
+    { q: "Le Prophète [[ﷺ]] est né…", a: ["l'Année de l'Éléphant, un lundi, orphelin de père", "à Médine, un vendredi", "l'année de l'Hégire"], c: 0, e: "Sourate Al-Fîl." },
+    { q: "Al-Khâliq signifie…", a: ["le Créateur", "le Pourvoyeur", "l'Unique"], c: 0, e: "Rien ne se crée tout seul." },
+  ],
+  "is2/s2-2": [
+    { q: "Ar-Razzâq signifie…", a: ["le Pourvoyeur, qui donne la subsistance", "le Créateur", "le Juste"], c: 0, e: "Il n'y a pas de bête sur terre dont la subsistance n'incombe à Allah." },
+    { q: "Qui a pris le Prophète [[ﷺ]] en nourrice ?", a: ["Ḥalîma", "Khadîja", "Âmina"], c: 0, e: "Allah a béni toute sa maison." },
+    { q: "Le ḥarâm dans le gain…", a: ["retire la bénédiction", "augmente la bénédiction", "n'a aucun effet"], c: 0, e: "Le croyant travaille de manière ḥalâl." },
+  ],
+  "is2/s2-3": [
+    { q: "À quel âge le Prophète [[ﷺ]] a-t-il perdu sa mère ?", a: ["Six ans", "Douze ans", "Vingt ans"], c: 0, e: "Son père était mort avant sa naissance." },
+    { q: "Après son grand-père, qui a pris soin de lui ?", a: ["Son oncle Abou Ṭâlib", "Abou Lahab", "Abou Bakr"], c: 0, e: "Ḥalîma, Oumm Ayman, ‘Abd al-Mouṭṭalib, puis Abou Ṭâlib." },
+    { q: "Celui qui prend soin d'un orphelin sera…", a: ["près du Prophète [[ﷺ]] au Paradis", "riche", "dispensé de prière"], c: 0, e: "Comme l'index et le majeur." },
+  ],
+  "is2/s3-1": [
+    { q: "La sourate al-Ikhlâṣ vaut…", a: ["le tiers du Coran", "la moitié du Coran", "le Coran entier"], c: 0, e: "Hadith rapporté par Mouslim." },
+    { q: "Le tawḥîd, c'est…", a: ["l'unicité d'Allah dans Sa seigneurie, l'adoration, Ses noms et qualités", "le pèlerinage", "la prière en groupe"], c: 0, e: "Allah n'a ni enfant, ni parent, ni égal." },
+    { q: "Avant la prophétie, on appelait Mouḥammad [[ﷺ]]…", a: ["al-Amîn, le digne de confiance", "al-Khalîl", "aṣ-Ṣiddîq"], c: 0, e: "Il n'a jamais adoré d'idole." },
+  ],
+  "is2/s3-2": [
+    { q: "Agir pour être vu (ar-riyâ’), c'est…", a: ["le petit chirk, qui gâche l'action", "une bonne intention", "une obligation"], c: 0, e: "La sincérité, c'est agir pour Allah." },
+    { q: "Quel âge avait le Prophète [[ﷺ]] quand il a épousé Khadîja ?", a: ["Vingt-cinq ans", "Quarante ans", "Quinze ans"], c: 0, e: "Elle lui avait confié son commerce." },
+    { q: "« C'est Toi seul que nous adorons » est le verset 5 de…", a: ["la Fâtiḥa", "al-Ikhlâṣ", "an-Nâs"], c: 0, e: "L'adoration est pour Allah seul." },
+  ],
+  "is2/s3-3": [
+    { q: "Les amulettes et les devins…", a: ["mènent au chirk", "protègent le croyant", "sont recommandés"], c: 0, e: "Notre protection, c'est Allah." },
+    { q: "Celui qui interroge un devin voit sa prière non acceptée pendant…", a: ["quarante nuits", "un jour", "une année"], c: 0, e: "Hadith rapporté par Mouslim." },
+    { q: "Pour poser la Pierre noire, al-Amîn a proposé…", a: ["un manteau porté par toutes les tribus", "un tirage au sort", "de la poser seul"], c: 0, e: "Il a ainsi évité la guerre." },
+  ],
+  "is2/s4-1": [
+    { q: "Les premiers versets révélés commencent par…", a: ["« Lis ! »", "« Dis ! »", "« Au nom d'Allah »"], c: 0, e: "Dans la grotte de Ḥirâ', à quarante ans." },
+    { q: "Les anges…", a: ["obéissent toujours à Allah, ne mangent ni ne dorment", "mangent et dorment", "peuvent désobéir"], c: 0, e: "Ils sont créés de lumière." },
+    { q: "Croire aux anges est le…", a: ["deuxième pilier de la foi", "premier pilier de l'islam", "dernier pilier de la foi"], c: 0, e: "Après la foi en Allah." },
+  ],
+  "is2/s4-2": [
+    { q: "Quel ange apporte la révélation ?", a: ["Jibrîl", "Mîkâ'îl", "Isrâfîl"], c: 0, e: "Mîkâ'îl : la pluie ; Isrâfîl : la Trompe." },
+    { q: "Mounkar et Nakîr…", a: ["interrogent dans la tombe", "gardent le Paradis", "écrivent les actions"], c: 0, e: "Mâlik garde l'Enfer." },
+    { q: "Qui a réconforté le Prophète [[ﷺ]] après la première révélation ?", a: ["Khadîja", "Abou Lahab", "Ḥalîma"], c: 0, e: "Waraqa a reconnu l'ange envoyé à Moûsâ." },
+  ],
+  "is2/s4-3": [
+    { q: "Combien d'anges écrivent nos actions et nos paroles ?", a: ["Deux", "Un", "Sept"], c: 0, e: "Kirâman kâtibîn : de nobles scribes." },
+    { q: "Les anges de la nuit et du jour se rencontrent…", a: ["à la prière de l'aube et à celle de l'‘aṣr", "à minuit", "au Maghrib seulement"], c: 0, e: "Al-Boukhârî et Mouslim." },
+    { q: "L'appel public à l'islam a commencé…", a: ["au mont aṣ-Ṣafâ", "à Médine", "à Ṭâ'if"], c: 0, e: "Après les premiers croyants : Khadîja, ‘Alî, Zayd, Abou Bakr." },
+  ],
+  "is2/s5-1": [
+    { q: "Le premier muezzin de l'islam est…", a: ["Bilâl", "Abou Bakr", "Zayd"], c: 0, e: "Torturé, il répétait « Aḥad ! Aḥad ! »." },
+    { q: "Quel livre a été révélé à Moûsâ ?", a: ["La Torah", "Les Psaumes", "L'Évangile"], c: 0, e: "Psaumes : Dâwoud ; Évangile : ‘Îsâ." },
+    { q: "La première martyre de l'islam est…", a: ["Soumayya", "Khadîja", "Fâṭima"], c: 0, e: "De la famille de Yâsir." },
+  ],
+  "is2/s5-2": [
+    { q: "Le Coran compte…", a: ["114 sourates", "100 sourates", "30 sourates"], c: 0, e: "Descendu en arabe par Jibrîl en vingt-trois ans." },
+    { q: "Des musulmans persécutés ont émigré chez le Négus, en…", a: ["Abyssinie", "Égypte", "Syrie"], c: 0, e: "Un roi juste qui les a protégés." },
+    { q: "« Le meilleur d'entre vous est celui qui… »", a: ["apprend le Coran et l'enseigne", "possède le plus de biens", "parle le plus"], c: 0, e: "Hadith rapporté par al-Boukhârî." },
+  ],
+  "is2/s5-3": [
+    { q: "Pour chaque lettre lue du Coran, on reçoit…", a: ["une bonne action multipliée par dix", "rien", "une seule bonne action"], c: 0, e: "Il n'est jamais trop tard pour apprendre." },
+    { q: "Celui qui lit le Coran avec difficulté reçoit…", a: ["deux récompenses", "aucune récompense", "une demi-récompense"], c: 0, e: "Al-Boukhârî et Mouslim." },
+    { q: "Quand on récite le Coran, on…", a: ["écoute attentivement et fait silence", "parle en même temps", "quitte la pièce"], c: 0, e: "Al-A‘râf, verset 204." },
+  ],
+  "is2/s6-1": [
+    { q: "Combien Allah a-t-Il de beaux noms selon le hadith ?", a: ["Quatre-vingt-dix-neuf", "Cent", "Trente"], c: 0, e: "Celui qui les connaît et les vit entrera au Paradis." },
+    { q: "« L'année de la tristesse » est celle de la mort…", a: ["d'Abou Ṭâlib puis de Khadîja", "d'Abou Bakr", "de Ḥamza"], c: 0, e: "C'est Allah qui guide les cœurs." },
+    { q: "Peut-on comparer Allah à une créature ?", a: ["Non, Il ne ressemble à aucune créature", "Oui", "Parfois"], c: 0, e: "On ne donne Ses noms qu'à Lui." },
+  ],
+  "is2/s6-2": [
+    { q: "As-Samî‘ signifie…", a: ["Celui qui entend tout", "Celui qui voit tout", "Celui qui sait tout"], c: 0, e: "Al-Baṣîr : Il voit tout ; al-‘Alîm : Il sait tout." },
+    { q: "À Ṭâ'if, le Prophète [[ﷺ]]…", a: ["a refusé la vengeance et prié pour leurs descendants", "a combattu les habitants", "a maudit la ville"], c: 0, e: "Il espérait qu'ils adoreraient Allah seul." },
+    { q: "Savoir qu'Allah voit tout nous rend…", a: ["vigilants même quand nous sommes seuls", "indifférents", "tristes"], c: 0, e: "Et nous réconforte dans l'injustice." },
+  ],
+  "is2/s6-3": [
+    { q: "Les cinq prières ont été prescrites…", a: ["pendant le Mi‘râj", "pendant la bataille de Badr", "pendant le pèlerinage d'adieu"], c: 0, e: "Elles valent cinquante." },
+    { q: "Abou Bakr est appelé aṣ-Ṣiddîq parce qu'il…", a: ["a cru sans hésiter au voyage nocturne", "était le plus riche", "était le premier muezzin"], c: 0, e: "Aṣ-Ṣiddîq : le véridique." },
+    { q: "Al-ghayb, c'est…", a: ["l'invisible, que l'on croit parce qu'Allah et Son Prophète nous l'ont appris", "ce que l'on voit", "une prière"], c: 0, e: "Al-Baqara, versets 2 et 3." },
+  ],
+  "is2/s7-1": [
+    { q: "Le destin est-il une excuse pour la paresse ou le péché ?", a: ["Non, jamais", "Oui", "Parfois"], c: 0, e: "L'homme a une volonté et un choix." },
+    { q: "Allah a écrit les destins…", a: ["cinquante mille ans avant de créer les cieux et la terre", "chaque matin", "à la naissance de chacun seulement"], c: 0, e: "Hadith rapporté par Mouslim." },
+    { q: "Qui a enseigné l'islam aux gens de Yathrib ?", a: ["Mouṣ‘ab", "Bilâl", "Khâlid"], c: 0, e: "Après les deux serments d'al-‘Aqaba." },
+  ],
+  "is2/s7-2": [
+    { q: "Le tawakkoul, c'est…", a: ["faire tout ce qui dépend de nous, puis s'en remettre à Allah", "ne rien faire et attendre", "compter seulement sur soi"], c: 0, e: "« Attache ta chamelle, et fais confiance à Allah »." },
+    { q: "Pendant l'Hégire, le Prophète [[ﷺ]] et Abou Bakr se sont cachés dans la grotte de…", a: ["Thawr", "Ḥirâ'", "Ouḥoud"], c: 0, e: "Trois nuits." },
+    { q: "Dans la grotte, le Prophète [[ﷺ]] a dit :", a: ["« Ne t'attriste pas, Allah est avec nous »", "« Fuyons vite »", "« Nous sommes perdus »"], c: 0, e: "At-Tawba, verset 40." },
+  ],
+  "is2/s7-3": [
+    { q: "Après un échec, on dit…", a: ["« Qadarou Llâhi wa mâ châ’a fa‘al »", "« Si seulement j'avais… »", "rien"], c: 0, e: "C'est le décret d'Allah." },
+    { q: "Le croyant, dans le bonheur…", a: ["remercie, et dans l'épreuve il patiente", "oublie Allah", "se vante"], c: 0, e: "Tout est bien pour lui." },
+    { q: "Les Anṣâr sont…", a: ["les musulmans de Médine qui ont accueilli et partagé", "les émigrés de La Mecque", "les anges"], c: 0, e: "Les Mouhâjiroûn sont les émigrés." },
+  ],
+  "is2/s8-1": [
+    { q: "Qui connaît le moment de l'Heure ?", a: ["Allah seul", "les savants", "les devins"], c: 0, e: "Celui qui annonce une date ment." },
+    { q: "À Badr, combien de croyants ont vaincu mille hommes ?", a: ["Environ trois cents", "Dix mille", "Cent"], c: 0, e: "Avec l'aide d'Allah et des anges." },
+    { q: "« Tu seras avec ceux que… »", a: ["tu aimes", "tu connais", "tu crains"], c: 0, e: "L'important est de se préparer." },
+  ],
+  "is2/s8-2": [
+    { q: "Devant la mort, on dit…", a: ["« Innâ li-Llâhi wa innâ ilayhi râji‘oûn »", "« Bismillah »", "« Âmîn »"], c: 0, e: "« Nous appartenons à Allah et c'est vers Lui que nous retournons »." },
+    { q: "Quand l'homme meurt, ses œuvres continuent par…", a: ["une aumône durable, un savoir utile, un enfant pieux qui invoque pour lui", "ses biens seulement", "rien"], c: 0, e: "Hadith rapporté par Mouslim." },
+    { q: "À Ouḥoud, l'épreuve est venue de…", a: ["la désobéissance des archers", "la pluie", "la trahison des anges"], c: 0, e: "Ḥamza et soixante-dix croyants sont morts." },
+  ],
+  "is2/s8-3": [
+    { q: "Al-barzakh, c'est…", a: ["la vie de la tombe, entre la mort et la Résurrection", "le Paradis", "le pont"], c: 0, e: "On s'y prépare toute sa vie." },
+    { q: "Quelle question est posée dans la tombe ?", a: ["Qui est ton Seigneur ?", "Quel est ton métier ?", "Combien as-tu gagné ?"], c: 0, e: "Puis : Quelle est ta religion ? Qui est cet homme ?" },
+    { q: "On appelle Ḥamza…", a: ["le maître des martyrs", "le premier muezzin", "le véridique"], c: 0, e: "Mort à Ouḥoud." },
+  ],
+  "is2/s9-1": [
+    { q: "Al-ba‘th désigne…", a: ["la résurrection", "le rassemblement", "la balance"], c: 0, e: "Al-ḥachr : le rassemblement." },
+    { q: "Lors de la bataille du Fossé, Allah a vaincu les Coalisés…", a: ["par le vent et les anges", "par un déluge", "par un tremblement de terre"], c: 0, e: "Le Prophète [[ﷺ]] creusait avec ses compagnons." },
+    { q: "Parmi les sept abrités sous l'ombre d'Allah, il y a…", a: ["le jeune qui a grandi dans l'adoration de son Seigneur", "le plus riche", "le plus fort"], c: 0, e: "Al-Boukhârî et Mouslim." },
+  ],
+  "is2/s9-2": [
+    { q: "Le croyant recevra le livre de ses actes…", a: ["dans sa main droite", "dans sa main gauche", "derrière son dos"], c: 0, e: "Rien n'est perdu, même le poids d'un atome." },
+    { q: "Ce qui pèse très lourd dans la balance :", a: ["le bon caractère et « Soubḥâna Llâhi wa bi-ḥamdih… »", "les beaux habits", "les grandes maisons"], c: 0, e: "Deux paroles légères sur la langue, lourdes dans la balance." },
+    { q: "Allah a appelé la trêve d'al-Ḥoudaybiya…", a: ["« une victoire éclatante »", "une défaite", "une erreur"], c: 0, e: "Elle semblait injuste aux compagnons." },
+  ],
+  "is2/s9-3": [
+    { q: "Celui qui boit de l'eau du bassin du Prophète [[ﷺ]]…", a: ["n'aura plus jamais soif", "devra encore boire", "sera interrogé"], c: 0, e: "C'est al-ḥawḍ." },
+    { q: "En entrant à La Mecque en l'an 8, le Prophète [[ﷺ]]…", a: ["a pardonné à ses ennemis", "s'est vengé", "a détruit la ville"], c: 0, e: "Il a brisé les idoles avec humilité." },
+    { q: "Ach-chafâ‘a signifie…", a: ["l'intercession", "le pont", "la balance"], c: 0, e: "Le Prophète [[ﷺ]] a gardé son invocation pour intercéder." },
+  ],
+  "is2/s10-1": [
+    { q: "Le plus grand bonheur du Paradis est…", a: ["voir Allah", "les palais", "les fruits"], c: 0, e: "On y entre par Sa miséricorde et les bonnes actions." },
+    { q: "Au pèlerinage d'adieu, le Prophète [[ﷺ]] a rappelé…", a: ["le caractère sacré de la vie et des biens et l'égalité de tous", "la fin de la prière", "la supériorité d'un peuple"], c: 0, e: "Et la bonté envers les femmes." },
+    { q: "Le Paradis est…", a: ["éternel", "temporaire", "réservé aux prophètes"], c: 0, e: "Ni tristesse, ni maladie, ni mort." },
+  ],
+  "is2/s10-2": [
+    { q: "On se protège du Feu, même avec…", a: ["une moitié de datte, ou une bonne parole", "rien", "beaucoup d'argent seulement"], c: 0, e: "Al-Boukhârî et Mouslim." },
+    { q: "La miséricorde d'Allah…", a: ["l'emporte sur Sa colère", "est inférieure à Sa colère", "n'existe pas"], c: 0, e: "Le croyant vit entre la crainte et l'espoir." },
+    { q: "Malade, le Prophète [[ﷺ]] a demandé que la prière soit dirigée par…", a: ["Abou Bakr", "‘Oumar", "‘Alî"], c: 0, e: "Il répétait : « La prière ! La prière ! »" },
+  ],
+  "is2/s10-3": [
+    { q: "À quel âge le Prophète [[ﷺ]] est-il mort ?", a: ["Soixante-trois ans", "Quarante ans", "Soixante-dix ans"], c: 0, e: "Un lundi." },
+    { q: "Aimer le Prophète [[ﷺ]], c'est…", a: ["suivre sa Sunna et prier sur lui", "seulement chanter ses louanges", "visiter sa tombe une fois"], c: 0, e: "Surtout le vendredi." },
+    { q: "Abou Bakr a dit : « Celui qui adore Allah… »", a: ["« Allah est vivant et ne meurt jamais »", "« doit pleurer »", "« doit partir »"], c: 0, e: "Paroles prononcées à la mort du Prophète [[ﷺ]]." },
+  ],
+  // ===================== ARABE · NIVEAU 0 (leçon de lecture de textes)
+  "a0/l16": [
+    { q: "Que signifie [[أَنَا مِنْ أَبِيدْجَان]] ?", a: ["Je suis d'Abidjan.", "Je vais à Abidjan.", "J'aime Abidjan."], c: 0, e: "Texte 1 : Karîm se présente." },
+    { q: "Dans le texte 2, le père de Salmâ est…", a: ["médecin : [[طَبِيبٌ]]", "enseignant : [[مُدَرِّسٌ]]", "étudiant : [[طَالِبٌ]]"], c: 0, e: "Sa mère est enseignante : [[مُدَرِّسَةٌ]]." },
+    { q: "Que signifie [[ٱلْيَوْمَ ٱلْجَوُّ جَمِيلٌ]] ?", a: ["Aujourd'hui, il fait beau.", "Aujourd'hui, il pleut.", "Demain, il fera chaud."], c: 0, e: "Texte 4 : Quel beau temps !" },
+  ],
 };
