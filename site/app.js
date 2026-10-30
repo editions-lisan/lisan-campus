@@ -103,7 +103,7 @@ const SPACES = [
   { id: 'ia', title: 'Formation à l’IA avec Claude', eyebrow: 'Ouvert à tous', icon: '🤖', color: 'i',
     lead: 'Comprendre l’intelligence artificielle et maîtriser Claude dans toutes les disciplines : étudier, enseigner, travailler, le droit, en toute sécurité.',
     intro: ['Huit parcours pour tous les profils : comprendre l’IA, bien formuler ses demandes, étudier (sciences, lettres, sciences humaines, sciences islamiques), enseigner et former, travailler (bureau, commerce, projets), l’IA juridique, l’éthique et la sécurité, et des projets pratiques.',
-      'Chaque parcours a son quiz, ses cartes de révision et son certificat. Les consignes de la bibliothèque se copient d’un geste pour être collées dans Claude.'] },
+      'Chaque parcours a son évaluation, ses cartes de révision et son certificat. Les consignes de la bibliothèque se copient d’un geste pour être collées dans Claude.'] },
   { id: 'arabe', title: 'Apprendre l’arabe', eyebrow: 'Collections « Je lis l’arabe ! » et « Je parle arabe ! »', icon: '💬', color: 'k',
     lead: 'Les compagnons des livres, du niveau 0 au niveau 3 : écouter les lettres, les mots et les dialogues, s’exercer et réviser.',
     intro: ['Ces quatre espaces accompagnent les livres des Éditions Lisân. Vous y écoutez les lettres, les syllabes, le vocabulaire et les dialogues de chaque leçon, vous vous entraînez avec les quiz et révisez avec les cartes.',
@@ -253,10 +253,10 @@ function inOrder(s, i) {
   const f = firstUndone(s); return f === -1 || i <= f;
 }
 // Espaces en ordre : un parcours ne s'ouvre qu'une fois le précédent du même espace réussi
-// (toutes ses leçons terminées et son quiz réussi, au moins 70 %).
-const PASS = () => (typeof CERT_QUIZ !== 'undefined' ? CERT_QUIZ : 70);
+// (toutes ses leçons terminées et son évaluation réussie, au moins 80 %).
+const PASS = () => (typeof CERT_QUIZ !== 'undefined' ? CERT_QUIZ : 80);
 const spaceSubjects = s => SUBJECTS.filter(x => spaceOf(x) === spaceOf(s));
-const subjectPassed = s => firstUndone(s) === -1 && (state.quiz[s.id] || 0) >= PASS();
+const subjectPassed = s => firstUndone(s) === -1 && (typeof quizOk === 'function' ? quizOk(s) : (state.quiz[s.id] || 0) >= PASS());
 function prevSubject(s) { const ss = spaceSubjects(s), k = ss.indexOf(s); return k > 0 ? ss[k - 1] : null; }
 function blockingSubject(s) { const ss = spaceSubjects(s); for (const x of ss) { if (x === s) return null; if (!subjectPassed(x)) return x; } return null; }
 const subjectOpen = s => !blockingSubject(s);
@@ -264,7 +264,7 @@ const subjectOpen = s => !blockingSubject(s);
 function nextStep(spId) {
   const x = SUBJECTS.filter(s => spaceOf(s) === spId).find(s => !subjectPassed(s)); if (!x) return null;
   const f = firstUndone(x);
-  return f === -1 ? { s: x, href: '#q-' + x.id, label: `Quiz : ${x.title}` } : { s: x, href: `#l-${x.id}.${x.lessons[f].id}`, label: `${x.title} — ${/^\d/.test(x.lessons[f].title) ? '' : `leçon ${f + 1} : `}${x.lessons[f].title}` };
+  return f === -1 ? { s: x, href: '#q-' + x.id, label: `Évaluation : ${x.title}` } : { s: x, href: `#l-${x.id}.${x.lessons[f].id}`, label: `${x.title} — ${/^\d/.test(x.lessons[f].title) ? '' : `leçon ${f + 1} : `}${x.lessons[f].title}` };
 }
 function access(s, lessonIndex) {
   const A = AUTH();
@@ -461,8 +461,8 @@ function viewHome() {
     <div class="sec-h"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Comment ça marche ?</h2></div>
     <section class="steps">${step('🧭', 'Choisissez un espace', 'L’arabe, le Coran, le droit ou l’intelligence artificielle : commencez par la première leçon, en accès libre, puis suivez les étapes dans l’ordre.')}
       ${step('🎧', 'Apprenez et écoutez', 'Des leçons courtes, lues à voix haute, sur téléphone ou sur ordinateur, même sans connexion.')}
-      ${step('✅', 'Vérifiez vos acquis', 'Un mini-exercice après chaque leçon, un quiz à la fin du parcours : la correction est immédiate, et vos erreurs reviennent dans « Mes révisions » jusqu’à ce qu’elles soient acquises.')}
-      ${step('🎓', 'Recevez votre certificat', 'Toutes les leçons terminées et le quiz réussi à 70 % : votre certificat, vérifiable en ligne.')}</section>
+      ${step('✅', 'Vérifiez vos acquis', 'Un mini-exercice corrigé après chaque leçon ; vos erreurs reviennent dans « Mes révisions » jusqu’à ce qu’elles soient acquises.')}
+      ${step('🎓', 'Recevez votre certificat', 'Toutes les leçons terminées et l’évaluation finale réussie à 80 % : votre certificat, vérifiable en ligne.')}</section>
     <div class="sec-h"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les livres des Éditions Lisân</h2><p>Les espaces « Apprendre l’arabe », « Lire le Coran pas à pas » et « Vivre l’islam en famille » accompagnent ces livres.</p></div>
     <section class="books" aria-label="Les livres">${BOOKS.map(([f, t, d, h]) => { const inner = `<img src="img/${f}.webp" alt="Couverture du livre « ${esc(t)} »" width="150" height="212" loading="lazy" decoding="async"><b>${esc(t)}</b><small>${esc(d)}</small>`;
       return h ? `<a class="book" href="#${h}">${inner}</a>` : `<div class="book">${inner}</div>`; }).join('')}</section>`;
@@ -499,10 +499,10 @@ function bindHeroVideo() {
 }
 function viewSpace(sp) {
   const ss = SUBJECTS.filter(s => spaceOf(s) === sp.id), p = spaceProgress(sp), A = AUTH();
-  const card = (s, k) => { const q = subjectProgress(s); const best = state.quiz[s.id], open = subjectOpen(s), ok = subjectPassed(s);
+  const card = (s, k) => { const q = subjectProgress(s); const best = quizBest(s), open = subjectOpen(s), ok = subjectPassed(s);
     return `<a class="subj c-${s.color}${open ? '' : ' locked'}" href="#m-${s.id}"><span class="subj-step">${ok ? '✓ Réussi' : open ? 'Étape ' + (k + 1) : '🔒 Étape ' + (k + 1)}</span><h3>${esc(s.title)}</h3><p>${esc(s.subtitle)}</p>
       <div class="bar"><i style="width:${q.pct}%"></i></div>
-      <span class="meta">${q.d} / ${q.n} leçons${best !== undefined ? ` · meilleur quiz ${best} %` : ''}</span></a>`; };
+      <span class="meta">${q.d} / ${q.n} leçons${best !== undefined ? ` · évaluation ${best} %` : ''}</span></a>`; };
   let reg = '';
   if (A) {
     if (!A.user()) reg = `<div class="notice">La première leçon de l’espace est en accès libre. Pour la suite, <button type="button" class="linkbtn" data-auth="signin">connectez-vous avec Google</button> puis inscrivez-vous à cet espace.</div>`;
@@ -532,8 +532,8 @@ function viewSubject(s) {
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title])}
     <div class="duo"><aside class="duo-side"><div class="subject-head c-${s.color}"><span class="eyebrow">${p.d} / ${p.n} leçons terminées</span><h1>${esc(s.title)}</h1><p class="lead">${esc(s.subtitle)}</p>
       <div class="bar"><i style="width:${p.pct}%"></i></div>
-      <div class="actions"><a class="btn${inOrder(s, 'quiz') && subjectOpen(s) ? '' : ' is-locked'}" href="#q-${s.id}">${inOrder(s, 'quiz') && subjectOpen(s) ? '' : '🔒 '}Quiz (${s.quiz.length} questions)</a><a class="btn ghost${subjectOpen(s) ? '' : ' is-locked'}" href="#f-${s.id}">${subjectOpen(s) ? '' : '🔒 '}Cartes de révision (${s.cards.length})</a></div></div>
-    ${subjectOpen(s) ? '' : `<div class="notice">🔒 Ce parcours s’ouvre après « ${esc(blockingSubject(s).title)} » : terminez-en toutes les leçons et réussissez son quiz (au moins ${PASS()} %). <a href="#m-${blockingSubject(s).id}">Y aller</a></div>`}
+      <div class="actions"><a class="btn${inOrder(s, 'quiz') && subjectOpen(s) ? '' : ' is-locked'}" href="#q-${s.id}">${inOrder(s, 'quiz') && subjectOpen(s) ? '' : '🔒 '}Évaluation du certificat</a><a class="btn ghost${subjectOpen(s) ? '' : ' is-locked'}" href="#f-${s.id}">${subjectOpen(s) ? '' : '🔒 '}Cartes de révision (${s.cards.length})</a></div></div>
+    ${subjectOpen(s) ? '' : `<div class="notice">🔒 Ce parcours s’ouvre après « ${esc(blockingSubject(s).title)} » : terminez-en toutes les leçons et réussissez son évaluation (au moins ${PASS()} %). <a href="#m-${blockingSubject(s).id}">Y aller</a></div>`}
     ${certPanelSubject(s)}</aside>
     <div class="duo-main"><div class="lessons c-${s.color}">${s.lessons.map((l, i) => { const d = state.done[s.id + '/' + l.id]; const lock = access(s, i) !== 'ok' || !inOrder(s, i) || !subjectOpen(s);
       const cur = !d && state.last && state.last.route === 'l-' + s.id + '.' + l.id;
@@ -542,17 +542,17 @@ function viewSubject(s) {
 function viewGate(s, why, i) {
   const sp = space(spaceOf(s)), A = AUTH();
   const u = A && A.user();
-  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [i === undefined ? 'Accès' : i === 'quiz' ? 'Quiz' : (i + 1) + ' / ' + s.lessons.length])}
+  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [i === undefined ? 'Accès' : i === 'quiz' ? 'Évaluation' : (i + 1) + ' / ' + s.lessons.length])}
     <div class="gate c-${sp.color}"><span class="sp-icon" aria-hidden="true">🔒</span>
-    ${why === 'prev' ? (() => { const x = blockingSubject(s), f = firstUndone(x), xp = subjectProgress(x), best = state.quiz[x.id];
+    ${why === 'prev' ? (() => { const x = blockingSubject(s), f = firstUndone(x), xp = subjectProgress(x), best = quizBest(x);
       const go = f === -1 ? `#q-${x.id}` : `#l-${x.id}.${x.lessons[f].id}`;
       return `<h1>Ce parcours s’ouvre après « ${esc(x.title)} »</h1>
-      <p class="lead">Dans l’espace « ${esc(sp.title)} », les parcours se suivent dans l’ordre. Pour ouvrir « ${esc(s.title)} », terminez d’abord toutes les leçons de « ${esc(x.title)} » et réussissez son quiz (au moins ${PASS()} %).</p>
-      <p>Où vous en êtes : <b>${xp.d} / ${xp.n} leçons</b>${best !== undefined ? ` · meilleur quiz <b>${best} %</b>` : ' · quiz pas encore fait'}.</p>
-      <div class="actions"><a class="btn" href="${go}">${f === -1 ? 'Faire le quiz' : `Reprendre à la leçon ${f + 1}`}</a><a class="btn ghost" href="#espace-${sp.id}">Voir l’espace</a></div>`; })()
+      <p class="lead">Dans l’espace « ${esc(sp.title)} », les parcours se suivent dans l’ordre. Pour ouvrir « ${esc(s.title)} », terminez d’abord toutes les leçons de « ${esc(x.title)} » et réussissez son évaluation (au moins ${PASS()} %).</p>
+      <p>Où vous en êtes : <b>${xp.d} / ${xp.n} leçons</b>${best !== undefined ? ` · évaluation <b>${best} %</b>` : ' · évaluation pas encore faite'}.</p>
+      <div class="actions"><a class="btn" href="${go}">${f === -1 ? 'Passer l’évaluation' : `Reprendre à la leçon ${f + 1}`}</a><a class="btn ghost" href="#espace-${sp.id}">Voir l’espace</a></div>`; })()
     : why === 'order' ? (() => { const f = firstUndone(s), fl = s.lessons[f];
-      return `<h1>${i === 'quiz' ? 'Le quiz s’ouvre à la fin du parcours' : 'Une étape à la fois'}</h1>
-      <p class="lead">Les leçons de « ${esc(s.title)} » se suivent dans l’ordre : chacune s’appuie sur la précédente. ${i === 'quiz' ? 'Terminez toutes les leçons pour ouvrir le quiz.' : 'Cette leçon s’ouvrira quand les précédentes seront terminées.'}</p>
+      return `<h1>${i === 'quiz' ? 'L’évaluation s’ouvre à la fin du parcours' : 'Une étape à la fois'}</h1>
+      <p class="lead">Les leçons de « ${esc(s.title)} » se suivent dans l’ordre : chacune s’appuie sur la précédente. ${i === 'quiz' ? 'Terminez toutes les leçons pour ouvrir l’évaluation du certificat.' : 'Cette leçon s’ouvrira quand les précédentes seront terminées.'}</p>
       <p>Prochaine étape : <b>leçon ${f + 1} · ${esc(fl.title)}</b></p>
       <div class="actions"><a class="btn" href="#l-${s.id}.${fl.id}">Reprendre à la leçon ${f + 1}</a><a class="btn ghost" href="#m-${s.id}">Voir le parcours</a></div>`; })()
     : why === 'login' ? `<h1>Connectez-vous pour continuer</h1>
@@ -574,7 +574,7 @@ function viewLesson(found) {
       <div class="bar"><i style="width:${P.pct}%"></i></div><span class="meta">${P.d} / ${P.n} leçons terminées</span></div>
     <nav class="ls-list">${s.lessons.map((x, j) => { const dn = !!state.done[s.id + '/' + x.id], lk = !dn && !inOrder(s, j);
       return `<a href="#l-${s.id}.${x.id}" class="${j === i ? 'on' : ''}${dn ? ' done' : ''}${lk ? ' locked' : ''}"${j === i ? ' aria-current="page"' : ''}><span>${dn ? '✓' : lk ? '🔒' : j + 1}</span>${esc(x.title)}</a>`; }).join('')}</nav>
-    <div class="ls-act"><a class="btn small" href="#q-${s.id}">${inOrder(s, 'quiz') ? '' : '🔒 '}Quiz</a><a class="btn ghost small" href="#f-${s.id}">Cartes</a></div></aside>`;
+    <div class="ls-act"><a class="btn small" href="#q-${s.id}">${inOrder(s, 'quiz') ? '' : '🔒 '}Évaluation</a><a class="btn ghost small" href="#f-${s.id}">Cartes</a></div></aside>`;
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [(i + 1) + ' / ' + s.lessons.length])}
     <div class="duo duo-r"><article class="lesson read c-${s.color}">
       <span class="eyebrow">${esc(s.title)} · ${i + 1} / ${s.lessons.length}</span>
@@ -587,7 +587,7 @@ function viewLesson(found) {
         <button type="button" class="btn done-toggle" data-done="${key}" data-need="${needFor(l)}" aria-pressed="${d}">${d ? '✓ Leçon terminée' : 'Marquer comme terminée'}</button>
         <p class="meta done-msg" id="done-msg" aria-live="polite"></p>
         <button type="button" class="linkbtn sugg-link" data-suggest="${esc(s.title + ' · ' + l.title)}">💡 Suggérer une amélioration</button>
-        <div class="actions">${prev ? `<a class="btn ghost small" href="#l-${s.id}.${prev.id}">← Précédente</a>` : ''}<a class="btn small${d ? '' : ' is-locked'}" data-next="1" href="${next ? `#l-${s.id}.${next.id}` : `#q-${s.id}`}">${next ? 'Suivante →' : 'Faire le quiz →'}</a></div>
+        <div class="actions">${prev ? `<a class="btn ghost small" href="#l-${s.id}.${prev.id}">← Précédente</a>` : ''}<a class="btn small${d ? '' : ' is-locked'}" data-next="1" href="${next ? `#l-${s.id}.${next.id}` : `#q-${s.id}`}">${next ? 'Suivante →' : 'Passer l’évaluation →'}</a></div>
       </div>
     </article>${side}</div>`;
 }
@@ -660,24 +660,79 @@ function viewMini(key) {
     <div class="mini-end" hidden aria-live="polite"></div></section>`;
 }
 function shuffle(a) { const r = a.slice(); for (let i = r.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [r[i], r[j]] = [r[j], r[i]]; } return r; }
-let quizRun = null;
+// ---------- évaluation du certificat : 20 questions tirées au sort parmi celles du parcours (quiz et notions de
+// chaque leçon, en QCM ou en « vrai ou faux »), temps limité, aucune correction avant la fin, 80 % requis ; après
+// un échec, nouvelle tentative au bout de 10 minutes, avec d'autres questions.
+const EVAL_N = 20, EVAL_SEC = 40, EVAL_WAIT = 10 * 60 * 1000;
+let quizRun = null, evalTimer = null;
+const evalWait = () => store.get('evalwait', {});
+function evalBank(s) {
+  const fromQuiz = s.quiz.map(q => ({ q: q.q, a: q.a, c: q.c, e: q.e }));
+  const fromLessons = s.lessons.flatMap(l => { const key = s.id + '/' + l.id, base = (window.MINI || {})[key];
+    if (base) return base.map((q, i) => { const v = miniVariants(q, i); return Math.random() < 0.65 ? v[0] : shuffle(v.slice(1))[0]; });   // surtout en QCM
+    return autoMini(key) || []; });
+  const nq = Math.min(fromQuiz.length, Math.ceil(EVAL_N * 0.6));
+  const pick = shuffle(fromQuiz).slice(0, nq).concat(shuffle(fromLessons).slice(0, EVAL_N - nq));
+  const seen = new Set(); return shuffle(pick.filter(q => { const k = q.q; if (seen.has(k)) return false; seen.add(k); return true; })).slice(0, EVAL_N);
+}
 function viewQuiz(s) {
-  quizRun = { s, answered: 0, right: 0, qs: s.quiz.map(q => ({ ...q, order: shuffle(q.a.map((_, k) => k)) })) };
-  const best = state.quiz[s.id], sp = space(spaceOf(s));
-  return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], ['Quiz'])}
-    <div class="subject-head c-${s.color}"><h1>Quiz : ${esc(s.title)}</h1><p class="lead">Touchez une réponse : la correction s'affiche aussitôt.${best !== undefined ? ` Votre meilleur score : ${best} %.` : ''}</p></div>
-    <div class="duo duo-r"><div class="quiz read c-${s.color}"><div class="qbar" aria-hidden="true"><i id="qbar"></i></div>${quizRun.qs.map((q, n) => `<div class="q" data-q="${n}"><b>${n + 1}. ${md(q.q)}</b>
-      <div class="opts">${q.order.map((k, j) => `<button type="button" class="opt" data-k="${k}"><span class="ol" aria-hidden="true">${'ABCDEF'[j]}</span><span class="ot${/^[\u0600-\u06ff\u0750-\u077f\u08a0-\u08ff\s]+$/.test(q.a[k]) ? ' ara" lang="ar" dir="rtl' : ''}">${md(q.a[k])}</span></button>`).join('')}</div>
-      <p class="expl" hidden>${md(q.e)}</p></div>`).join('')}
+  clearInterval(evalTimer);
+  const best = quizBest(s), sp = space(spaceOf(s)), wait = (evalWait()[s.id] || 0) - Date.now();
+  const head = `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], ['Évaluation'])}
+    <div class="subject-head c-${s.color}"><h1>Évaluation du certificat : ${esc(s.title)}</h1>`;
+  if (wait > 0) { quizRun = null;
+    return head + `<p class="lead">Prochaine tentative possible dans <b>${Math.ceil(wait / 60000)} minute${wait > 60000 ? 's' : ''}</b>. Profitez-en pour revoir les leçons et faire « Mes révisions » : la prochaine évaluation posera d’autres questions.</p></div>
+      <div class="actions"><a class="btn" href="#revisions">Mes révisions</a><a class="btn ghost" href="#m-${s.id}">Retour au parcours</a></div>`; }
+  const qs = evalBank(s).map(q => ({ ...q, order: q.vf ? [0, 1] : shuffle(q.a.map((_, k) => k)) })), N = qs.length, total = N * EVAL_SEC;
+  quizRun = { s, answered: 0, right: 0, qs, picks: [], end: 0, total, started: false, over: false };
+  return head + `<p class="lead">${N} questions tirées au sort parmi toutes celles du parcours · ${Math.round(total / 60)} minutes en tout · une seule réponse par question, sans correction avant la fin · au moins ${PASS()} % pour réussir.${best !== undefined ? ` Votre meilleur score : ${best} %.` : ''}</p></div>
+    <div class="duo duo-r"><div class="quiz read c-${s.color}" id="evalq">
+      <div class="notice" id="eval-start"><b>Prêt ?</b> Le temps démarre dès que vous commencez. En cas d’échec, une nouvelle tentative, avec d’autres questions, sera possible au bout de 10 minutes.
+        <div class="actions"><button type="button" class="btn" data-eval-start>Commencer l’évaluation</button></div></div>
+      <div id="eval-qs" hidden><div class="etimer" id="etimer" role="timer">⏱ <b>${Math.round(total / 60)}:00</b> <span>0 / ${N} réponses</span></div><div class="qbar" aria-hidden="true"><i id="qbar"></i></div>${qs.map((q, n) => `<div class="q" data-q="${n}"><b>${n + 1}. ${md(q.q)}</b>
+      <div class="opts">${q.order.map((k, j) => `<button type="button" class="opt" data-k="${k}"><span class="ol" aria-hidden="true">${'ABCDEF'[j]}</span><span class="ot${/^[؀-ۿݐ-ݿࢠ-ࣿ\s]+$/.test(q.a[k]) ? ' ara" lang="ar" dir="rtl' : ''}">${md(q.a[k])}</span></button>`).join('')}</div>
+      <p class="expl" hidden>${md(q.e || '')}</p></div>`).join('')}
+      <div class="actions"><button type="button" class="btn ghost" data-eval-finish>Terminer et voir mon résultat</button></div></div>
       <div class="qresult" id="qresult" hidden></div>
-      <div class="score" id="score">0 / ${s.quiz.length}</div>
-      <div class="actions" id="quiz-end" hidden><a class="btn" href="#q-${s.id}" data-reload="1">Recommencer</a><a class="btn ghost" href="#m-${s.id}">Retour au parcours</a></div>
-      <div class="cert-panel ok" id="quiz-cert" hidden><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Parcours réussi !</b><small>Toutes les leçons sont terminées et le quiz est réussi : votre certificat vous attend.</small></div><a class="btn small" href="#m-${s.id}">Obtenir mon certificat</a></div>
+      <div class="actions" id="quiz-end" hidden><a class="btn ghost" href="#m-${s.id}">Retour au parcours</a></div>
+      <div class="cert-panel ok" id="quiz-cert" hidden><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Parcours réussi !</b><small>Toutes les leçons sont terminées et l’évaluation est réussie : votre certificat vous attend.</small></div><a class="btn small" href="#m-${s.id}">Obtenir mon certificat</a></div>
     </div>
-    <aside class="qside c-${s.color}" aria-label="Votre score"><span class="eyebrow">Votre score</span><span class="ring" id="qs-ring" style="--p:0">0 %</span>
-      <b id="qs-t">0 / ${s.quiz.length} questions</b><span class="meta" id="qs-m">Répondez aux questions : le score se met à jour.</span>
+    <aside class="qside c-${s.color}" aria-label="Évaluation"><span class="eyebrow">Temps restant</span><span class="ring" id="qs-ring" style="--p:100">${Math.round(total / 60)}:00</span>
+      <b id="qs-t">0 / ${N} réponses</b><span class="meta" id="qs-m">Les réponses ne sont corrigées qu’à la fin.</span>
       <div class="bar"><i id="qs-bar" style="width:0%"></i></div>${best !== undefined ? `<span class="meta">Meilleur score : ${best} %</span>` : ''}
-      <span class="meta">Seuil du certificat : 70 %</span><a class="btn ghost small" href="#m-${s.id}">Retour au parcours</a></aside></div>`;
+      <span class="meta">Seuil du certificat : ${PASS()} %</span><a class="btn ghost small" href="#m-${s.id}">Retour au parcours</a></aside></div>`;
+}
+function evalTick() {
+  if (!quizRun || quizRun.over) { clearInterval(evalTimer); return; }
+  const left = Math.max(0, Math.round((quizRun.end - Date.now()) / 1000)), rg = document.getElementById('qs-ring');
+  if (!rg) { clearInterval(evalTimer); return; }
+  rg.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`; rg.style.setProperty('--p', Math.round(left / quizRun.total * 100));
+  rg.classList.toggle('late', left <= 60);
+  const et = document.getElementById('etimer'); if (et) { et.querySelector('b').textContent = rg.textContent; et.classList.toggle('late', left <= 60); }
+  if (left <= 0) evalFinish(true);
+}
+function evalFinish(timeout) {
+  const R = quizRun; if (!R || R.over) return; R.over = true; clearInterval(evalTimer);
+  const N = R.qs.length; R.right = 0;
+  document.querySelectorAll('#eval-qs .q').forEach((box, n) => { const q = R.qs[n], pick = R.picks[n];
+    box.querySelectorAll('.opt').forEach(b => { b.disabled = true; b.classList.remove('picked'); if (+b.dataset.k === q.c) b.classList.add('right'); });
+    const ok = pick === q.c; if (ok) R.right++;
+    if (pick !== undefined && !ok) box.querySelector(`.opt[data-k="${pick}"]`).classList.add('wrong');
+    if (pick === undefined) box.insertAdjacentHTML('beforeend', '<p class="meta">Sans réponse.</p>');
+    if (!ok) revAdd(q, R.s.title + ' · évaluation');
+    const ex = box.querySelector('.expl'); if (ex.textContent.trim()) ex.hidden = false; });
+  const et = document.getElementById('etimer'); if (et) et.hidden = true; const fin = document.querySelector('[data-eval-finish]'); if (fin) fin.closest('.actions').hidden = true;
+  const pct = Math.round(R.right / N * 100), key = EVAL_KEY(R.s.id), pass = pct >= PASS();
+  if (state.quiz[key] === undefined || pct > state.quiz[key]) { state.quiz[key] = pct; save('quiz'); }
+  const w = evalWait(); if (pass) delete w[R.s.id]; else w[R.s.id] = Date.now() + EVAL_WAIT; store.set('evalwait', w);
+  document.getElementById('qs-t').textContent = `${R.right} / ${N} bonnes réponses`; document.getElementById('qs-m').textContent = `Score : ${pct} %`;
+  const qr = document.getElementById('qresult');
+  qr.innerHTML = `<span class="ring" style="--p:${pct}">${pct} %</span><div><h2>${pass ? (pct === 100 ? 'Parfait, sans faute !' : 'Évaluation réussie, bravo !') : (pct >= 60 ? 'Pas encore : vous y êtes presque' : 'Évaluation non réussie, cette fois')}</h2><p>${timeout ? 'Le temps est écoulé. ' : ''}${R.right} bonne${R.right > 1 ? 's' : ''} réponse${R.right > 1 ? 's' : ''} sur ${N}. ${pass ? `Vous atteignez le seuil de ${PASS()} % du certificat.` : `Il faut ${PASS()} % pour réussir. Revoyez la correction ci-dessous : les questions manquées sont dans « Mes révisions ». Nouvelle tentative, avec d’autres questions, dans 10 minutes.`}</p>${(() => {
+      const ss = spaceSubjects(R.s), nx = ss[ss.indexOf(R.s) + 1];
+      return pass && nx && subjectOpen(nx) ? `<p class="unlock">🔓 Le parcours suivant est ouvert : <b>${esc(nx.title)}</b></p><a class="btn small" href="#l-${nx.id}.${nx.lessons[0].id}">Commencer « ${esc(nx.title)} » →</a>` : ''; })()}</div>`;
+  qr.hidden = false; document.getElementById('quiz-end').hidden = false; qr.scrollIntoView({ behavior: smooth(), block: 'center' });
+  if (pass) confetti();
+  if (AUTH() && parcoursStatus(R.s).ok) document.getElementById('quiz-cert').hidden = false;
 }
 let flashRun = null;
 function viewFlash(s) {
@@ -843,7 +898,7 @@ const PAGES = {
       '**Apprendre l’arabe** : les compagnons des livres « Je lis l’arabe ! » (niveau 0) et « Je parle arabe ! » (niveaux 1 à 3).',
       '**Lire le Coran pas à pas** : le compagnon du livre, avec la récitation lente d’al-Ḥouṣarî.'] },
     { h: 'Comment utiliser le Campus' },
-    { ol: ['Choisissez un espace sur la page d’accueil, puis un parcours.', 'Lisez ou écoutez chaque leçon, puis marquez-la comme terminée.', 'Vérifiez vos acquis avec le quiz, et révisez avec les cartes.',
+    { ol: ['Choisissez un espace sur la page d’accueil, puis un parcours.', 'Lisez ou écoutez chaque leçon, réussissez son mini-exercice, puis marquez-la comme terminée.', 'Révisez avec les cartes et « Mes révisions », puis passez l’évaluation du certificat.',
       'Installez l’application depuis les **Paramètres** pour l’utiliser hors connexion.'] },
     { box: 'Les contenus de droit résument des cours et des textes publics : vérifiez toujours avec vos enseignants.', title: 'À savoir', kind: 'marge' },
   ] },
@@ -856,7 +911,7 @@ const PAGES = {
     { ul: ['**Votre progression** (leçons terminées, temps de lecture de chaque leçon, scores, cartes sues) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Ils ne nous sont pas transmis.',
       '**Si vous vous connectez avec Google** : le nom, l’adresse e-mail et la photo de votre compte Google.',
       '**Si vous vous inscrivez à un espace** : votre fiche d’inscription (civilité, nom, prénoms, date de naissance, téléphone, pays et ville de résidence, profil, manière dont vous avez connu le site et, pour les moins de 18 ans, le nom et le téléphone d’un parent ou tuteur), vos réponses aux questions de l’espace, vos inscriptions et votre progression.',
-      '**Si vous obtenez un certificat** : vos civilité, prénom et nom, le parcours réussi, le nombre de leçons, le score au quiz et la date. Ces informations sont inscrites au registre des certificats : **toute personne qui connaît le numéro du certificat** (ou scanne son code QR) peut les consulter, afin de vérifier qu’il est authentique. Aucune autre donnée n’y figure.',
+      '**Si vous obtenez un certificat** : vos civilité, prénom et nom, le parcours réussi, le nombre de leçons, le score à l’évaluation et la date. Ces informations sont inscrites au registre des certificats : **toute personne qui connaît le numéro du certificat** (ou scanne son code QR) peut les consulter, afin de vérifier qu’il est authentique. Aucune autre donnée n’y figure.',
       '**Si vous envoyez une suggestion** : son texte, son type et la leçon concernée, enregistrés avec votre fiche pour que nous puissions vous répondre.',
       '**Qui y a accès** : seuls les Éditions Lisân, administrateur du site, consultent les fiches d’inscription, pour gérer les inscriptions et contacter les élèves au sujet de leurs cours.',
       '**Si vous nous écrivez** par le formulaire de contact : votre nom, votre adresse e-mail et votre message, uniquement pour vous répondre.'] },
@@ -883,7 +938,7 @@ const PAGES = {
     { h: '3. Les contenus' },
     { p: 'Les contenus sont proposés à des fins d’apprentissage. Les leçons de droit ne constituent pas des consultations juridiques ; pour une situation personnelle, adressez-vous à un professionnel. La lecture du Coran s’apprend auprès d’un maître ; le Campus sert à réviser.' },
     { h: '4. Les certificats' },
-    { p: 'Un certificat de réussite est délivré à l’élève inscrit qui termine toutes les leçons d’un parcours et réussit son quiz avec au moins 70 %. Le grand certificat d’un espace récompense celui qui réussit tous les parcours de cet espace. Chaque certificat porte un numéro et un code QR, vérifiables sur la page [Vérifier un certificat](#verifier). Il atteste le travail accompli sur Lisân Campus ; ce n’est pas un diplôme d’État. Tout certificat obtenu de manière frauduleuse peut être annulé.' },
+    { p: 'Un certificat de réussite est délivré à l’élève inscrit qui termine toutes les leçons d’un parcours et réussit son évaluation finale avec au moins 80 %. Le grand certificat d’un espace récompense celui qui réussit tous les parcours de cet espace. Chaque certificat porte un numéro et un code QR, vérifiables sur la page [Vérifier un certificat](#verifier). Il atteste le travail accompli sur Lisân Campus ; ce n’est pas un diplôme d’État. Tout certificat obtenu de manière frauduleuse peut être annulé.' },
     { h: '5. Propriété intellectuelle' },
     { p: 'Les textes, exercices, illustrations, le nom et le logo « Lisân » sont la propriété de Mouhamadou CISSEMA et des Éditions Lisân. Ils sont réservés à votre usage personnel et pédagogique : toute reproduction ou diffusion, même partielle, demande une autorisation écrite. Les récitations du Coran appartiennent à leurs ayants droit et sont diffusées par everyayah.com.' },
     { h: '6. Votre compte' },
@@ -933,7 +988,7 @@ function viewContact() {
 const navStack = [];
 function trackNav(h) { const n = navStack.length; if (n > 1 && navStack[n - 2] === h) navStack.pop(); else if (navStack[n - 1] !== h) navStack.push(h); if (navStack.length > 80) navStack.shift(); }
 function route() {
-  stopVoice(); closeMenu(); clearInterval(lessonClock);
+  stopVoice(); closeMenu(); clearInterval(lessonClock); clearInterval(evalTimer);
   if (!location.hash) history.replaceState(null, '', '#accueil');
   const h = decodeURIComponent(location.hash.slice(1)) || 'accueil';
   trackNav(h);
@@ -1269,26 +1324,20 @@ document.addEventListener('click', e => {
         end.insertAdjacentHTML('beforeend', ' <span class="ok-t">Mini-exercice validé : vous pouvez terminer la leçon.</span>'); } }
     return; }
   if (t.closest('[data-mini-again]')) { const sec = t.closest('.mini'); sec.outerHTML = viewMini(sec.dataset.mini); return; }
-  const opt = t.closest('.opt');
-  if (opt && quizRun) { const box = opt.closest('.q'), n = +box.dataset.q, q = quizRun.qs[n];
-    box.querySelectorAll('.opt').forEach(b => { b.disabled = true; if (+b.dataset.k === q.c) b.classList.add('right'); });
-    const ok = +opt.dataset.k === q.c; studied(5); if (!ok) { opt.classList.add('wrong'); revAdd(q, quizRun.s.title + ' · quiz'); }
-    box.querySelector('.expl').hidden = false; box.classList.add('done-q'); quizRun.answered++; if (ok) quizRun.right++;
-    const sc = document.getElementById('score'); sc.textContent = `${quizRun.right} / ${quizRun.qs.length}`;
-    const qb = document.getElementById('qbar'); if (qb) qb.style.width = (quizRun.answered / quizRun.qs.length * 100) + '%';
-    const N = quizRun.qs.length, rp = Math.round(quizRun.right / N * 100), rg = document.getElementById('qs-ring');
-    if (rg) { rg.style.setProperty('--p', rp); rg.textContent = rp + ' %'; document.getElementById('qs-t').textContent = `${quizRun.answered} / ${N} questions`;
-      document.getElementById('qs-m').textContent = `${quizRun.right} bonne${quizRun.right > 1 ? 's' : ''} réponse${quizRun.right > 1 ? 's' : ''}`; document.getElementById('qs-bar').style.width = (quizRun.answered / N * 100) + '%'; }
-    if (quizRun.answered === quizRun.qs.length) { const pct = Math.round(quizRun.right / quizRun.qs.length * 100);
-      if (state.quiz[quizRun.s.id] === undefined || pct > state.quiz[quizRun.s.id]) { state.quiz[quizRun.s.id] = pct; save('quiz'); }
-      sc.textContent = `Score final : ${quizRun.right} / ${quizRun.qs.length} (${pct} %)`; document.getElementById('quiz-end').hidden = false;
-      const qr = document.getElementById('qresult');
-      if (qr) { qr.innerHTML = `<span class="ring" style="--p:${pct}">${pct} %</span><div><h2>${pct >= 70 ? (pct === 100 ? 'Parfait, sans faute !' : 'Quiz réussi, bravo !') : 'Continuez, vous progressez !'}</h2><p>${quizRun.right} bonne${quizRun.right > 1 ? 's' : ''} réponse${quizRun.right > 1 ? 's' : ''} sur ${quizRun.qs.length}. ${pct >= 70 ? 'Vous atteignez le seuil de 70 % du certificat.' : 'Relisez les leçons puis recommencez : il faut 70 % pour réussir le parcours, obtenir le certificat et ouvrir le parcours suivant.'}</p>${(() => {
-          const ss = spaceSubjects(quizRun.s), nx = ss[ss.indexOf(quizRun.s) + 1];
-          return pct >= 70 && nx && subjectOpen(nx) ? `<p class="unlock">🔓 Le parcours suivant est ouvert : <b>${esc(nx.title)}</b></p><a class="btn small" href="#l-${nx.id}.${nx.lessons[0].id}">Commencer « ${esc(nx.title)} » →</a>` : ''; })()}</div>`;
-        qr.hidden = false; qr.scrollIntoView({ behavior: smooth(), block: 'center' }); }
-      if (pct >= 70) confetti();
-      if (AUTH() && parcoursStatus(quizRun.s).ok) document.getElementById('quiz-cert').hidden = false; }
+  if (t.closest('[data-eval-start]') && quizRun && !quizRun.started) { quizRun.started = true; quizRun.end = Date.now() + quizRun.total * 1000;
+    document.getElementById('eval-start').hidden = true; document.getElementById('eval-qs').hidden = false; clearInterval(evalTimer); evalTimer = setInterval(evalTick, 500); evalTick(); return; }
+  if (t.closest('[data-eval-finish]') && quizRun && quizRun.started) { const left = quizRun.qs.length - quizRun.answered;
+    const b = t.closest('[data-eval-finish]');
+    if (left && !b.dataset.sure) { b.dataset.sure = '1'; b.textContent = `Il reste ${left} question${left > 1 ? 's' : ''} sans réponse : toucher encore pour terminer`; return; }
+    evalFinish(false); return; }
+  const opt = t.closest('#eval-qs .opt');
+  if (opt && quizRun && quizRun.started && !quizRun.over) { const box = opt.closest('.q'), n = +box.dataset.q;
+    if (quizRun.picks[n] !== undefined) return;
+    quizRun.picks[n] = +opt.dataset.k; quizRun.answered++; studied(5);
+    box.querySelectorAll('.opt').forEach(b => { b.disabled = true; }); opt.classList.add('picked'); box.classList.add('done-q');
+    const N = quizRun.qs.length; document.getElementById('qbar').style.width = (quizRun.answered / N * 100) + '%';
+    document.getElementById('qs-t').textContent = `${quizRun.answered} / ${N} réponses`; document.querySelector('#etimer span').textContent = `${quizRun.answered} / ${N} réponses`; document.getElementById('qs-bar').style.width = (quizRun.answered / N * 100) + '%';
+    if (quizRun.answered === N) evalFinish(false);
     return; }
   if (t.closest('#cardface') && flashRun) { flashRun.flipped = !flashRun.flipped; flashRun.anim = 'show'; drawFlash(); return; }
   const fb = t.closest('[data-flash]');

@@ -944,3 +944,13 @@ a.dash-c:hover { border-color: var(--accent); }
 .mini.nudge { animation: nudge .45s ease; }
 @media (prefers-reduced-motion: reduce) { .mini.nudge { animation: none; } }
 .mini-end .ok-t { color: var(--good); font-weight: 700; }
+/* évaluation du certificat */
+.opt.picked { border-color: var(--accent); background: var(--accent-soft); }
+.opt.picked .ol { background: var(--accent); color: #fff; }
+.ring.late { color: var(--bad); }
+.etimer { position: sticky; top: calc(74px + env(safe-area-inset-top, 0px)); z-index: 4; display: flex; align-items: center; gap: 10px; justify-content: center; margin: 0 auto 8px; width: max-content; max-width: 100%; padding: 6px 14px; border-radius: 99px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 6px 16px rgba(15, 23, 51, .08); font-size: 15px; }
+.etimer b { font-variant-numeric: tabular-nums; font-size: 17px; }
+.etimer span { color: var(--muted, inherit); font-size: 13px; }
+.etimer.late, .etimer.late b { color: var(--bad); border-color: var(--bad); }
+@media (max-width: 1099.98px) { #eval-qs .qbar { display: none; } }
+@media (min-width: 1100px) { .etimer { display: none; } }

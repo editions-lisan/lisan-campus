@@ -1,14 +1,19 @@
 // ===== Lisân Campus · certificats (parcours et espace complet), vérification publique, suggestions
 // Utilise app.js (esc, crumbs, space, spaceOf, subj, SUBJECTS, state, subjectProgress, AUTH, route) et inscription.js (prenomFmt, dateFr).
 
-const CERT_QUIZ = 70;                                    // score minimal au quiz pour obtenir un certificat
+const CERT_QUIZ = 80;                                    // score minimal à l'évaluation pour obtenir un certificat
+// L'évaluation du certificat (#q-…) est enregistrée sous « parcours@eval » ; un quiz réussi à 70 % avant le
+// 30 octobre 2026 (ancienne formule, clé « parcours ») reste valable.
+const LEGACY_QUIZ = 70, EVAL_KEY = id => id + '@eval';
+const quizBest = s => { const e = state.quiz[EVAL_KEY(s.id)], o = state.quiz[s.id]; return e === undefined ? o : (o !== undefined && o >= LEGACY_QUIZ && o > e ? o : e); };
+const quizOk = s => (state.quiz[EVAL_KEY(s.id)] || 0) >= CERT_QUIZ || (state.quiz[s.id] || 0) >= LEGACY_QUIZ;
 const SITE_URL = 'https://lisan-campus.pages.dev/';
 const verifUrl = num => `${SITE_URL}#verifier-${num}`;
 
 // ---------- conditions
 function parcoursStatus(s) {
-  const p = subjectProgress(s), q = state.quiz[s.id], needQuiz = !!(s.quiz && s.quiz.length);
-  return { p, q, needQuiz, ok: p.n > 0 && p.d === p.n && (!needQuiz || (q !== undefined && q >= CERT_QUIZ)) };
+  const p = subjectProgress(s), q = quizBest(s), needQuiz = !!(s.quiz && s.quiz.length), qok = quizOk(s);
+  return { p, q, qok, needQuiz, ok: p.n > 0 && p.d === p.n && (!needQuiz || qok) };
 }
 function spaceStatus(sp) {
   const ss = SUBJECTS.filter(s => spaceOf(s) === sp.id), st = ss.map(parcoursStatus);
@@ -23,7 +28,7 @@ function certData(kind, obj) {                           // contenu d'un certifi
   const name = i.prenom ? { civilite: i.civilite || '', prenom: prenomFmt(i.prenom), nom: String(i.nom || '').toUpperCase() } : (() => { const n = splitName(u.displayName); return { civilite: '', prenom: prenomFmt(n.prenom), nom: n.nom }; })();
   if (kind === 'parcours') { const s = obj, st = parcoursStatus(s), sp = space(spaceOf(s));
     return Object.assign({ key: 'p:' + s.id, type: 'parcours', titre: s.title, espace: sp.title, spaceId: sp.id, subjectId: s.id, lecons: st.p.n, quiz: st.needQuiz ? st.q : null }, name); }
-  const sp = obj, st = spaceStatus(sp), qs = st.ss.filter(s => s.quiz && s.quiz.length).map(s => state.quiz[s.id] || 0);
+  const sp = obj, st = spaceStatus(sp), qs = st.ss.filter(s => s.quiz && s.quiz.length).map(s => quizBest(s) || 0);
   return Object.assign({ key: 'e:' + sp.id, type: 'espace', titre: sp.title, espace: sp.title, spaceId: sp.id, subjectId: null,
     lecons: st.ss.reduce((a, s) => a + s.lessons.length, 0), quiz: qs.length ? Math.round(qs.reduce((a, b) => a + b, 0) / qs.length) : null }, name);
 }
@@ -38,7 +43,7 @@ function certPanelSubject(s) {
   if (st.ok) return `<div class="cert-panel ok"><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Félicitations ! Vous avez terminé ce parcours.</b><small>Votre certificat de réussite vous attend.</small></div>${issueBtn('parcours', s.id, sp)}</div>`;
   return `<div class="cert-panel"><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Certificat de réussite</b><ul class="cp-list">
     <li class="${st.p.d === st.p.n ? 'ok' : ''}">Terminer les ${st.p.n} leçons <span>(${st.p.d} / ${st.p.n})</span></li>
-    ${st.needQuiz ? `<li class="${st.q >= CERT_QUIZ ? 'ok' : ''}">Réussir le quiz avec au moins ${CERT_QUIZ} % <span>(${st.q === undefined ? 'pas encore fait' : 'meilleur score : ' + st.q + ' %'})</span></li>` : ''}</ul></div></div>`;
+    ${st.needQuiz ? `<li class="${st.qok ? 'ok' : ''}">Réussir l’évaluation avec au moins ${CERT_QUIZ} % <span>(${st.q === undefined ? 'pas encore fait' : 'meilleur score : ' + st.q + ' %'})</span></li>` : ''}</ul></div></div>`;
 }
 function certPanelSpace(sp) {
   const A = AUTH(); if (!A) return '';
@@ -49,8 +54,8 @@ function certPanelSpace(sp) {
   if (one) { const s = st.ss[0], ps = st.st[0];
     return `<div class="cert-panel"><span class="cp-ic" aria-hidden="true">🎓</span><div><b>${title}</b><ul class="cp-list">
       <li class="${ps.p.d === ps.p.n ? 'ok' : ''}">Terminer les ${ps.p.n} leçons <span>(${ps.p.d} / ${ps.p.n})</span></li>
-      ${ps.needQuiz ? `<li class="${ps.q >= CERT_QUIZ ? 'ok' : ''}">Réussir le quiz avec au moins ${CERT_QUIZ} % <span>(${ps.q === undefined ? 'pas encore fait' : 'meilleur score : ' + ps.q + ' %'})</span></li>` : ''}</ul></div></div>`; }
-  return `<div class="cert-panel gold"><span class="cp-ic" aria-hidden="true">🏅</span><div><b>${title}</b><small>Il récompense celui qui termine toutes les leçons de l’espace et réussit chaque quiz (au moins ${CERT_QUIZ} %) : ${st.done} parcours réussi${st.done > 1 ? 's' : ''} sur ${st.ss.length}.</small></div></div>`;
+      ${ps.needQuiz ? `<li class="${ps.qok ? 'ok' : ''}">Réussir l’évaluation avec au moins ${CERT_QUIZ} % <span>(${ps.q === undefined ? 'pas encore fait' : 'meilleur score : ' + ps.q + ' %'})</span></li>` : ''}</ul></div></div>`; }
+  return `<div class="cert-panel gold"><span class="cp-ic" aria-hidden="true">🏅</span><div><b>${title}</b><small>Il récompense celui qui termine toutes les leçons de l’espace et réussit chaque évaluation (au moins ${CERT_QUIZ} %) : ${st.done} parcours réussi${st.done > 1 ? 's' : ''} sur ${st.ss.length}.</small></div></div>`;
 }
 function issueBtn(kind, id, sp) {
   const A = AUTH();
@@ -138,7 +143,7 @@ function certHTML(c) {
       <p class="cert-ar ara" lang="ar" dir="rtl">${grand ? 'الشَّهَادَةُ الكُبْرَى' : 'شَهَادَةُ نَجَاحٍ'}</p>
       <p class="cert-lead">Ce certificat atteste que</p>
       <h2 class="cert-name">${esc(name)}</h2>
-      <p class="cert-text">${what} sur Lisân Campus : ${Number(c.lecons) || 0} leçons terminées${c.quiz !== null && c.quiz !== undefined ? `, quiz réussi${c.type === 'espace' ? 's avec une moyenne de' : ' avec'} ${Number(c.quiz)} %` : ''}.</p>
+      <p class="cert-text">${what} sur Lisân Campus : ${Number(c.lecons) || 0} leçons terminées${c.quiz !== null && c.quiz !== undefined ? `, ${c.type === 'espace' ? 'évaluations réussies avec une moyenne de' : 'évaluation réussie avec'} ${Number(c.quiz)} %` : ''}.</p>
       <svg class="cert-orn" viewBox="0 0 240 16" aria-hidden="true"><path d="M0 8H96M144 8H240" stroke="currentColor" stroke-width="1.2"/><path d="${STAR8(120, 8, 7.5)}" fill="currentColor"/><circle cx="104" cy="8" r="2.2" fill="currentColor"/><circle cx="136" cy="8" r="2.2" fill="currentColor"/></svg>
       <footer class="cert-foot">
         <div class="cert-meta"><span>Délivré le</span><b>${dateFr(c.date)}</b><span>Certificat n°</span><b>${esc(c.num)}</b><span>Code d’authenticité</span><b class="cert-code">${code}</b></div>
@@ -174,7 +179,7 @@ function viewVerify(num) {
     <form class="form verify-form" id="verify-form"><label>Numéro du certificat<input name="num" value="${esc(num || '')}" placeholder="LCC-2026-XXXXXXXX" autocomplete="off" autocapitalize="characters" required></label>
       <div class="actions"><button type="submit" class="btn">Vérifier</button></div></form>
     <div id="verify-out" aria-live="polite">${A ? '' : '<p class="notice">La vérification n’est pas disponible sur cet aperçu : ouvrez lisan-campus.pages.dev.</p>'}</div>
-    <p class="meta">Chaque certificat est inscrit dans le registre de Lisân Campus au moment où il est délivré ; il ne peut plus être modifié ensuite. Il porte un numéro unique, un code d’authenticité, un code QR, un micro-texte au nom du titulaire et un fond de sécurité. Un certificat Lisân Campus atteste que son titulaire a terminé les leçons et réussi les quiz du parcours sur le site. Ce n’est pas un diplôme d’État.</p></div>`;
+    <p class="meta">Chaque certificat est inscrit dans le registre de Lisân Campus au moment où il est délivré ; il ne peut plus être modifié ensuite. Il porte un numéro unique, un code d’authenticité, un code QR, un micro-texte au nom du titulaire et un fond de sécurité. Un certificat Lisân Campus atteste que son titulaire a terminé les leçons et réussi les évaluations du parcours sur le site. Ce n’est pas un diplôme d’État.</p></div>`;
 }
 function bindVerify(num) {
   const f = document.getElementById('verify-form'), out = document.getElementById('verify-out'), A = AUTH();
@@ -225,7 +230,7 @@ function certAccountPanel(A) {
   const cs = myCerts(A);
   return `<section class="panel"><h2>Mes certificats</h2>${cs.length ? cs.map(c => `<div class="ins-row"><div><b>${c.type === 'espace' ? '🏅' : '🎓'} ${esc(c.titre)}</b><small>N° ${esc(c.num)} · délivré le ${dateFr(c.date)}</small></div>
     <div class="actions"><a class="btn small" href="#certificat-${c.num}">Voir</a></div></div>`).join('')
-    : `<p>Terminez toutes les leçons d’un parcours et réussissez son quiz (au moins ${CERT_QUIZ} %) : votre certificat de réussite sera délivré ici. En terminant tout un espace, vous obtenez son grand certificat.</p>`}
+    : `<p>Terminez toutes les leçons d’un parcours et réussissez son évaluation (au moins ${CERT_QUIZ} %) : votre certificat de réussite sera délivré ici. En terminant tout un espace, vous obtenez son grand certificat.</p>`}
     <p class="meta"><a href="#verifier">Vérifier un certificat</a></p></section>`;
 }
 
