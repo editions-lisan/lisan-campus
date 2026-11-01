@@ -523,8 +523,42 @@ function viewSpace(sp) {
       ${sp.intro.map(t => `<p class="lead">${md(t)}</p>`).join('')}
       <div class="bar"><i style="width:${p.pct}%"></i></div><span class="meta">${p.d} / ${p.n} leçons terminées</span></div>
     ${reg}
+    ${(window.LIVRES || []).some(b => b.space === sp.id) || (window.DOCS || []).some(d => d.space === sp.id) ? `<a class="lib-link" href="#bibliotheque-${sp.id}"><span aria-hidden="true">📚</span><span><b>Les livres de cet espace</b><small>Livre de l’élève et cahier d’exercices, à lire ou à télécharger</small></span></a>` : ''}
     ${certPanelSpace(sp)}</aside>
     <div class="duo-main"><section class="subjects">${ss.map(card).join('')}</section></div></div>`;
+}
+// ---------- bibliothèque : les livres des Éditions Lisân (élève, maître, exercices) et les documents de cours.
+// Lecture et téléchargement après connexion et inscription à l’espace du livre (comme les leçons) ; sans connexion
+// configurée (aperçu), tout est libre.
+const DOC_ICON = { eleve: '📗', maitre: '📘', exercices: '📙', cours: '📄' };
+function libAccess(spId) {
+  const A = AUTH(); if (!A) return 'ok';
+  if (!A.user()) return 'signin';
+  return A.enrolled(spId) ? 'ok' : 'enroll';
+}
+function libDocRow(file, d, spId) {
+  if (d.k === 'maitre') return `<div class="lib-doc lib-res"><span class="lib-ic" aria-hidden="true">🔒</span><div class="lib-dt"><b>${esc(d.name)}</b><small>Réservé aux enseignants et aux animateurs : il n’est pas proposé en ligne.</small></div><div class="lib-act"><a class="btn ghost small" href="#contact">Le demander</a></div></div>`;
+  const acc = libAccess(spId), meta = [d.pages ? d.pages + ' pages' : '', d.mb ? String(d.mb).replace('.', ',') + ' Mo' : ''].filter(Boolean).join(' · ');
+  const act = acc === 'ok' ? `<a class="btn small" href="${file}" target="_blank" rel="noopener">Lire</a><a class="btn ghost small" href="${file}" download>Télécharger</a>`
+    : acc === 'signin' ? `<button type="button" class="btn ghost small" data-auth="signin">Se connecter pour lire</button>`
+    : `<a class="btn ghost small" href="#inscription-${spId}">S’inscrire pour lire</a>`;
+  return `<div class="lib-doc"><span class="lib-ic" aria-hidden="true">${DOC_ICON[d.k] || '📄'}</span><div class="lib-dt"><b>${esc(d.name)}</b><small>${esc(meta)}</small></div><div class="lib-act">${act}</div></div>`;
+}
+function viewLibrary() {
+  const L = window.LIVRES || [], D = window.DOCS || [];
+  const groups = SPACES.map(sp => ({ sp, books: L.filter(b => b.space === sp.id), docs: D.filter(d => d.space === sp.id) })).filter(g => g.books.length || g.docs.length);
+  const A = AUTH(), u = A && A.user();
+  return `${crumbs(['Bibliothèque'])}
+    <div class="subject-head c-a"><span class="eyebrow">Éditions Lisân</span><h1>📚 Bibliothèque</h1>
+      <p class="lead">Les livres de la collection, avec le livre de l’élève et le cahier d’exercices à lire en ligne ou à télécharger en PDF. Le livret du maître est réservé aux enseignants et aux animateurs.</p>
+      ${A && !u ? `<p class="meta">La lecture et le téléchargement demandent la connexion Google et l’inscription à l’espace du livre. <button type="button" class="linkbtn" data-auth="signin">Se connecter</button></p>` : ''}</div>
+    <nav class="lib-nav" aria-label="Rayons">${groups.map(g => `<button type="button" class="chip" data-scrollto="lib-${g.sp.id}">${g.sp.icon} ${esc(g.sp.title)}</button>`).join('')}</nav>
+    ${groups.map(g => `<section class="lib-sec" id="lib-${g.sp.id}"><h2>${g.sp.icon} ${esc(g.sp.title)}</h2>
+      ${g.books.map(b => `<article class="lib-book"><img class="lib-cover" src="livres/couv/Lisan_${b.id}_eleve.webp" alt="Couverture : ${esc(b.title)}" loading="lazy" width="160" height="226">
+        <div class="lib-info"><h3>${esc(b.title)}</h3><p class="meta">${esc(b.sub)} · Mouhamadou CISSEMA</p>
+        ${b.docs.map(d => libDocRow(`livres/Lisan_${b.id}_${d.k}.pdf`, d, b.space)).join('')}</div></article>`).join('')}
+      ${g.docs.length ? `<article class="lib-book lib-docs"><div class="lib-info"><h3>Documents de cours</h3>${g.docs.map(d => libDocRow('livres/' + d.file, { k: 'cours', name: d.title, pages: d.pages, mb: d.mb }, d.space)).join('')}</div></article>` : ''}
+    </section>`).join('')}`;
 }
 function findLesson(key) {
   const [sid, lid] = key.split('.');
@@ -1007,6 +1041,7 @@ function route() {
     if (g) html = g; else { html = viewLesson(f); keep = true; after = afterLesson; } }
   else if (h.startsWith('q-') && subj(h.slice(2))) { const s = subj(h.slice(2)); html = authGate(s) || (inOrder(s, 'quiz') ? viewQuiz(s) : viewGate(s, 'order', 'quiz')); }
   else if (h.startsWith('f-') && subj(h.slice(2))) { const s = subj(h.slice(2)); const g = authGate(s); if (g) html = g; else { html = viewFlash(s); after = () => { drawFlash(); checkArVoice(); }; } }
+  else if (h === 'bibliotheque' || (h.startsWith('bibliotheque-') && space(h.slice(13)))) { html = viewLibrary(); if (h !== 'bibliotheque') after = () => { const el = document.getElementById('lib-' + h.slice(13)); if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 60); }; }
   else if (h === 'revisions') html = viewRevisions();
   else if (h === 'recherche') { html = viewSearch(); after = () => { const i = document.getElementById('ssearch'); let t; i.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => drawSearch(i.value), 150); }); drawSearch(''); }; }
   else if (h === 'glossaire') { html = viewGlossary(); after = () => { drawGlossary(''); document.getElementById('gsearch').addEventListener('input', e => drawGlossary(e.target.value)); }; }
@@ -1146,6 +1181,7 @@ function renderDrawer() {
       <div class="dr-sec">Les espaces</div>
       ${SPACES.map(sp => item('espace-' + sp.id, sp.icon, sp.title)).join('')}
       <div class="dr-sec">Outils</div>
+      ${item('bibliotheque', '📚', 'Bibliothèque')}
       ${item('revisions', '🔁', 'Mes révisions' + (revDue().length ? ` (${revDue().length})` : ''))}
       ${item('recherche', '🔍', 'Rechercher dans les leçons')}
       ${item('glossaire', '🔎', 'Glossaire')}

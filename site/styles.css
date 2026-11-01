@@ -955,3 +955,31 @@ a.dash-c:hover { border-color: var(--accent); }
 @media (max-width: 1099.98px) { #eval-qs .qbar { display: none; } }
 @media (min-width: 1100px) { .etimer { display: none; } }
 .opt.picked::after { content: 'Votre réponse'; margin-left: auto; padding-left: 10px; font-size: 13px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+/* bibliothèque */
+.lib-nav { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 6px; }
+.lib-sec { margin: 26px 0; scroll-margin-top: 90px; }
+.lib-sec > h2 { font-family: var(--font-display); font-size: 1.35rem; margin: 0 0 12px; }
+.lib-book { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 18px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 14px; }
+.lib-book.lib-docs { grid-template-columns: minmax(0, 1fr); }
+.lib-cover { width: 150px; height: auto; border-radius: 8px; box-shadow: 0 8px 20px rgba(15, 23, 51, .18); display: block; }
+.lib-info h3 { margin: 0 0 2px; font-size: 1.15rem; }
+.lib-info > .meta { margin: 0 0 10px; display: block; }
+.lib-doc { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line); }
+.lib-ic { font-size: 26px; flex: none; }
+.lib-dt { flex: 1; min-width: 0; }
+.lib-dt b { display: block; }
+.lib-dt small { color: var(--muted); }
+.lib-act { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.lib-link { display: flex; gap: 12px; align-items: center; margin: 12px 0; padding: 12px 14px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); color: var(--ink); text-decoration: none; }
+.lib-link > span:first-child { font-size: 26px; }
+.lib-link b { display: block; } .lib-link small { color: var(--muted); }
+.lib-link:hover { border-color: var(--accent); }
+@media (max-width: 640px) {
+  .lib-book { grid-template-columns: 90px minmax(0, 1fr); gap: 12px; padding: 12px; }
+  .lib-cover { width: 90px; }
+  .lib-doc { flex-wrap: wrap; }
+  .lib-act { width: 100%; justify-content: flex-start; padding-left: 38px; }
+}
+.lib-nav .chip img.emo, .lib-sec > h2 img.emo, .lib-ic img.emo, .lib-link img.emo { font-size: inherit; }
+.lib-nav .chip { display: inline-flex; align-items: center; gap: 6px; }
+.lib-res .lib-dt b { color: var(--muted); }
