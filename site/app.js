@@ -1600,7 +1600,7 @@ if (LA && LA.ready) {
   setTimeout(() => (window.requestIdleCallback || setTimeout)(() => baseline()), 4000);
   // retour après une actualisation : même page, même position, sans écran d'ouverture ni animation
   function settle() {
-    if (root.classList.contains('quick')) still();
+    if (root.classList.contains('lc-quick')) still();
     if (!root.classList.contains('ptr-back')) return;
     let y = 0; try { y = +sessionStorage.getItem('lc-ptr-y') || 0; sessionStorage.removeItem('lc-ptr'); sessionStorage.removeItem('lc-ptr-y'); } catch (e) {}
     still();

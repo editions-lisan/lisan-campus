@@ -555,11 +555,11 @@ header.top { background: color-mix(in srgb, var(--surface) 82%, transparent); -w
 body.scrolled header.top { box-shadow: 0 6px 22px rgba(20, 28, 46, .10); }
 .brand-logo { border-radius: 12px; transition: transform .25s ease; }
 .brand:hover .brand-logo { transform: rotate(-6deg) scale(1.04); }
-.quick { display: none; gap: 4px; align-items: center; }
+nav.quick { display: none; gap: 4px; align-items: center; }
 .quick a { color: var(--ink); text-decoration: none; font-weight: 700; font-size: 15px; padding: 7px 12px; border-radius: 999px; }
 .quick a:hover { background: var(--accent-soft); color: var(--accent); }
 .quick a[aria-current="page"] { color: var(--accent); background: var(--accent-soft); }
-@media (min-width: 980px) { .quick { display: flex; } }
+@media (min-width: 980px) { nav.quick { display: flex; } }
 
 /* barre de progression de lecture (leçons) */
 #readbar { position: fixed; top: env(safe-area-inset-top, 0px); left: 0; height: 3px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); z-index: 6;
@@ -1002,7 +1002,7 @@ html, body { overscroll-behavior-y: none; }
 #ptr.ready .ptr-arc { stroke-dashoffset: 0; stroke: var(--good, #0e6b4f); transition: stroke-dashoffset .25s ease; }
 @keyframes ptrspin { from { transform: rotate(-90deg); } to { transform: rotate(270deg); } }
 @keyframes ptrpulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(.88); } }
-.ptr-back #veil, .quick #veil { display: none !important; }
+.ptr-back #veil, .lc-quick #veil { display: none !important; }
 @media (prefers-reduced-motion: reduce) { #ptr.spin svg, .ptr-back #ptr svg, #ptr.spin img, .ptr-back #ptr img { animation-duration: 2.4s; } }
 @media print { #ptr { display: none !important; } }
 
