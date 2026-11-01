@@ -42,15 +42,17 @@ let lessonClock = null, lastAct = Date.now();
 function startLessonClock() {
   clearInterval(lessonClock);
   const b0 = document.querySelector('[data-done]'); if (!b0) return;
-  const key = b0.dataset.done, need = +b0.dataset.need || 0; let n = 0;
+  const key = b0.dataset.done, need = +b0.dataset.need || 0; let n = 0, tick = Date.now();
   lessonClock = setInterval(() => {
+    const now = Date.now(), dt = Math.max(1, Math.min(90, Math.round((now - tick) / 1000))); tick = now;
     const b = document.querySelector('[data-done]');
     if (!b || b.dataset.done !== key) { clearInterval(lessonClock); return; }
-    const listening = (window.speechSynthesis && speechSynthesis.speaking) || !player.paused;
-    // seulement sur la page de la leçon, visible et au premier plan (pas une autre fenêtre), en lisant ou en écoutant
-    if (document.visibilityState !== 'visible' || (!listening && (!document.hasFocus() || Date.now() - lastAct > 90000))) return;
+    const listening = (TTS.on && !TTS.paused) || !player.paused;
+    // sur la page de la leçon, en lisant (page visible, activité récente) ou en écoutant, même écran éteint
+    if (!listening && (document.visibilityState !== 'visible' || !document.hasFocus() || Date.now() - lastAct > 90000)) return;
     if ((state.time[key] || 0) >= need) return;
-    state.time[key] = (state.time[key] || 0) + 1; n++; studied(1, false);
+    const add = Math.min(listening ? dt : 1, Math.max(1, need - (state.time[key] || 0)));
+    state.time[key] = (state.time[key] || 0) + add; n++; studied(add, false);
     if (n % 10 === 0 || state.time[key] >= need) { save('time'); save('days'); }
     doneBtnState(b);
   }, 1000);
@@ -140,7 +142,7 @@ function pickVoices() {
   voices.ar = vs.find(v => /^ar[-_]SA/i.test(v.lang) && /Google/i.test(v.name)) || vs.find(v => /^ar/i.test(v.lang)) || null;
 }
 if (synth) { pickVoices(); synth.onvoiceschanged = () => { pickVoices(); checkArVoice(); }; }
-function stopVoice() { if (synth) synth.cancel(); if (playingBtn) { playingBtn.classList.remove('playing'); playingBtn = null; } stopAudio(); }
+function stopVoice() { ttsStop(); if (synth) synth.cancel(); if (playingBtn) { playingBtn.classList.remove('playing'); playingBtn = null; } stopAudio(); }
 // ---------- prononciation : mots arabes transcrits et formules islamiques
 // Les transcriptions (Mouḥammad, Moûsâ, rak‘a, Ismâ‘îl…) sont réécrites pour la voix française ; l'arabe entre
 // [[...]] est lu par la voix arabe de l'appareil, ou, à défaut, les formules connues sont dites en transcription.
@@ -196,23 +198,134 @@ function speechParts(text, lang) {
   if (last < t.length) out.push({ lang: 'fr', text: pronFr(t.slice(last)) });
   return out.filter(p => /[\p{L}\p{N}]/u.test(p.text));
 }
+// ---------- écoute : vitesses, écoute en arrière-plan et commandes sur l'écran verrouillé
+// Sept vitesses, pour tous les publics : 0,5× pour découvrir ou mémoriser, 2× pour réviser vite.
+const RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
+const rateLabel = r => String(r).replace('.', ',') + '×';
+if (!RATES.includes(+state.rate)) { state.rate = +state.rate && +state.rate < 1 ? 0.75 : 1; save('rate'); }   // ancienne « Lente »
+const baseRate = lang => lang === 'ar' ? 0.8 : (lang === 'en' ? 0.95 : 1);
+const LOC = { en: 'en-US', ar: 'ar-SA', fr: 'fr-FR' };
+// Une lecture longue (une leçon, une fable, une sourate) continue quand on quitte l'application ou qu'on éteint
+// l'écran : un son de veille inaudible garde la page active et affiche les commandes sur l'écran verrouillé.
+const veille = new Audio(); veille.loop = true; veille.preload = 'none'; veille.setAttribute('playsinline', '');
+const TTS = { items: [], idx: 0, btn: null, title: '', on: false, paused: false, gen: 0, long: false };
+const MS = 'mediaSession' in navigator ? navigator.mediaSession : null;
+function keepAwake(on) {
+  try {
+    if (on) { if (!veille.src) veille.src = 'media/veille.mp3'; const pr = veille.play(); if (pr && pr.catch) pr.catch(() => {}); }
+    else veille.pause();
+  } catch (e) {}
+}
+function ttsChunks(text, lang) {
+  const out = [];
+  speechParts(text, lang).forEach(p => (p.text.match(/(?:[^.!?;:؟،]|\.(?=\d))+[.!?;:؟،]*/g) || [p.text]).forEach(c => {
+    if (/[\p{L}\p{N}]/u.test(c)) out.push({ text: c.trim(), lang: p.lang });
+  }));
+  return out;
+}
+function ttsPlayFrom(i) {
+  if (!synth || !TTS.items.length) return;
+  synth.cancel(); const g = ++TTS.gen;
+  TTS.idx = Math.max(0, Math.min(i, TTS.items.length - 1)); TTS.on = true; TTS.paused = false;
+  for (let k = TTS.idx; k < TTS.items.length; k++) {
+    const it = TTS.items[k], u = new SpeechSynthesisUtterance(it.text), v = voices[it.lang] || null;
+    u.lang = LOC[it.lang] || 'fr-FR'; if (v) u.voice = v;
+    u.rate = Math.max(0.1, Math.min(4, baseRate(it.lang) * (+state.rate || 1)));
+    u.onstart = () => { if (g === TTS.gen) { TTS.idx = k; lpUpdate(); } };
+    u.onend = () => { if (g === TTS.gen && k === TTS.items.length - 1) ttsStop(); };
+    u.onerror = e => { if (g === TTS.gen && k === TTS.items.length - 1 && !/interrupted|canceled/.test(e.error || '')) ttsStop(); };
+    synth.speak(u);
+  }
+  if (TTS.btn) { TTS.btn.classList.add('playing'); playingBtn = TTS.btn; }
+  if (TTS.long) { keepAwake(true); mediaFor('tts'); lpShow(); }
+  lpUpdate();
+}
+function ttsPause() { if (!TTS.on || TTS.paused) return; TTS.paused = true; TTS.gen++; if (synth) synth.cancel(); keepAwake(false); lpUpdate(); }
+function ttsResume() { if (!TTS.on) return; ttsPlayFrom(TTS.idx); }
+function ttsStop() {
+  const was = TTS.on; TTS.on = false; TTS.paused = false; TTS.gen++;
+  if (was && synth) synth.cancel();
+  if (TTS.btn) TTS.btn.classList.remove('playing'); if (playingBtn === TTS.btn) playingBtn = null; TTS.btn = null;
+  keepAwake(false); if (was) { lpHide(); mediaClear(); }
+}
 function speak(text, lang, btn) {
   if (!synth) { showNoVoice(); return; }
   if (btn && btn === playingBtn) { stopVoice(); return; }
   stopVoice();
-  const slow = state.rate !== 1, loc = { en: 'en-US', ar: 'ar-SA', fr: 'fr-FR' };
-  const utts = [];
-  speechParts(text, lang).forEach(p => (p.text.match(/(?:[^.!?;:؟،]|\.(?=\d))+[.!?;:؟،]*/g) || [p.text]).forEach(c => {
-    if (!/[\p{L}\p{N}]/u.test(c)) return;
-    const u = new SpeechSynthesisUtterance(c.trim()), v = voices[p.lang] || null;
-    u.lang = loc[p.lang] || 'fr-FR'; if (v) u.voice = v;
-    u.rate = p.lang === 'ar' ? (slow ? 0.55 : 0.8) : (slow ? 0.65 : (p.lang === 'en' ? 0.95 : 1));
-    utts.push(u);
-  }));
-  if (!utts.length) return;
-  if (btn) { btn.classList.add('playing'); playingBtn = btn; }
-  utts[utts.length - 1].onend = () => { if (btn && playingBtn === btn) { btn.classList.remove('playing'); playingBtn = null; } };
-  utts.forEach(u => { u.onerror = () => { if (btn) btn.classList.remove('playing'); }; synth.speak(u); });
+  const items = ttsChunks(text, lang);
+  if (!items.length) return;
+  TTS.items = items; TTS.btn = btn || null; TTS.long = !!btn && (items.length >= 4 || String(text).length > 160);
+  const h = document.querySelector('#view h1');
+  TTS.title = (btn && btn.closest('.verse') && btn.closest('.verse').querySelector('h3') ? btn.closest('.verse').querySelector('h3').textContent : (h ? h.textContent : 'Lisân Campus')).trim();
+  ttsPlayFrom(0);
+}
+// vitesse : s'applique aussitôt, y compris pendant une écoute (reprise à la phrase en cours)
+function setRate(r) {
+  state.rate = r; save('rate');
+  try { player.playbackRate = r; } catch (e) {}
+  if (TTS.on && !TTS.paused) ttsPlayFrom(TTS.idx);
+  document.querySelectorAll('[data-set="rate"]').forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.val === r)));
+  lpUpdate();
+}
+// commandes de l'écran verrouillé et de la notification
+function mediaFor(kind) {
+  if (!MS) return;
+  try {
+    MS.metadata = new MediaMetadata({ title: kind === 'tts' ? TTS.title : (AUD.title || 'Écoute'), artist: 'Lisân Campus', album: 'Éditions Lisân',
+      artwork: [{ src: 'icon-192.png', sizes: '192x192', type: 'image/png' }, { src: 'logo.png', sizes: '512x512', type: 'image/png' }] });
+    const H = kind === 'tts'
+      ? { play: ttsResume, pause: ttsPause, stop: () => stopVoice(), previoustrack: () => ttsPlayFrom(TTS.idx - 1), nexttrack: () => ttsPlayFrom(TTS.idx + 1),
+          seekbackward: () => ttsPlayFrom(TTS.idx - 3), seekforward: () => ttsPlayFrom(TTS.idx + 3) }
+      : { play: () => { player.play().catch(() => {}); lpUpdate(); }, pause: () => { player.pause(); lpUpdate(); }, stop: () => stopVoice(), previoustrack: null, nexttrack: null,
+          seekbackward: () => { player.currentTime = Math.max(0, player.currentTime - 10); }, seekforward: () => { player.currentTime = Math.min(player.duration || 0, player.currentTime + 10); } };
+    Object.entries(H).forEach(([k, f]) => { try { MS.setActionHandler(k, f); } catch (e) {} });
+    MS.playbackState = 'playing';
+  } catch (e) {}
+}
+function mediaClear() { if (!MS) return; try { MS.playbackState = 'none'; MS.metadata = null; } catch (e) {} }
+// lecteur en bas de l'écran : pause, phrase précédente / suivante, vitesse
+let lp = null;
+function lpBuild() {
+  if (lp) return lp;
+  lp = document.createElement('div'); lp.id = 'lp'; lp.setAttribute('role', 'region'); lp.setAttribute('aria-label', 'Lecteur audio'); lp.hidden = true;
+  lp.innerHTML = `<div class="lp-bar"><i></i></div><div class="lp-row">
+    <img src="logo.png" alt="" width="34" height="34"><div class="lp-t"><b></b><small></small></div>
+    <button type="button" class="lp-b" data-lp="prev" aria-label="Phrase précédente"><svg viewBox="0 0 24 24"><path d="M6 5v14M19 5l-10 7 10 7z"/></svg></button>
+    <button type="button" class="lp-b lp-main" data-lp="toggle" aria-label="Pause"><svg viewBox="0 0 24 24"><path class="i-pause" d="M8 5v14M16 5v14"/><path class="i-play" d="M7 4l13 8-13 8z"/></svg></button>
+    <button type="button" class="lp-b" data-lp="next" aria-label="Phrase suivante"><svg viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z"/></svg></button>
+    <button type="button" class="lp-rate" data-lp="rate" aria-haspopup="true" aria-expanded="false"></button>
+    <button type="button" class="lp-b lp-x" data-lp="stop" aria-label="Arrêter l'écoute"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
+    <div class="lp-menu" role="menu" hidden><span>Vitesse d'écoute</span><div>${RATES.map(r => `<button type="button" role="menuitemradio" data-lp-rate="${r}">${rateLabel(r)}</button>`).join('')}</div>
+    <small>Plus lent pour découvrir ou mémoriser, plus rapide pour réviser.</small></div>`;
+  document.body.appendChild(lp);
+  lp.addEventListener('click', e => {
+    const r = e.target.closest('[data-lp-rate]'); if (r) { setRate(+r.dataset.lpRate); lpMenu(false); return; }
+    const b = e.target.closest('[data-lp]'); if (!b) return;
+    const a = b.dataset.lp, isT = TTS.on;
+    if (a === 'rate') { lpMenu(lp.querySelector('.lp-menu').hidden); return; }
+    if (a === 'stop') { stopVoice(); return; }
+    if (a === 'toggle') { if (isT) (TTS.paused ? ttsResume() : ttsPause()); else if (player.paused) { player.play().catch(() => {}); keepAwake(false); } else player.pause(); lpUpdate(); return; }
+    if (a === 'prev') { if (isT) ttsPlayFrom(TTS.idx - 1); else player.currentTime = Math.max(0, player.currentTime - 10); return; }
+    if (a === 'next') { if (isT) ttsPlayFrom(TTS.idx + 1); else if (player.duration) player.currentTime = Math.min(player.duration - .2, player.currentTime + 10); return; }
+  });
+  document.addEventListener('click', e => { if (lp && !lp.hidden && !e.target.closest('#lp')) lpMenu(false); });
+  return lp;
+}
+function lpMenu(on) { if (!lp) return; const m = lp.querySelector('.lp-menu'); m.hidden = !on; lp.querySelector('.lp-rate').setAttribute('aria-expanded', String(!!on)); }
+function lpShow() { lpBuild(); lp.hidden = false; document.body.classList.add('lp-on'); requestAnimationFrame(() => lp.classList.add('on')); }
+function lpHide() { if (!lp) return; lp.classList.remove('on'); document.body.classList.remove('lp-on'); lpMenu(false); setTimeout(() => { if (!lp.classList.contains('on')) lp.hidden = true; }, 260); }
+function lpUpdate() {
+  if (!lp || lp.hidden) return;
+  const isT = TTS.on, paused = isT ? TTS.paused : player.paused;
+  lp.classList.toggle('paused', paused);
+  lp.querySelector('[data-lp="toggle"]').setAttribute('aria-label', paused ? 'Reprendre' : 'Pause');
+  lp.querySelector('.lp-t b').textContent = isT ? TTS.title : (AUD.title || 'Écoute');
+  const n = isT ? TTS.items.length : (AUD.total || 1), k = isT ? TTS.idx + 1 : (AUD.total - playlist.length);
+  lp.querySelector('.lp-t small').textContent = isT ? `Phrase ${k} sur ${n} · vitesse ${rateLabel(+state.rate || 1)}` : `Piste ${Math.max(1, k)} sur ${n} · vitesse ${rateLabel(+state.rate || 1)}`;
+  lp.querySelector('.lp-bar i').style.transform = `scaleX(${n ? Math.min(1, k / n) : 0})`;
+  lp.querySelector('.lp-rate').textContent = rateLabel(+state.rate || 1);
+  lp.querySelectorAll('[data-lp-rate]').forEach(b => b.setAttribute('aria-checked', String(+b.dataset.lpRate === (+state.rate || 1))));
+  if (MS) try { MS.playbackState = paused ? 'paused' : 'playing'; } catch (e) {}
 }
 function showNoVoice() { const n = document.getElementById('novoice'); if (n) n.hidden = false; }
 function checkArVoice() { const n = document.getElementById('noar'); if (n && synth && voicesLoaded) n.hidden = !!voices.ar; }
@@ -220,16 +333,20 @@ function checkArVoice() { const n = document.getElementById('noar'); if (n && sy
 // ---------- récitations (fichiers audio)
 const player = new Audio();
 let audioBtn = null, playlist = [];
+const AUD = { title: '', total: 0 };
 player.preload = 'none';
-function stopAudio() { try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove("playing"); audioBtn = null; playlist = []; audioFallback = null; }
+function stopAudio() { const was = AUD.total > 1 && audioBtn; try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove("playing"); audioBtn = null; playlist = []; audioFallback = null; if (was) { AUD.total = 0; if (!TTS.on) { lpHide(); mediaClear(); } } }
 let audioFallback = null;   // fichier de secours (le verset) si l'audio du mot seul ne se charge pas
 function playAudio(urls, btn, fallback) {
   if (btn && btn === audioBtn) { stopAudio(); if (synth) synth.cancel(); return; }
   if (synth) synth.cancel(); if (playingBtn) { playingBtn.classList.remove('playing'); playingBtn = null; }
   stopAudio();
   playlist = urls.slice(); audioBtn = btn || null; audioFallback = fallback || null; if (audioBtn) audioBtn.classList.add('playing');
-  const next = () => { if (!playlist.length) { stopAudio(); return; } const src = playlist.shift(); player.src = src; player.play().catch(e => { if (!e || e.name !== 'AbortError') audioError(src); }); };
-  player.onended = next; player.onerror = () => audioError(player.src); next();
+  AUD.total = urls.length; const h = document.querySelector('#view h1'); AUD.title = (h ? h.textContent : 'Récitation').trim();
+  if (AUD.total > 1) { lpShow(); mediaFor('audio'); }
+  const next = () => { if (!playlist.length) { stopAudio(); return; } const src = playlist.shift(); player.src = src; try { player.preservesPitch = true; player.playbackRate = +state.rate || 1; } catch (e) {}
+    player.play().catch(e => { if (!e || e.name !== 'AbortError') audioError(src); }); lpUpdate(); };
+  player.onended = next; player.onerror = () => audioError(player.src); player.onratechange = null; next();
 }
 // une erreur ne compte que pour le fichier en cours (le refus de lecture et l'événement d'erreur arrivent tous deux)
 function audioError(src) {
@@ -523,14 +640,24 @@ function viewSpace(sp) {
       ${sp.intro.map(t => `<p class="lead">${md(t)}</p>`).join('')}
       <div class="bar"><i style="width:${p.pct}%"></i></div><span class="meta">${p.d} / ${p.n} leçons terminées</span></div>
     ${reg}
-    ${(window.LIVRES || []).some(b => b.space === sp.id) || (window.DOCS || []).some(d => d.space === sp.id) ? `<a class="lib-link" href="#bibliotheque-${sp.id}"><span aria-hidden="true">📚</span><span><b>Les livres de cet espace</b><small>Livre de l’élève et cahier d’exercices, à lire ou à télécharger</small></span></a>` : ''}
+    ${libLink(sp.id)}
     ${certPanelSpace(sp)}</aside>
     <div class="duo-main"><section class="subjects">${ss.map(card).join('')}</section></div></div>`;
 }
 // ---------- bibliothèque : les livres des Éditions Lisân (élève, maître, exercices) et les documents de cours.
 // Lecture et téléchargement après connexion et inscription à l’espace du livre (comme les leçons) ; sans connexion
 // configurée (aperçu), tout est libre.
-const DOC_ICON = { eleve: '📗', maitre: '📘', exercices: '📙', cours: '📄' };
+const DOC_ICON = { eleve: '📗', maitre: '📘', exercices: '📙', cours: '📄', Cours: '📄', TD: '📝', 'Méthode': '🧭', Code: '📕' };
+const DOC_KIND = { Cours: 'cours', TD: 'travaux dirigés', 'Méthode': 'fiche méthode', Code: 'Code civil' };
+const libList = l => l.length > 1 ? l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1] : (l[0] || '');
+function libLink(spId) {
+  const nb = (window.LIVRES || []).filter(b => b.space === spId).length, D = (window.DOCS || []).filter(d => d.space === spId);
+  if (!nb && !D.length) return '';
+  const t = nb ? (nb > 1 ? 'Les livres de cet espace' : 'Le livre de cet espace') : 'Les documents de cet espace';
+  let sub = nb ? 'Livre de l’élève et cahier d’exercices, à lire ou à télécharger' : libList(D.map(d => DOC_KIND[d.kind] || String(d.kind || 'document').toLowerCase()).filter((k, i, a) => a.indexOf(k) === i)) + ', à lire ou à télécharger';
+  sub = sub.charAt(0).toUpperCase() + sub.slice(1);
+  return `<a class="lib-link" href="#bibliotheque-${spId}"><span aria-hidden="true">📚</span><span><b>${t}</b><small>${esc(sub)}</small></span></a>`;
+}
 function libAccess(spId) {
   const A = AUTH(); if (!A) return 'ok';
   if (!A.user()) return 'signin';
@@ -542,7 +669,7 @@ function libDocRow(file, d, spId) {
   const act = acc === 'ok' ? `<a class="btn small" href="${file}" target="_blank" rel="noopener">Lire</a><a class="btn ghost small" href="${file}" download>Télécharger</a>`
     : acc === 'signin' ? `<button type="button" class="btn ghost small" data-auth="signin">Se connecter pour lire</button>`
     : `<a class="btn ghost small" href="#inscription-${spId}">S’inscrire pour lire</a>`;
-  return `<div class="lib-doc"><span class="lib-ic" aria-hidden="true">${DOC_ICON[d.k] || '📄'}</span><div class="lib-dt"><b>${esc(d.name)}</b><small>${esc(meta)}</small></div><div class="lib-act">${act}</div></div>`;
+  return `<div class="lib-doc"><span class="lib-ic" aria-hidden="true">${DOC_ICON[d.k] || '📄'}</span><div class="lib-dt">${d.kind ? `<span class="tag">${esc(d.kind)}</span>` : ''}<b>${esc(d.name)}</b><small>${esc([d.desc, meta].filter(Boolean).join(' · '))}</small></div><div class="lib-act">${act}</div></div>`;
 }
 function viewLibrary() {
   const L = window.LIVRES || [], D = window.DOCS || [];
@@ -550,14 +677,14 @@ function viewLibrary() {
   const A = AUTH(), u = A && A.user();
   return `${crumbs(['Bibliothèque'])}
     <div class="subject-head c-a"><span class="eyebrow">Éditions Lisân</span><h1>📚 Bibliothèque</h1>
-      <p class="lead">Les livres de la collection, avec le livre de l’élève et le cahier d’exercices à lire en ligne ou à télécharger en PDF. Le livret du maître est réservé aux enseignants et aux animateurs.</p>
-      ${A && !u ? `<p class="meta">La lecture et le téléchargement demandent la connexion Google et l’inscription à l’espace du livre. <button type="button" class="linkbtn" data-auth="signin">Se connecter</button></p>` : ''}</div>
+      <p class="lead">Les livres de la collection, avec le livre de l’élève et le cahier d’exercices, et les documents des cours de droit, à lire en ligne ou à télécharger en PDF. Le livret du maître est réservé aux enseignants et aux animateurs.</p>
+      ${A && !u ? `<p class="meta">La lecture et le téléchargement demandent la connexion Google et l’inscription à l’espace concerné. <button type="button" class="linkbtn" data-auth="signin">Se connecter</button></p>` : ''}</div>
     <nav class="lib-nav" aria-label="Rayons">${groups.map(g => `<button type="button" class="chip" data-scrollto="lib-${g.sp.id}">${g.sp.icon} ${esc(g.sp.title)}</button>`).join('')}</nav>
     ${groups.map(g => `<section class="lib-sec" id="lib-${g.sp.id}"><h2>${g.sp.icon} ${esc(g.sp.title)}</h2>
       ${g.books.map(b => `<article class="lib-book"><img class="lib-cover" src="livres/couv/Lisan_${b.id}_eleve.webp" alt="Couverture : ${esc(b.title)}" loading="lazy" width="160" height="226">
         <div class="lib-info"><h3>${esc(b.title)}</h3><p class="meta">${esc(b.sub)} · Mouhamadou CISSEMA</p>
         ${b.docs.map(d => libDocRow(`livres/Lisan_${b.id}_${d.k}.pdf`, d, b.space)).join('')}</div></article>`).join('')}
-      ${g.docs.length ? `<article class="lib-book lib-docs"><div class="lib-info"><h3>Documents de cours</h3>${g.docs.map(d => libDocRow('livres/' + d.file, { k: 'cours', name: d.title, pages: d.pages, mb: d.mb }, d.space)).join('')}</div></article>` : ''}
+      ${g.docs.length ? `<article class="lib-book lib-docs"><div class="lib-info"><h3>Documents de cours</h3>${g.docs.map(d => libDocRow('livres/' + d.file, { k: d.kind || 'cours', kind: d.kind, name: d.title, desc: d.desc, pages: d.pages, mb: d.mb }, d.space)).join('')}</div></article>` : ''}
     </section>`).join('')}`;
 }
 function findLesson(key) {
@@ -868,7 +995,7 @@ function viewSettings() {
   return `${crumbs(['Paramètres'])}
     <div><h1>Paramètres</h1><p class="lead">Réglez Lisân Campus à votre convenance. Ces réglages sont enregistrés sur cet appareil.</p></div>
     <section class="panel"><h2>Voix</h2>
-      <div class="setrow"><span>Vitesse de lecture</span>${seg('rate', state.rate, [[1, 'Normale'], [0.65, 'Lente']])}</div>
+      <div class="setrow"><span>Vitesse d'écoute</span>${seg('rate', state.rate, RATES.map(r => [r, rateLabel(r)]))}</div>
       <div class="setrow"><span>Essayer les voix</span><div class="actions">
         <button type="button" class="btn ghost small" data-say="Bienvenue sur Lisân Campus." data-lang="fr">${ICON}Français</button>
         <button type="button" class="btn ghost small" data-say="Welcome to Lisan Campus." data-lang="en">${ICON}Anglais</button>
@@ -1046,6 +1173,7 @@ function route() {
   else if (h === 'recherche') { html = viewSearch(); after = () => { const i = document.getElementById('ssearch'); let t; i.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => drawSearch(i.value), 150); }); drawSearch(''); }; }
   else if (h === 'glossaire') { html = viewGlossary(); after = () => { drawGlossary(''); document.getElementById('gsearch').addEventListener('input', e => drawGlossary(e.target.value)); }; }
   else if (h === 'parametres') { html = viewSettings(); after = voiceStatus; }
+  else if (h === 'bibliotheque') html = viewLibrary();
   else if (h === 'compte') html = viewAccount();
   else if (h.startsWith('inscription-') && space(h.slice(12)) && AUTH()) { html = viewEnroll(space(h.slice(12))); after = bindEnroll; }
   else if (h === 'profil' && AUTH() && AUTH().user()) { html = viewProfil(); after = bindProfil; }
@@ -1185,6 +1313,7 @@ function renderDrawer() {
       ${item('revisions', '🔁', 'Mes révisions' + (revDue().length ? ` (${revDue().length})` : ''))}
       ${item('recherche', '🔍', 'Rechercher dans les leçons')}
       ${item('glossaire', '🔎', 'Glossaire')}
+      ${item('bibliotheque', '📚', 'Bibliothèque')}
       ${A ? item('compte', '👤', 'Mon compte') : ''}
       ${A && u && isAdminCached() ? item('admin', '📋', 'Administration') : ''}
       ${item('suggestion', '💡', 'Suggérer une idée')}
@@ -1297,7 +1426,7 @@ document.addEventListener('click', e => {
   const tr = t.closest('[data-trad]');
   if (tr) { const box = tr.closest('.dialog'); const on = !box.classList.contains('show-fr'); box.classList.toggle('show-fr', on); tr.setAttribute('aria-pressed', on); return; }
   const setB = t.closest('[data-set]');
-  if (setB) { const k = setB.dataset.set; let v = setB.dataset.val; if (k === 'rate') v = +v; state[k] = v; save(k); applyDisplay();
+  if (setB) { const k = setB.dataset.set; let v = setB.dataset.val; if (k === 'rate') { setRate(+v); return; } state[k] = v; save(k); applyDisplay();
     setB.parentElement.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === setB)); return; }
   const rs = t.closest('[data-reset]');
   if (rs) { const z = document.getElementById('reset-zone');
@@ -1443,3 +1572,111 @@ if (LA && LA.ready) {
   LA.ready.then(() => { if (!booted) boot(); else if (!sameUser() || /^#(admin|certificat-|profil|inscription-)/.test(location.hash)) route(); }, boot);
   setTimeout(boot, 7000);
 } else boot();
+
+// ---------- tirer pour actualiser
+// Comme dans les applications : on tire la page vers le bas depuis le haut, le logo apparaît et tourne.
+// La page ne change pas d'adresse et ne revient jamais à l'accueil. S'il existe une nouvelle version du site,
+// elle est rechargée sans écran d'ouverture ni animation, à la même page et au même endroit ; sinon rien ne bouge.
+(function () {
+  const el = document.getElementById('ptr'), root = document.documentElement;
+  if (!el) return;
+  const arc = el.querySelector('.ptr-arc'), svg = el.querySelector('svg'), LEN = 132, MAX = 120, ARM = 72;
+  const head = document.querySelector('header.top');
+  const place = () => { const b = head ? head.getBoundingClientRect().bottom : 0; el.style.top = Math.max(8, Math.round(b) + 14) + 'px'; };
+  // empreinte des fichiers du site : elle change quand une nouvelle version est publiée
+  const files = [...document.querySelectorAll('script[src], link[rel="stylesheet"][href]')].map(n => n.getAttribute('src') || n.getAttribute('href'))
+    .filter(u => u && !/^(https?:)?\/\//.test(u));
+  const one = async u => {
+    try {
+      const r = await fetch(u, { method: 'HEAD', cache: 'no-store' });
+      const k = r.ok && (r.headers.get('etag') || r.headers.get('last-modified') || r.headers.get('content-length'));
+      if (k) return k;
+    } catch (e) {}
+    try { const t = await (await fetch(u, { cache: 'no-store' })).text(); let h = 5381; for (let i = 0; i < t.length; i += 7) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return t.length + ':' + h; }
+    catch (e) { return null; }
+  };
+  const sign = async () => { const p = await Promise.all(files.map(one)); return p.some(x => x === null) ? null : p.join('|'); };
+  let base = null; const baseline = () => { if (base) return base; base = sign(); return base; };
+  setTimeout(() => (window.requestIdleCallback || setTimeout)(() => baseline()), 4000);
+  // retour après une actualisation : même page, même position, sans écran d'ouverture ni animation
+  function settle() {
+    if (root.classList.contains('quick')) still();
+    if (!root.classList.contains('ptr-back')) return;
+    let y = 0; try { y = +sessionStorage.getItem('lc-ptr-y') || 0; sessionStorage.removeItem('lc-ptr'); sessionStorage.removeItem('lc-ptr-y'); } catch (e) {}
+    still();
+    if (y) { scrollTo(0, y); requestAnimationFrame(() => scrollTo(0, y)); setTimeout(() => scrollTo(0, y), 120); }
+    place(); el.classList.add('ready');
+    setTimeout(() => { el.classList.add('go'); root.classList.remove('ptr-back'); el.classList.remove('ready'); }, 450);
+    setTimeout(() => el.classList.remove('go'), 900);
+  }
+  // fige la page affichée : aucune animation d'entrée (flou, glissement) sur un contenu déjà vu
+  function still() {
+    V.querySelectorAll('.rv').forEach(n => { n.style.transition = 'none'; n.classList.add('in'); });
+    V.querySelectorAll('img').forEach(n => n.classList.add('ok'));
+    [V, ...V.querySelectorAll('*')].forEach(n => { const a = getComputedStyle(n).animationName; if (a && a !== 'none') n.style.animation = 'none'; });
+  }
+  if (document.body.classList.contains('ready')) settle(); else window.addEventListener('lc-ready', () => settle(), { once: true });
+  // le geste
+  let y0 = null, x0 = 0, pull = 0, active = false, busy = false, may = false;
+  const menuOpen = () => document.body.classList.contains('menu-open') || document.body.classList.contains('veiled');
+  const field = t => t && t.closest && t.closest('input, textarea, select, [contenteditable], dialog, .modal');
+  const innerScrolled = t => { for (let n = t; n && n !== document.body && n !== root; n = n.parentElement) { if (n.scrollTop > 0) return true; } return false; };
+  const show = p => {
+    const k = Math.min(1, p / ARM);
+    el.style.transform = `translateY(${Math.round(p - 90)}px) scale(${(.7 + .3 * k).toFixed(3)})`;
+    el.style.opacity = Math.min(1, p / 40).toFixed(2);
+    arc.style.strokeDashoffset = (LEN - LEN * .82 * k).toFixed(1);
+    svg.style.transform = `rotate(${Math.round(-90 + p * 2.4)}deg)`;
+    el.classList.toggle('armed', p >= ARM);
+  };
+  const reset = () => { el.classList.add('go'); el.classList.remove('spin', 'armed', 'ready'); el.style.transform = ''; el.style.opacity = ''; arc.style.strokeDashoffset = ''; svg.style.transform = '';
+    setTimeout(() => el.classList.remove('go'), 350); };
+  const atTop = () => (window.scrollY || root.scrollTop || 0) <= 0;
+  // toute traction vers le bas en haut de page est prise en charge ici, dès le premier mouvement du doigt :
+  // l'actualisation du navigateur (qui rechargeait tout et ramenait à l'accueil) ne se déclenche plus
+  document.addEventListener('touchstart', e => {
+    y0 = null; active = false; pull = 0;
+    if (e.touches.length !== 1 || !atTop() || innerScrolled(e.target)) return;
+    y0 = e.touches[0].clientY; x0 = e.touches[0].clientX;
+    may = !busy && !menuOpen() && !field(e.target);
+  }, { passive: true, capture: true });
+  document.addEventListener('touchmove', e => {
+    if (y0 === null) return;
+    const dy = e.touches[0].clientY - y0, dx = e.touches[0].clientX - x0;
+    if (!active) {
+      if (dy < 0 || !atTop()) { y0 = null; return; }                 // le doigt monte : défilement normal
+      if (Math.abs(dx) > dy) { if (Math.abs(dx) > 8) y0 = null; return; } // geste horizontal
+      if (e.cancelable) e.preventDefault();                           // bloque l'actualisation du navigateur
+      if (!may || dy < 6) return;
+      active = true; place(); el.classList.remove('go');
+    }
+    if (e.cancelable) e.preventDefault();
+    pull = Math.min(MAX, Math.max(0, (dy - 6) * .55));
+    show(pull);
+  }, { passive: false, capture: true });
+  const end = () => {
+    if (y0 === null) return; y0 = null;
+    if (!active) return; active = false;
+    if (pull >= ARM) refresh(); else reset();
+  };
+  document.addEventListener('touchend', end, { passive: true, capture: true });
+  document.addEventListener('touchcancel', () => { if (active) { active = false; y0 = null; reset(); } }, { passive: true });
+  async function refresh() {
+    busy = true; el.classList.add('go', 'spin'); el.style.transform = ''; el.style.opacity = ''; arc.style.strokeDashoffset = ''; svg.style.transform = '';
+    if (navigator.vibrate) try { navigator.vibrate(8); } catch (e) {}
+    const t0 = Date.now();
+    let changed = false;
+    try { const [a, b] = await Promise.all([baseline(), sign()]); changed = !!(a && b && a !== b); if (!a) base = null; } catch (e) {}
+    if (window.lcCheckUpdate) try { window.lcCheckUpdate(); } catch (e) {}
+    const wait = Math.max(0, 750 - (Date.now() - t0));
+    setTimeout(() => {
+      if (changed && navigator.onLine !== false) {
+        try { keepPlace(); sessionStorage.setItem('lc-ptr', String(Date.now())); sessionStorage.setItem('lc-ptr-y', String(Math.round(scrollY))); } catch (e) {}
+        location.reload(); return;
+      }
+      el.classList.add('ready');
+      setTimeout(() => { reset(); busy = false; }, 380);
+    }, wait);
+  }
+  window.addEventListener('resize', place, { passive: true });
+})();

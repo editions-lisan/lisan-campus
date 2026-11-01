@@ -1,7 +1,7 @@
 // Lisân Campus : lecture hors connexion.
 // Changez VERSION à chaque mise à jour du site pour renouveler le cache.
-const VERSION = 'lisan-campus-2026-11-01b';
-const CORE = ['./', 'styles.css', 'app.js', 'config.js', 'auth.js', 'inscription.js', 'admin.js', 'certificats.js', 'boot.js', 'emoji.js', 'vendor/qrcode.min.js', 'logo.png',
+const VERSION = 'lisan-campus-2026-11-01c';
+const CORE = ['./', 'styles.css', 'app.js', 'config.js', 'auth.js', 'inscription.js', 'admin.js', 'certificats.js', 'boot.js', 'ptr.js', 'emoji.js', 'vendor/qrcode.min.js', 'logo.png',
   'data/droit.js', 'data/ia.js', 'data/arabe.js', 'data/coran.js', 'data/islam.js', 'data/mini.js', 'data/livres.js', 'fonts/LisanNaskh-R.woff2', 'fonts/LisanNaskh-B.woff2',
   'fonts/literata-600.woff2', 'fonts/literata-800.woff2', 'fonts/literata-600-ext.woff2', 'fonts/literata-800-ext.woff2', 'fonts/atkinson-400.woff2', 'fonts/atkinson-700.woff2', 'fonts/atkinson-400i.woff2',
   'fonts/atkinson-400-ext.woff2', 'fonts/atkinson-700-ext.woff2', 'fonts/atkinson-400i-ext.woff2',
@@ -19,7 +19,7 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
   // Vidéos : laissées au navigateur (lecture par morceaux), jamais mises en cache.
-  if (/\.(mp4|webm|pdf)$/.test(url.pathname)) return;   // vidéos et livres PDF : jamais en cache
+  if (/\.(mp4|webm|mp3|pdf)$/.test(url.pathname)) return;   // vidéos, son de veille et livres PDF : jamais en cache
   // Pages : le réseau d'abord (pour recevoir les mises à jour) ; le cache si l'on est hors connexion
   // ou si le réseau ne répond pas en 3 secondes.
   if (req.mode === 'navigate') {
