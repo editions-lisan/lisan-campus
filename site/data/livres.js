@@ -187,6 +187,7 @@ window.LIVRES = [
 window.DOCS = [
  { space: "droit", kind: "Cours", title: "Cours de droit civil : le droit des personnes", desc: "Licence 1", file: "droit/cours-droit-civil-personnes.pdf", pages: 74, mb: 0.6 },
  { space: "droit", kind: "TD", title: "Travaux dirigés de droit civil : les personnes", desc: "Année 2026-2027 · trois séances", file: "droit/td-droit-civil-personnes-2026-2027.pdf", pages: 11, mb: 0.5 },
- { space: "droit", kind: "Méthode", title: "Fiche méthode : le cas pratique et le commentaire de décision", desc: "D’après les notes de cours et de TD", file: "droit/fiche-methode-cas-pratique-commentaire.pdf", pages: 12, mb: 0.2 },
+ { space: "droit", kind: "Méthode", title: "Fiche méthode : le cas pratique et le commentaire de décision", desc: "D’après les notes de cours et de TD", file: "droit/fiche-methode-cas-pratique-commentaire.pdf", pages: 14, mb: 0.2 },
+ { space: "droit", kind: "Exercices", title: "Cahier d’exercices de méthodologie", desc: "Douze exercices progressifs et leurs corrigés", file: "droit/cahier-exercices-methodologie.pdf", pages: 11, mb: 0.2 },
  { space: "droit", kind: "Code", title: "Code civil II : droit des biens et des obligations", desc: "Texte de référence", file: "droit/code-civil-ii.pdf", pages: 341, mb: 1.2 }
 ];

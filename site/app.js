@@ -370,6 +370,10 @@ const AUTH = () => window.LisanAuth && window.LisanAuth.enabled ? window.LisanAu
 // Parcours en ordre : une leçon ne s'ouvre que si toutes les précédentes sont terminées
 // (une leçon déjà terminée reste toujours accessible, pour la relire) ; le quiz, après la dernière leçon.
 const firstUndone = s => s.lessons.findIndex(l => !state.done[s.id + '/' + l.id]);
+// Espace Droit : les matières sont enseignées en parallèle à l'université, elles sont donc toutes ouvertes ;
+// à l'intérieur de chaque matière, les leçons restent dans l'ordre.
+const FREE_ORDER = ['droit'];
+const freeOrder = s => FREE_ORDER.includes(spaceOf(s));
 function inOrder(s, i) {
   if (i === 'quiz') return firstUndone(s) === -1;
   if (state.done[s.id + '/' + s.lessons[i].id]) return true;
@@ -382,7 +386,7 @@ const spaceSubjects = s => SUBJECTS.filter(x => spaceOf(x) === spaceOf(s));
 const subjectPassed = s => firstUndone(s) === -1 && (typeof quizOk === 'function' ? quizOk(s) : (state.quiz[s.id] || 0) >= PASS());
 function prevSubject(s) { const ss = spaceSubjects(s), k = ss.indexOf(s); return k > 0 ? ss[k - 1] : null; }
 function blockingSubject(s) { const ss = spaceSubjects(s); for (const x of ss) { if (x === s) return null; if (!subjectPassed(x)) return x; } return null; }
-const subjectOpen = s => !blockingSubject(s);
+const subjectOpen = s => freeOrder(s) || !blockingSubject(s);
 // prochaine étape d'un espace : première leçon non terminée du premier parcours non réussi, sinon son quiz
 function nextStep(spId) {
   const x = SUBJECTS.filter(s => spaceOf(s) === spId).find(s => !subjectPassed(s)); if (!x) return null;
@@ -400,6 +404,15 @@ function access(s, lessonIndex) {
 
 // ---------- blocs de contenu
 function renderBlock(b, s) {
+  // corrigé d'exercice : caché jusqu'à ce que l'élève le demande
+  if (b.corrige) return `<details class="corrige"><summary><span>Voir le corrigé</span><small>Cherche d'abord au brouillon</small></summary><div class="corrige-b">${b.corrige.map(x => renderBlock(x, s)).join('')}</div></details>`;
+  // anglais juridique : illustration, vocabulaire à écouter, dialogue anglais avec traduction
+  if (b.illus) return `<figure class="illus"><img src="img/en/${esc(b.illus)}.svg" alt="${esc(b.cap || '')}" width="640" height="320" loading="lazy" decoding="async">${b.cap ? `<figcaption>${esc(b.cap)}</figcaption>` : ''}</figure>`;
+  if (b.envocab) return `<div class="envocab">${b.envocab.map(([e, w, fr, ex]) => `<button type="button" class="envw" data-say="${esc(w + '. ' + (ex || ''))}" data-lang="en"><span class="envw-e" aria-hidden="true">${e || ''}</span><span class="envw-t"><b>${esc(w)}</b><small>${esc(fr)}</small>${ex ? `<i>${esc(ex)}</i>` : ''}</span><span class="envw-p" aria-hidden="true">▶</span></button>`).join('')}</div>`;
+  if (b.endialog) { const L = b.endialog.lines, all = L.map(l => l[2]).join(' ');
+    return `<div class="dialog endialog"><p class="situ">${md(b.endialog.situation)}</p>
+      <div class="actions"><button type="button" class="btn small" data-say="${esc(all)}" data-lang="en">${ICON}Écouter tout le dialogue</button><button type="button" class="btn ghost small" data-trad="1" aria-pressed="false">Traduction</button></div>
+      ${L.map(([who, col, en, fr]) => `<div class="dl dl-e"><span class="who" style="color:${esc(col)}">${esc(who)}</span><button type="button" class="dl-en" data-say="${esc(en)}" data-lang="en">${esc(en)}</button><span class="fr">${md(fr)}</span></div>`).join('')}</div>`; }
   if (b.p) return `<p>${md(b.p)}</p>`;
   if (b.h) return `<h3>${md(b.h)}</h3>`;
   if (b.ul) return `<ul>${b.ul.map(x => `<li>${md(x)}</li>`).join('')}</ul>`;
@@ -647,7 +660,7 @@ function viewSpace(sp) {
 // ---------- bibliothèque : les livres des Éditions Lisân (élève, maître, exercices) et les documents de cours.
 // Lecture et téléchargement après connexion et inscription à l’espace du livre (comme les leçons) ; sans connexion
 // configurée (aperçu), tout est libre.
-const DOC_ICON = { eleve: '📗', maitre: '📘', exercices: '📙', cours: '📄', Cours: '📄', TD: '📝', 'Méthode': '🧭', Code: '📕' };
+const DOC_ICON = { eleve: '📗', maitre: '📘', exercices: '📙', cours: '📄', Cours: '📄', TD: '📝', 'Méthode': '🧭', Exercices: '✍️', Code: '📕' };
 const DOC_KIND = { Cours: 'cours', TD: 'travaux dirigés', 'Méthode': 'fiche méthode', Code: 'Code civil' };
 const libList = l => l.length > 1 ? l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1] : (l[0] || '');
 function libLink(spId) {
@@ -1100,7 +1113,7 @@ const PAGES = {
     { h: '1. Objet' },
     { p: 'Lisân Campus est un site d’apprentissage gratuit édité par les Éditions Lisân. En l’utilisant, vous acceptez les présentes conditions.' },
     { h: '2. Accès' },
-    { p: 'La page d’accueil, la présentation des espaces et la première leçon de chaque espace sont en accès libre. Les leçons et les parcours se suivent dans l’ordre : chaque leçon s’ouvre quand la précédente est terminée, chaque parcours quand le précédent est réussi. L’accès au reste des contenus demande une connexion avec un compte Google et une inscription gratuite à chaque espace, avec une fiche d’inscription dont vous certifiez l’exactitude. Le site peut être interrompu pour maintenance ou évoluer sans préavis.' },
+    { p: 'La page d’accueil, la présentation des espaces et la première leçon de chaque espace sont en accès libre. Les leçons et les parcours se suivent dans l’ordre : chaque leçon s’ouvre quand la précédente est terminée, chaque parcours quand le précédent est réussi. Dans l’espace « Droit · Licence 1 », dont les matières sont enseignées en parallèle à l’université, toutes les matières sont ouvertes dès l’inscription ; à l’intérieur de chacune, les leçons se suivent dans l’ordre. L’accès au reste des contenus demande une connexion avec un compte Google et une inscription gratuite à chaque espace, avec une fiche d’inscription dont vous certifiez l’exactitude. Le site peut être interrompu pour maintenance ou évoluer sans préavis.' },
     { h: '3. Les contenus' },
     { p: 'Les contenus sont proposés à des fins d’apprentissage. Les leçons de droit ne constituent pas des consultations juridiques ; pour une situation personnelle, adressez-vous à un professionnel. La lecture du Coran s’apprend auprès d’un maître ; le Campus sert à réviser.' },
     { h: '4. Les certificats' },

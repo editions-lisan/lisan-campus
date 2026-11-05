@@ -1046,3 +1046,36 @@ html, body { overscroll-behavior-y: none; }
 .seg:has(> [data-set="rate"]) { display: grid; grid-template-columns: repeat(4, 1fr); border-radius: 14px; max-width: 320px; }
 .seg > [data-set="rate"] { padding: 8px 4px; }
 .lib-dt .tag { display: inline-block; margin: 0 0 3px; background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
+
+/* ===== Corrigés d'exercices à déplier */
+details.corrige { margin: 10px 0 22px; border: 1px solid var(--line); border-left: 4px solid var(--good, #0e6b4f); border-radius: 12px; background: var(--surface); }
+details.corrige > summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; font-weight: 700; color: var(--good, #0e6b4f); }
+details.corrige > summary::-webkit-details-marker { display: none; }
+details.corrige > summary::before { content: "▸"; margin-right: 4px; transition: transform .2s ease; }
+details.corrige[open] > summary::before { transform: rotate(90deg); }
+details.corrige > summary span { flex: 1; }
+details.corrige > summary small { font-weight: 400; color: var(--muted); font-size: 13px; }
+details.corrige[open] > summary small { display: none; }
+details.corrige .corrige-b { padding: 0 14px 12px; }
+@media print { details.corrige { break-inside: avoid; } }
+
+/* ===== Anglais juridique : illustrations, vocabulaire, dialogues */
+figure.illus { margin: 14px 0 18px; }
+figure.illus img { display: block; width: 100%; height: auto; border-radius: 16px; box-shadow: 0 6px 20px rgba(20, 28, 46, .10); }
+figure.illus figcaption { margin-top: 6px; text-align: center; font-size: 13px; font-style: italic; color: var(--muted); }
+.envocab { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin: 12px 0 16px; }
+.envw { display: flex; align-items: flex-start; gap: 10px; text-align: left; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; cursor: pointer; transition: transform .12s ease, border-color .12s ease; }
+.envw:hover { border-color: var(--accent); }
+.envw:active { transform: scale(.98); }
+.envw-e { font-size: 26px; line-height: 1; flex: none; width: 32px; text-align: center; padding-top: 2px; }
+.envw-e .emo { width: 28px; height: 28px; }
+.envw-t { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.envw-t b { font-size: 16px; }
+.envw-t small { font-size: 13px; color: var(--muted); }
+.envw-t i { font-size: 14px; color: var(--ink); opacity: .85; }
+.envw-p { flex: none; color: var(--accent); font-size: 13px; padding-top: 4px; }
+.envw.playing { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.endialog .dl-e { border-left-width: 4px; }
+.dl-en { border: 0; background: color-mix(in srgb, var(--accent) 7%, transparent); border-radius: 12px; padding: 8px 12px; text-align: left; cursor: pointer; color: var(--ink); font: inherit; font-size: 16px; line-height: 1.45; width: fit-content; max-width: 100%; }
+.dl-en:hover { background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.dl-en:active { transform: scale(.98); }
