@@ -248,9 +248,11 @@ function ttsStop() {
   if (TTS.btn) TTS.btn.classList.remove('playing'); if (playingBtn === TTS.btn) playingBtn = null; TTS.btn = null;
   keepAwake(false); if (was) { lpHide(); mediaClear(); }
 }
-function speak(text, lang, btn) {
+function speak(text, lang, btn, noRec) {
+  if (btn && (btn === playingBtn || btn === audioBtn)) { stopVoice(); return; }
+  // leçon ou dialogue enregistré (data/audio.js) : vrai fichier audio, qui continue dans une autre application
+  const rec = !noRec && btn && recFor(text); if (rec) { playRecorded(rec, btn, text, lang); return; }
   if (!synth) { showNoVoice(); return; }
-  if (btn && btn === playingBtn) { stopVoice(); return; }
   stopVoice();
   const items = ttsChunks(text, lang);
   if (!items.length) return;
@@ -276,7 +278,7 @@ function mediaFor(kind) {
     const H = kind === 'tts'
       ? { play: ttsResume, pause: ttsPause, stop: () => stopVoice(), previoustrack: () => ttsPlayFrom(TTS.idx - 1), nexttrack: () => ttsPlayFrom(TTS.idx + 1),
           seekbackward: () => ttsPlayFrom(TTS.idx - 3), seekforward: () => ttsPlayFrom(TTS.idx + 3) }
-      : { play: () => { player.play().catch(() => {}); lpUpdate(); }, pause: () => { player.pause(); lpUpdate(); }, stop: () => stopVoice(), previoustrack: null, nexttrack: null,
+      : { play: () => { player.play().catch(() => {}); lpUpdate(); }, pause: () => { player.pause(); lpUpdate(); }, stop: () => stopVoice(), previoustrack: AUD.rec ? () => recSeek(recIdx() - 1) : null, nexttrack: AUD.rec ? () => recSeek(recIdx() + 1) : null,
           seekbackward: () => { player.currentTime = Math.max(0, player.currentTime - 10); }, seekforward: () => { player.currentTime = Math.min(player.duration || 0, player.currentTime + 10); } };
     Object.entries(H).forEach(([k, f]) => { try { MS.setActionHandler(k, f); } catch (e) {} });
     MS.playbackState = 'playing';
@@ -305,8 +307,8 @@ function lpBuild() {
     if (a === 'rate') { lpMenu(lp.querySelector('.lp-menu').hidden); return; }
     if (a === 'stop') { stopVoice(); return; }
     if (a === 'toggle') { if (isT) (TTS.paused ? ttsResume() : ttsPause()); else if (player.paused) { player.play().catch(() => {}); keepAwake(false); } else player.pause(); lpUpdate(); return; }
-    if (a === 'prev') { if (isT) ttsPlayFrom(TTS.idx - 1); else player.currentTime = Math.max(0, player.currentTime - 10); return; }
-    if (a === 'next') { if (isT) ttsPlayFrom(TTS.idx + 1); else if (player.duration) player.currentTime = Math.min(player.duration - .2, player.currentTime + 10); return; }
+    if (a === 'prev') { if (isT) ttsPlayFrom(TTS.idx - 1); else if (AUD.rec) recSeek(player.currentTime - (AUD.marks[recIdx()] || 0) > 2 ? recIdx() : recIdx() - 1); else player.currentTime = Math.max(0, player.currentTime - 10); return; }
+    if (a === 'next') { if (isT) ttsPlayFrom(TTS.idx + 1); else if (AUD.rec) recSeek(recIdx() + 1); else if (player.duration) player.currentTime = Math.min(player.duration - .2, player.currentTime + 10); return; }
   });
   document.addEventListener('click', e => { if (lp && !lp.hidden && !e.target.closest('#lp')) lpMenu(false); });
   return lp;
@@ -320,9 +322,9 @@ function lpUpdate() {
   lp.classList.toggle('paused', paused);
   lp.querySelector('[data-lp="toggle"]').setAttribute('aria-label', paused ? 'Reprendre' : 'Pause');
   lp.querySelector('.lp-t b').textContent = isT ? TTS.title : (AUD.title || 'Écoute');
-  const n = isT ? TTS.items.length : (AUD.total || 1), k = isT ? TTS.idx + 1 : (AUD.total - playlist.length);
-  lp.querySelector('.lp-t small').textContent = isT ? `Phrase ${k} sur ${n} · vitesse ${rateLabel(+state.rate || 1)}` : `Piste ${Math.max(1, k)} sur ${n} · vitesse ${rateLabel(+state.rate || 1)}`;
-  lp.querySelector('.lp-bar i').style.transform = `scaleX(${n ? Math.min(1, k / n) : 0})`;
+  const n = isT ? TTS.items.length : (AUD.total || 1), k = isT ? TTS.idx + 1 : (AUD.rec ? recIdx() + 1 : AUD.total - playlist.length);
+  lp.querySelector('.lp-t small').textContent = isT || AUD.rec ? `Phrase ${k} sur ${n} · vitesse ${rateLabel(+state.rate || 1)}` : `Piste ${Math.max(1, k)} sur ${n} · vitesse ${rateLabel(+state.rate || 1)}`;
+  lp.querySelector('.lp-bar i').style.transform = `scaleX(${AUD.rec && !isT && player.duration ? Math.min(1, player.currentTime / player.duration) : n ? Math.min(1, k / n) : 0})`;
   lp.querySelector('.lp-rate').textContent = rateLabel(+state.rate || 1);
   lp.querySelectorAll('[data-lp-rate]').forEach(b => b.setAttribute('aria-checked', String(+b.dataset.lpRate === (+state.rate || 1))));
   if (MS) try { MS.playbackState = paused ? 'paused' : 'playing'; } catch (e) {}
@@ -333,9 +335,35 @@ function checkArVoice() { const n = document.getElementById('noar'); if (n && sy
 // ---------- récitations (fichiers audio)
 const player = new Audio();
 let audioBtn = null, playlist = [];
-const AUD = { title: '', total: 0 };
+const AUD = { title: '', total: 0, rec: false, marks: null };
+// ---------- leçons et dialogues enregistrés (MP3 de audio/, liste dans data/audio.js) : ce sont de vrais fichiers
+// audio, que le téléphone continue de lire quand on passe à une autre application ou qu'on éteint l'écran ;
+// sans fichier (ou s'il ne se charge pas), la voix du téléphone prend le relais. Un fichier n'est utilisé que si
+// son empreinte (h) correspond au texte actuel de la leçon : une leçon modifiée n'est jamais lue avec un ancien son.
+const audioHash = t => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return h.toString(36); };
+const REC = (() => { const m = {}; Object.values(window.AUDIO || {}).forEach(x => { if (x && x.h) m[x.h] = x; }); return m; })();
+const recFor = text => REC[audioHash(String(text))] || null;
+const recIdx = () => { const m = AUD.marks || [], t = player.currentTime; let k = 0; while (k + 1 < m.length && m[k + 1] <= t + 0.05) k++; return k; };
+function recSeek(i) { const m = AUD.marks || []; if (!m.length) return; i = Math.max(0, Math.min(m.length - 1, i)); player.currentTime = m[i]; if (player.paused) player.play().catch(() => {}); lpUpdate(); }
+function playRecorded(rec, btn, text, lang) {
+  stopVoice();
+  audioBtn = btn || null; if (audioBtn) audioBtn.classList.add('playing');
+  const h = document.querySelector('#view h1'); AUD.title = (h ? h.textContent : 'Lisân Campus').trim();
+  AUD.total = rec.t.length; AUD.marks = rec.t; AUD.rec = true; playlist = []; audioFallback = null;
+  player.preload = 'auto'; player.src = rec.f;
+  try { player.preservesPitch = true; player.playbackRate = +state.rate || 1; } catch (e) {}
+  player.onended = () => stopAudio();
+  player.onerror = () => { const b = audioBtn; stopAudio(); speak(text, lang, b, true); };
+  player.play().catch(() => {});
+  lpShow(); mediaFor('audio'); lpUpdate();
+}
+let recTick = 0;
+player.addEventListener('timeupdate', () => { if (!AUD.rec) return; const n = Date.now(); if (n - recTick < 400) return; recTick = n; lpUpdate();
+  if (MS && MS.setPositionState && player.duration) try { MS.setPositionState({ duration: player.duration, position: Math.min(player.currentTime, player.duration), playbackRate: player.playbackRate || 1 }); } catch (e) {} });
+player.addEventListener('play', () => { if (AUD.rec) lpUpdate(); });
+player.addEventListener('pause', () => { if (AUD.rec) lpUpdate(); });
 player.preload = 'none';
-function stopAudio() { const was = AUD.total > 1 && audioBtn; try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove("playing"); audioBtn = null; playlist = []; audioFallback = null; if (was) { AUD.total = 0; if (!TTS.on) { lpHide(); mediaClear(); } } }
+function stopAudio() { const was = (AUD.total > 1 || AUD.rec) && audioBtn; AUD.rec = false; AUD.marks = null; try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove("playing"); audioBtn = null; playlist = []; audioFallback = null; if (was) { AUD.total = 0; if (!TTS.on) { lpHide(); mediaClear(); } } }
 let audioFallback = null;   // fichier de secours (le verset) si l'audio du mot seul ne se charge pas
 function playAudio(urls, btn, fallback) {
   if (btn && btn === audioBtn) { stopAudio(); if (synth) synth.cancel(); return; }
