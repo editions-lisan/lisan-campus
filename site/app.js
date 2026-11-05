@@ -892,7 +892,11 @@ function evalBank(s) {
     return autoMini(key) || []; });
   const nq = Math.min(fromQuiz.length, Math.ceil(EVAL_N * 0.6));
   const pick = shuffle(fromQuiz).slice(0, nq).concat(shuffle(fromLessons).slice(0, EVAL_N - nq));
-  const seen = new Set(); return shuffle(pick.filter(q => { const k = q.q; if (seen.has(k)) return false; seen.add(k); return true; })).slice(0, EVAL_N);
+  // doublons écartés ; s'il manque des questions (petit parcours), on complète avec le reste des deux réserves
+  const seen = new Set(), keep = q => { if (seen.has(q.q)) return false; seen.add(q.q); return true; };
+  const out = pick.filter(keep);
+  for (const q of shuffle(fromQuiz.concat(fromLessons))) { if (out.length >= EVAL_N) break; if (keep(q)) out.push(q); }
+  return shuffle(out).slice(0, EVAL_N);
 }
 function viewQuiz(s) {
   clearInterval(evalTimer);

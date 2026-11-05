@@ -1,12 +1,12 @@
 // Lisân Campus : lecture hors connexion.
 // Changez VERSION à chaque mise à jour du site pour renouveler le cache.
-const VERSION = 'lisan-campus-2026-11-05c';
+const VERSION = 'lisan-campus-2026-11-05d';
 const CORE = ['./', 'styles.css', 'app.js', 'config.js', 'auth.js', 'inscription.js', 'admin.js', 'certificats.js', 'boot.js', 'ptr.js', 'emoji.js', 'vendor/qrcode.min.js', 'logo.png',
   'data/droit.js', 'data/ia.js', 'data/arabe.js', 'data/coran.js', 'data/islam.js', 'data/mini.js', 'data/livres.js', 'data/audio.js', 'fonts/LisanNaskh-R.woff2', 'fonts/LisanNaskh-B.woff2',
   'fonts/literata-600.woff2', 'fonts/literata-800.woff2', 'fonts/literata-600-ext.woff2', 'fonts/literata-800-ext.woff2', 'fonts/atkinson-400.woff2', 'fonts/atkinson-700.woff2', 'fonts/atkinson-400i.woff2',
   'fonts/atkinson-400-ext.woff2', 'fonts/atkinson-700-ext.woff2', 'fonts/atkinson-400i-ext.woff2',
   'manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-192.png', 'icon-maskable-512.png', 'apple-touch-icon.png', 'favicon-32.png',
-  'img/en/campus.svg', 'img/en/justice.svg', 'img/en/professions.svg', 'img/en/courts.svg', 'img/en/courtroom.svg', 'img/en/police.svg', 'img/en/lawfirm.svg', 'img/en/contract.svg', 'img/en/persons.svg', 'img/en/falsefriends.svg', 'img/en/pronunciation.svg', 'img/eco/maslow.svg', 'img/eco/keynes.svg', 'img/eco/phillips.svg'];
+  'img/en/campus.svg', 'img/en/justice.svg', 'img/en/professions.svg', 'img/en/courts.svg', 'img/en/courtroom.svg', 'img/en/police.svg', 'img/en/lawfirm.svg', 'img/en/contract.svg', 'img/en/persons.svg', 'img/en/falsefriends.svg', 'img/en/pronunciation.svg', 'img/eco/maslow.svg', 'img/eco/keynes.svg', 'img/eco/phillips.svg', 'img/droit/kelsen.svg', 'img/droit/droits.svg', 'img/droit/juridictions.svg', 'img/droit/penal.svg', 'img/droit/absence.svg', 'img/droit/sources-dm.svg', 'img/droit/dissertation.svg', 'img/droit/vonneumann.svg'];
 
 self.addEventListener('install', e => {
   // cache: 'reload' : on prend les fichiers sur le serveur, jamais dans le cache du navigateur
