@@ -183,7 +183,19 @@ function pronWord(w) {
 }
 // article assimilé collé au mot précédent, comme on le prononce : « rabbi l-‘âlamîn » → « rabbil ‘âlamîn »,
 // « bismi Llâhi r-raḥmâni » → « bismi Llâhir raḥmâni »
-const pronFr = t => String(t).replace(/\s+·\s+/g, ', ').replace(/(\p{L})\s+([a-z]{1,2})-(?=\p{L})/gu, '$1$2 ').replace(/[^\s()«»"“”,.;:!?]+/g, pronWord);
+// chiffres romains, « n° », signes = − → dits en toutes lettres : « XVIIe siècle » → « dix-septième siècle »,
+// « Chapitre II » → « Chapitre deux », « III. Les systèmes » → « trois. Les systèmes »
+const NUM_FR = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize'];
+const numFr = n => n <= 16 ? NUM_FR[n] : n < 20 ? 'dix-' + NUM_FR[n - 10] : n === 20 ? 'vingt' : n < 30 ? 'vingt' + (n === 21 ? ' et un' : '-' + NUM_FR[n - 20]) : String(n);
+const ordFr = n => n === 1 ? 'premier' : numFr(n).replace(/e$/, '').replace(/cinq$/, 'cinqu').replace(/neuf$/, 'neuv') + 'ième';
+const romain = r => { const v = { I: 1, V: 5, X: 10, L: 50 }; let n = 0; for (let i = 0; i < r.length; i++) n += v[r[i]] < (v[r[i + 1]] || 0) ? -v[r[i]] : v[r[i]]; return n; };
+const frNorm = t => String(t)
+  .replace(/\bIer(?=[\s,.;:!?)-]|$)/g, 'premier')
+  .replace(/\b([IVXL]{1,6})(e|ème)(?=[\s,.;:!?)-]|$)/g, (m, r) => romain(r) < 30 ? ordFr(romain(r)) : m)
+  .replace(/\b(Chapitre|Titre|Partie|Section|Livre|Tome|Leçon|Unité|Annexe|Niveau)\s+([IVX]{1,5})\b/g, (m, w, r) => w + ' ' + numFr(romain(r)))
+  .replace(/(^|[.,;:]\s+)([IVX]{1,5})\.(?=\s|$)/g, (m, p, r) => p + numFr(romain(r)) + '.')
+  .replace(/\bn°\s*/g, 'numéro ').replace(/\s=\s/g, ' égale ').replace(/\s−\s/g, ' moins ').replace(/\s*→\s*/g, ', ');
+const pronFr = t => frNorm(String(t).replace(/\s+·\s+/g, ', ')).replace(/(\p{L})\s+([a-z]{1,2})-(?=\p{L})/gu, '$1$2 ').replace(/[^\s()«»"“”,.;:!?]+/g, pronWord);
 // découpe en morceaux : [{ lang, text }] ; l'arabe entre [[...]] devient un morceau arabe (ou une formule transcrite)
 function speechParts(text, lang) {
   if (lang !== 'fr') return [{ lang, text: lang === 'ar' ? arSpeak(text) : text }];
@@ -435,7 +447,7 @@ function renderBlock(b, s) {
   // corrigé d'exercice : caché jusqu'à ce que l'élève le demande
   if (b.corrige) return `<details class="corrige"><summary><span>Voir le corrigé</span><small>Cherche d'abord au brouillon</small></summary><div class="corrige-b">${b.corrige.map(x => renderBlock(x, s)).join('')}</div></details>`;
   // anglais juridique : illustration, vocabulaire à écouter, dialogue anglais avec traduction
-  if (b.illus) return `<figure class="illus"><img src="img/en/${esc(b.illus)}.svg" alt="${esc(b.cap || '')}" width="640" height="320" loading="lazy" decoding="async">${b.cap ? `<figcaption>${esc(b.cap)}</figcaption>` : ''}</figure>`;
+  if (b.illus) return `<figure class="illus"><img src="img/${b.illus.includes('/') ? '' : 'en/'}${esc(b.illus)}.svg" alt="${esc(b.cap || '')}" width="640" height="320" loading="lazy" decoding="async">${b.cap ? `<figcaption>${esc(b.cap)}</figcaption>` : ''}</figure>`;
   if (b.envocab) return `<div class="envocab">${b.envocab.map(([e, w, fr, ex]) => `<button type="button" class="envw" data-say="${esc(w + '. ' + (ex || ''))}" data-lang="en"><span class="envw-e" aria-hidden="true">${e || ''}</span><span class="envw-t"><b>${esc(w)}</b><small>${esc(fr)}</small>${ex ? `<i>${esc(ex)}</i>` : ''}</span><span class="envw-p" aria-hidden="true">▶</span></button>`).join('')}</div>`;
   if (b.endialog) { const L = b.endialog.lines, all = L.map(l => l[2]).join(' ');
     return `<div class="dialog endialog"><p class="situ">${md(b.endialog.situation)}</p>

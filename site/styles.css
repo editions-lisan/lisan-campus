@@ -1062,6 +1062,7 @@ details.corrige .corrige-b { padding: 0 14px 12px; }
 /* ===== Anglais juridique : illustrations, vocabulaire, dialogues */
 figure.illus { margin: 14px 0 18px; }
 figure.illus img { display: block; width: 100%; height: auto; border-radius: 16px; box-shadow: 0 6px 20px rgba(20, 28, 46, .10); }
+figure.illus img[src*="img/eco/"] { max-width: 480px; margin-inline: auto; }
 figure.illus figcaption { margin-top: 6px; text-align: center; font-size: 13px; font-style: italic; color: var(--muted); }
 .envocab { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; margin: 12px 0 16px; }
 .envw { display: flex; align-items: flex-start; gap: 10px; text-align: left; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px 12px; cursor: pointer; transition: transform .12s ease, border-color .12s ease; }
