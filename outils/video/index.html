@@ -49,6 +49,8 @@ h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-heigh
 .nf img { width: 48px; height: 48px; flex: none; }
 .nf small { display: block; font-size: 19px; font-weight: 400; color: #586174; margin-top: 2px; }
 .rc { width: 380px; height: 190px; border-radius: 16px; box-shadow: 0 20px 40px rgba(20,28,46,.25); background-size: cover; }
+.rc.bk { width: 262px; height: 372px; border-radius: 6px 14px 14px 6px; box-shadow: -6px 0 0 #3a2a4a inset, 0 24px 48px rgba(20,28,46,.35); }
+.rc.rp { width: 200px; height: 230px; border-radius: 10px; border: 6px solid #fbf7ef; }
 /* scène 5 */
 #s4-title { left: 84px; top: 96px; width: 740px; font-size: 58px; color: #141c2e; }
 #s4-title span { color: #23468f; }
@@ -107,13 +109,13 @@ h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-heigh
   <h2 id="n-title" class="abs">Le Campus <span>s’agrandit</span></h2>
   <div class="abs nf" id="nf0" style="top:218px"><img src="../../site/emoji/1f4c8.svg" alt=""><div>Économie politique<small>et neuf matières de la licence 1 de droit</small></div></div>
   <div class="abs nf" id="nf1" style="top:304px"><img src="../../site/emoji/270d.svg" alt=""><div>Exercices corrigés et schémas<small>à la fin de chaque leçon de cours</small></div></div>
-  <div class="abs nf" id="nf2" style="top:390px"><img src="../../site/emoji/1f4d6.svg" alt=""><div>Romans juridiques en anglais<small>quatre affaires à lire et à écouter</small></div></div>
+  <div class="abs nf" id="nf2" style="top:390px"><img src="../../site/emoji/1f4d6.svg" alt=""><div>Roman juridique en anglais<small>The Missing Will, un roman illustré à lire et à écouter</small></div></div>
   <div class="abs nf" id="nf3" style="top:476px"><img src="../../site/emoji/1f3a7.svg" alt=""><div>Écoute même écran éteint<small>sept vitesses, voix enregistrées</small></div></div>
   <div class="abs nf" id="nf4" style="top:562px"><img src="../../site/emoji/1f3c5.svg" alt=""><div>Évaluations et certificats<small>vérifiables en ligne par code QR</small></div></div>
-  <div class="abs rc" id="rc0" style="background-image:url(../../site/img/romans/will.svg)"></div>
-  <div class="abs rc" id="rc1" style="background-image:url(../../site/img/romans/lease.svg)"></div>
-  <div class="abs rc" id="rc2" style="background-image:url(../../site/img/romans/night.svg)"></div>
-  <div class="abs rc" id="rc3" style="background-image:url(../../site/img/romans/uniforms.svg)"></div>
+  <div class="abs rc rp" id="rc1" style="background-image:url(../../site/img/romans/part1.svg)"></div>
+  <div class="abs rc rp" id="rc2" style="background-image:url(../../site/img/romans/part3.svg)"></div>
+  <div class="abs rc rp" id="rc3" style="background-image:url(../../site/img/romans/part2.svg)"></div>
+  <div class="abs rc bk" id="rc0" style="background-image:url(../../site/img/romans/will.svg)"></div>
 
   <!-- scène 5 : le téléphone -->
   <h2 id="s4-title" class="abs">Tout le Campus <span>dans votre téléphone</span></h2>
@@ -172,7 +174,7 @@ function render(t) {
   anim('n-eyebrow', t, 10.5, .5, 16.15, .4, { oy: -30 });
   anim('n-title', t, 10.62, .6, 16.15, .4, { oy: -30 });
   for (let k = 0; k < 5; k++) anim('nf' + k, t, 11.15 + k * .42, .5, 16.1 + k * .03, .4, { dx: -40, dy: 0, ox: -60 });
-  const RX = [740, 772, 804, 836], RY = [124, 222, 320, 418], RR = [-7, -2, 3, 8];
+  const RX = [880, 738, 1010, 860], RY = [150, 190, 210, 330], RR = [2, -11, 9, -4];
   RX.forEach((x, k) => { const el = $('rc' + k); el.style.left = x + 'px'; el.style.top = RY[k] + 'px';
     anim('rc' + k, t, 12.4 + k * .2, .7, 16.1 + k * .04, .45, { dx: 260, dy: 0, r: RR[k], back: true, ox: 300 });
     if (t > 13.4 && t < 16.1) el.style.transform += ` translateY(${Math.sin((t - 13.4) * 2 + k) * 3}px)`; });

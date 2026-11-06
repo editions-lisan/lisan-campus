@@ -29,7 +29,7 @@ for k,j in enumerate(jobs):
         a=tts.generate(c['text'], sid=0, speed=speed); x=rs(np.array(a.samples,dtype=np.float32), a.sample_rate)
         if len(x)==0: continue
         marks.append(round(t,2)); pieces.append(x); t+=len(x)/SR
-        gap=0.55 if j.get('dialog') else (0.45 if c['text'].endswith(':') or len(c['text'])<40 else 0.3)
+        gap=c['gap'] if 'gap' in c else 0.55 if j.get('dialog') else (0.45 if c['text'].endswith(':') or len(c['text'])<40 else 0.3)
         pieces.append(np.zeros(int(gap*SR),dtype=np.float32)); t+=gap
     wav=np.concatenate(pieces); tmp=W+f'tmp{part}.wav'; sf.write(tmp, wav, SR)
     subprocess.run(['ffmpeg','-v','error','-y','-i',tmp,'-af','loudnorm=I=-16:TP=-1.5:LRA=11','-ac','1','-ar','22050','-b:a','32k',OUT+f[6:]],check=True)

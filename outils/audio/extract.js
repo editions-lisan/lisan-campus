@@ -19,10 +19,10 @@ for(const l of SUBJECTS.find(x=>x.id==='en').lessons) l.body.forEach((bl,i)=>{ i
   jobs.push({key:'en/'+l.id+'#'+i,h:hash(all),dialog:true,chunks:L.map(x=>({lang:FEM.test(x[0])?'enf':'enm',text:x[2]}))}); });
 // romans juridiques en anglais : le chapitre entier (narrateur + voix des personnages) et chaque dialogue
 const LITF=/^(Akissi|Mariam|The victim|Awa|Apprentice|Judge$)/, voice=w=>w==='Aïcha'?'enf':LITF.test(w)?'enl':'enm';
-const sent=t=>(t.match(/[^.!?]+[.!?]+["”]?|[^.!?]+$/g)||[t]).map(x=>x.trim()).filter(Boolean);
+const sent=t=>{const u=t.replace(/\b(Mr|Mrs|Dr)\./g,'$1§');return (u.match(/[^.!?]+[.!?]+["”]?|[^.!?]+$/g)||[u]).map(x=>x.trim().replace(/§/g,'.')).filter(Boolean);};
 const lit=SUBJECTS.find(x=>x.id==='lit');
 if(lit) for(const l of lit.lessons){ const B=l.body, li=B.findIndex(b=>b.listen);
-  if(li>=0){ const ch=[]; B.forEach(b=>{ if(b.enstory) b.enstory.forEach(p=>sent(p[0]).forEach(x=>ch.push({lang:'enn',text:x}))); if(b.endialog) b.endialog.lines.forEach(x=>ch.push({lang:voice(x[0]),text:x[2]})); });
+  if(li>=0){ const ch=[]; B.forEach(b=>{ if(b.enstory) b.enstory.forEach(p=>{sent(p[0]).forEach(x=>ch.push({lang:'enn',text:x}));ch[ch.length-1].gap=0.8;}); if(b.endialog) b.endialog.lines.forEach(x=>ch.push({lang:voice(x[0]),text:x[2]})); });
     jobs.push({key:'lit/'+l.id+'#c',h:hash(B[li].listen),chunks:ch}); }
   B.forEach((b,i)=>{ if(!b.endialog) return; const L=b.endialog.lines; jobs.push({key:'lit/'+l.id+'#'+i,h:hash(L.map(x=>x[2]).join(' ')),dialog:true,chunks:L.map(x=>({lang:voice(x[0]),text:x[2]}))}); }); }
 fs.writeFileSync(process.argv[2],JSON.stringify(jobs));

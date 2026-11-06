@@ -3,7 +3,7 @@ const fs=require('fs'),path=require('path');
 const SITE=path.resolve(__dirname,'../../site'), OUT=SITE+'/emoji';
 const icons=JSON.parse(fs.readFileSync('package/icons.json')), chars=JSON.parse(fs.readFileSync('package/chars.json'));
 const used=JSON.parse(fs.readFileSync('used.json'));
-const SKIP=new Set(['a9','2630','2197','2b07']);           // ©, ☰, ↗, ⬇ : signes typographiques du site, laissés en texte
+const SKIP=new Set(['a9','2630','2197','2b07','25b6']);    // ©, ☰, ↗, ⬇, ▶ : signes typographiques du site, laissés en texte
 const SUB={'1f46a':'1fac2'};          // famille → personnes qui s’enlacent (absent du jeu Fluent)
 const hex=s=>[...s].map(c=>c.codePointAt(0).toString(16)).filter(h=>h!=='fe0f').join('-');
 fs.rmSync(OUT,{recursive:true,force:true});fs.mkdirSync(OUT);
