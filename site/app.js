@@ -740,7 +740,7 @@ function viewLibrary() {
     <nav class="lib-nav" aria-label="Rayons">${groups.map(g => `<button type="button" class="chip" data-scrollto="lib-${g.sp.id}">${g.sp.icon} ${esc(g.sp.title)}</button>`).join('')}</nav>
     ${groups.map(g => `<section class="lib-sec" id="lib-${g.sp.id}"><h2>${g.sp.icon} ${esc(g.sp.title)}</h2>
       ${g.books.map(b => `<article class="lib-book"><img class="lib-cover" src="livres/couv/Lisan_${b.id}_eleve.webp" alt="Couverture : ${esc(b.title)}" loading="lazy" width="160" height="226">
-        <div class="lib-info"><h3>${esc(b.title)}</h3><p class="meta">${esc(b.sub)} · Mouhamadou CISSEMA</p>
+        <div class="lib-info"><h3>${esc(b.title)}</h3><p class="meta">${esc(b.sub)} · Éditions Lisân</p>
         ${b.docs.map(d => libDocRow(`livres/Lisan_${b.id}_${d.k}.pdf`, d, b.space)).join('')}</div></article>`).join('')}
       ${g.docs.length ? `<article class="lib-book lib-docs"><div class="lib-info"><h3>Documents de cours</h3>${g.docs.map(d => libDocRow('livres/' + d.file, { k: d.kind || 'cours', kind: d.kind, name: d.title, desc: d.desc, pages: d.pages, mb: d.mb }, d.space)).join('')}</div></article>` : ''}
     </section>`).join('')}`;
