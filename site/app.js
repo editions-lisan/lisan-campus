@@ -1375,7 +1375,6 @@ function renderDrawer() {
       ${item('revisions', '🔁', 'Mes révisions' + (revDue().length ? ` (${revDue().length})` : ''))}
       ${item('recherche', '🔍', 'Rechercher dans les leçons')}
       ${item('glossaire', '🔎', 'Glossaire')}
-      ${item('bibliotheque', '📚', 'Bibliothèque')}
       ${A ? item('compte', '👤', 'Mon compte') : ''}
       ${A && u && isAdminCached() ? item('admin', '📋', 'Administration') : ''}
       ${item('suggestion', '💡', 'Suggérer une idée')}
@@ -1648,24 +1647,30 @@ if (LA && LA.ready) {
   // empreinte des fichiers du site : elle change quand une nouvelle version est publiée
   const files = [...document.querySelectorAll('script[src], link[rel="stylesheet"][href]')].map(n => n.getAttribute('src') || n.getAttribute('href'))
     .filter(u => u && !/^(https?:)?\/\//.test(u));
+  // chaque requête est abandonnée au bout de 4 secondes : un réseau lent ne bloque jamais le logo qui tourne
+  const tfetch = (u, o) => { const c = window.AbortController ? new AbortController() : null; const t = setTimeout(() => c && c.abort(), 4000);
+    return fetch(u, Object.assign({ signal: c ? c.signal : undefined }, o)).finally(() => clearTimeout(t)); };
+  const within = (p, ms, v) => Promise.race([p, new Promise(r => setTimeout(() => r(v), ms))]);
   const one = async u => {
     try {
-      const r = await fetch(u, { method: 'HEAD', cache: 'no-store' });
+      const r = await tfetch(u, { method: 'HEAD', cache: 'no-store' });
       const k = r.ok && (r.headers.get('etag') || r.headers.get('last-modified') || r.headers.get('content-length'));
       if (k) return k;
     } catch (e) {}
-    try { const t = await (await fetch(u, { cache: 'no-store' })).text(); let h = 5381; for (let i = 0; i < t.length; i += 7) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return t.length + ':' + h; }
+    try { const t = await (await tfetch(u, { cache: 'no-store' })).text(); let h = 5381; for (let i = 0; i < t.length; i += 7) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return t.length + ':' + h; }
     catch (e) { return null; }
   };
   const sign = async () => { const p = await Promise.all(files.map(one)); return p.some(x => x === null) ? null : p.join('|'); };
   let base = null; const baseline = () => { if (base) return base; base = sign(); return base; };
   setTimeout(() => (window.requestIdleCallback || setTimeout)(() => baseline()), 4000);
   // retour après une actualisation : même page, même position, sans écran d'ouverture ni animation
+  const unback = () => { root.classList.remove('ptr-back'); el.classList.remove('ready', 'spin'); try { sessionStorage.removeItem('lc-ptr'); } catch (e) {} };
+  if (root.classList.contains('ptr-back')) setTimeout(unback, 6000);   // garde-fou : jamais de logo qui tourne sans fin
   function settle() {
-    if (root.classList.contains('lc-quick')) still();
+    try { if (root.classList.contains('lc-quick')) still(); } catch (e) {}
     if (!root.classList.contains('ptr-back')) return;
     let y = 0; try { y = +sessionStorage.getItem('lc-ptr-y') || 0; sessionStorage.removeItem('lc-ptr'); sessionStorage.removeItem('lc-ptr-y'); } catch (e) {}
-    still();
+    try { still(); } catch (e) {}
     if (y) { scrollTo(0, y); requestAnimationFrame(() => scrollTo(0, y)); setTimeout(() => scrollTo(0, y), 120); }
     place(); el.classList.add('ready');
     setTimeout(() => { el.classList.add('go'); root.classList.remove('ptr-back'); el.classList.remove('ready'); }, 450);
@@ -1726,18 +1731,27 @@ if (LA && LA.ready) {
   async function refresh() {
     busy = true; el.classList.add('go', 'spin'); el.style.transform = ''; el.style.opacity = ''; arc.style.strokeDashoffset = ''; svg.style.transform = '';
     if (navigator.vibrate) try { navigator.vibrate(8); } catch (e) {}
-    const t0 = Date.now();
+    const t0 = Date.now(); let over = false;
+    const stop = () => { if (over) return; over = true; el.classList.add('ready'); setTimeout(() => { reset(); busy = false; }, 380); };
+    const guard = setTimeout(stop, 10000);                     // dans tous les cas, le logo s'arrête au bout de 10 secondes
     let changed = false;
-    try { const [a, b] = await Promise.all([baseline(), sign()]); changed = !!(a && b && a !== b); if (!a) base = null; } catch (e) {}
-    if (window.lcCheckUpdate) try { window.lcCheckUpdate(); } catch (e) {}
+    try {
+      const [a, b] = await within(Promise.all([baseline(), sign()]), 6000, [null, null]);
+      changed = !!(a && b && a !== b); if (!a) base = null;
+      if (!changed && window.lcSWNew) changed = await within(window.lcSWNew(), 6000, false);
+    } catch (e) {}
+    // une seule actualisation par minute : si la nouvelle version vient d'être chargée, on ne recharge pas encore
+    let recent = false; try { recent = Date.now() - (+sessionStorage.getItem('lc-ptr-last') || 0) < 60000; } catch (e) {}
     const wait = Math.max(0, 750 - (Date.now() - t0));
-    setTimeout(() => {
-      if (changed && navigator.onLine !== false) {
-        try { keepPlace(); sessionStorage.setItem('lc-ptr', String(Date.now())); sessionStorage.setItem('lc-ptr-y', String(Math.round(scrollY))); } catch (e) {}
+    setTimeout(async () => {
+      if (over) return;
+      if (changed && !recent && navigator.onLine !== false) {
+        if (window.lcSWReady) await within(window.lcSWReady(), 5000, false);   // la nouvelle version est installée avant le rechargement
+        clearTimeout(guard); over = true;
+        try { keepPlace(); sessionStorage.setItem('lc-ptr', String(Date.now())); sessionStorage.setItem('lc-ptr-last', String(Date.now())); sessionStorage.setItem('lc-ptr-y', String(Math.round(scrollY))); sessionStorage.setItem('lc-sw-reload', String(Date.now())); } catch (e) {}
         location.reload(); return;
       }
-      el.classList.add('ready');
-      setTimeout(() => { reset(); busy = false; }, 380);
+      clearTimeout(guard); stop();
     }, wait);
   }
   window.addEventListener('resize', place, { passive: true });

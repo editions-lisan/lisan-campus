@@ -14,6 +14,12 @@ if ('serviceWorker' in navigator) {
   document.addEventListener('visibilitychange', () => { if (pending && document.visibilityState === 'hidden') doReload(); });
   const reg = new Promise(res => window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').then(r => {
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') r.update().catch(() => {}); }); res(r); }).catch(() => res(null))));
+  // tirer pour actualiser : existe-t-il une nouvelle version ? (lcSWNew) ; attendre qu'elle soit installée (lcSWReady)
+  let swTook = false; navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadSW) swTook = true; });
+  window.lcSWNew = () => reg.then(r => r ? r.update().then(() => !!(r.installing || r.waiting) || swTook || pending) : false).catch(() => false);
+  window.lcSWReady = () => new Promise(res => { if (swTook) return res(true);
+    navigator.serviceWorker.addEventListener('controllerchange', () => res(true), { once: true });
+    reg.then(r => { if (!r || !(r.installing || r.waiting)) res(false); }); });
   window.lcCheckUpdate = () => {
     const go = () => { if (location.hash && location.hash !== '#accueil') { pending = true; return; }   // l'élève est déjà reparti : la mise à jour attendra
       try { sessionStorage.setItem('lc-sw-reload', String(Date.now())); } catch (e) {} location.reload(); };
