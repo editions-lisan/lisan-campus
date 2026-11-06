@@ -8,7 +8,46 @@ const PAYS = [
   ['Maroc', '+212'], ['Algérie', '+213'], ['Tunisie', '+216'], ['Égypte', '+20'], ['Arabie saoudite', '+966'], ['Émirats arabes unis', '+971'],
   ['Qatar', '+974'], ['France', '+33'], ['Belgique', '+32'], ['Suisse', '+41'], ['Canada', '+1'], ['États-Unis', '+1'], ['Autre pays', ''],
 ];
-const STATUTS = ['Élève', 'Étudiant(e)', 'Enseignant(e) ou maître', 'Parent', 'Professionnel(le)', 'Sans emploi ou au foyer', 'Autre'];
+// Situation actuelle : un choix pour chaque profil, « Autre situation » pour tous les autres
+const SITUATIONS = [
+  'Actuellement étudiant(e) à l’université',
+  'Ancien(ne) étudiant(e) universitaire',
+  'Étudiant(e) ayant interrompu temporairement mes études',
+  'Futur(e) étudiant(e) : je souhaite intégrer l’université prochainement',
+  'Je souhaite reprendre mes études l’année prochaine',
+  'Élève du secondaire (collège ou lycée)',
+  'Apprenant(e) en formation professionnelle ou technique',
+  'J’exerce une activité professionnelle',
+  'Sans activité scolaire, universitaire ou professionnelle actuellement',
+  'Autre situation',
+];
+const [S_UNI, S_OLD, S_PAUSE, S_FUTUR, S_REPRISE, S_SEC, S_FORM, S_PRO, S_SANS, S_AUTRE] = SITUATIONS;
+// anciennes réponses « Vous êtes… » : reprises dans la nouvelle liste
+const STATUT_OLD = { 'Élève': S_SEC, 'Étudiant(e)': S_UNI, 'Enseignant(e) ou maître': S_PRO, 'Professionnel(le)': S_PRO, 'Sans emploi ou au foyer': S_SANS, 'Parent': S_AUTRE, 'Autre': S_AUTRE };
+const ETABS = ['Université Musulmane Africaine (UMA)', 'Université Félix Houphouët-Boigny (Cocody)', 'Université Alassane Ouattara (Bouaké)', 'Université Nangui Abrogoua (Abobo-Adjamé)',
+  'Université Jean Lorougnon Guédé (Daloa)', 'Université Peleforo Gon Coulibaly (Korhogo)', 'Université de Man', 'Université privée ou grande école', 'Université hors de Côte d’Ivoire',
+  'Autre établissement', 'Aucun établissement actuellement', 'Non concerné(e)'];
+const NIVEAUX = ['Licence 1', 'Licence 2', 'Licence 3', 'Master 1', 'Master 2', 'Doctorat', 'BTS, DUT ou diplôme technique', 'Autre'];
+const ANNEES = ['2026-2027', '2025-2026', 'Autre'];
+const CLASSES = ['6e', '5e', '4e', '3e', 'Seconde', 'Première', 'Terminale', 'Autre'];
+const REPRISES = ['2027-2028', '2028-2029', 'Plus tard', 'Je ne sais pas encore'];
+// questions de parcours, facultatives, affichées selon la situation déclarée
+const PARCOURS = [
+  { k: 'etab', t: 'select', l: 'Université ou établissement', o: ETABS, for: [S_UNI, S_OLD, S_PAUSE] },
+  { k: 'etabAutre', t: 'text', l: 'Précisez l’établissement', dep: ['etab', ['Autre établissement', 'Université privée ou grande école', 'Université hors de Côte d’Ivoire']], for: [S_UNI, S_OLD, S_PAUSE] },
+  { k: 'filiere', t: 'text', l: 'Filière ou domaine d’études', hint: 'Par exemple : droit, lettres, sciences économiques', for: [S_UNI, S_OLD, S_PAUSE] },
+  { k: 'niveau', t: 'select', l: 'Niveau d’études (actuel ou dernier atteint)', o: NIVEAUX, for: [S_UNI, S_OLD, S_PAUSE] },
+  { k: 'annee', t: 'select', l: 'Année universitaire', o: ANNEES, for: [S_UNI] },
+  { k: 'classe', t: 'select', l: 'Classe', o: CLASSES, for: [S_SEC] },
+  { k: 'ecole', t: 'text', l: 'Établissement scolaire', for: [S_SEC] },
+  { k: 'formation', t: 'text', l: 'Formation suivie et établissement ou centre', hint: 'Par exemple : BT comptabilité, centre de formation de Yopougon', for: [S_FORM] },
+  { k: 'metier', t: 'text', l: 'Profession ou secteur d’activité', for: [S_PRO] },
+  { k: 'projet', t: 'text', l: 'Votre projet d’études ou d’orientation', hint: 'Filière ou établissement visé, si vous le savez', for: [S_FUTUR, S_REPRISE, S_PAUSE] },
+  { k: 'reprise', t: 'select', l: 'Année prévue pour commencer ou reprendre', o: REPRISES, for: [S_FUTUR, S_REPRISE, S_PAUSE] },
+  { k: 'precision', t: 'text', l: 'Précisez votre situation', for: [S_AUTRE] },
+];
+const PARCOURS_LABEL = { etab: 'Établissement', etabAutre: 'Établissement (précision)', filiere: 'Filière', niveau: 'Niveau d’études', annee: 'Année universitaire', classe: 'Classe',
+  ecole: 'Établissement scolaire', formation: 'Formation', metier: 'Profession', projet: 'Projet d’études', reprise: 'Reprise prévue', precision: 'Précision' };
 const SOURCES = ['Un enseignant ou un maître', 'Un livre des Éditions Lisân', 'Un ami ou la famille', 'WhatsApp', 'Facebook', 'Une recherche sur Google', 'Mon université', 'Autre'];
 const SPACE_CODE = { droit: 'DR', ia: 'IA', arabe: 'AR', coran: 'QR', islam: 'IS' };
 
@@ -17,35 +56,35 @@ const QUESTIONS = {
   arabe: [
     { k: 'niveau', t: 'radio', l: 'Votre niveau en arabe', req: 1, o: ['Je débute : je ne lis pas encore l’arabe', 'Je lis un peu, lentement', 'Je lis et je comprends quelques phrases', 'Je parle déjà un peu arabe'] },
     { k: 'depart', t: 'radio', l: 'Par quel niveau voulez-vous commencer ?', req: 1, o: ['Niveau 0 · Je lis l’arabe !', 'Niveau 1 · Je parle arabe !', 'Niveau 2 · Je parle arabe !', 'Niveau 3 · Je parle arabe !', 'Je ne sais pas encore'] },
-    { k: 'cadre', t: 'radio', l: 'Vous apprenez…', req: 1, o: ['Seul(e), à mon rythme', 'Dans une école ou un centre', 'Avec un enseignant en ligne'] },
+    { k: 'cadre', t: 'radio', l: 'Vous apprenez…', req: 1, o: ['Seul(e), à mon rythme', 'Dans une école ou un centre', 'Avec un enseignant en ligne', 'Autre'] },
     { k: 'livre', t: 'radio', l: 'Avez-vous le livre des Éditions Lisân ?', req: 1, o: ['Oui', 'Pas encore'] },
   ],
   coran: [
     { k: 'niveau', t: 'radio', l: 'Votre lecture du Coran aujourd’hui', req: 1, o: ['Je ne connais pas encore les lettres', 'Je connais les lettres', 'Je lis lentement, en épelant', 'Je lis couramment et je veux améliorer ma lecture'] },
     { k: 'maitre', t: 'radio', l: 'Suivez-vous un maître ?', req: 1, o: ['Oui, dans une école coranique ou un centre', 'Oui, en ligne', 'Pas encore'] },
-    { k: 'centre', t: 'text', l: 'Nom de l’école ou du centre', hint: 'Facultatif' },
-    { k: 'objectif', t: 'radio', l: 'Votre objectif', req: 1, o: ['Apprendre à lire le Coran', 'Améliorer ma lecture', 'Préparer la mémorisation', 'Accompagner mon enfant'] },
+    { k: 'centre', t: 'text', l: 'Nom de l’école ou du centre', dep: ['maitre', ['Oui, dans une école coranique ou un centre']] },
+    { k: 'objectif', t: 'radio', l: 'Votre objectif', req: 1, o: ['Apprendre à lire le Coran', 'Améliorer ma lecture', 'Préparer la mémorisation', 'Accompagner mon enfant', 'Autre'] },
     { k: 'livre', t: 'radio', l: 'Avez-vous le livre « Lire le Coran pas à pas » ?', req: 1, o: ['Oui', 'Pas encore'] },
   ],
   droit: [
-    { k: 'etab', t: 'text', l: 'Établissement', req: 1 },
-    { k: 'niveau', t: 'select', l: 'Niveau d’études', req: 1, o: ['Licence 1', 'Licence 2', 'Licence 3', 'Master', 'Pas encore inscrit(e)', 'Autre'] },
-    { k: 'annee', t: 'select', l: 'Année universitaire', req: 1, o: ['2026-2027', '2025-2026', 'Autre'] },
-    { k: 'matricule', t: 'text', l: 'Numéro matricule', hint: 'Facultatif' },
+    { k: 'raison', t: 'radio', l: 'Vous suivez l’espace Droit…', req: 1, o: ['Pour mes cours de licence en droit', 'Pour préparer mon entrée en faculté de droit', 'Pour réviser ou reprendre des cours de droit', 'Pour mon travail', 'Par intérêt personnel', 'Autre'] },
+    { k: 'matricule', t: 'text', l: 'Numéro matricule', hint: 'Si vous en avez un', dep: ['raison', ['Pour mes cours de licence en droit']] },
   ],
   islam: [
-    { k: 'role', t: 'radio', l: 'Vous suivez ce programme comme…', req: 1, o: ['Parent', 'Enfant ou adolescent', 'Animateur, oustaz ou enseignant', 'Adulte qui apprend pour lui-même'] },
+    { k: 'role', t: 'radio', l: 'Vous suivez ce programme comme…', req: 1, o: ['Parent', 'Enfant ou adolescent', 'Animateur, oustaz ou enseignant', 'Adulte qui apprend pour lui-même', 'Autre'] },
     { k: 'niveau', t: 'radio', l: 'Par quel niveau commencez-vous ?', req: 1, o: ['Niveau 1 · L’Islâm', 'Niveau 2 · L’Îmân', 'Je ne sais pas encore'] },
-    { k: 'cadre', t: 'radio', l: 'Vous suivez le programme…', req: 1, o: ['En famille, à la maison', 'Dans une mosquée, une école ou un centre', 'Seul(e)'] },
+    { k: 'cadre', t: 'radio', l: 'Vous suivez le programme…', req: 1, o: ['En famille, à la maison', 'Dans une mosquée, une école ou un centre', 'Seul(e)', 'Autre'] },
     { k: 'livre', t: 'radio', l: 'Avez-vous les livres « Vivre l’islam en famille » ?', req: 1, o: ['Oui', 'Pas encore'] },
   ],
   ia: [
-    { k: 'objectif', t: 'radio', l: 'Pourquoi vous former à l’IA ?', req: 1, o: ['Pour mes études', 'Pour enseigner', 'Pour mon travail', 'Pour créer des contenus', 'Pour découvrir'] },
+    { k: 'objectif', t: 'radio', l: 'Pourquoi vous former à l’IA ?', req: 1, o: ['Pour mes études', 'Pour enseigner', 'Pour mon travail', 'Pour créer des contenus', 'Pour découvrir', 'Autre'] },
     { k: 'domaine', t: 'select', l: 'Votre domaine principal', req: 1, o: ['Études (collège, lycée, université)', 'Enseignement ou formation', 'Droit', 'Commerce ou entreprise', 'Santé', 'Agriculture', 'Administration', 'Sciences islamiques', 'Association', 'Autre'] },
     { k: 'usage', t: 'radio', l: 'Utilisez-vous déjà un assistant d’IA ?', req: 1, o: ['Jamais', 'Un peu', 'Souvent'] },
     { k: 'compte', t: 'radio', l: 'Avez-vous un compte Claude ?', req: 1, o: ['Oui', 'Pas encore'] },
   ],
 };
+// anciennes réponses de l'espace Droit (inscriptions faites avant novembre 2026) : toujours affichées
+const ANSWER_OLD = { etab: 'Établissement', niveau: 'Niveau d’études', annee: 'Année universitaire' };
 
 // ---------- outils
 const ageOf = d => { if (!d) return null; const b = new Date(d + 'T00:00:00'); if (isNaN(b)) return null; const n = new Date();
@@ -62,9 +101,9 @@ function splitName(full) {
 }
 function defaultInfo() {
   const A = AUTH(), u = A && A.user(), saved = A && A.info && A.info();
-  if (saved) return Object.assign({}, saved);
+  if (saved) { const i = Object.assign({}, saved); if (STATUT_OLD[i.statut]) { if (i.statut === 'Parent') i.parcours = Object.assign({ precision: 'Parent' }, i.parcours); i.statut = STATUT_OLD[i.statut]; } return i; }
   const n = splitName(u && u.displayName);
-  return { civilite: '', prenom: n.prenom, nom: n.nom, naissance: '', ind: '+225', tel: '', pays: 'Côte d’Ivoire', paysAutre: '', ville: '', statut: '', source: '', news: false, tuteur: null };
+  return { civilite: '', prenom: n.prenom, nom: n.nom, naissance: '', ind: '+225', tel: '', pays: 'Côte d’Ivoire', paysAutre: '', ville: '', statut: '', parcours: {}, source: '', news: false, tuteur: null };
 }
 
 // ---------- champs
@@ -78,6 +117,13 @@ const fieldRadio = (k, l, opts, v, o = {}) => `<fieldset class="fld radios" data
   ${opts.map(x => `<label class="choice"><input type="radio" name="${k}" value="${esc(x)}"${x === v ? ' checked' : ''}${o.req ? ' required' : ''}><span>${esc(x)}</span></label>`).join('')}<small class="err" hidden></small></fieldset>`;
 const fieldCheck = (k, html, v, req) => `<label class="choice check fld" data-f="${k}"><input type="checkbox" name="${k}"${v ? ' checked' : ''}${req ? ' required' : ''}><span>${html}${req ? ' <span class="req" aria-hidden="true">*</span>' : ''}</span><small class="err" hidden></small></label>`;
 
+// enveloppe affichée seulement quand le champ « dep » a l'une des valeurs « vals »
+const cond = (dep, vals, html, cur) => `<div class="cond" data-dep="${esc(dep)}" data-vals="${esc(JSON.stringify(vals))}"${vals.includes(cur) ? '' : ' hidden'}>${html}</div>`;
+const optField = (name, q, v) => q.t === 'select' ? fieldSelect(name, q.l, q.o, v, q) : q.t === 'radio' ? fieldRadio(name, q.l, q.o, v, q) : fieldText(name, q.l, v, { req: q.req, hint: q.hint });
+function parcoursFields(i) {
+  const P = i.parcours || {};
+  return PARCOURS.map(q => { let h = optField('p_' + q.k, q, P[q.k]); if (q.dep) h = cond('p_' + q.dep[0], q.dep[1], h, P[q.dep[0]]); return cond('statut', q.for, h, i.statut); }).join('');
+}
 function infoFieldsets(i, opts = {}) {
   const A = AUTH(), u = A && A.user();
   const today = new Date().toISOString().slice(0, 10), minor = (ageOf(i.naissance) ?? 99) < 18, t = i.tuteur || {};
@@ -96,11 +142,15 @@ function infoFieldsets(i, opts = {}) {
       <div class="fld tel-row" data-f="tel"><span class="lbl">Téléphone (WhatsApp de préférence)${reqMark(1)}</span>
         <div class="tel-in"><select name="ind" aria-label="Indicatif">${[...new Set(PAYS.map(p => p[1]).filter(Boolean))].map(c => `<option${c === i.ind ? ' selected' : ''}>${c}</option>`).join('')}</select>
         <input name="tel" type="tel" inputmode="tel" autocomplete="tel-national" value="${esc(i.tel || '')}" required aria-label="Numéro de téléphone" placeholder="07 00 00 00 00"></div><small class="err" hidden></small></div>
-      <div class="row2">${fieldSelect('pays', 'Pays de résidence', PAYS.map(p => p[0]), i.pays, { req: 1 })}${fieldText('ville', 'Ville ou commune', i.ville, { req: 1, ac: 'address-level2' })}</div>
+      <div class="row2">${fieldSelect('pays', 'Pays de résidence', PAYS.map(p => p[0]), i.pays, { req: 1 })}${fieldText('ville', 'Ville ou commune', i.ville, { ac: 'address-level2' })}</div>
       <div id="pays-autre"${i.pays === 'Autre pays' ? '' : ' hidden'}>${fieldText('paysAutre', 'Précisez le pays', i.paysAutre, { req: 1 })}</div>
     </fieldset>
-    <fieldset class="group"><legend>Votre profil</legend>
-      ${fieldSelect('statut', 'Vous êtes', STATUTS, i.statut, { req: 1 })}
+    <fieldset class="group"><legend>Votre situation</legend>
+      <p class="meta">Choisissez la situation la plus proche de la vôtre : tous les profils peuvent suivre les cours. Les précisions qui suivent sont facultatives.</p>
+      ${fieldRadio('statut', 'Votre situation actuelle', SITUATIONS, i.statut, { req: 1 })}
+      ${parcoursFields(i)}
+    </fieldset>
+    <fieldset class="group"><legend>Pour mieux vous connaître</legend>
       ${fieldSelect('source', 'Comment avez-vous connu Lisân Campus ?', SOURCES, i.source)}
       ${opts.news !== false ? fieldCheck('news', 'Je souhaite recevoir les nouveautés des Éditions Lisân (nouveaux cours, nouveaux livres).', i.news, false) : ''}
     </fieldset>`;
@@ -112,15 +162,29 @@ function bindInfoFields(f) {
   const ps = f.elements.pays, pa = f.querySelector('#pays-autre');
   ps.addEventListener('change', () => { const c = (PAYS.find(p => p[0] === ps.value) || [])[1]; if (c) f.elements.ind.value = c;
     pa.hidden = ps.value !== 'Autre pays'; });
+  bindCond(f);
   f.addEventListener('input', e => { const w = e.target.closest('.fld'); if (w) { w.classList.remove('bad'); const er = w.querySelector('.err'); if (er) er.hidden = true; } });
+}
+function bindCond(f) {
+  const val = n => { const c = f.querySelector(`[name="${n}"]:checked`); if (c) return c.value; const e = f.elements[n]; return e && !(e instanceof RadioNodeList) && e.type !== 'radio' ? e.value : ''; };
+  const sync = () => f.querySelectorAll('.cond').forEach(c => { let vals = []; try { vals = JSON.parse(c.dataset.vals); } catch (e) {}
+    const parentHidden = c.parentElement && c.parentElement.closest('.cond[hidden]'); c.hidden = !!parentHidden || !vals.includes(val(c.dataset.dep)); });
+  f.addEventListener('change', sync); sync();
 }
 function readInfo(f) {
   const g = k => (f.elements[k] && f.elements[k].value || '').trim();
   const minor = (ageOf(g('naissance')) ?? 99) < 18;
   return { civilite: (f.querySelector('[name=civilite]:checked') || {}).value || '', prenom: prenomFmt(g('prenom')), nom: g('nom').replace(/\s+/g, ' ').toUpperCase(),
     naissance: g('naissance'), ind: g('ind'), tel: g('tel').replace(/[^\d]/g, ''), pays: g('pays'), paysAutre: g('pays') === 'Autre pays' ? g('paysAutre') : '', ville: g('ville'),
-    statut: g('statut'), source: g('source'), news: !!(f.elements.news && f.elements.news.checked),
+    statut: (f.querySelector('[name=statut]:checked') || {}).value || '', parcours: readParcours(f), source: g('source'), news: !!(f.elements.news && f.elements.news.checked),
     tuteur: minor ? { nom: g('tNom'), tel: g('tTel').replace(/[^\d+]/g, ''), accord: !!f.elements.tAccord.checked } : null };
+}
+// toutes les clés sont écrites (vides si la question ne concerne pas la situation choisie) : une ancienne réponse ne reste jamais dans la fiche
+function readParcours(f) {
+  const out = {};
+  PARCOURS.forEach(q => { const w = f.querySelector(`[name="p_${q.k}"]`), box = w && w.closest('.cond');
+    let v = ''; if (w && !(box && (box.hidden || box.closest('.cond[hidden]')))) v = String(w.value || '').trim().slice(0, 120); out[q.k] = v; });
+  return out;
 }
 function validate(f) {
   const bad = [];
@@ -150,14 +214,18 @@ const paysOf = i => i.pays === 'Autre pays' ? (i.paysAutre || 'Autre pays') : i.
 function infoRows(i) {
   const a = ageOf(i.naissance);
   const rows = [['Nom et prénom(s)', `${i.civilite === 'Madame' ? 'Mme' : 'M.'} ${String(i.nom || '').toUpperCase()} ${prenomFmt(i.prenom)}`], ['Date de naissance', `${dateFr(i.naissance)}${a !== null ? ` (${a} ans)` : ''}`],
-    ['Téléphone', telFr(i.ind, i.tel)], ['Résidence', `${i.ville}, ${paysOf(i)}`], ['Profil', i.statut]];
+    ['Téléphone', telFr(i.ind, i.tel)], ['Résidence', [i.ville, paysOf(i)].filter(Boolean).join(', ')], ['Situation', STATUT_OLD[i.statut] || i.statut]];
+  Object.entries(i.parcours || {}).forEach(([k, v]) => { if (v && PARCOURS_LABEL[k]) rows.push([PARCOURS_LABEL[k], v]); });
   if (i.source) rows.push(['Connu par', i.source]);
   if (i.tuteur) rows.push(['Parent ou tuteur', `${i.tuteur.nom} · ${telFr('', i.tuteur.tel)}${i.tuteur.accord ? ' · accord donné' : ''}`]);
   rows.push(['Recevoir les nouveautés', i.news ? 'Oui' : 'Non']);
   return rows;
 }
 const dl = rows => `<dl class="recap">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v || '—')}</dd></div>`).join('')}</dl>`;
-const answerRows = (id, rep) => (QUESTIONS[id] || []).filter(q => rep[q.k]).map(q => [q.l, rep[q.k]]);
+const answerRows = (id, rep) => { rep = rep || {}; const qs = QUESTIONS[id] || [], known = qs.map(q => q.k);
+  return [...qs.filter(q => rep[q.k]).map(q => [q.l, rep[q.k]]), ...Object.keys(ANSWER_OLD).filter(k => rep[k] && !known.includes(k)).map(k => [ANSWER_OLD[k], rep[k]])]; };
+// résumé du parcours en une ligne (export Excel)
+const parcoursText = i => Object.entries(i.parcours || {}).filter(([k, v]) => v && PARCOURS_LABEL[k]).map(([k, v]) => `${PARCOURS_LABEL[k]} : ${v}`).join(' | ');
 
 // ---------- l'inscription : formulaire → vérification → confirmation
 let enrollRun = null;   // { id, step, info, rep, attest, cgu, num, date, err }
@@ -189,8 +257,10 @@ function drawEnroll() {
       <form class="form enroll-form" novalidate>
         ${infoFieldsets(R.info)}
         <fieldset class="group"><legend>Votre parcours : ${esc(sp.title)}</legend>
-          ${qs.map(q => q.t === 'radio' ? fieldRadio('q_' + q.k, q.l, q.o, R.rep[q.k], q) : q.t === 'select' ? fieldSelect('q_' + q.k, q.l, q.o, R.rep[q.k], q)
-            : fieldText('q_' + q.k, q.l, R.rep[q.k] !== undefined ? R.rep[q.k] : (q.def || ''), { req: q.req })).join('')}
+          ${qs.map(q => { const cur = R.rep[q.k] || '', other = /^Autre : /.test(cur), base = other ? 'Autre' : cur;
+            let h = optField('q_' + q.k, q, base);
+            if ((q.o || []).includes('Autre')) h += cond('q_' + q.k, ['Autre'], fieldText('q_' + q.k + '_autre', 'Précisez', other ? cur.slice(8) : ''), base);
+            return q.dep ? cond('q_' + q.dep[0], q.dep[1], h, (R.rep[q.dep[0]] || '').replace(/^Autre : .*/, 'Autre')) : h; }).join('')}
         </fieldset>
         <fieldset class="group"><legend>Engagements</legend>
           ${fieldCheck('attest', 'Je certifie que les informations de cette fiche sont exactes.', R.attest, true)}
@@ -200,7 +270,10 @@ function drawEnroll() {
       </form>`;
     const f = box.querySelector('form'); bindInfoFields(f);
     f.addEventListener('submit', e => { e.preventDefault(); if (!validate(f)) return;
-      R.info = readInfo(f); R.rep = {}; qs.forEach(q => { const v = q.t === 'radio' ? (f.querySelector(`[name="q_${q.k}"]:checked`) || {}).value : (f.elements['q_' + q.k].value || '').trim(); if (v) R.rep[q.k] = v; });
+      R.info = readInfo(f); R.rep = {}; qs.forEach(q => { const el = f.querySelector(`[name="q_${q.k}"]`), box = el && el.closest('.cond'); if (box && box.hidden) return;
+        let v = q.t === 'radio' ? (f.querySelector(`[name="q_${q.k}"]:checked`) || {}).value : (f.elements['q_' + q.k].value || '').trim();
+        const o = f.elements['q_' + q.k + '_autre']; if (v === 'Autre' && o && o.value.trim()) v = 'Autre : ' + o.value.trim().slice(0, 100);
+        if (v) R.rep[q.k] = v; });
       R.attest = f.elements.attest.checked; R.cgu = f.elements.cgu.checked; R.step = 'check'; R.err = ''; drawEnroll(); window.scrollTo(0, 0); });
     return;
   }

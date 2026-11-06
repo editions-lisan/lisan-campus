@@ -181,7 +181,7 @@ function adminCards(rows) {
     return `<article class="adm-card c-${sp.color}">
       <div class="adm-top"><b>${esc(civ(i))} ${esc(String(i.nom || '').toUpperCase())} ${esc(prenomFmt(i.prenom || u.name))}</b><span class="tag">${sp.icon} ${esc(sp.title)}</span></div>
       <small>N° ${esc(en.num)} · inscrit le ${dateFr(en.date)}</small>
-      <p>${[a !== null ? a + ' ans' : '', i.statut, [i.ville, paysOf(i)].filter(Boolean).join(', ')].filter(Boolean).map(esc).join(' · ')}</p>
+      <p>${[a !== null ? a + ' ans' : '', STATUT_OLD[i.statut] || i.statut, [i.ville, paysOf(i)].filter(Boolean).join(', ')].filter(Boolean).map(esc).join(' · ')}</p>
       <div class="actions">${wa ? `<a class="btn small" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${i.tel ? `<a class="btn ghost small" href="${telLink(i)}">Appeler ${esc(telFr(i.ind, i.tel))}</a>` : ''}
         ${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}">E-mail</a>` : ''}</div>
       <details><summary>Fiche complète</summary>${dl([['Adresse e-mail', u.email], ...infoRows(i), ...answerRows(id, en.reponses), ['Leçons terminées (compte)', String(u.done)],
@@ -190,11 +190,11 @@ function adminCards(rows) {
 
 // ---------- export : Excel (feuille « Tous » + une feuille par espace) et CSV
 const COLS = [['N° d’inscription', 14], ['Espace', 18], ['Date d’inscription', 14], ['Civilité', 9], ['Nom', 16], ['Prénoms', 18], ['Date de naissance', 14], ['Âge', 6],
-  ['Téléphone', 16], ['Lien WhatsApp', 30], ['E-mail', 28], ['Pays', 14], ['Ville', 14], ['Profil', 16], ['Connu par', 20], ['Nouveautés', 10], ['Parent ou tuteur', 20], ['Tél. parent', 14]];
+  ['Téléphone', 16], ['Lien WhatsApp', 30], ['E-mail', 28], ['Pays', 14], ['Ville', 14], ['Situation', 30], ['Détails du parcours', 44], ['Connu par', 20], ['Nouveautés', 10], ['Parent ou tuteur', 20], ['Tél. parent', 14]];
 function baseLine({ u, id, en }) {
   const i = u.info || {}, a = ageOf(i.naissance), d = en.date ? new Date(en.date) : null;
   return [en.num, space(id).title, d ? d.toLocaleDateString('fr-FR') : '', i.civilite || '', String(i.nom || '').toUpperCase(), prenomFmt(i.prenom || u.name), i.naissance ? new Date(i.naissance + 'T00:00:00').toLocaleDateString('fr-FR') : '',
-    a === null ? '' : a, telFr(i.ind, i.tel), waLink(i), u.email, paysOf(i) || '', i.ville || '', i.statut || '', i.source || '', i.news ? 'Oui' : 'Non',
+    a === null ? '' : a, telFr(i.ind, i.tel), waLink(i), u.email, paysOf(i) || '', i.ville || '', STATUT_OLD[i.statut] || i.statut || '', parcoursText(i), i.source || '', i.news ? 'Oui' : 'Non',
     i.tuteur ? i.tuteur.nom : '', i.tuteur ? i.tuteur.tel : ''];
 }
 const answersText = (id, rep) => answerRows(id, rep).map(([k, v]) => `${k} : ${v}`).join(' | ');
