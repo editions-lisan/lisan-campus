@@ -171,11 +171,11 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>
 <script>window.PagedConfig={auto:true,after:()=>{window.__done=true}}</script>
 <script src="file://${path.join(DEPS, 'pagedjs/dist/paged.polyfill.js')}"></script></head><body>
 <div class="cover">${cover(true)}</div>
-<section class="front titlep"><p class="kick">Legal Stories from Abidjan · Book One</p><h1>The Missing Will</h1><p class="sub">A legal novel</p><p class="orn">❧</p><p class="author">Mouhamadou Cissema</p>
+<section class="front titlep"><p class="kick">Legal Stories from Abidjan</p><h1>The Missing Will</h1><p class="sub">A legal novel</p><p class="orn">❧</p><p class="author">Book One</p>
 <div class="pub"><img src="file://${SITE}/logo.png" alt="">Éditions Lisân</div></section>
 <section class="front copy">
-<p><b>The Missing Will</b><br>Legal Stories from Abidjan · Book One</p>
-<p>© 2026 Mouhamadou CISSEMA and Éditions Lisân. All rights reserved.</p>
+<p><b>The Missing Will</b><br>Legal Stories from Abidjan, a collection of Éditions Lisân · Book One</p>
+<p>© 2026 Éditions Lisân. All rights reserved.</p>
 <p>This is a work of fiction. The characters, the law firm Kouassi &amp; Traoré, the cases and the court decisions in this book are invented; any resemblance to real persons is coincidental. The legal rules mentioned in the story are explained simply for learners and do not replace the advice of a lawyer.</p>
 <p>Cover and illustrations: Éditions Lisân.</p>
 <p>Read and listen online, with a French translation of every paragraph: Lisân Campus, lisan-campus.pages.dev.</p>

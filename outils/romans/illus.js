@@ -69,7 +69,7 @@ function cover(withText) {
   if (withText) {
     b += `<text x="740" y="250" text-anchor="middle" font-family="Literata, Georgia, serif" font-size="40" letter-spacing="10" fill="#f0c877">LEGAL STORIES FROM ABIDJAN</text>`;
     b += `<text x="740" y="560" text-anchor="middle" font-family="Literata, Georgia, serif" font-style="italic" font-size="190" fill="#fbf1dc">The Missing</text><text x="740" y="760" text-anchor="middle" font-family="Literata, Georgia, serif" font-style="italic" font-size="190" fill="#fbf1dc">Will</text>`;
-    b += `<text x="740" y="900" text-anchor="middle" font-family="Literata, Georgia, serif" font-size="52" letter-spacing="6" fill="#f0c877">MOUHAMADOU CISSEMA</text>`;
+    b += `<text x="740" y="900" text-anchor="middle" font-family="Literata, Georgia, serif" font-size="52" letter-spacing="14" fill="#f0c877">BOOK ONE</text>`;
   }
   return svg(W, H, b, withText ? 'role="img" aria-label="The Missing Will — couverture"' : 'aria-hidden="true"');
 }
