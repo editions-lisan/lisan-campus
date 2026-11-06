@@ -10,7 +10,9 @@ def load(name, model):
 VO={'fr':(load('vits-piper-fr_FR-siwis-medium','fr_FR-siwis-medium.onnx'),1.0),
     'ar':(load('vits-piper-ar_JO-kareem-medium','ar_JO-kareem-medium.onnx'),0.85),
     'enf':(load('vits-piper-en_US-amy-medium','en_US-amy-medium.onnx'),0.95),
-    'enm':(load('vits-piper-en_US-joe-medium','en_US-joe-medium.onnx'),0.95)}
+    'enm':(load('vits-piper-en_US-joe-medium','en_US-joe-medium.onnx'),0.95),
+    'enn':(load('vits-piper-en_US-ryan-medium','en_US-ryan-medium.onnx'),0.98),
+    'enl':(load('vits-piper-en_US-lessac-medium','en_US-lessac-medium.onnx'),0.95)}
 SR=22050
 def rs(x, sr):
     if sr==SR: return x

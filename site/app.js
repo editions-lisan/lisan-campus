@@ -26,7 +26,9 @@ function audioSeconds(text) {
   const arw = ar.reduce((n, x) => n + x.split(/\s+/).length, 0), pauses = (t.match(/[.!?;:]/g) || []).length;
   return fr * 0.36 + arw * 0.7 + pauses * 0.25;
 }
-const needFor = l => Math.max(40, Math.min(1800, Math.round(audioSeconds(lessonSpeech(l)))));
+// les romans en anglais comptent aussi le texte anglais (récit et dialogues) dans le temps d'étude
+const storySeconds = l => l.body.some(b => b.enstory) ? audioSeconds(l.body.map(b => b.enstory ? b.enstory.map(p => p[0]).join(' ') : b.endialog ? b.endialog.lines.map(x => x[2]).join(' ') : '').join(' ')) : 0;
+const needFor = l => Math.max(40, Math.min(1800, Math.round(audioSeconds(lessonSpeech(l)) + storySeconds(l))));
 const fmtLeft = n => n >= 60 ? `${Math.floor(n / 60)} min ${String(n % 60).padStart(2, '0')} s` : `${n} s`;
 // le mini-exercice doit être réussi (toutes les réponses justes) pour terminer la leçon et passer à la suivante
 const miniNeeded = key => !state.minis[key] && !!document.querySelector(`.mini[data-mini="${key}"]`);
@@ -453,6 +455,9 @@ function renderBlock(b, s) {
     return `<div class="dialog endialog"><p class="situ">${md(b.endialog.situation)}</p>
       <div class="actions"><button type="button" class="btn small" data-say="${esc(all)}" data-lang="en">${ICON}Écouter tout le dialogue</button><button type="button" class="btn ghost small" data-trad="1" aria-pressed="false">Traduction</button></div>
       ${L.map(([who, col, en, fr]) => `<div class="dl dl-e"><span class="who" style="color:${esc(col)}">${esc(who)}</span><button type="button" class="dl-en" data-say="${esc(en)}" data-lang="en">${esc(en)}</button><span class="fr">${md(fr)}</span></div>`).join('')}</div>`; }
+  // romans en anglais : écoute du chapitre entier (voix enregistrées) et récit avec traduction à afficher
+  if (b.listen) return `<div class="actions"><button type="button" class="btn small" data-say="${esc(b.listen)}" data-lang="en">${ICON}${esc(b.label || 'Écouter le chapitre')}</button></div>`;
+  if (b.enstory) return `<div class="dialog enstory"><div class="actions"><button type="button" class="btn ghost small" data-trad="1" aria-pressed="false">Traduction</button></div>${b.enstory.map(([en, fr]) => `<div class="sp"><button type="button" class="dl-en sp-en" data-say="${esc(en)}" data-lang="en">${md(en)}</button><span class="fr">${md(fr)}</span></div>`).join('')}</div>`;
   if (b.p) return `<p>${md(b.p)}</p>`;
   if (b.h) return `<h3>${md(b.h)}</h3>`;
   if (b.ul) return `<ul>${b.ul.map(x => `<li>${md(x)}</li>`).join('')}</ul>`;
@@ -700,7 +705,7 @@ function viewSpace(sp) {
 // ---------- bibliothèque : les livres des Éditions Lisân (élève, maître, exercices) et les documents de cours.
 // Lecture et téléchargement après connexion et inscription à l’espace du livre (comme les leçons) ; sans connexion
 // configurée (aperçu), tout est libre.
-const DOC_ICON = { eleve: '📗', maitre: '📘', exercices: '📙', cours: '📄', Cours: '📄', TD: '📝', 'Méthode': '🧭', Exercices: '✍️', Code: '📕' };
+const DOC_ICON = { eleve: '📗', maitre: '📘', exercices: '📙', cours: '📄', Cours: '📄', TD: '📝', 'Méthode': '🧭', Exercices: '✍️', Lectures: '📖', Code: '📕' };
 const DOC_KIND = { Cours: 'cours', TD: 'travaux dirigés', 'Méthode': 'fiche méthode', Code: 'Code civil' };
 const libList = l => l.length > 1 ? l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1] : (l[0] || '');
 function libLink(spId) {

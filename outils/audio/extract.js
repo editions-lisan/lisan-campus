@@ -1,7 +1,7 @@
 // Extrait, avec les fonctions mêmes du site, le texte de chaque leçon à enregistrer (morceaux français / arabe)
 const fs=require('fs');global.window=global;global.document={};
 const D='/home/claude/lisan-campus/site/';
-let src='';for(const f of ['data/droit.js','data/ia.js','data/arabe.js','data/coran.js','data/islam.js']) src+=fs.readFileSync(D+f,'utf8')+'\n';
+let src='';for(const f of ['data/droit.js','data/romans.js','data/ia.js','data/arabe.js','data/coran.js','data/islam.js']) src+=fs.readFileSync(D+f,'utf8')+'\n';
 src+=fs.readFileSync(D+'boot.js','utf8').split('\n').filter(l=>l.startsWith('const SUBJECTS'))[0]+'\nglobal.SUBJECTS=SUBJECTS;';
 eval(src);
 const app=fs.readFileSync(D+'app.js','utf8');
@@ -17,5 +17,13 @@ for(const s of SUBJECTS){ if(s.noLessonVoice||s.id==='en') continue;
 const FEM=/^(Awa|Mrs\.|Ma[iî]tre Bamba|Salimata|Mrs |Mme)/;
 for(const l of SUBJECTS.find(x=>x.id==='en').lessons) l.body.forEach((bl,i)=>{ if(!bl.endialog) return; const L=bl.endialog.lines; const all=L.map(x=>x[2]).join(' ');
   jobs.push({key:'en/'+l.id+'#'+i,h:hash(all),dialog:true,chunks:L.map(x=>({lang:FEM.test(x[0])?'enf':'enm',text:x[2]}))}); });
+// romans juridiques en anglais : le chapitre entier (narrateur + voix des personnages) et chaque dialogue
+const LITF=/^(Akissi|Mariam|The victim|Awa|Apprentice|Judge$)/, voice=w=>w==='Aïcha'?'enf':LITF.test(w)?'enl':'enm';
+const sent=t=>(t.match(/[^.!?]+[.!?]+["”]?|[^.!?]+$/g)||[t]).map(x=>x.trim()).filter(Boolean);
+const lit=SUBJECTS.find(x=>x.id==='lit');
+if(lit) for(const l of lit.lessons){ const B=l.body, li=B.findIndex(b=>b.listen);
+  if(li>=0){ const ch=[]; B.forEach(b=>{ if(b.enstory) b.enstory.forEach(p=>sent(p[0]).forEach(x=>ch.push({lang:'enn',text:x}))); if(b.endialog) b.endialog.lines.forEach(x=>ch.push({lang:voice(x[0]),text:x[2]})); });
+    jobs.push({key:'lit/'+l.id+'#c',h:hash(B[li].listen),chunks:ch}); }
+  B.forEach((b,i)=>{ if(!b.endialog) return; const L=b.endialog.lines; jobs.push({key:'lit/'+l.id+'#'+i,h:hash(L.map(x=>x[2]).join(' ')),dialog:true,chunks:L.map(x=>({lang:voice(x[0]),text:x[2]}))}); }); }
 fs.writeFileSync(process.argv[2],JSON.stringify(jobs));
 console.log(jobs.length,'fichiers', jobs.reduce((n,j)=>n+j.chunks.length,0),'morceaux', jobs.filter(j=>j.chunks.some(c=>c.lang==='ar')).length,'avec arabe');

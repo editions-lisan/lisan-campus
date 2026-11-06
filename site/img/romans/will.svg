@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" role="img">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f6b45"/><stop offset="1" stop-color="#0e3f2a"/></linearGradient></defs>
+<rect width="640" height="320" rx="22" fill="url(#g)"/>
+
+<path d="M0 270 Q160 225 320 262 T640 248 V320 H0Z" fill="#0b3d24" opacity=".7"/>
+<path d="M0 292 Q200 262 400 290 T640 284 V320 H0Z" fill="#082e1b"/>
+<g transform="translate(440 70)">
+ <rect x="0" y="0" width="150" height="190" rx="10" fill="#f6ecd2"/>
+ <rect x="-12" y="-10" width="174" height="22" rx="11" fill="#e6d5ab"/>
+ <rect x="-12" y="178" width="174" height="22" rx="11" fill="#e6d5ab"/>
+ <g stroke="#b9a57a" stroke-width="4" stroke-linecap="round"><path d="M24 40H126M24 62H126M24 84H110M24 106H126M24 128H90"/></g>
+ <path d="M30 156 q14 -16 26 0 t26 0" stroke="#3a3a6a" stroke-width="3" fill="none"/>
+ <circle cx="118" cy="154" r="20" fill="#b5332b"/><circle cx="118" cy="154" r="12" fill="none" stroke="#e8857c" stroke-width="2"/>
+ <path d="M108 172 l-6 26 l10 -6 l6 8 z M128 172 l6 26 l-10 -6 l-6 8z" fill="#b5332b"/>
+</g>
+<g transform="translate(372 196) rotate(-25)"><ellipse rx="22" ry="40" fill="#c98a1b"/><path d="M0 -40 V40 M-12 -34 Q-18 0 -12 34 M12 -34 Q18 0 12 34" stroke="#8a5a0a" stroke-width="2.5" fill="none"/></g>
+<g transform="translate(606 230) rotate(20)"><ellipse rx="18" ry="34" fill="#d8a02a"/><path d="M0 -34 V34 M-10 -28 Q-15 0 -10 28 M10 -28 Q15 0 10 28" stroke="#8a5a0a" stroke-width="2.2" fill="none"/></g>
+
+<text x="36" y="58" font-family="'Atkinson Hyperlegible', Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="3" fill="#f0b24a">LEGAL STORIES FROM ABIDJAN · I</text>
+<text x="36" y="112" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700" fill="#ffffff">The Missing Will</text>
+<text x="36" y="146" font-family="Georgia, 'Times New Roman', serif" font-size="20" font-style="italic" fill="#ffffff" opacity=".85">Le testament introuvable</text>
+<rect x="36" y="166" width="64" height="4" rx="2" fill="#f0b24a"/>
+</svg>

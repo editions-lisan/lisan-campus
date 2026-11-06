@@ -36,12 +36,20 @@ h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-heigh
 /* scène 3 */
 #s3-title { left: 0; right: 0; top: 70px; text-align: center; font-size: 58px; color: #141c2e; }
 #s3-sub { left: 0; right: 0; top: 150px; text-align: center; font-size: 28px; color: #586174; }
-.card { top: 236px; width: 272px; height: 330px; background: #fff; border-radius: 22px; border-top: 10px solid var(--c); box-shadow: 0 18px 40px rgba(20,28,46,.12); padding: 26px 22px; color: #141c2e; display: flex; flex-direction: column; gap: 14px; }
+.card { top: 236px; width: 224px; height: 336px; background: #fff; border-radius: 22px; border-top: 10px solid var(--c); box-shadow: 0 18px 40px rgba(20,28,46,.12); padding: 26px 22px; color: #141c2e; display: flex; flex-direction: column; gap: 14px; }
 .card .ic { width: 86px; height: 86px; border-radius: 50%; background: color-mix(in srgb, var(--c) 14%, #fff); display: grid; place-items: center; }
 .card .ic svg { width: 52px; height: 52px; stroke: var(--c); fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; }
-.card h3 { font-family: "Literata", serif; font-weight: 800; font-size: 29px; line-height: 1.12; margin: 0; color: var(--c); }
-.card p { margin: 0; font-size: 22px; line-height: 1.35; color: #3b4558; }
-/* scène 4 */
+.card h3 { font-family: "Literata", serif; font-weight: 800; font-size: 26px; line-height: 1.12; margin: 0; color: var(--c); }
+.card p { margin: 0; font-size: 20px; line-height: 1.35; color: #3b4558; }
+/* scène 4 : nouveautés */
+#n-eyebrow { left: 84px; top: 70px; color: #c0392b; }
+#n-title { left: 84px; top: 104px; width: 640px; font-size: 54px; color: #141c2e; }
+#n-title span { color: #23468f; }
+.nf { left: 88px; width: 640px; display: flex; align-items: center; gap: 18px; font-size: 27px; font-weight: 700; color: #141c2e; }
+.nf img { width: 48px; height: 48px; flex: none; }
+.nf small { display: block; font-size: 19px; font-weight: 400; color: #586174; margin-top: 2px; }
+.rc { width: 380px; height: 190px; border-radius: 16px; box-shadow: 0 20px 40px rgba(20,28,46,.25); background-size: cover; }
+/* scène 5 */
 #s4-title { left: 84px; top: 96px; width: 740px; font-size: 58px; color: #141c2e; }
 #s4-title span { color: #23468f; }
 .feat { left: 88px; width: 620px; display: flex; align-items: center; gap: 18px; font-size: 31px; font-weight: 700; color: #141c2e; }
@@ -81,31 +89,46 @@ h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-heigh
   <div class="chip" id="ch2"><span class="wave" id="wave"><b></b><b></b><b></b><b></b><b></b><b></b></span>Récitation d’al-Ḥouṣarî</div></div>
 
   <!-- scène 3 : les espaces -->
-  <h2 id="s3-title" class="abs">Quatre espaces pour apprendre</h2>
+  <h2 id="s3-title" class="abs">Cinq espaces pour apprendre</h2>
   <div id="s3-sub" class="abs">Une première leçon offerte dans chaque parcours</div>
   <div class="abs card" id="k0" style="--c:#2b3f8f"><div class="ic"><svg viewBox="0 0 52 52"><path d="M8 10h36a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4H24l-10 8v-8H8a4 4 0 0 1-4-4V14a4 4 0 0 1 4-4z"/><path d="M17 23h18M17 29h11"/></svg></div>
     <h3>Apprendre l’arabe</h3><p>Lire, écrire et parler, du niveau 0 au niveau 3</p></div>
   <div class="abs card" id="k1" style="--c:#0e6b4f"><div class="ic"><svg viewBox="0 0 52 52"><path d="M26 14c-5-4-12-5-20-4v28c8-1 15 0 20 4 5-4 12-5 20-4V10c-8-1-15 0-20 4z"/><path d="M26 14v28"/></svg></div>
     <h3>Lire le Coran pas à pas</h3><p>Lettres, signes de lecture, mots et versets</p></div>
   <div class="abs card" id="k2" style="--c:#23468f"><div class="ic"><svg viewBox="0 0 52 52"><path d="M26 8v36M14 44h24M10 14h32"/><path d="M10 14l-6 14a7 7 0 0 0 12 0zM42 14l-6 14a7 7 0 0 0 12 0z"/></svg></div>
-    <h3>Droit · Licence&nbsp;1</h3><p>Huit matières de la première année de droit</p></div>
+    <h3>Droit · Licence&nbsp;1</h3><p>Neuf matières, exercices corrigés, romans en anglais</p></div>
   <div class="abs card" id="k3" style="--c:#5a3fc0"><div class="ic"><svg viewBox="0 0 52 52"><path d="M26 6c1.5 9 5 12.5 14 14-9 1.5-12.5 5-14 14-1.5-9-5-12.5-14-14 9-1.5 12.5-5 14-14z"/><path d="M40 32c.7 4 2.4 5.6 6 6-3.6.7-5.3 2.4-6 6-.7-3.6-2.4-5.3-6-6 3.6-.4 5.3-2 6-6z"/></svg></div>
     <h3>Formation à l’IA avec Claude</h3><p>Comprendre l’IA et bien s’en servir</p></div>
+  <div class="abs card" id="k4" style="--c:#b0601a"><div class="ic"><svg viewBox="0 0 52 52"><path d="M10 44V24l16-12 16 12v20z"/><path d="M21 44V32h10v12M26 6v6"/><circle cx="26" cy="24" r="3"/></svg></div>
+    <h3>Vivre l’islam en famille</h3><p>Niveaux 1 et 2, à partager avec les enfants</p></div>
 
-  <!-- scène 4 : le téléphone -->
+  <!-- scène 4 : les nouveautés -->
+  <div id="n-eyebrow" class="abs eyebrow">Nouveau</div>
+  <h2 id="n-title" class="abs">Le Campus <span>s’agrandit</span></h2>
+  <div class="abs nf" id="nf0" style="top:218px"><img src="../../site/emoji/1f4c8.svg" alt=""><div>Économie politique<small>et neuf matières de la licence 1 de droit</small></div></div>
+  <div class="abs nf" id="nf1" style="top:304px"><img src="../../site/emoji/270d.svg" alt=""><div>Exercices corrigés et schémas<small>à la fin de chaque leçon de cours</small></div></div>
+  <div class="abs nf" id="nf2" style="top:390px"><img src="../../site/emoji/1f4d6.svg" alt=""><div>Romans juridiques en anglais<small>quatre affaires à lire et à écouter</small></div></div>
+  <div class="abs nf" id="nf3" style="top:476px"><img src="../../site/emoji/1f3a7.svg" alt=""><div>Écoute même écran éteint<small>sept vitesses, voix enregistrées</small></div></div>
+  <div class="abs nf" id="nf4" style="top:562px"><img src="../../site/emoji/1f3c5.svg" alt=""><div>Évaluations et certificats<small>vérifiables en ligne par code QR</small></div></div>
+  <div class="abs rc" id="rc0" style="background-image:url(../../site/img/romans/will.svg)"></div>
+  <div class="abs rc" id="rc1" style="background-image:url(../../site/img/romans/lease.svg)"></div>
+  <div class="abs rc" id="rc2" style="background-image:url(../../site/img/romans/night.svg)"></div>
+  <div class="abs rc" id="rc3" style="background-image:url(../../site/img/romans/uniforms.svg)"></div>
+
+  <!-- scène 5 : le téléphone -->
   <h2 id="s4-title" class="abs">Tout le Campus <span>dans votre téléphone</span></h2>
   <div class="abs feat" id="f0" style="top:272px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Des leçons courtes, à écouter</div>
-  <div class="abs feat" id="f1" style="top:338px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Des quiz corrigés aussitôt</div>
-  <div class="abs feat" id="f2" style="top:404px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Des cartes pour réviser</div>
+  <div class="abs feat" id="f1" style="top:338px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Des mini-exercices et des quiz</div>
+  <div class="abs feat" id="f2" style="top:404px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Des cartes et des révisions espacées</div>
   <div class="abs feat" id="f3" style="top:470px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Même hors connexion</div>
-  <div class="abs" id="cta">Gratuit · <b>lisan-campus.netlify.app</b></div>
+  <div class="abs" id="cta">Gratuit · <b>lisan-campus.pages.dev</b></div>
   <div class="abs" id="phone"><div id="screen"><div id="notch"></div>
-    <img id="sc0" src="img/s_lesson.png" alt=""><img id="sc1" src="img/s_quiz.png" alt=""><img id="sc2" src="img/s_coran.png" alt=""></div></div>
+    <img id="sc0" src="img/s_home.png" alt=""><img id="sc1" src="img/s_schema.png" alt=""><img id="sc2" src="img/s_roman.png" alt=""></div></div>
 
   <div class="abs" id="fade"></div>
 </div>
 <script>
-const T = 16;
+const T = 23;
 const $ = id => document.getElementById(id);
 const clamp = x => Math.max(0, Math.min(1, x));
 const ease = x => 1 - Math.pow(1 - x, 3);                 // sortie douce
@@ -123,8 +146,8 @@ function anim(id, t, a, d, o, od, opt = {}) {
 function render(t) {
   // fonds
   $('pattern').style.transform = `translate(${-t * 9}px, ${-t * 5}px) rotate(${t * .4}deg)`;
-  $('light').style.opacity = easeIO(prog(t, 6.9, .6)) * (1 - easeIO(prog(t, 15.35, .5)));
-  $('fade').style.opacity = easeIO(prog(t, 15.35, .6));
+  $('light').style.opacity = easeIO(prog(t, 6.9, .6)) * (1 - easeIO(prog(t, 22.35, .5)));
+  $('fade').style.opacity = easeIO(prog(t, 22.35, .6));
   // scène 1
   anim('logo', t, .15, .8, 3.0, .45, { dy: 0, s: .55, back: true, oy: -40 });
   anim('s1-eyebrow', t, .75, .6, 3.0, .45, { oy: -40 });
@@ -142,15 +165,23 @@ function render(t) {
   // scène 3
   anim('s3-title', t, 7.25, .6, 10.15, .45, { oy: -30 });
   anim('s3-sub', t, 7.5, .6, 10.2, .45, { oy: -30 });
-  [70, 362, 654, 946].forEach((x, k) => { $('k' + k).style.left = x + 'px';
+  [36, 280, 524, 768, 1012].forEach((x, k) => { $('k' + k).style.left = x + 'px';
     anim('k' + k, t, 7.7 + k * .16, .7, 10.1 + k * .05, .45, { dy: 70, back: true, oy: 40, os: -.04 });
     if (t > 8.6 && t < 10.1) $('k' + k).style.transform += ` translateY(${Math.sin((t - 8.6) * 2.2 + k) * 4}px)`; });
-  // scène 4
-  anim('s4-title', t, 10.55, .65, 15.2, .4);
-  ['f0', 'f1', 'f2', 'f3'].forEach((id, k) => anim(id, t, 11.3 + k * .38, .5, 15.2, .4, { dx: -30, dy: 0 }));
-  anim('cta', t, 13.15, .6, 15.2, .4, { dy: 20, s: .9, back: true });
-  anim('phone', t, 10.45, .9, 15.25, .4, { dx: 380, dy: 0, r: 0 });
-  const scr = [[10.9, 12.85, 470], [12.85, 14.3, 260], [14.3, 15.6, 420]];
+  // scène 4 : nouveautés
+  anim('n-eyebrow', t, 10.5, .5, 16.15, .4, { oy: -30 });
+  anim('n-title', t, 10.62, .6, 16.15, .4, { oy: -30 });
+  for (let k = 0; k < 5; k++) anim('nf' + k, t, 11.15 + k * .42, .5, 16.1 + k * .03, .4, { dx: -40, dy: 0, ox: -60 });
+  const RX = [740, 772, 804, 836], RY = [124, 222, 320, 418], RR = [-7, -2, 3, 8];
+  RX.forEach((x, k) => { const el = $('rc' + k); el.style.left = x + 'px'; el.style.top = RY[k] + 'px';
+    anim('rc' + k, t, 12.4 + k * .2, .7, 16.1 + k * .04, .45, { dx: 260, dy: 0, r: RR[k], back: true, ox: 300 });
+    if (t > 13.4 && t < 16.1) el.style.transform += ` translateY(${Math.sin((t - 13.4) * 2 + k) * 3}px)`; });
+  // scène 5
+  anim('s4-title', t, 16.6, .65, 22.2, .4);
+  ['f0', 'f1', 'f2', 'f3'].forEach((id, k) => anim(id, t, 17.35 + k * .38, .5, 22.2, .4, { dx: -30, dy: 0 }));
+  anim('cta', t, 19.2, .6, 22.2, .4, { dy: 20, s: .9, back: true });
+  anim('phone', t, 16.5, .9, 22.25, .4, { dx: 380, dy: 0, r: 0 });
+  const scr = [[16.95, 18.75, 470], [18.75, 20.45, 300], [20.45, 22.5, 420]];
   scr.forEach(([a, b, dist], k) => { const el = $('sc' + k);
     const vis = k === 0 ? 1 - prog(t, b - .3, .3) : prog(t, a - .3, .3) * (k === 2 ? 1 : 1 - prog(t, b - .3, .3));
     el.style.opacity = vis; el.style.transform = `translateY(${-dist * easeIO(prog(t, a + .4, b - a - .5))}px)`; });

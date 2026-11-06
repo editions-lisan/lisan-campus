@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" role="img">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d18a1e"/><stop offset="1" stop-color="#9c5a0c"/></linearGradient></defs>
+<rect width="640" height="320" rx="22" fill="url(#g)"/>
+
+<path d="M0 286 q40 -12 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 V320 H0Z" fill="#5fa7d8" opacity=".75"/>
+<path d="M0 300 q40 -10 80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 t80 0 V320 H0Z" fill="#3b86c0"/>
+<path d="M440 40 H630" stroke="#5a3a14" stroke-width="5" stroke-linecap="round"/>
+<g transform="translate(478 40)"><path d="M0 0 v10 M-20 22 L0 10 L20 22" stroke="#5a3a14" stroke-width="3" fill="none"/><path d="M-26 22 h52 l6 26 h-12 v62 h-40 v-62 h-12z" fill="#7a2e8e"/><path d="M-6 22 l6 16 l6 -16" fill="#ffffff" opacity=".9"/><circle cx="0" cy="56" r="2.5" fill="#ffffff"/><circle cx="0" cy="72" r="2.5" fill="#ffffff"/></g><g transform="translate(540 40)"><path d="M0 0 v10 M-20 22 L0 10 L20 22" stroke="#5a3a14" stroke-width="3" fill="none"/><path d="M-26 22 h52 l6 26 h-12 v62 h-40 v-62 h-12z" fill="#7a2e8e"/><path d="M-6 22 l6 16 l6 -16" fill="#ffffff" opacity=".9"/><circle cx="0" cy="56" r="2.5" fill="#ffffff"/><circle cx="0" cy="72" r="2.5" fill="#ffffff"/></g><g transform="translate(602 40)"><path d="M0 0 v10 M-20 22 L0 10 L20 22" stroke="#5a3a14" stroke-width="3" fill="none"/><path d="M-26 22 h52 l6 26 h-12 v62 h-40 v-62 h-12z" fill="#7a2e8e"/><path d="M-6 22 l6 16 l6 -16" fill="#ffffff" opacity=".9"/><circle cx="0" cy="56" r="2.5" fill="#ffffff"/><circle cx="0" cy="72" r="2.5" fill="#ffffff"/></g>
+<g transform="translate(420 190)">
+ <rect x="0" y="62" width="170" height="16" rx="5" fill="#2b2b2b"/>
+ <path d="M14 62 V22 a22 22 0 0 1 22 -22 H140 a20 20 0 0 1 20 20 V40 H120 V24 H44 V62z" fill="#e8e1d2"/>
+ <rect x="128" y="40" width="22" height="22" fill="#e8e1d2"/><path d="M139 62 v10" stroke="#555" stroke-width="3"/>
+ <circle cx="152" cy="22" r="9" fill="#b5332b"/><rect x="58" y="6" width="48" height="8" rx="4" fill="#c9c0ad"/>
+ <path d="M0 78 h170" stroke="#7a2e8e" stroke-width="3"/>
+</g>
+
+<text x="36" y="58" font-family="'Atkinson Hyperlegible', Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="3" fill="#fff3d6">LEGAL STORIES FROM ABIDJAN · IV</text>
+<text x="36" y="104" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#ffffff">Two Hundred</text><text x="36" y="148" font-family="Georgia, 'Times New Roman', serif" font-size="38" font-weight="700" fill="#ffffff">Uniforms</text>
+<text x="36" y="182" font-family="Georgia, 'Times New Roman', serif" font-size="20" font-style="italic" fill="#ffffff" opacity=".85">Deux cents uniformes</text>
+<rect x="36" y="200" width="64" height="4" rx="2" fill="#fff3d6"/>
+</svg>
