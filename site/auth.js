@@ -122,13 +122,20 @@
       profile = null; cache.set('profile', null); cache.set('user', null);
       ['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis'].forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null);
     },
-    onSave(k, v) {                                       // progression : envoyée au compte (regroupée toutes les 3 s)
+    // progression : envoyée au compte, regroupée (3 s après une leçon, un exercice, une carte ; au plus une fois par minute pour le
+    // temps d'étude), et envoyée aussitôt quand on quitte l'application : peu d'écritures, même avec beaucoup d'élèves en même temps
+    onSave(k, v) {
       if (!user || !['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis'].includes(k)) return;
-      clearTimeout(timer);
-      timer = setTimeout(() => { doc().set({ progress: progressData() }, { merge: true }).catch(() => {}); }, 3000);
+      const due = Date.now() + (k === 'time' || k === 'days' ? 60000 : 3000);
+      if (timer && due >= dueAt) return;                 // un envoi est déjà prévu plus tôt : il emportera aussi ce changement
+      clearTimeout(timer); dueAt = due; timer = setTimeout(flush, due - Date.now());
     },
   };
   const doc = () => fb.firestore().collection('users').doc(user.uid);
+  let dueAt = 0;
+  function flush() { clearTimeout(timer); timer = null; dueAt = 0; if (user && fb) doc().set({ progress: progressData() }, { merge: true }).catch(() => {}); }
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && timer) flush(); });
+  window.addEventListener('pagehide', () => { if (timer) flush(); });
   // une écriture sans réponse du serveur au bout de 10 s (hors connexion) reste en file d'attente : on continue
   const within = (p, ms = 10000) => Promise.race([p, new Promise(r => setTimeout(r, ms))]);
   function numero(id) {                                  // numéro d'inscription stable : LC-2026-QR-4F7K2A
