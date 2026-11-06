@@ -25,5 +25,11 @@ if(lit) for(const l of lit.lessons){ const B=l.body, li=B.findIndex(b=>b.listen)
   if(li>=0){ const ch=[]; B.forEach(b=>{ if(b.enstory) b.enstory.forEach(p=>{sent(p[0]).forEach(x=>ch.push({lang:'enn',text:x}));ch[ch.length-1].gap=0.8;}); if(b.endialog) b.endialog.lines.forEach(x=>ch.push({lang:voice(x[0]),text:x[2]})); });
     jobs.push({key:'lit/'+l.id+'#c',h:hash(B[li].listen),chunks:ch}); }
   B.forEach((b,i)=>{ if(!b.endialog) return; const L=b.endialog.lines; jobs.push({key:'lit/'+l.id+'#'+i,h:hash(L.map(x=>x[2]).join(' ')),dialog:true,chunks:L.map(x=>({lang:voice(x[0]),text:x[2]}))}); }); }
+// cartes de révision en anglais (anglais juridique, roman) : chaque mot, une seule fois, voix anglaise
+// (texte = plain() du site, celui du bouton « Écouter » ; fichier audio/cartes/<empreinte>.mp3)
+const plain=s=>String(s).replace(/\[\[.+?\]\]/g,'').replace(/\*\*|\*/g,''), seen=new Set();
+for(const id of ['en','lit']){ const s=SUBJECTS.find(x=>x.id===id); if(s) s.cards.forEach(c=>{ const t=plain(c[0]), h=hash(t); if(seen.has(h)) return; seen.add(h);
+  jobs.push({key:'cartes/'+h,h,card:true,chunks:[{lang:'enm',text:t,gap:0.25}]}); }); }
+if(process.argv[3]==='cartes'){ const out=jobs.filter(j=>j.card); jobs.length=0; jobs.push(...out); }
 fs.writeFileSync(process.argv[2],JSON.stringify(jobs));
 console.log(jobs.length,'fichiers', jobs.reduce((n,j)=>n+j.chunks.length,0),'morceaux', jobs.filter(j=>j.chunks.some(c=>c.lang==='ar')).length,'avec arabe');

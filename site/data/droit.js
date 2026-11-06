@@ -3519,3 +3519,56 @@ M_INFO.cards.push(...[["Hardware / software","Matériel / logiciel"],["Périphé
     { q: "« Le tribunal déboute Pierre de sa demande » signifie que…", a: ["la demande de Pierre est rejetée", "Pierre gagne le procès", "Jean est condamné", "l'affaire est renvoyée"], c: 0, e: "S'il lui donne raison, il « fait droit » à sa demande." });
   M_METHO.cards.push(["Appelant / intimé", "Celui qui fait appel / son adversaire devant la cour d'appel"], ["Arrêt confirmatif / infirmatif", "La cour d'appel confirme / infirme le jugement"], ["Arrêt de cassation / de rejet", "La Cour de cassation casse la décision / rejette le pourvoi"], ["Débouter", "Rejeter la demande d'une partie"], ["Section détachée", "Antenne du TPI dans une petite ville ; décisions de même valeur"]);
 })();
+// Séance de TD de méthodologie du 6 novembre 2026 : vocabulaire de la fiche de décision, jugement / arrêt / arrêté,
+// ordre administratif, raisonnement en quatre temps du cas pratique, formulation simplifiée de l'arrêt du 16 décembre 1975
+(function () {
+  const get = id => M_METHO.lessons.find(x => x.id === id);
+  const F = get("fichedecision");
+  if (F) {
+    const i = F.body.findIndex(b => b.h === "Exemple de fiche de décision");
+    F.body.splice(i < 0 ? F.body.length : i, 0,
+      { h: "Le vocabulaire de la fiche" },
+      { table: { h: ["Terme", "Sens"], r: [
+        ["**Références**", "L'identité de la décision, « décodée » : sa **nature** (jugement, arrêt de cassation, de rejet…), la **juridiction** et sa chambre, le **lieu**, la **date** et les **parties**"],
+        ["**Faits**", "Les **événements** qui ont opposé les parties et qui ont rendu le procès **inévitable**"],
+        ["**Procédure**", "L'**historique** des juridictions successivement saisies, et ce que chacune a décidé"],
+        ["**Demandeur** (partie demanderesse)", "Celui qui saisit le tribunal ; son adversaire est le **défendeur** (partie défenderesse)"],
+        ["**Appelant** / **intimé**", "Celui qui saisit la cour d'appel / celui contre qui l'appel est formé"],
+        ["**Demandeur au pourvoi**", "Celui qui saisit la Cour de cassation ; son adversaire est le **défendeur au pourvoi**"],
+        ["**Prétention**", "Ce que **chaque partie demande** au juge (une somme, l'annulation d'un acte, la modification d'un prénom…)"],
+        ["**Fondement**", "L'**élément juridique** (article de loi, principe, jurisprudence) sur lequel chaque partie s'appuie pour justifier sa prétention"]
+      ] } },
+      { box: "Le **jugement** est la décision d'un **tribunal** (premier degré). L'**arrêt** est la décision d'une **cour** : une juridiction du **second degré** (cour d'appel) ou une juridiction **suprême** (Cour de cassation, Conseil d'État, CCJA). L'**arrêté** n'est pas une décision de justice : c'est un **acte administratif** pris par une autorité administrative (ministre, préfet, maire), par exemple l'arrêté qui nomme un fonctionnaire. On écrit donc « l'**arrêt** de la Cour de cassation », jamais « l'arrêté ».", title: "Jugement, arrêt, arrêté", kind: "piege" },
+      { box: "Les arrêts du Conseil d'État étudiés en TD sont français. En France, l'ordre administratif a, lui aussi, trois niveaux : le **tribunal administratif** (premier degré), la **cour administrative d'appel** (second degré) et le **Conseil d'État** (juridiction suprême). En Côte d'Ivoire, le **Conseil d'État** est la juridiction suprême de l'ordre administratif (voir le parcours Organisation judiciaire).", title: "Et l'ordre administratif ?", kind: "cle" }
+    );
+  }
+  const C = get("casexo");
+  if (C) {
+    const i = C.body.findIndex(b => b.quote && /^\*\*I\. /.test(b.quote));
+    C.body.splice(i < 0 ? C.body.length : i, 0,
+      { box: "Chaque problème se résout en quatre temps : **les faits** utiles au problème ; **la présentation de la règle** (« En droit… ») ; **la présentation de l'application**, qui confronte les faits à chaque condition de la règle (« En l'espèce… ») ; **la conclusion**, c'est-à-dire la solution (« Par conséquent… »). Ici, la règle part d'un principe : la personnalité juridique prend fin à la **mort**, définie comme la **cessation des fonctions vitales constatée sur un corps**. Sans corps, la mort ne peut pas être constatée : d'où les régimes de l'**absence** et de la **disparition**.", title: "Le raisonnement en quatre temps", kind: "cle" }
+    );
+  }
+  const X = get("ficheexo");
+  if (X) {
+    const i = X.body.findIndex(b => b.title === "Portée");
+    X.body.splice(i < 0 ? X.body.length : i, 0,
+      { box: "Le problème peut aussi se formuler ainsi : « **Un changement de morphologie peut-il justifier la modification des prénoms ?** » La réponse est alors affirmative, avec une nuance à ne pas oublier : la Cour de cassation ne dit pas elle-même que le changement de prénom doit être accordé. Elle reproche à la cour d'appel d'avoir examiné le prénom **en lui-même**, sans tenir compte de la **situation personnelle** de S…, c'est-à-dire de la transformation de son apparence. Le changement de morphologie est donc un élément que le juge **doit prendre en compte** pour apprécier l'intérêt légitime.", title: "Une formulation plus simple", kind: "marge" }
+    );
+  }
+  M_METHO.quiz.push(
+    { q: "Dans une fiche de décision, la « prétention » d'une partie, c'est…", a: ["ce qu'elle demande au juge", "le texte sur lequel elle s'appuie", "le résumé des faits", "la décision rendue"], c: 0, e: "Le texte invoqué est le fondement." },
+    { q: "Le « fondement » d'une prétention est…", a: ["l'élément juridique invoqué pour la justifier", "ce que la partie réclame", "la juridiction saisie", "la date de la décision"], c: 0, e: "Article de loi, principe ou jurisprudence." },
+    { q: "Un arrêté est…", a: ["un acte administratif", "une décision de la cour d'appel", "une décision de la Cour de cassation", "un jugement de premier degré"], c: 0, e: "Ne pas confondre avec l'arrêt, décision d'une cour." },
+    { q: "Une décision rendue par une cour d'appel ou par la Cour de cassation s'appelle…", a: ["un arrêt", "un jugement", "un arrêté", "une ordonnance de référé"], c: 0, e: "Le tribunal rend un jugement ; la cour, un arrêt." },
+    { q: "En France, quelle juridiction se trouve entre le tribunal administratif et le Conseil d'État ?", a: ["La cour administrative d'appel", "La cour d'appel", "Le Tribunal des conflits", "La Cour de cassation"], c: 0, e: "Tribunal administratif → cour administrative d'appel → Conseil d'État." },
+    { q: "Dans une fiche de décision, la procédure est…", a: ["l'historique des juridictions successivement saisies", "le récit des événements entre les parties", "la question de droit", "la réponse de la Cour"], c: 0, e: "Les événements entre les parties sont les faits." }
+  );
+  M_METHO.cards.push(
+    ["Prétention", "Ce que chaque partie demande au juge"],
+    ["Fondement", "L'élément juridique sur lequel une partie s'appuie pour justifier sa prétention"],
+    ["Arrêt / arrêté", "Décision d'une cour (second degré ou suprême) / acte administratif"],
+    ["Ordre administratif (France)", "Tribunal administratif → cour administrative d'appel → Conseil d'État"],
+    ["Mort (définition)", "Cessation des fonctions vitales constatée sur un corps ; sans corps : absence ou disparition"]
+  );
+})();

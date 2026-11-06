@@ -102,7 +102,8 @@ const spaceOf = s => s.space || 'droit';
 const lessonOff = s => (s.lessons.length > 1 && !/^Leçon\b/.test(s.lessons[0].title) && /^Leçon 1\b/.test(s.lessons[1].title)) ? 1 : 0;
 const lessonNum = (s, i) => i + 1 - lessonOff(s);
 const lessonPos = (s, i) => lessonOff(s) && i === 0 ? 'Introduction' : lessonNum(s, i) + ' / ' + (s.lessons.length - lessonOff(s));
-const cardLang = s => s.lang === 'ar' ? 'ar' : (s.id === 'en' ? 'en' : 'fr');
+const EN_CARDS = new Set(['en', 'lit']); // parcours dont les cartes sont en anglais (anglais juridique, roman)
+const cardLang = s => s.lang === 'ar' ? 'ar' : (EN_CARDS.has(s.id) || s.lang === 'en' ? 'en' : 'fr');
 
 // ---------- les espaces
 const SPACES = [
@@ -369,7 +370,7 @@ function playRecorded(rec, btn, text, lang) {
   player.onended = () => stopAudio();
   player.onerror = () => { const b = audioBtn; stopAudio(); speak(text, lang, b, true); };
   player.play().catch(() => {});
-  lpShow(); mediaFor('audio'); lpUpdate();
+  if (rec.d >= 6) { lpShow(); mediaFor('audio'); lpUpdate(); }   // un mot de carte (quelques secondes) se joue sans le lecteur du bas
 }
 let recTick = 0;
 player.addEventListener('timeupdate', () => { if (!AUD.rec) return; const n = Date.now(); if (n - recTick < 400) return; recTick = n; lpUpdate();

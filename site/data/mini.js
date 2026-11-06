@@ -1660,6 +1660,9 @@ window.MINI = {
     { q: "Devant la cour d'appel, la partie qui a fait appel s'appelle…", a: ["l'appelant", "l'intimé", "le défendeur au pourvoi"], c: 0, e: "Son adversaire est l'intimé." },
     { q: "La cour d'appel infirme le jugement : elle rend un arrêt…", a: ["infirmatif", "confirmatif", "de rejet"], c: 0, e: "Si elle confirme le jugement, l'arrêt est confirmatif." },
     { q: "« Le tribunal déboute Pierre de sa demande » signifie que…", a: ["la demande de Pierre est rejetée", "Jean est condamné", "Pierre fait appel"], c: 0, e: "S'il donne raison à Pierre, il « fait droit » à sa demande." },
+    { q: "Ce que chaque partie demande au juge s'appelle…", a: ["la prétention", "le fondement", "le dispositif"], c: 0, e: "Le fondement est l'élément juridique invoqué pour la justifier." },
+    { q: "Un arrêté est…", a: ["un acte administratif (ministre, préfet, maire)", "la décision d'une cour d'appel", "la décision de la Cour de cassation"], c: 0, e: "La décision d'une cour est un arrêt ; celle d'un tribunal, un jugement." },
+    { q: "La procédure, dans une fiche de décision, retrace…", a: ["l'historique des juridictions successivement saisies", "les événements qui ont opposé les parties", "la question de droit posée"], c: 0, e: "Les événements entre les parties forment les faits." },
   ],
   "metho/commentaire": [
     { q: "Le commentaire de décision suit un plan…", a: ["en deux parties et deux sous-parties, obligatoire", "libre, sans parties", "en trois parties numérotées comme un cas pratique"], c: 0, e: "I, A, B ; II, A, B, avec des titres tirés de la décision." },

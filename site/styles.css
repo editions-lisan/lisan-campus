@@ -476,7 +476,7 @@ details.panel summary { cursor: pointer; }
   --edge: color-mix(in srgb, var(--sc, var(--accent)) 35%, var(--surface));
 }
 /* cartes des espaces et des parcours : couleur pleine */
-.spacecard, .subj { border: 0; color: #fff; overflow: hidden; isolation: isolate;
+.spacecard, .subj { border: 0; color: #fff; overflow: hidden; overflow: clip; flex-shrink: 0; isolation: isolate;
   background: radial-gradient(circle at 92% 8%, rgba(255,255,255,.16) 0 54px, transparent 55px), radial-gradient(circle at 100% 100%, rgba(255,255,255,.10) 0 90px, transparent 91px),
     linear-gradient(140deg, var(--solid) 0%, var(--solid-dk) 100%);
   box-shadow: 0 10px 24px color-mix(in srgb, var(--solid) 28%, transparent); transition: transform .15s ease, box-shadow .15s ease; }
@@ -788,7 +788,7 @@ body.veiled .home-hero .wd, body.veiled .home-hero .hz, body.veiled .home-hero .
 .duo, .duo-side, .duo-main { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
 .duo-side > .cert-panel { margin: 0; }
 .lside, .qside { display: none; }
-body { overflow-x: clip; }
+html, body { overflow-x: clip; }
 
 @media (min-width: 1100px) {
   .wrap { max-width: 1240px; }
@@ -1142,7 +1142,7 @@ body.veiled .rosette .d { animation-play-state: paused; }
 @media (prefers-reduced-motion: reduce) { .spacecard::after, .subj::after { transition: none; } }
 
 /* titre de leçon : étoile en filigrane dans le bandeau */
-article.lesson > h1 { position: relative; overflow: hidden; isolation: isolate; }
+article.lesson > h1 { position: relative; overflow: hidden; overflow: clip; flex-shrink: 0; isolation: isolate; }
 article.lesson > h1::after { content: ""; position: absolute; z-index: -1; right: -46px; top: 50%; width: 170px; height: 170px; margin-top: -85px; opacity: .13;
   background: var(--khatam) center / contain no-repeat; pointer-events: none; }
 
@@ -1172,6 +1172,6 @@ footer.site .wrap { padding-top: 46px; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .tablewrap.stk td:first-child { color: #fff; } }
 @media print { .rosette, footer.site::after { display: none !important; } }
 /* en-tête d'espace et de parcours : la même étoile en filigrane */
-.subject-head { position: relative; overflow: hidden; isolation: isolate; background: linear-gradient(140deg, var(--solid) 0%, var(--solid-dk) 100%); }
+.subject-head { position: relative; overflow: hidden; overflow: clip; flex-shrink: 0; isolation: isolate; background: linear-gradient(140deg, var(--solid) 0%, var(--solid-dk) 100%); }
 .subject-head::after { content: ""; position: absolute; z-index: -1; pointer-events: none; width: 230px; height: 230px; right: -70px; top: -76px; opacity: .2;
   background: var(--khatam) center / contain no-repeat; }
