@@ -462,7 +462,8 @@ function renderBlock(b, s) {
   if (b.h) return `<h3>${md(b.h)}</h3>`;
   if (b.ul) return `<ul>${b.ul.map(x => `<li>${md(x)}</li>`).join('')}</ul>`;
   if (b.ol) return `<ol>${b.ol.map(x => `<li>${md(x)}</li>`).join('')}</ol>`;
-  if (b.table) return `<div class="tablewrap"><table><thead><tr>${b.table.h.map(x => `<th>${md(x)}</th>`).join('')}</tr></thead><tbody>${b.table.r.map(r => `<tr>${r.map(x => `<td>${md(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  if (b.table) { const stk = b.table.h.length >= 3, lab = b.table.h.map(x => esc(String(x).replace(/[*_`]/g, '')));
+    return `<div class="tablewrap${stk ? ' stk' : ''}"><table><thead><tr>${b.table.h.map(x => `<th>${md(x)}</th>`).join('')}</tr></thead><tbody>${b.table.r.map(r => `<tr>${r.map((x, j) => `<td${stk ? ` data-l="${lab[j] || ''}"` : ''}>${md(x)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`; }
   if (b.box) return `<div class="box ${b.kind || 'marge'}"><b class="k">${esc(b.title || 'En marge')}</b><div>${md(b.box)}</div></div>`;
   if (b.quote) return `<div class="quote">${md(b.quote)}</div>`;
   if (b.prompt) return `<div class="pbox"><div class="pb-h"><b>${esc(b.label || 'Consigne à copier')}</b><button type="button" class="btn ghost small" data-copy="1">Copier</button></div><pre class="pb-t">${esc(b.prompt)}</pre></div>`;
@@ -610,6 +611,9 @@ function homeDash() {
     <div class="dash-c"><span class="dash-i" aria-hidden="true">🎯</span><div><b>${Math.floor(t / 60)} / ${DAY_GOAL / 60} min</b><small>objectif du jour</small><span class="bar"><i style="width:${pct}%"></i></span></div></div>
     <a class="dash-c" href="#revisions"><span class="dash-i" aria-hidden="true">🔁</span><div><b>${due} question${due > 1 ? 's' : ''}</b><small>${due ? 'à revoir aujourd’hui' : 'rien à revoir aujourd’hui'}</small></div></a></section>`;
 }
+// ornements : l'étoile à huit branches (khatam) des Éditions Lisân
+const ORN = '<svg viewBox="0 0 120 16" width="120" height="16" focusable="false"><path d="M0 8H46M74 8H120" stroke="currentColor" stroke-width="1"/><path d="M8.0 1.0L10.1 3.1L12.9 3.1L12.9 5.9L15.0 8.0L12.9 10.1L12.9 12.9L10.1 12.9L8.0 15.0L5.9 12.9L3.1 12.9L3.1 10.1L1.0 8.0L3.1 5.9L3.1 3.1L5.9 3.1Z" transform="translate(52 0)" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="60" cy="8" r="1.8" fill="currentColor"/></svg>';
+const ROSETTE = '<svg class="rosette" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><circle class="d" pathLength="1" cx="100" cy="100" r="97" style="--i:0"/><circle class="d" pathLength="1" cx="100" cy="100" r="90" style="--i:1"/><path class="d" pathLength="1" d="M134.4 16.9L134.4 183.1M183.1 65.6L65.6 183.1M183.1 134.4L16.9 134.4M134.4 183.1L16.9 65.6M65.6 183.1L65.6 16.9M16.9 134.4L134.4 16.9M16.9 65.6L183.1 65.6M65.6 16.9L183.1 134.4" style="--i:2"/><path class="d" pathLength="1" d="M100.0 42.0L117.0 59.0L141.0 59.0L141.0 83.0L158.0 100.0L141.0 117.0L141.0 141.0L117.0 141.0L100.0 158.0L83.0 141.0L59.0 141.0L59.0 117.0L42.0 100.0L59.0 83.0L59.0 59.0L83.0 59.0Z" style="--i:3"/><path class="d" pathLength="1" d="M113.0 68.6L118.4 81.6L131.4 87.0L126.0 100.0L131.4 113.0L118.4 118.4L113.0 131.4L100.0 126.0L87.0 131.4L81.6 118.4L68.6 113.0L74.0 100.0L68.6 87.0L81.6 81.6L87.0 68.6L100.0 74.0Z" style="--i:4"/><circle class="d" pathLength="1" cx="129.1" cy="29.8" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="170.2" cy="70.9" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="170.2" cy="129.1" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="129.1" cy="170.2" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="70.9" cy="170.2" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="29.8" cy="129.1" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="29.8" cy="70.9" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="70.9" cy="29.8" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="100" cy="100" r="12" style="--i:6"/></svg>';
 function viewHome() {
   const last = lastLesson();
   // reprendre : la dernière leçon si elle n'est pas terminée, sinon la prochaine étape de son espace
@@ -621,7 +625,7 @@ function viewHome() {
   const pct = totalL ? Math.round(doneL / totalL * 100) : 0;
   const kpi = (ic, b, t, c) => `<div class="kpi" style="--kc:var(--s-${c})"><i aria-hidden="true">${ic}</i><b${typeof b === 'number' ? ` data-count="${b}"` : ''}>${typeof b === 'number' ? nf(b) : b}</b><span>${t}</span></div>`;
   const step = (ic, t, d) => `<div class="step"><span class="ic" aria-hidden="true">${ic}</span><h3>${t}</h3><p>${d}</p></div>`;
-  return `<div class="home-hero"><section class="hero">
+  return `<div class="home-hero">${ROSETTE}<section class="hero">
       <span class="eyebrow hz" style="--hd:.05s">Éditions Lisân · la langue qui ouvre les portes</span>
       <h1>${words('Apprendre, réviser et', 0)} <em>${words('se', 3)}</em> <span class="nw"><em>${words('former', 4)}</em>${words(',', 5)}</span> ${words('à son rythme', 6)}</h1>
       <p class="lead hz" style="--hd:.85s">L’arabe du niveau 0 au niveau 3, la lecture du Coran, la Licence 1 Droit et une formation à l’intelligence artificielle : des leçons courtes, la voix pour écouter, des quiz corrigés et des cartes de révision, sur téléphone et même hors connexion.</p>
@@ -630,7 +634,7 @@ function viewHome() {
     <section class="kpis" aria-label="Lisân Campus en chiffres">${kpi('🧭', SPACES.length, 'espaces', 'a')}${kpi('📚', totalL, 'leçons', 'n')}${kpi('✍️', nQ, 'questions de quiz', 'i')}${kpi('🃏', nC, 'cartes de révision', 'l')}${kpi('📶', 'Hors ligne', 'fonctionne même sans internet', 'm').replace('<b>', '<b class="txt">')}</section>
     ${homeDash()}
     ${doneL || last ? `<section class="mine"><span class="ring" style="--p:${pct}">${pct} %</span><div><b>Votre progression</b><p>${doneL} leçon${doneL > 1 ? 's' : ''} terminée${doneL > 1 ? 's' : ''} sur ${totalL}${last ? ` · dernière leçon : ${esc(last.s.title)}, ${esc(last.l.title)}` : ''}</p></div>${last ? `<a class="btn" href="${resumeHref}">Reprendre</a>` : ''}</section>` : ''}
-    <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les cinq espaces</h2><p>Choisissez votre espace : la première leçon de chaque espace est en accès libre.</p></div>
+    <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">${ORN}</span><h2>Les cinq espaces</h2><p>Choisissez votre espace : la première leçon de chaque espace est en accès libre.</p></div>
     <section class="spaces">${SPACES.map(sp => { const p = spaceProgress(sp); const A = AUTH();
       const ins = A && A.user() ? (A.enrolled(sp.id) ? '<span class="tag ok">Inscrit</span>' : '<span class="tag">Non inscrit</span>') : '';
       return `<a class="spacecard c-${sp.color}" href="#espace-${sp.id}"><span class="sp-icon" aria-hidden="true">${sp.icon}</span>
@@ -638,12 +642,12 @@ function viewHome() {
         <div class="bar"><i style="width:${p.pct}%"></i></div><span class="meta">${p.count} parcours · ${p.d} / ${p.n} leçons ${ins}</span>
         <span class="go">Entrer <span aria-hidden="true">→</span></span></a>`; }).join('')}
     </section>
-    <div class="sec-h"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Comment ça marche ?</h2></div>
+    <div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Comment ça marche ?</h2></div>
     <section class="steps">${step('🧭', 'Choisissez un espace', 'L’arabe, le Coran, le droit ou l’intelligence artificielle : commencez par la première leçon, en accès libre, puis suivez les étapes dans l’ordre.')}
       ${step('🎧', 'Apprenez et écoutez', 'Des leçons courtes, lues à voix haute, sur téléphone ou sur ordinateur, même sans connexion.')}
       ${step('✅', 'Vérifiez vos acquis', 'Un mini-exercice corrigé après chaque leçon ; vos erreurs reviennent dans « Mes révisions » jusqu’à ce qu’elles soient acquises.')}
       ${step('🎓', 'Recevez votre certificat', 'Toutes les leçons terminées et l’évaluation finale réussie à 80 % : votre certificat, vérifiable en ligne.')}</section>
-    <div class="sec-h"><span class="orn" aria-hidden="true">✦ ✦ ✦</span><h2>Les livres des Éditions Lisân</h2><p>Les espaces « Apprendre l’arabe », « Lire le Coran pas à pas » et « Vivre l’islam en famille » accompagnent ces livres.</p></div>
+    <div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Les livres des Éditions Lisân</h2><p>Les espaces « Apprendre l’arabe », « Lire le Coran pas à pas » et « Vivre l’islam en famille » accompagnent ces livres.</p></div>
     <section class="books" aria-label="Les livres">${BOOKS.map(([f, t, d, h]) => { const inner = `<img src="img/${f}.webp" alt="Couverture du livre « ${esc(t)} »" width="150" height="212" loading="lazy" decoding="async"><b>${esc(t)}</b><small>${esc(d)}</small>`;
       return h ? `<a class="book" href="#${h}">${inner}</a>` : `<div class="book">${inner}</div>`; }).join('')}</section>`;
 }
