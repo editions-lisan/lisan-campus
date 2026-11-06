@@ -3498,3 +3498,24 @@ M_INFO.cards.push(...[["Hardware / software","Matériel / logiciel"],["Périphé
   const i = L.body.findIndex(b => b.ul);
   L.body.splice(i < 0 ? L.body.length : i + 1, 0, { box: "**Problématique** : la loi a-t-elle toujours été supérieure au règlement ? **I. La supériorité classique de la loi sur le règlement** : A. Le domaine illimité de la loi ; B. La soumission du règlement à la loi. **II. Le bouleversement de la supériorité classique** : A. L'égalité entre la loi et le règlement autonome ; B. Le domaine illimité du règlement.", title: "Le plan retenu en classe" });
 })();
+// Schéma simplifié d'un procès civil (TD de droit civil, guide d'entraînement, p. 141-142) : dans la fiche de décision, avant l'exemple
+(function () {
+  const L = M_METHO.lessons.find(x => x.id === "fichedecision"); if (!L) return;
+  const i = L.body.findIndex(b => b.h === "Exemple de fiche de décision");
+  L.body.splice(i < 0 ? L.body.length : i, 0,
+    { h: "Schéma simplifié d'un procès civil" },
+    { p: "Pour rédiger la **procédure** d'une fiche de décision, il faut savoir qui a saisi quelle juridiction et ce que chacune a décidé. Le schéma suit **Pierre**, qui agit en justice contre **Jean**. C'est un schéma **simplifié** : certaines étapes varient selon les affaires ; une décision rendue **en dernier ressort**, par exemple, ne peut pas faire l'objet d'un appel et ne peut être attaquée que par un pourvoi en cassation." },
+    { illus: "droit/proces-civil", cap: "Du tribunal à la Cour de cassation : le nom des parties et des décisions à chaque degré" },
+    { ol: [
+      "**Premier degré : le tribunal de première instance** ou une **section détachée** de tribunal. Les sections détachées sont installées dans les petites villes ; elles dépendent du TPI sur le plan administratif, mais leurs décisions ont la **même valeur** que celles du TPI. Pierre, qui agit, est le **demandeur** ; Jean est le **défendeur**. Le tribunal rend un **jugement** : il **déboute** Pierre de sa demande (la demande est rejetée) ou il **fait droit** à sa demande (Jean est condamné).",
+      "**Second degré : la cour d'appel.** La partie qui perd peut **interjeter appel** : elle devient l'**appelant**, son adversaire l'**intimé**. La cour rend un **arrêt** : elle **confirme** le jugement (**arrêt confirmatif**) ou elle l'**infirme** (**arrêt infirmatif**).",
+      "**La Cour de cassation.** La partie qui perd en appel peut **former un pourvoi en cassation** (ou **se pourvoir en cassation**) : elle devient le **demandeur au pourvoi**, son adversaire le **défendeur au pourvoi**. La Cour rend un **arrêt** : elle **casse** la décision de la cour d'appel (**arrêt de cassation**) ou elle **rejette** le pourvoi (**arrêt de rejet**).",
+    ] },
+    { box: "En matière civile, le **tribunal de première instance** ivoirien correspond au **tribunal de grande instance** français (devenu **tribunal judiciaire** en 2020) ; la **cour d'appel** porte le même nom dans les deux pays ; la **Cour de cassation** ivoirienne (avant la révision constitutionnelle de 2020, la **chambre judiciaire de la Cour suprême**) correspond à la **Cour de cassation** française. Les arrêts français étudiés en TD se lisent donc avec ce schéma.", title: "Côte d'Ivoire et France", kind: "cle" });
+  M_METHO.quiz.push(
+    { q: "Devant la cour d'appel, comment appelle-t-on la partie qui a fait appel ?", a: ["L'appelant", "L'intimé", "Le demandeur au pourvoi", "Le défendeur"], c: 0, e: "Son adversaire est l'intimé." },
+    { q: "La cour d'appel donne raison au tribunal. Elle rend un arrêt…", a: ["confirmatif", "infirmatif", "de cassation", "de rejet"], c: 0, e: "Elle confirme le jugement." },
+    { q: "La Cour de cassation estime que la cour d'appel a bien appliqué la loi. Elle rend un arrêt…", a: ["de rejet", "de cassation", "infirmatif", "confirmatif"], c: 0, e: "Elle rejette le pourvoi." },
+    { q: "« Le tribunal déboute Pierre de sa demande » signifie que…", a: ["la demande de Pierre est rejetée", "Pierre gagne le procès", "Jean est condamné", "l'affaire est renvoyée"], c: 0, e: "S'il lui donne raison, il « fait droit » à sa demande." });
+  M_METHO.cards.push(["Appelant / intimé", "Celui qui fait appel / son adversaire devant la cour d'appel"], ["Arrêt confirmatif / infirmatif", "La cour d'appel confirme / infirme le jugement"], ["Arrêt de cassation / de rejet", "La Cour de cassation casse la décision / rejette le pourvoi"], ["Débouter", "Rejeter la demande d'une partie"], ["Section détachée", "Antenne du TPI dans une petite ville ; décisions de même valeur"]);
+})();

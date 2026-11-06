@@ -1657,6 +1657,9 @@ window.MINI = {
     { q: "La Cour de cassation est…", a: ["juge du droit : elle vérifie l'application de la loi sans rejuger les faits", "une juridiction du fond qui rejuge les faits", "une cour d'appel supérieure"], c: 0, e: "Le tribunal et la cour d'appel sont des juridictions du fond." },
     { q: "« Mais attendu que… » annonce en principe…", a: ["un arrêt de rejet", "un arrêt de cassation", "un renvoi devant une autre cour"], c: 0, e: "« Attendu cependant que… » annonce plutôt une cassation." },
     { q: "Dans la fiche de décision, la rubrique des faits contient…", a: ["les faits matériels avant toute procédure, dans l'ordre chronologique", "les prétentions des parties", "la décision de la cour d'appel"], c: 0, e: "Les faits sont différents des prétentions et de la procédure." },
+    { q: "Devant la cour d'appel, la partie qui a fait appel s'appelle…", a: ["l'appelant", "l'intimé", "le défendeur au pourvoi"], c: 0, e: "Son adversaire est l'intimé." },
+    { q: "La cour d'appel infirme le jugement : elle rend un arrêt…", a: ["infirmatif", "confirmatif", "de rejet"], c: 0, e: "Si elle confirme le jugement, l'arrêt est confirmatif." },
+    { q: "« Le tribunal déboute Pierre de sa demande » signifie que…", a: ["la demande de Pierre est rejetée", "Jean est condamné", "Pierre fait appel"], c: 0, e: "S'il donne raison à Pierre, il « fait droit » à sa demande." },
   ],
   "metho/commentaire": [
     { q: "Le commentaire de décision suit un plan…", a: ["en deux parties et deux sous-parties, obligatoire", "libre, sans parties", "en trois parties numérotées comme un cas pratique"], c: 0, e: "I, A, B ; II, A, B, avec des titres tirés de la décision." },
