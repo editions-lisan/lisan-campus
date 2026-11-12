@@ -3572,3 +3572,74 @@ M_INFO.cards.push(...[["Hardware / software","Matériel / logiciel"],["Périphé
     ["Mort (définition)", "Cessation des fonctions vitales constatée sur un corps ; sans corps : absence ou disparition"]
   );
 })();
+// Anglais juridique, unité 2 : cours « Sources of law in English law » (les sources du droit anglais)
+(function () {
+  const L = M_EN.lessons.find(x => x.id === "whatislaw");
+  if (!L) return;
+  const i = L.body.findIndex(b => b.h === "À toi de jouer");
+  L.body.splice(i < 0 ? L.body.length : i, 0,
+    { h: "Sources of law in English law" },
+    { p: "Le cours suivant présente les **sources du droit anglais** : d'où viennent les règles appliquées par les juges en Angleterre et au pays de Galles. Écoute chaque paragraphe, puis affiche la traduction." },
+    { enstory: [
+      ["The **sources of law** are the origins from which legal rules and principles are derived. In the English legal system, the main sources of law are legislation, common law, equity, judicial precedent, European Union law, custom and international law.",
+       "Les **sources du droit** sont les origines d'où proviennent les règles et les principes juridiques. Dans le système juridique anglais, les principales sources du droit sont la législation, la common law, l'equity, le précédent judiciaire, le droit de l'Union européenne, la coutume et le droit international."],
+      ["**1. Legislation (statute law).** Legislation refers to laws enacted by Parliament: **Acts of Parliament**, also called **statutes**. It also includes **delegated legislation**, such as statutory instruments, orders and by-laws, made by ministers or other bodies under powers given by an Act. Example: the **Human Rights Act 1998**. Because Parliament is sovereign, legislation is the highest source of law.",
+       "**1. La législation (le droit écrit).** La législation désigne les lois adoptées par le Parlement : les **Acts of Parliament**, aussi appelés **statutes**. Elle comprend aussi la **législation déléguée** (textes d'application, ordonnances, arrêtés locaux), prise par les ministres ou d'autres autorités en vertu des pouvoirs qu'une loi leur confie. Exemple : la **loi de 1998 sur les droits de l'homme**. Le Parlement étant souverain, la législation est la source la plus élevée."],
+      ["**2. Common law.** Common law consists of legal rules developed by **judges** through their decisions in court cases. It is based on judicial precedent, meaning that courts generally follow decisions made in previous similar cases.",
+       "**2. La common law.** La common law est faite des règles juridiques élaborées par les **juges** à travers leurs décisions. Elle repose sur le précédent judiciaire : les tribunaux suivent en général les décisions rendues dans des affaires semblables antérieures."],
+      ["**3. Equity.** Equity developed to provide fairness and justice where common law remedies, mainly damages, were insufficient. Equitable remedies are **discretionary**: the judge may refuse them. Examples include **injunctions**, **specific performance**, **rescission** and **rectification**. Where common law and equity conflict, **equity prevails**.",
+       "**3. L'equity.** L'equity s'est développée pour apporter équité et justice là où les remèdes de la common law, surtout les dommages-intérêts, étaient insuffisants. Les remèdes d'equity sont **discrétionnaires** : le juge peut les refuser. Exemples : l'**injonction** (ordre de faire ou de ne pas faire), l'**exécution forcée en nature**, l'**annulation** du contrat et sa **rectification**. En cas de conflit entre la common law et l'equity, **l'equity l'emporte**."],
+      ["**4. Judicial precedent.** Judicial precedent is the principle whereby courts follow legal decisions made by **higher courts** in previous cases. It is based on the doctrine of **stare decisis**, which means “to stand by things decided”. Only the **ratio decidendi**, the legal reason for the decision, is binding; **obiter dicta**, things said in passing, are only persuasive. At the top of the hierarchy sits the **Supreme Court of the United Kingdom**, which replaced the House of Lords in 2009.",
+       "**4. Le précédent judiciaire.** Le précédent judiciaire est le principe selon lequel les tribunaux suivent les décisions rendues par les **juridictions supérieures** dans des affaires antérieures. Il repose sur la doctrine du **stare decisis** : « s'en tenir à ce qui a été jugé ». Seule la **ratio decidendi**, le motif juridique de la décision, est obligatoire ; les **obiter dicta**, remarques faites en passant, n'ont qu'une valeur persuasive. Au sommet de la hiérarchie se trouve la **Cour suprême du Royaume-Uni**, qui a remplacé la Chambre des lords en 2009."],
+      ["**5. European Union law.** Historically, EU law had a significant influence on English law, from 1973, when the United Kingdom joined the European Communities. Following **Brexit**, the UK left the EU on 31 January 2020, and EU law no longer applies in the same way. However, certain EU-derived laws were kept as “retained EU law”, called **“assimilated law”** since 1 January 2024, and continue to have legal effect in the UK.",
+       "**5. Le droit de l'Union européenne.** Le droit de l'UE a longtemps eu une influence importante sur le droit anglais, depuis l'entrée du Royaume-Uni dans les Communautés européennes en 1973. Depuis le **Brexit**, le Royaume-Uni a quitté l'UE le 31 janvier 2020, et le droit de l'UE ne s'applique plus de la même façon. Certaines règles d'origine européenne ont cependant été conservées (« retained EU law »), appelées **« assimilated law »** depuis le 1er janvier 2024, et produisent encore des effets au Royaume-Uni."],
+      ["**6. Custom.** Custom refers to traditional practices that have been recognized by the courts as legally binding. For a local custom to be recognized, it must generally be **ancient** (in existence since “time immemorial”, fixed by law at 1189), **certain**, **reasonable** and **continuous**. Today, custom is a minor source of law.",
+       "**6. La coutume.** La coutume désigne des pratiques traditionnelles que les tribunaux ont reconnues comme juridiquement obligatoires. Pour être reconnue, une coutume locale doit en général être **ancienne** (exister « depuis des temps immémoriaux », date fixée à 1189), **certaine**, **raisonnable** et **continue**. Aujourd'hui, la coutume est une source mineure du droit."],
+      ["**7. International law.** International law influences English law through **treaties** and international conventions. Generally, international treaties do not automatically become part of English domestic law unless they are **incorporated by legislation**: the UK has a **dualist** system. For example, the Human Rights Act 1998 gave effect in domestic law to the rights of the European Convention on Human Rights.",
+       "**7. Le droit international.** Le droit international influence le droit anglais par les **traités** et les conventions internationales. En principe, un traité ne fait pas automatiquement partie du droit interne anglais : il doit être **intégré par une loi**. Le Royaume-Uni a un système **dualiste**. Par exemple, la loi de 1998 sur les droits de l'homme a donné effet en droit interne aux droits de la Convention européenne des droits de l'homme."],
+      ["**The constitution.** The United Kingdom does not have a **codified constitution**, that is, a single written document. Its constitution is **uncodified**: it is found in statutes, common law, constitutional conventions and works of authority.",
+       "**La constitution.** Le Royaume-Uni n'a pas de **constitution codifiée**, c'est-à-dire réunie dans un document écrit unique. Sa constitution est **non codifiée** : elle se trouve dans des lois, dans la common law, dans des conventions constitutionnelles et dans des ouvrages faisant autorité."],
+    ] },
+    { table: { h: ["Source", "Français", "Who makes it?"], r: [
+      ["**Legislation** (statute law)", "La loi et la législation déléguée", "Parliament (and ministers, by delegation)"],
+      ["**Common law**", "Le droit forgé par les juges", "Judges"],
+      ["**Equity**", "Les règles et remèdes d'équité", "Judges (historically, the Court of Chancery)"],
+      ["**Judicial precedent**", "Le précédent judiciaire (*stare decisis*)", "Higher courts"],
+      ["**EU law** (now assimilated law)", "Le droit de l'Union européenne", "EU institutions, before Brexit"],
+      ["**Custom**", "La coutume", "Local communities, recognized by the courts"],
+      ["**International law**", "Le droit international", "States, through treaties"],
+    ] } },
+    { envocab: [
+      ["📜", "a statute", "une loi (votée par le Parlement)", "The Human Rights Act 1998 is a statute."],
+      ["🏛", "delegated legislation", "la législation déléguée", "Ministers make delegated legislation under an Act."],
+      ["⚖", "case law", "la jurisprudence", "Common law is case law made by judges."],
+      ["🔁", "a binding precedent", "un précédent obligatoire", "Lower courts must follow a binding precedent."],
+      ["🤝", "specific performance", "l'exécution forcée en nature", "The court ordered specific performance of the contract."],
+      ["❌", "an injunction", "une injonction (ordre du juge)", "She obtained an injunction against her noisy neighbor."],
+      ["🕰", "time immemorial", "des temps immémoriaux", "The custom has existed since time immemorial."],
+      ["🌍", "to incorporate a treaty", "intégrer un traité en droit interne", "Parliament must incorporate a treaty by an Act."],
+    ] },
+    { box: "La Côte d'Ivoire, comme la France, appartient à la famille **romano-germanique** (*civil law system*) : la source principale y est la **loi écrite**, et la jurisprudence n'oblige pas, en principe, les autres juges. L'Angleterre appartient à la famille de la **common law** : le juge y crée le droit, et ses décisions s'imposent aux juridictions inférieures. Attention : *civil law* désigne donc soit le **droit civil**, soit le **système romano-germanique**, selon le contexte.", title: "Lien avec le cours de droit", kind: "cle" }
+  );
+  const j = L.body.findIndex(b => b.corrige);
+  if (j > 0) L.body.splice(j + 1, 0,
+    { p: "Relie chaque phrase à sa source du droit anglais : (1) Parliament passes the Human Rights Act 1998 ; (2) a judge orders a builder to finish the house as agreed ; (3) a High Court judge follows a decision of the Court of Appeal ; (4) villagers have dried their nets on a beach since time immemorial ; (5) the UK signs a treaty, then passes an Act to apply it." },
+    { corrige: [{ ol: ["Legislation (statute law).", "Equity (specific performance).", "Judicial precedent (stare decisis).", "Custom.", "International law, incorporated by legislation."] }] }
+  );
+  M_EN.quiz.push(
+    { q: "What is an Act of Parliament also called?", a: ["A statute", "A precedent", "A custom", "A treaty"], c: 0, e: "*Statute law* = la loi votée par le Parlement." },
+    { q: "*Stare decisis* means…", a: ["to stand by things decided", "the reason for the decision", "things said in passing", "let the buyer beware"], c: 0, e: "La *ratio decidendi* est le motif de la décision ; les *obiter dicta*, les remarques faites en passant." },
+    { q: "Which of these is an equitable remedy?", a: ["Specific performance", "A fine", "Imprisonment", "A statute"], c: 0, e: "Injunction, specific performance, rescission et rectification sont des remèdes d'equity." },
+    { q: "In English law, a treaty becomes part of domestic law…", a: ["when it is incorporated by an Act of Parliament", "as soon as it is signed", "when a judge reads it", "never"], c: 0, e: "Le Royaume-Uni a un système dualiste." },
+    { q: "Since 2009, the highest court of the United Kingdom is…", a: ["the Supreme Court", "the House of Lords", "the Court of Appeal", "the High Court"], c: 0, e: "La Cour suprême a remplacé la Chambre des lords (Appellate Committee)." },
+    { q: "The constitution of the United Kingdom is…", a: ["uncodified", "a single written document", "the Human Rights Act 1998", "an EU treaty"], c: 0, e: "Elle se trouve dans des lois, la common law, des conventions et des ouvrages faisant autorité." }
+  );
+  M_EN.cards.push(
+    ["statute", "loi votée par le Parlement (Act of Parliament)"],
+    ["delegated legislation", "législation déléguée (prise par les ministres en vertu d'une loi)"],
+    ["equity", "règles et remèdes d'équité, qui l'emportent sur la common law en cas de conflit"],
+    ["stare decisis", "s'en tenir à ce qui a été jugé (doctrine du précédent)"],
+    ["ratio decidendi", "motif juridique de la décision, seul obligatoire"],
+    ["injunction", "injonction : ordre du juge de faire ou de ne pas faire"]
+  );
+})();

@@ -12,4 +12,4 @@ Refaire les enregistrements :
 4. `python3 synth.py 0 2` et `python3 synth.py 1 2` en parallèle, puis fusionner `man0.json` et `man1.json` dans `site/data/audio.js` ;
 5. changer `VERSION` dans `site/sw.js`.
 
-Les mots des cartes de révision en anglais (anglais juridique et roman) sont aussi enregistrés, un fichier par mot (`audio/cartes/<empreinte>.mp3`, voix `en_US-joe-medium`) ; ils sont joués sans le lecteur du bas. Pour ne refaire que ceux-là : `node extract.js jobs.json cartes`, puis les étapes 4 et 5.
+Les paragraphes des textes de cours de l'anglais juridique (blocs `enstory`) sont enregistrés un par un (`audio/en/<leçon>~<bloc>-<n>.mp3`, voix `en_US-joe-medium`). Les mots des cartes de révision en anglais (anglais juridique et roman) sont aussi enregistrés, un fichier par mot (`audio/cartes/<empreinte>.mp3`, voix `en_US-joe-medium`) ; ils sont joués sans le lecteur du bas. Pour ne refaire que ceux-là : `node extract.js jobs.json cartes`, puis les étapes 4 et 5.

@@ -25,6 +25,10 @@ if(lit) for(const l of lit.lessons){ const B=l.body, li=B.findIndex(b=>b.listen)
   if(li>=0){ const ch=[]; B.forEach(b=>{ if(b.enstory) b.enstory.forEach(p=>{sent(p[0]).forEach(x=>ch.push({lang:'enn',text:x}));ch[ch.length-1].gap=0.8;}); if(b.endialog) b.endialog.lines.forEach(x=>ch.push({lang:voice(x[0]),text:x[2]})); });
     jobs.push({key:'lit/'+l.id+'#c',h:hash(B[li].listen),chunks:ch}); }
   B.forEach((b,i)=>{ if(!b.endialog) return; const L=b.endialog.lines; jobs.push({key:'lit/'+l.id+'#'+i,h:hash(L.map(x=>x[2]).join(' ')),dialog:true,chunks:L.map(x=>({lang:voice(x[0]),text:x[2]}))}); }); }
+// textes de cours de l'anglais juridique (blocs enstory) : chaque paragraphe (bouton du paragraphe ; empreinte du texte brut)
+const unmd=t=>String(t).replace(/\*\*|\*/g,'');
+for(const l of SUBJECTS.find(x=>x.id==='en').lessons) l.body.forEach((b,i)=>{ if(!b.enstory) return;
+  b.enstory.forEach((p,k)=>jobs.push({key:'en/'+l.id+'~'+i+'-'+k,h:hash(p[0]),chunks:sent(unmd(p[0])).map(x=>({lang:'enm',text:x}))})); });
 // cartes de révision en anglais (anglais juridique, roman) : chaque mot, une seule fois, voix anglaise
 // (texte = plain() du site, celui du bouton « Écouter » ; fichier audio/cartes/<empreinte>.mp3)
 const plain=s=>String(s).replace(/\[\[.+?\]\]/g,'').replace(/\*\*|\*/g,''), seen=new Set();

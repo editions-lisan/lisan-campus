@@ -1488,7 +1488,7 @@ document.addEventListener('click', e => {
   const au = t.closest('[data-audio]');
   if (au) { playAudio(JSON.parse(au.dataset.audio), au, au.dataset.fallback); return; }
   const sayB = t.closest('[data-say]');
-  if (sayB) { speak(sayB.dataset.say, sayB.dataset.lang, sayB.classList.contains('btn') ? sayB : null); return; }
+  if (sayB) { speak(sayB.dataset.say, sayB.dataset.lang, sayB.classList.contains('btn') || sayB.classList.contains('sp-en') ? sayB : null); return; }   // paragraphe de texte anglais : son enregistrement s'il existe
   const tr = t.closest('[data-trad]');
   if (tr) { const box = tr.closest('.dialog'); const on = !box.classList.contains('show-fr'); box.classList.toggle('show-fr', on); tr.setAttribute('aria-pressed', on); return; }
   const setB = t.closest('[data-set]');
