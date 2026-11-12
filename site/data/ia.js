@@ -69,7 +69,7 @@ const M_IA = {
     { id: "limites", title: "Les limites : hallucinations, biais et erreurs", body: [
       { h: "Les hallucinations" },
       { p: "Tout modèle de langage peut **inventer**, avec assurance, une information fausse : une date, une citation, un article de loi, la référence d'un livre, un hadith, une statistique. On parle d'**hallucination**. La réponse paraît sûre d'elle : c'est ce qui la rend dangereuse." },
-      { box: "En 2023, à New York, un juge a sanctionné des avocats qui avaient cité devant lui des décisions de justice **inventées par un assistant d'IA** (affaire *Mata c. Avianca*). Ils ne les avaient pas vérifiées. La même erreur existe en médecine, en histoire ou en religion : une citation inventée reste fausse, même bien présentée.", title: "Un cas réel", kind: "piege" },
+      { box: "En 2023, à New York, un juge a sanctionné des avocats qui avaient cité devant lui des décisions de justice **inventées par un assistant d'IA** (affaire *Mata c. Avianca*). Ils ne les avaient pas vérifiées. La même année, dans la vidéo de lancement de son assistant Bard, Google lui fait affirmer que le télescope James Webb a pris la toute première photo d'une planète hors du système solaire : c'est faux, cette photo date de 2004. La même erreur guette en médecine, en histoire, en sciences ou en religion : une citation ou une date inventée reste fausse, même bien présentée.", title: "Deux cas réels", kind: "piege" },
       { h: "Les autres limites" },
       { table: { h: ["Limite", "Ce qui se passe", "Le bon réflexe"], r: [
         ["**Date de connaissances**", "Le modèle ignore ce qui s'est passé après la fin de son entraînement", "Activer la **recherche web** et demander les liens"],

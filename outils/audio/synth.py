@@ -18,9 +18,11 @@ def rs(x, sr):
     if sr==SR: return x
     n=int(len(x)*SR/sr); return np.interp(np.linspace(0,len(x)-1,n), np.arange(len(x)), x).astype(np.float32)
 jobs=json.load(open(W+'jobs.json'))
-man={}
+MF=W+f'man{part}.json'
+man=json.load(open(MF)) if os.path.exists(MF) else {}   # reprise : les leçons déjà enregistrées sont gardées
 for k,j in enumerate(jobs):
     if k % nparts != part: continue
+    if j['key'] in man and man[j['key']]['h']==j['h']: continue
     sid,rest=j['key'].split('/',1); name=rest.replace('#','-d')
     os.makedirs(OUT+sid, exist_ok=True); f=f'audio/{sid}/{name}.mp3'
     pieces=[]; marks=[]; t=0.0
@@ -35,5 +37,6 @@ for k,j in enumerate(jobs):
     subprocess.run(['ffmpeg','-v','error','-y','-i',tmp,'-af','loudnorm=I=-16:TP=-1.5:LRA=11','-ac','1','-ar','22050','-b:a','32k',OUT+f[6:]],check=True)
     man[j['key']]={'f':f,'h':j['h'],'d':round(t,1),'t':marks}
     print(k, j['key'], round(t), 's', flush=True)
-json.dump(man, open(W+f'man{part}.json','w'), ensure_ascii=False)
+    json.dump(man, open(MF,'w'), ensure_ascii=False)
+json.dump(man, open(MF,'w'), ensure_ascii=False)
 print('FIN', part)

@@ -17,7 +17,9 @@ const save = k => { store.set(k, state[k]); if (window.LisanAuth && window.Lisan
 // la page de la leçon est ouverte et visible, et que l'élève lit (activité récente) ou écoute ; il s'arrête
 // dès qu'on quitte la page et reprend au retour.
 // texte lu à voix haute : le français, et l'arabe entre [[...]] (lu par la voix arabe, ou formule transcrite)
-const lessonSpeech = l => [l.title, ...l.body.map(b => b.p || b.h || (b.ul || b.ol || []).join('. ') || b.box || b.quote || '')].filter(Boolean).map(x => String(x).replace(/\*\*|\*/g, '').replace(/\[([^\]]+)\]\(#[^)]*\)/g, '$1')).join('. ');
+// (chaque bloc : paragraphe, titre, liste, encadré, citation et tableaux, lus ligne par ligne avec le nom des colonnes ;
+// parenthèses, guillemets, crochets et barres marquent une pause : voir blockSpeech() et pausePunct() plus bas)
+const lessonSpeech = l => speechBlocks(l).join('. ');
 const lessonText = l => lessonSpeech(l).replace(/\[\[.+?\]\]/g, '');
 // durée de l'écoute à vitesse normale : 0,36 s par mot français, 0,7 s par mot arabe, 0,25 s de pause par phrase
 function audioSeconds(text) {
@@ -171,6 +173,14 @@ const FORMULES = {
 const FORM_KEYS = Object.fromEntries(Object.entries(FORMULES).map(([k, v]) => [arKey(k), v]));
 const ELIS = /^(?:jusqu|lorsqu|puisqu|quoiqu|quelqu|qu|[dlcjmnst])[’']/i;
 const TRANSCR = /[âîûÂÎÛḥṣḍṭẓḤṢḌṬẒ‘ʿʾ]/;
+// termes arabes écrits à l'universitaire (u pour « ou », consonne finale prononcée) : comment la voix française doit les dire
+const AR_LEX = { qiyas: 'qiyâss', kanun: 'qânoûne', qanun: 'qânoûne', urf: 'ourf', idjma: 'idjmâ', ijma: 'idjmâ', ijtihad: 'ijtihâde', mujtahid: 'moujtahide', mujtahids: 'moujtahides',
+  hukm: 'houkm', sunna: 'sounna', usul: 'ousoûl', muqatil: 'mouqâtil', qurtubi: 'qourtoubî', 'al-qurtubi': 'al-qourtoubî', bukhari: 'boukhârî', 'al-bukhari': 'al-boukhârî',
+  muslim: 'mouslim', mushaf: 'mous-haf', suhuf: 'souhouf', uthman: 'outhmâne', uthmani: 'outhmânî', umar: 'oumar', hasan: 'hassane', matn: 'matne', isnad: 'isnâde',
+  tawhid: 'tawhîde', 'ra-y': 'raï', ray: 'raï', istihsan: 'istihsâne', istislah: 'istislâh', talfiq: 'talfîq', thabit: 'thâbite', abbas: 'abbâss', hadiths: 'hadîthe', hadith: 'hadîthe',
+  daif: 'daïf', sahih: 'sahîh', ayat: 'âyâte', 'al-insan': 'al-insâne', far: 'far', asl: 'asl', illa: 'illa', wahy: 'wah-y', mursala: 'moursala', qawl: 'qawl', taqrir: 'taqrîr',
+  jibril: 'jibrîl', hira: 'hirâ', yamama: 'yamâma', hafsa: 'hafsa', 'abu': 'aboû', zahirisme: 'zâhirisme', majalla: 'majalla', 'char-iyya': 'char‘iyya', siyasa: 'siyâssa' };
+const lexKey = x => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[ḥṣḍṭẓ]/gi, c => c.normalize('NFD')[0]).toLowerCase().replace(/^['’‘ʿʾ]+|['’‘ʿʾ]+$/g, '').replace(/['’‘ʿʾ]/g, '-');
 function pronWord(w) {
   const m = w.match(ELIS), pre = m ? m[0] : '', x0 = w.slice(pre.length);
   if (!TRANSCR.test(x0)) return w;
@@ -198,7 +208,9 @@ const frNorm = t => String(t)
   .replace(/\b(Chapitre|Titre|Partie|Section|Livre|Tome|Leçon|Unité|Annexe|Niveau)\s+([IVX]{1,5})\b/g, (m, w, r) => w + ' ' + numFr(romain(r)))
   .replace(/(^|[.,;:]\s+)([IVX]{1,5})\.(?=\s|$)/g, (m, p, r) => p + numFr(romain(r)) + '.')
   .replace(/\bn°\s*/g, 'numéro ').replace(/\s=\s/g, ' égale ').replace(/\s−\s/g, ' moins ').replace(/\s*→\s*/g, ', ');
-const pronFr = t => frNorm(String(t).replace(/\s+·\s+/g, ', ')).replace(/(\p{L})\s+([a-z]{1,2})-(?=\p{L})/gu, '$1$2 ').replace(/[^\s()«»"“”,.;:!?]+/g, pronWord);
+const pronLex = t => String(t).replace(/[^\s()«»"“”,.;:!?]+/g, w => { const m = w.match(ELIS), pre = m ? m[0] : '', x0 = w.slice(pre.length), lx = AR_LEX[lexKey(x0)];
+  return lx ? pre + (/^['’‘ʿʾ]?\p{Lu}/u.test(x0) ? lx.charAt(0).toUpperCase() + lx.slice(1) : lx) : w; });
+const pronFr = t => frNorm(pronLex(String(t).replace(/\s+·\s+/g, ', '))).replace(/(\p{L})\s+([a-z]{1,2})-(?=\p{L})/gu, '$1$2 ').replace(/[^\s()«»"“”,.;:!?]+/g, pronWord);
 // découpe en morceaux : [{ lang, text }] ; l'arabe entre [[...]] devient un morceau arabe (ou une formule transcrite)
 function speechParts(text, lang) {
   if (lang !== 'fr') return [{ lang, text: lang === 'ar' ? arSpeak(text) : text }];
@@ -213,6 +225,20 @@ function speechParts(text, lang) {
   if (last < t.length) out.push({ lang: 'fr', text: pronFr(t.slice(last)) });
   return out.filter(p => /[\p{L}\p{N}]/u.test(p.text));
 }
+// texte parlé d'une leçon, bloc par bloc (le même découpage sert à « écouter à partir d'ici »)
+// les tableaux sont lus ligne par ligne : « Tableau : colonne 1, colonne 2. Ligne. Colonne 2 : valeur. »
+const tableSpeech = T => { const h = (T.h || []).map(x => String(x).trim()), r = T.r || [];
+  return [`Tableau : ${h.filter(Boolean).join(', ')}`].concat(r.map(row => { const c = row.map(x => String(x).trim());
+    if (c.length <= 2) return c.filter(Boolean).join(' : ');
+    return [c[0], ...c.slice(1).map((v, i) => v && v !== '—' ? (h[i + 1] ? h[i + 1] + ' : ' : '') + v : '').filter(Boolean)].filter(Boolean).join('. '); })).join('. '); };
+const blockSpeech = b => b.p || b.h || (b.ul || b.ol || []).join('. ') || b.box || b.quote || (b.table ? tableSpeech(b.table) : '');
+// pauses : parenthèses, guillemets, crochets, barres et tirets deviennent des virgules (l'arabe [[...]] reste intact)
+const pausePunct = t => String(t).split(/(\[\[.+?\]\])/).map((x, i) => i % 2 ? x : x
+    .replace(/\s*[()«»“”"{}]\s*/g, ', ').replace(/(?<!\[)\[(?!\[)|(?<!\])\](?!\])/g, ', ')
+    .replace(/\s+[\/|]\s+|(?<=\p{L})\/(?=\p{L})/gu, ', ').replace(/\s[–—]\s/g, ', ')).join('')
+  .replace(/,(\s*,)+/g, ',').replace(/,\s*([.;:!?])/g, '$1').replace(/([.;:!?])\s*,/g, '$1').replace(/^\s*,\s*/, '').replace(/\s*,\s*$/, '').replace(/ {2,}/g, ' ');
+const speechClean = x => pausePunct(String(x).replace(/\*\*|\*/g, '').replace(/\[([^\]]+)\]\(#[^)]*\)/g, '$1'));
+const speechBlocks = l => [l.title, ...l.body.map(blockSpeech)].filter(Boolean).map(speechClean).filter(x => /[\p{L}\p{N}]/u.test(x));
 // ---------- écoute : vitesses, écoute en arrière-plan et commandes sur l'écran verrouillé
 // Sept vitesses, pour tous les publics : 0,5× pour découvrir ou mémoriser, 2× pour réviser vite.
 const RATES = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2];
@@ -261,11 +287,12 @@ function ttsStop() {
   const was = TTS.on; TTS.on = false; TTS.paused = false; TTS.gen++;
   if (was && synth) synth.cancel();
   if (TTS.btn) TTS.btn.classList.remove('playing'); if (playingBtn === TTS.btn) playingBtn = null; TTS.btn = null;
-  keepAwake(false); if (was) { lpHide(); mediaClear(); }
+  keepAwake(false); markSpeaking(-1); if (was) { lpHide(); mediaClear(); }
 }
 function speak(text, lang, btn, noRec) {
   if (btn && (btn === playingBtn || btn === audioBtn)) { stopVoice(); return; }
   // leçon ou dialogue enregistré (data/audio.js) : vrai fichier audio, qui continue dans une autre application
+  if (btn) { LISTEN.route = location.hash; LISTEN.text = String(text); }
   const rec = !noRec && btn && recFor(text); if (rec) { playRecorded(rec, btn, text, lang); return; }
   if (!synth) { showNoVoice(); return; }
   stopVoice();
@@ -306,7 +333,7 @@ function lpBuild() {
   if (lp) return lp;
   lp = document.createElement('div'); lp.id = 'lp'; lp.setAttribute('role', 'region'); lp.setAttribute('aria-label', 'Lecteur audio'); lp.hidden = true;
   lp.innerHTML = `<div class="lp-bar"><i></i></div><div class="lp-row">
-    <img src="logo.png" alt="" width="34" height="34"><div class="lp-t"><b></b><small></small></div>
+    <img src="logo.png" alt="" width="34" height="34"><div class="lp-t" title="Revenir à la page écoutée"><b></b><small></small></div>
     <button type="button" class="lp-b" data-lp="prev" aria-label="Phrase précédente"><svg viewBox="0 0 24 24"><path d="M6 5v14M19 5l-10 7 10 7z"/></svg></button>
     <button type="button" class="lp-b lp-main" data-lp="toggle" aria-label="Pause"><svg viewBox="0 0 24 24"><path class="i-pause" d="M8 5v14M16 5v14"/><path class="i-play" d="M7 4l13 8-13 8z"/></svg></button>
     <button type="button" class="lp-b" data-lp="next" aria-label="Phrase suivante"><svg viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z"/></svg></button>
@@ -317,6 +344,7 @@ function lpBuild() {
   document.body.appendChild(lp);
   lp.addEventListener('click', e => {
     const r = e.target.closest('[data-lp-rate]'); if (r) { setRate(+r.dataset.lpRate); lpMenu(false); return; }
+    if (e.target.closest('.lp-t') && LISTEN.route && location.hash !== LISTEN.route) { location.hash = LISTEN.route; return; }   // retour à la page écoutée
     const b = e.target.closest('[data-lp]'); if (!b) return;
     const a = b.dataset.lp, isT = TTS.on;
     if (a === 'rate') { lpMenu(lp.querySelector('.lp-menu').hidden); return; }
@@ -343,14 +371,64 @@ function lpUpdate() {
   lp.querySelector('.lp-rate').textContent = rateLabel(+state.rate || 1);
   lp.querySelectorAll('[data-lp-rate]').forEach(b => b.setAttribute('aria-checked', String(+b.dataset.lpRate === (+state.rate || 1))));
   if (MS) try { MS.playbackState = paused ? 'paused' : 'playing'; } catch (e) {}
+  markSpeaking(isT ? TTS.idx : AUD.rec ? recIdx() : -1);
+  lp.classList.toggle('away', !!LISTEN.route && location.hash !== LISTEN.route && longPlaying());
 }
 function showNoVoice() { const n = document.getElementById('novoice'); if (n) n.hidden = false; }
 function checkArVoice() { const n = document.getElementById('noar'); if (n && synth && voicesLoaded) n.hidden = !!voices.ar; }
 
+// ---------- écoute continue et « écouter à partir d'ici »
+// Une écoute longue (leçon, récitation) continue quand on change de page dans l'application : le lecteur du bas reste
+// affiché, et toucher son titre ramène à la page écoutée. Dans une leçon, ▶ à côté d'un titre lance l'écoute à partir
+// de ce passage ; pendant l'écoute, toucher un paragraphe y conduit, et le passage lu est surligné.
+const LISTEN = { route: '', text: '', cache: {} };
+const longPlaying = () => (TTS.on && TTS.long) || (AUD.rec && AUD.long) || (AUD.total > 1 && !!audioBtn);
+function chunkCount(text, forRec) { const sv = voices.ar; if (forRec) voices.ar = voices.ar || true; try { return ttsChunks(text, 'fr').length; } finally { voices.ar = sv; } }
+function lessonStarts(l, forRec) {                       // premier morceau lu de chaque bloc (même découpage que l'enregistrement)
+  const k = l.id + '|' + forRec + '|' + l.body.length; if (LISTEN.cache[k]) return LISTEN.cache[k];
+  const st = []; let n = chunkCount(speechClean(l.title) + '. ', forRec);
+  l.body.forEach((b, bi) => { st[bi] = n; const t = blockSpeech(b), c = t ? speechClean(t) : ''; if (/[\p{L}\p{N}]/u.test(c)) n += chunkCount(c + '. ', forRec); });
+  return (LISTEN.cache[k] = st);
+}
+const listenLesson = () => { const h = decodeURIComponent(location.hash.slice(1)); return h.startsWith('l-') && h === decodeURIComponent(LISTEN.route.slice(1)) ? findLesson(h.slice(2)) : null; };
+let speakingEl = null;
+function markSpeaking(idx) {                             // surligne le passage en cours de lecture
+  let el = null;
+  if (idx >= 0 && longPlaying()) { const f = listenLesson();
+    if (f) { const st = lessonStarts(f.l, !!AUD.rec); let bi = -1; st.forEach((v, i) => { if (v <= idx && document.querySelector(`article.lesson [data-bi="${i}"]`)) bi = i; });
+      if (bi >= 0) el = document.querySelector(`article.lesson [data-bi="${bi}"]`); } }
+  if (el === speakingEl) return;
+  if (speakingEl) speakingEl.classList.remove('speaking'); speakingEl = el; if (el) el.classList.add('speaking');
+}
+function listenFrom(bi) {
+  const f = findLesson(decodeURIComponent(location.hash.slice(3))), btn = document.querySelector('article.lesson .actions [data-say]');
+  if (!f || !btn) return;
+  if (longPlaying() && listenLesson()) { if (AUD.rec) recSeek(lessonStarts(f.l, true)[bi] || 0); else if (TTS.on) ttsPlayFrom(lessonStarts(f.l, false)[bi] || 0); return; }
+  const rec = recFor(btn.dataset.say);
+  speak(btn.dataset.say, 'fr', btn);
+  if (rec) { const go = () => { player.removeEventListener('loadedmetadata', go); recSeek(lessonStarts(f.l, true)[bi] || 0); };
+    if (player.readyState >= 1) go(); else player.addEventListener('loadedmetadata', go); }
+  else if (TTS.on) ttsPlayFrom(lessonStarts(f.l, false)[bi] || 0);
+}
+function lessonListenUi() {                             // après l'affichage d'une leçon : boutons ▶ et reprise de l'écoute en cours
+  const art = document.querySelector('article.lesson'), lb = art && art.querySelector('.actions [data-say]'); if (!lb) return;
+  art.querySelectorAll('h2[data-bi], h3[data-bi]').forEach(h => h.insertAdjacentHTML('beforeend', `<button type="button" class="say-from" data-from="${h.dataset.bi}" aria-label="Écouter à partir d’ici" title="Écouter à partir d’ici">▶</button>`));
+  if (longPlaying() && listenLesson() && lb.dataset.say === LISTEN.text) { lb.classList.add('playing'); if (TTS.on) { TTS.btn = lb; playingBtn = lb; } else audioBtn = lb;
+    markSpeaking(TTS.on ? TTS.idx : recIdx()); }
+}
+document.addEventListener('click', e => {
+  const f = e.target.closest('[data-from]'); if (f) { e.preventDefault(); listenFrom(+f.dataset.from); return; }
+  if (!longPlaying() || !listenLesson()) return;
+  const blk = e.target.closest('article.lesson [data-bi]');
+  if (!blk || e.target.closest('a, button, input, select, textarea, summary, label, [data-say], .mini, .corrige')) return;
+  if (getSelection && String(getSelection()).length) return;
+  listenFrom(+blk.dataset.bi);
+});
+
 // ---------- récitations (fichiers audio)
 const player = new Audio();
 let audioBtn = null, playlist = [];
-const AUD = { title: '', total: 0, rec: false, marks: null };
+const AUD = { title: '', total: 0, rec: false, marks: null, long: false };
 // ---------- leçons et dialogues enregistrés (MP3 de audio/, liste dans data/audio.js) : ce sont de vrais fichiers
 // audio, que le téléphone continue de lire quand on passe à une autre application ou qu'on éteint l'écran ;
 // sans fichier (ou s'il ne se charge pas), la voix du téléphone prend le relais. Un fichier n'est utilisé que si
@@ -364,7 +442,7 @@ function playRecorded(rec, btn, text, lang) {
   stopVoice();
   audioBtn = btn || null; if (audioBtn) audioBtn.classList.add('playing');
   const h = document.querySelector('#view h1'); AUD.title = (h ? h.textContent : 'Lisân Campus').trim();
-  AUD.total = rec.t.length; AUD.marks = rec.t; AUD.rec = true; playlist = []; audioFallback = null;
+  AUD.total = rec.t.length; AUD.marks = rec.t; AUD.rec = true; AUD.long = rec.d >= 6; playlist = []; audioFallback = null;
   player.preload = 'auto'; player.src = rec.f;
   try { player.preservesPitch = true; player.playbackRate = +state.rate || 1; } catch (e) {}
   player.onended = () => stopAudio();
@@ -378,7 +456,7 @@ player.addEventListener('timeupdate', () => { if (!AUD.rec) return; const n = Da
 player.addEventListener('play', () => { if (AUD.rec) lpUpdate(); });
 player.addEventListener('pause', () => { if (AUD.rec) lpUpdate(); });
 player.preload = 'none';
-function stopAudio() { const was = (AUD.total > 1 || AUD.rec) && audioBtn; AUD.rec = false; AUD.marks = null; try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove("playing"); audioBtn = null; playlist = []; audioFallback = null; if (was) { AUD.total = 0; if (!TTS.on) { lpHide(); mediaClear(); } } }
+function stopAudio() { const was = (AUD.total > 1 || AUD.rec) && audioBtn; AUD.rec = false; AUD.long = false; AUD.marks = null; markSpeaking(-1); try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove("playing"); audioBtn = null; playlist = []; audioFallback = null; if (was) { AUD.total = 0; if (!TTS.on) { lpHide(); mediaClear(); } } }
 let audioFallback = null;   // fichier de secours (le verset) si l'audio du mot seul ne se charge pas
 function playAudio(urls, btn, fallback) {
   if (btn && btn === audioBtn) { stopAudio(); if (synth) synth.cancel(); return; }
@@ -386,7 +464,7 @@ function playAudio(urls, btn, fallback) {
   stopAudio();
   playlist = urls.slice(); audioBtn = btn || null; audioFallback = fallback || null; if (audioBtn) audioBtn.classList.add('playing');
   AUD.total = urls.length; const h = document.querySelector('#view h1'); AUD.title = (h ? h.textContent : 'Récitation').trim();
-  if (AUD.total > 1) { lpShow(); mediaFor('audio'); }
+  if (AUD.total > 1) { LISTEN.route = location.hash; LISTEN.text = ''; lpShow(); mediaFor('audio'); }
   const next = () => { if (!playlist.length) { stopAudio(); return; } const src = playlist.shift(); player.src = src; try { player.preservesPitch = true; player.playbackRate = +state.rate || 1; } catch (e) {}
     player.play().catch(e => { if (!e || e.name !== 'AbortError') audioError(src); }); lpUpdate(); };
   player.onended = next; player.onerror = () => audioError(player.src); player.onratechange = null; next();
@@ -810,8 +888,8 @@ function viewLesson(found) {
       <span class="eyebrow">${esc(s.title)} · ${lessonPos(s, i)}</span>
       <h1>${esc(l.title)}</h1>${l.ar ? `<p class="ara title-ar" lang="ar" dir="rtl">${esc(l.ar)}</p>` : ''}
       ${noVoice}${(s.lang === 'ar' && !s.noVoice) || (!s.noLessonVoice && /\[\[/.test(text)) ? noAr : ''}${s.noVoice ? noAudio : ''}
-      ${!s.noLessonVoice && s.id !== 'en' ? `<div class="actions"><button type="button" class="btn ghost small" data-say="${esc(text)}" data-lang="fr">${ICON}Écouter la leçon <small>· ${mins} min</small></button></div>` : ''}
-      ${l.body.map(b => renderBlock(b, s)).join('')}
+      ${!s.noLessonVoice && s.id !== 'en' ? `<div class="actions"><button type="button" class="btn ghost small" data-say="${esc(text)}" data-lang="fr">${ICON}Écouter la leçon <small>· ${mins} min</small></button></div><p class="meta listen-tip">▶ à côté d’un titre : écouter à partir de là. Pendant l’écoute, touchez un paragraphe pour y aller ; l’écoute continue si vous changez de page.</p>` : ''}
+      ${l.body.map((b, bi) => renderBlock(b, s).replace(/^(\s*<[a-zA-Z][\w-]*)/, `$1 data-bi="${bi}"`)).join('')}
       ${viewMini(key)}
       <div class="lesson-foot">
         <button type="button" class="btn done-toggle" data-done="${key}" data-need="${needFor(l)}" aria-pressed="${d}">${d ? '✓ Leçon terminée' : 'Marquer comme terminée'}</button>
@@ -1222,7 +1300,8 @@ function viewContact() {
 const navStack = [];
 function trackNav(h) { const n = navStack.length; if (n > 1 && navStack[n - 2] === h) navStack.pop(); else if (navStack[n - 1] !== h) navStack.push(h); if (navStack.length > 80) navStack.shift(); }
 function route() {
-  stopVoice(); closeMenu(); clearInterval(lessonClock); clearInterval(evalTimer); if (typeof closeReader === 'function') closeReader();
+  if (!longPlaying()) stopVoice(); else markSpeaking(-1);   // une écoute longue continue d'une page à l'autre
+  closeMenu(); clearInterval(lessonClock); clearInterval(evalTimer); if (typeof closeReader === 'function') closeReader();
   if (!location.hash) history.replaceState(null, '', '#accueil');
   const h = decodeURIComponent(location.hash.slice(1)) || 'accueil';
   trackNav(h);
@@ -1260,6 +1339,8 @@ function route() {
   document.querySelectorAll('.quick a').forEach(a => { const on = a.getAttribute('href') === '#' + h || (h === 'accueil' && a.getAttribute('href') === '#accueil') || (h.startsWith('verifier') && a.getAttribute('href') === '#verifier');
     if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
   if (after) after();
+  if (h.startsWith('l-') && keep) lessonListenUi();
+  lpUpdate();
   checkArVoice();
   if (keep) {
     const saved = state.last && state.last.route === h ? state.last.y : 0;

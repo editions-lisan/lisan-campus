@@ -1201,3 +1201,13 @@ footer.site .wrap { padding-top: 46px; }
 .adm-bar { height: 7px; margin: 6px 0 4px; }
 .adm-pt { font-size: 13px; }
 .adm-pt tr.ok td { color: var(--ok, #1b7a3a); }
+/* Écoute : à partir d'un titre, passage en cours surligné, retour à la page écoutée */
+.say-from { display: inline-grid; place-items: center; width: 26px; height: 26px; margin-left: 8px; vertical-align: middle; border-radius: 50%; border: 1px solid var(--line);
+  background: var(--surface); color: var(--sc, var(--accent)); font-size: 11px; line-height: 1; cursor: pointer; padding: 0 0 0 2px; }
+.say-from:hover { background: color-mix(in srgb, var(--sc, var(--accent)) 12%, var(--surface)); }
+article.lesson .speaking { background: color-mix(in srgb, var(--sc, var(--accent)) 9%, transparent); box-shadow: -10px 0 0 color-mix(in srgb, var(--sc, var(--accent)) 9%, transparent), 10px 0 0 color-mix(in srgb, var(--sc, var(--accent)) 9%, transparent);
+  border-radius: 6px; transition: background .25s; }
+.listen-tip { margin-top: -4px; font-size: 13px; }
+#lp .lp-t { cursor: pointer; }
+#lp.away .lp-t small::before { content: "↩ Revenir · "; font-weight: 600; }
+@media print { .say-from, .listen-tip { display: none !important; } }
