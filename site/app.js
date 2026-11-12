@@ -322,7 +322,7 @@ function mediaFor(kind) {
       ? { play: ttsResume, pause: ttsPause, stop: () => stopVoice(), previoustrack: () => ttsPlayFrom(TTS.idx - 1), nexttrack: () => ttsPlayFrom(TTS.idx + 1),
           seekbackward: () => ttsPlayFrom(TTS.idx - 3), seekforward: () => ttsPlayFrom(TTS.idx + 3) }
       : { play: () => { player.play().catch(() => {}); lpUpdate(); }, pause: () => { player.pause(); lpUpdate(); }, stop: () => stopVoice(), previoustrack: AUD.rec ? () => recSeek(recIdx() - 1) : null, nexttrack: AUD.rec ? () => recSeek(recIdx() + 1) : null,
-          seekbackward: () => { player.currentTime = Math.max(0, player.currentTime - 10); }, seekforward: () => { player.currentTime = Math.min(player.duration || 0, player.currentTime + 10); } };
+          seekbackward: () => { const t = Math.max(0, player.currentTime - 10); if (AUD.rec) recGo(t); else player.currentTime = t; }, seekforward: () => { const t = Math.min(player.duration || 0, player.currentTime + 10); if (AUD.rec) recGo(t); else player.currentTime = t; } };
     Object.entries(H).forEach(([k, f]) => { try { MS.setActionHandler(k, f); } catch (e) {} });
     MS.playbackState = 'playing';
   } catch (e) {}
@@ -438,18 +438,40 @@ const audioHash = t => { let h = 5381; for (let i = 0; i < t.length; i++) h = ((
 const REC = (() => { const m = {}; Object.values(window.AUDIO || {}).forEach(x => { if (x && x.h) m[x.h] = x; }); return m; })();
 const recFor = text => REC[audioHash(String(text))] || null;
 const recIdx = () => { const m = AUD.marks || [], t = player.currentTime; let k = 0; while (k + 1 < m.length && m[k + 1] <= t + 0.05) k++; return k; };
-function recSeek(i) { const m = AUD.marks || []; if (!m.length) return; i = Math.max(0, Math.min(m.length - 1, i)); player.currentTime = m[i]; if (player.paused) player.play().catch(() => {}); lpUpdate(); }
+function recSeek(i) { const m = AUD.marks || []; if (!m.length) return; i = Math.max(0, Math.min(m.length - 1, i)); recGo(m[i]); lpUpdate(); }
+// Aller à un moment de l'enregistrement. Si l'hébergeur ne permet pas de lire le fichier par morceaux (pas de requêtes
+// « Range »), le téléphone ne sait pas sauter plus loin que ce qu'il a déjà reçu et repart du début : on lit alors le
+// fichier entier, téléchargé une fois en mémoire (préparé dès le début de l'écoute), où l'on peut se placer partout.
+let recBlob = { f: null, url: null, p: null };
+function recBlobFor(f) {
+  if (recBlob.f === f && recBlob.p) return recBlob.p;
+  if (recBlob.url) try { URL.revokeObjectURL(recBlob.url); } catch (e) {}
+  const me = recBlob = { f, url: null, p: null };
+  me.p = fetch(f).then(r => r.ok ? r.blob() : Promise.reject(new Error(r.status))).then(b => (me.url = URL.createObjectURL(b)));
+  me.p.catch(() => { if (recBlob === me) recBlob = { f: null, url: null, p: null }; });
+  return me.p;
+}
+const canSeek = t => { const s = player.seekable; for (let k = 0; k < s.length; k++) if (t >= s.start(k) - 0.05 && t <= s.end(k) + 0.05) return true; return false; };
+function recGo(t) {
+  if (canSeek(t) || (recBlob.url && player.src === recBlob.url)) { player.currentTime = t; if (player.paused) player.play().catch(() => {}); return; }
+  const f = AUD.file;
+  recBlobFor(f).then(url => {
+    if (!AUD.rec || AUD.file !== f) return;
+    const go = () => { player.removeEventListener('loadedmetadata', go); try { player.playbackRate = +state.rate || 1; } catch (e) {} player.currentTime = t; player.play().catch(() => {}); lpUpdate(); };
+    if (player.src !== url) { player.addEventListener('loadedmetadata', go); player.src = url; } else go();
+  }, () => { try { player.currentTime = t; } catch (e) {} });
+}
 function playRecorded(rec, btn, text, lang) {
   stopVoice();
   audioBtn = btn || null; if (audioBtn) audioBtn.classList.add('playing');
   const h = document.querySelector('#view h1'); AUD.title = (h ? h.textContent : 'Lisân Campus').trim();
-  AUD.total = rec.t.length; AUD.marks = rec.t; AUD.rec = true; AUD.long = rec.d >= 6; playlist = []; audioFallback = null;
+  AUD.total = rec.t.length; AUD.marks = rec.t; AUD.rec = true; AUD.long = rec.d >= 6; AUD.file = rec.f; playlist = []; audioFallback = null;
   player.preload = 'auto'; player.src = rec.f;
   try { player.preservesPitch = true; player.playbackRate = +state.rate || 1; } catch (e) {}
   player.onended = () => stopAudio();
   player.onerror = () => { const b = audioBtn; stopAudio(); speak(text, lang, b, true); };
   player.play().catch(() => {});
-  if (rec.d >= 6) { lpShow(); mediaFor('audio'); lpUpdate(); }   // un mot de carte (quelques secondes) se joue sans le lecteur du bas
+  if (rec.d >= 6) { lpShow(); mediaFor('audio'); lpUpdate(); recBlobFor(rec.f).catch(() => {}); }   // un mot de carte (quelques secondes) se joue sans le lecteur du bas ; une leçon : fichier entier préparé pour pouvoir s'y déplacer
 }
 let recTick = 0;
 player.addEventListener('timeupdate', () => { if (!AUD.rec) return; const n = Date.now(); if (n - recTick < 400) return; recTick = n; lpUpdate();
