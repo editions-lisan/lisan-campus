@@ -13,7 +13,7 @@ const EXTRA = require('./complements.js');
 
 // ---------- matières du site
 const ctx = { window: {}, console }; vm.createContext(ctx);
-vm.runInContext(fs.readFileSync(path.join(SITE, 'data/droit.js'), 'utf8') + ';this.S={M_INTRO,M_DC,M_DM,M_OJ,M_METHO,M_TEE,M_ECO};', ctx);
+vm.runInContext(fs.readFileSync(path.join(SITE, 'data/droit.js'), 'utf8') + ';this.S={M_INTRO,M_DC,M_DM,M_OJ,M_CONST,M_METHO,M_TEE,M_INFO,M_ECO};', ctx);
 const S = ctx.S;
 
 // ---------- plan de chaque document
@@ -25,7 +25,7 @@ const DOCS = [
       ['Première partie · Le droit objectif', ['caracteres', 'matieres', 'loi', 'forceloi', 'coutume', 'jurisprudence', 'interpretation', 'espace', 'temps', 'institution']],
       ['Deuxième partie · Les droits subjectifs', ['patrimoniaux', 'extrapatrimoniaux', 'chargepreuve', 'procedes', 'action', 'instance']],
     ] },
-  { id: 'dc', m: S.M_DC, file: 'cours-droit-civil.pdf', title: 'Droit civil', sub: 'Le droit des personnes', by: "D'après le cours et les travaux dirigés de M. TRAORE",
+  { id: 'dc', m: S.M_DC, file: 'cours-droit-civil.pdf', title: 'Droit civil', sub: 'Le droit des personnes',
     parts: [
       ['Introduction', ['intro']],
       ['Titre I · Les personnes physiques', [
@@ -37,7 +37,7 @@ const DOCS = [
       ['Travaux dirigés', ['td1', 'td2', 'td3', 'x:proces']],
     ],
     annexes: [['Annexe 1 · Le polycopié du cours (texte intégral)', 'cours-droit-civil-personnes.pdf'], ['Annexe 2 · Les fiches de travaux dirigés (énoncés)', 'td-droit-civil-personnes-2026-2027.pdf']] },
-  { id: 'dm', m: S.M_DM, file: 'cours-droit-musulman.pdf', title: 'Droit musulman', sub: 'La Charia et les sources du droit musulman', by: "D'après le cours de Dr Youssouf BAKAYOKO",
+  { id: 'dm', m: S.M_DM, file: 'cours-droit-musulman.pdf', title: 'Droit musulman', sub: 'La Charia et les sources du droit musulman',
     parts: [
       ['Chapitre 1 · Définitions et compréhension de la Charia', ['charia']],
       ['Chapitre 2 · Les sources du droit musulman', ['coran', 'sunna']],
@@ -55,7 +55,12 @@ const DOCS = [
         ['Chapitre I · Les magistrats', ['magistrats', 'recrutement', 'statut', 'responsabilite']],
         ['Chapitre II · Les auxiliaires de justice', ['avocats', 'notaire', 'commissaire', 'greffier']]]],
     ] },
-  { id: 'metho', m: S.M_METHO, file: 'cours-methodologie-juridique.pdf', title: 'Méthodologie juridique', sub: 'Dissertation, cas pratique, commentaire d\'arrêt et commentaire de texte', by: "D'après le cours de M. OUATTARA Dotianga Kader",
+  { id: 'const', m: S.M_CONST, file: 'cours-droit-constitutionnel.pdf', title: 'Droit constitutionnel', sub: "L'État : origine, définition et fondements du pouvoir",
+    parts: [
+      ['Introduction', ['introduction']],
+      ["Chapitre 1 · L'origine de l'État", ['etatnature', 'evolution']],
+    ] },
+  { id: 'metho', m: S.M_METHO, file: 'cours-methodologie-juridique.pdf', title: 'Méthodologie juridique', sub: 'Dissertation, cas pratique, commentaire d\'arrêt et commentaire de texte',
     parts: [
       ['Introduction générale', ['introgen', 'atelier1']],
       ['Chapitre 1 · La dissertation juridique', ['methode', 'dissexo', 'sujet', 'corrige', 'atelier2']],
@@ -64,7 +69,12 @@ const DOCS = [
       ['Chapitre 4 · Le commentaire de texte', ['commtexte']],
       ['Travaux dirigés', ['td1', 'td2', 'td3', 'td4', 'td5', 'td6', 'td7', 'td8', 'td9']],
     ] },
-  { id: 'eco', m: S.M_ECO, file: 'cours-economie-politique.pdf', title: 'Économie politique', sub: 'Activité économique, grands courants de pensée et dix principes de l\'économie', by: "D'après le cours du Dr SANOGO Aly Balé",
+  { id: 'info', m: S.M_INFO, file: 'cours-informatique.pdf', title: 'Informatique', sub: "L'ordinateur, le binaire et la représentation de l'information",
+    parts: [
+      ["Chapitre 1 · L'ordinateur", ['composants', 'choix']],
+      ['Chapitre 2 · Le binaire et la représentation de l\'information', ['binaire', 'bases', 'decbin', 'bindec', 'hexa', 'synthese']],
+    ] },
+  { id: 'eco', m: S.M_ECO, file: 'cours-economie-politique.pdf', title: 'Économie politique', sub: 'Activité économique, grands courants de pensée et dix principes de l\'économie',
     strip: /^Chapitre [IV]+ · /,
     parts: [
       ['Introduction générale', ['intro']],
@@ -93,7 +103,7 @@ function block(b) {
   if (b.raw) return b.raw;
   if (b.corrige) return `<div class="corr"><p class="corr-k">Corrigé</p>${b.corrige.map(block).join('')}</div>`;
   if (b.illus) { const s = svg(b.illus); return s ? `<figure class="ill"><img src="${s}" alt="">${b.cap ? `<figcaption>${md(b.cap)}</figcaption>` : ''}</figure>` : ''; }
-  if (b.p) return `<p>${md(b.p)}</p>`;
+  if (b.p) return /^\*\*Essaie\*\*/.test(b.p) ? '' : `<p>${md(b.p)}</p>`;
   if (b.h) return `<h4>${mt(b.h)}</h4>`;
   if (b.ul) return `<ul>${b.ul.map(x => `<li>${md(x)}</li>`).join('')}</ul>`;
   if (b.ol) return `<ol>${b.ol.map(x => `<li>${md(x)}</li>`).join('')}</ol>`;
@@ -142,7 +152,7 @@ function build(d) {
 <script>window.PagedConfig={auto:true,after:()=>{window.__done=true}}</script>
 <script src="file://${path.join(DEPS, 'pagedjs/dist/paged.polyfill.js')}"></script></head><body>
 <section class="cover"><div class="band">${KHATAM}<p class="lvl">Licence 1 · Droit</p><h1 class="ct">${esc(d.title)}</h1><p class="cs">${esc(d.sub)}</p></div>
-<div class="cbot"><p class="cby">${d.by ? esc(d.by) : 'D\'après le plan du cours de Licence 1'}</p><p class="cy">${ANNEE}</p>
+<div class="cbot"><p class="cby">Conception, rédaction et direction pédagogique : Éditions Lisân</p><p class="cy">${ANNEE}</p>
 <p class="cn">Cours complet · ${nb} leçons, exercices corrigés et lexique</p>
 <div class="brand"><img src="file://${path.join(SITE, 'logo.png')}" alt=""><div><b>Lisân Campus</b><span>Éditions Lisân</span></div></div></div></section>
 <section class="front"><h2 class="fh">Sommaire</h2><ol class="toc">${tocHTML}</ol>
@@ -230,7 +240,7 @@ tr:nth-child(even) td{background:var(--soft)} tr{break-inside:avoid} table.short
 .box.piege{background:#f9e5e2} .box.piege .k{color:#a2301f}
 blockquote{margin:2mm 0 3.5mm;padding:1mm 0 1mm 5mm;border-left:.8mm solid var(--line);font-style:italic;color:#2c3446}
 .corr{border:.3mm solid #b9d6c3;border-left:1.2mm solid #2f7d4f;background:#f4faf6;border-radius:1.5mm;padding:2.4mm 3.5mm .8mm;margin:2mm 0 4mm}
-.corr-k{font:700 8.6pt Atk;letter-spacing:.06em;text-transform:uppercase;color:#2f7d4f;margin:0 0 1.2mm}
+.corr-k{font:700 8.6pt Atk;letter-spacing:.06em;text-transform:uppercase;color:#2f7d4f;margin:0 0 1.2mm;break-after:avoid}
 .corr h4{margin-top:2.5mm}
 figure.ill{margin:3mm 0 4mm;text-align:center;break-inside:avoid}
 figure.ill img{max-width:100%;max-height:92mm}

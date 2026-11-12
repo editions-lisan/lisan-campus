@@ -4,7 +4,7 @@ Un document par matière, à la même mise en page, construit à partir des leç
 
 - `build_cours.js` : plan de chaque document (`DOCS` : leçons rangées par partie et chapitre), mise en pages (Paged.js), PDF (Chromium). Toute leçon d'une matière doit y être placée, sinon le script s'arrête.
 - `complements.js` : pages propres aux documents (schéma simplifié du procès civil des TD de droit civil, bibliographie du cours de droit musulman).
-- `originaux/` : polycopié du cours et fiches de TD de droit civil (M. TRAORE), ajoutés en annexe du document de droit civil.
+- `originaux/` : polycopié du cours et fiches de TD de droit civil, tels qu'ils ont été remis, ajoutés en annexe du document de droit civil.
 
 Refaire les documents après toute modification des leçons :
 

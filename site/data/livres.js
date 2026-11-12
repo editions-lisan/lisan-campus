@@ -185,13 +185,15 @@ window.LIVRES = [
  }
 ];
 window.DOCS = [
- { space: "droit", kind: "Cours", title: "Introduction à l’étude du droit", desc: "Cours complet · le droit objectif et les droits subjectifs · exercices corrigés et lexique", file: "droit/cours-introduction-etude-droit.pdf", pages: 29, mb: 0.4 },
- { space: "droit", kind: "Cours", title: "Droit civil : le droit des personnes", desc: "Cours complet de M. TRAORE, travaux dirigés corrigés, schéma du procès civil, lexique ; polycopié et fiches de TD originaux en annexe", file: "droit/cours-droit-civil.pdf", pages: 139, mb: 1.7 },
- { space: "droit", kind: "Cours", title: "Droit musulman : la Charia et ses sources", desc: "Cours complet d’après Dr Youssouf BAKAYOKO · révélation et compilation du Coran, bibliographie et lexique", file: "droit/cours-droit-musulman.pdf", pages: 21, mb: 0.3 },
+ { space: "droit", kind: "Cours", title: "Introduction à l’étude du droit", desc: "Cours complet · le droit objectif et les droits subjectifs · exercices corrigés et lexique", file: "droit/cours-introduction-etude-droit.pdf", pages: 30, mb: 0.4 },
+ { space: "droit", kind: "Cours", title: "Droit civil : le droit des personnes", desc: "Cours complet, travaux dirigés corrigés, schéma du procès civil et lexique ; polycopié et fiches de TD originaux en annexe", file: "droit/cours-droit-civil.pdf", pages: 139, mb: 1.7 },
+ { space: "droit", kind: "Cours", title: "Droit musulman : la Charia et ses sources", desc: "Cours complet · sources du droit musulman, révélation et compilation du Coran, bibliographie et lexique", file: "droit/cours-droit-musulman.pdf", pages: 21, mb: 0.3 },
  { space: "droit", kind: "Cours", title: "Organisation judiciaire de la Côte d’Ivoire", desc: "Cours complet · principes, juridictions, magistrats et auxiliaires de justice · lexique", file: "droit/cours-organisation-judiciaire.pdf", pages: 31, mb: 0.5 },
- { space: "droit", kind: "Cours", title: "Méthodologie juridique", desc: "Cours complet d’après M. OUATTARA · dissertation, cas pratique, commentaire d’arrêt et de texte, quatre ateliers et neuf TD corrigés", file: "droit/cours-methodologie-juridique.pdf", pages: 50, mb: 0.7 },
+ { space: "droit", kind: "Cours", title: "Droit constitutionnel", desc: "Cours · définition et objets du droit constitutionnel, origine de l’État (contrat social, évolution naturelle) · lexique", file: "droit/cours-droit-constitutionnel.pdf", pages: 10, mb: 0.2 },
+ { space: "droit", kind: "Cours", title: "Méthodologie juridique", desc: "Cours complet · dissertation, cas pratique, commentaire d’arrêt et de texte, quatre ateliers et neuf TD corrigés", file: "droit/cours-methodologie-juridique.pdf", pages: 50, mb: 0.7 },
  { space: "droit", kind: "Cours", title: "Techniques d’expression écrite", desc: "Cours complet · niveaux 1 et 2, textes du cours et exercices corrigés", file: "droit/cours-expression-ecrite.pdf", pages: 39, mb: 0.4 },
- { space: "droit", kind: "Cours", title: "Économie politique", desc: "Cours complet d’après le Dr SANOGO Aly Balé · trois chapitres et exercices corrigés", file: "droit/cours-economie-politique.pdf", pages: 29, mb: 0.4 },
+ { space: "droit", kind: "Cours", title: "Informatique : l’ordinateur et le binaire", desc: "Cours complet · composants, choix d’un ordinateur, bit et octet, conversions binaire, décimal et hexadécimal, exercices corrigés", file: "droit/cours-informatique.pdf", pages: 17, mb: 0.3 },
+ { space: "droit", kind: "Cours", title: "Économie politique", desc: "Cours complet · activité économique, grands courants de pensée, dix principes de l’économie, exercices corrigés", file: "droit/cours-economie-politique.pdf", pages: 29, mb: 0.4 },
  { space: "droit", kind: "Lectures", title: "The Missing Will : roman juridique en anglais illustré", desc: "Legal Stories from Abidjan, livre 1 · niveau B1 · lexique, notes de droit et questions de lecture", file: "droit/the-missing-will.pdf", pages: 66, mb: 0.6 },
  { space: "droit", kind: "Code", title: "Code civil II : droit des biens et des obligations", desc: "Texte de référence", file: "droit/code-civil-ii.pdf", pages: 341, mb: 1.2 }
 ];

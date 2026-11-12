@@ -111,7 +111,7 @@ const cardLang = s => s.lang === 'ar' ? 'ar' : (EN_CARDS.has(s.id) || s.lang ===
 const SPACES = [
   { id: 'droit', title: 'Droit · Licence 1', eyebrow: 'Première année de droit', icon: '⚖️', color: 'a',
     lead: 'Les matières de la Licence 1 Droit, enrichies au fil des cours : leçons, quiz et cartes de révision.',
-    intro: ['Huit matières de la première année de droit, rédigées à partir des cours et des textes officiels : introduction au droit, droit civil, droit musulman, organisation judiciaire, méthodologie, expression écrite, anglais et informatique.',
+    intro: ['Les matières de la première année de droit, rédigées à partir des cours et des textes officiels : introduction au droit, droit civil, droit musulman, organisation judiciaire, droit constitutionnel, méthodologie, expression écrite, anglais juridique, informatique et économie politique, ainsi qu’un roman juridique en anglais.',
       'Chaque leçon s’écoute à voix haute. Le quiz et les cartes de révision de chaque matière servent à vérifier ce que vous avez retenu. Vérifiez toujours avec le cours de vos enseignants.'] },
   { id: 'ia', title: 'Formation à l’IA avec Claude', eyebrow: 'Ouvert à tous', icon: '🤖', color: 'i',
     lead: 'Comprendre l’intelligence artificielle et maîtriser Claude dans toutes les disciplines : étudier, enseigner, travailler, le droit, en toute sécurité.',
@@ -208,6 +208,12 @@ const frNorm = t => String(t)
   .replace(/\b([IVXL]{1,6})(e|ème)(?=[\s,.;:!?)-]|$)/g, (m, r) => romain(r) < 30 ? ordFr(romain(r)) : m)
   .replace(/\b(Chapitre|Titre|Partie|Section|Livre|Tome|Leçon|Unité|Annexe|Niveau)\s+([IVX]{1,5})\b/g, (m, w, r) => w + ' ' + numFr(romain(r)))
   .replace(/(^|[.,;:]\s+)([IVX]{1,5})\.(?=\s|$)/g, (m, p, r) => p + numFr(romain(r)) + '.')
+  .replace(/₍([₀-₉]+)₎/g, '$1')
+  .replace(/\b([0-9A-F]+)₁₆/g, (m, d) => d.split('').join(' ') + ' en base seize')
+  .replace(/\b([01]+)₂/g, (m, d) => d.split('').join(' ') + ' en base deux')
+  .replace(/(\d|\))₁₀/g, '$1 en base dix').replace(/₁₀/g, ' en base dix')
+  .replace(/(\d|n)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (m, b, e) => b + ' puissance ' + [...e].map(c => '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c)).join(''))
+  .replace(/#([0-9A-F]{6})\b/g, (m, d) => 'dièse ' + d.split('').join(' ')).replace(/\b([0-9A-F]{2}(?::[0-9A-F]{2}){5})\b/g, m => m.split(':').map(x => x.split('').join(' ')).join(', ')).replace(/\s\+\s/g, ' plus ').replace(/\s÷\s/g, ' divisé par ').replace(/\s×\s/g, ' fois ')
   .replace(/\bn°\s*/g, 'numéro ').replace(/\s=\s/g, ' égale ').replace(/\s−\s/g, ' moins ').replace(/\s*→\s*/g, ', ');
 const pronLex = t => String(t).replace(/[^\s()«»"“”,.;:!?]+/g, w => { const m = w.match(ELIS), pre = m ? m[0] : '', x0 = w.slice(pre.length), lx = AR_LEX[lexKey(x0)];
   return lx ? pre + (/^['’‘ʿʾ]?\p{Lu}/u.test(x0) ? lx.charAt(0).toUpperCase() + lx.slice(1) : lx) : w; });
@@ -636,6 +642,9 @@ function renderBlock(b, s) {
       <b>Ta consigne</b><div class="prompt-out" id="pr-out"></div>
       <div class="actions"><button type="button" class="btn small" id="pr-copy">Copier la consigne</button><a class="btn ghost small" href="https://claude.ai/new" target="_blank" rel="noopener">Ouvrir Claude ↗</a></div>
       <p class="meta" id="pr-msg" aria-live="polite"></p></div>`;
+  if (b.tool === 'bindec') return `<div class="tool"><label for="bd-in"><b>Convertisseur binaire → décimal</b></label>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input id="bd-in" type="text" maxlength="16" value="11110" inputmode="numeric" autocomplete="off" spellcheck="false"><span class="out" id="bd-out"></span></div>
+      <div class="meta" id="bd-steps"></div></div>`;
   if (b.tool === 'binary') return `<div class="tool"><label for="bin-in"><b>Convertisseur décimal → binaire</b></label>
       <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><input id="bin-in" type="number" min="0" max="1023" value="13" inputmode="numeric"><span class="out" id="bin-out"></span></div>
       <div class="meta" id="bin-steps"></div></div>`;
@@ -1459,6 +1468,12 @@ function afterLesson() {
       try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(done, fallback); else fallback(); } catch (e) { fallback(); }
     });
   }
+  const bd = document.getElementById('bd-in');
+  if (bd) { const g = () => { const v = (bd.value.replace(/[^01]/g, '').replace(/^0+(?=.)/, '') || '0').slice(-16); const n = v.length, parts = [];
+      for (let k = 0; k < n; k++) if (v[k] === '1') parts.push(String(2 ** (n - 1 - k)));
+      document.getElementById('bd-out').textContent = '= ' + parseInt(v, 2);
+      document.getElementById('bd-steps').textContent = (bd.value.replace(/[01]/g, '') ? 'Seuls les chiffres 0 et 1 comptent. ' : '') + 'Poids des rangs, de droite à gauche : 1, 2, 4, 8, 16… · ' + v + ' = ' + (parts.join(' + ') || '0') + ' = ' + parseInt(v, 2); };
+    bd.addEventListener('input', g); g(); }
   const inp = document.getElementById('bin-in');
   if (inp) { const f = () => { let n = Math.max(0, Math.min(1023, parseInt(inp.value, 10) || 0)); const out = n.toString(2); const steps = []; let m = n; if (m === 0) steps.push('0 ÷ 2 = 0, reste 0'); while (m > 0) { steps.push(`${m} ÷ 2 = ${Math.floor(m / 2)}, reste ${m % 2}`); m = Math.floor(m / 2); } document.getElementById('bin-out').textContent = out; document.getElementById('bin-steps').textContent = steps.join(' · ') + ' → restes lus de bas en haut'; }; inp.addEventListener('input', f); f(); }
 }

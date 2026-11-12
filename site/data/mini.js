@@ -1741,3 +1741,80 @@ Object.assign(window.MINI, {
     { q: "Le plan « I. Explication — II. Critique » est…", a: ["à éviter", "le plan obligatoire", "réservé aux textes législatifs"], c: 0, e: "Chaque partie doit à la fois expliquer et apprécier." },
     { q: "L'introduction d'un commentaire de texte présente…", a: ["l'auteur, la date, la source et la nature du texte", "uniquement l'avis de l'étudiant", "la conclusion du devoir"], c: 0, e: "Puis le contexte, l'idée générale, la problématique et l'annonce du plan." } ]
 });
+
+// ===== Informatique : le binaire (refonte du cours, novembre 2026)
+Object.assign(window.MINI, {
+  "info/choix": [
+    { q: "Pour choisir un ordinateur, on part d'abord…", a: ["des logiciels que l'on utilisera", "de la couleur du boîtier", "de la marque la plus connue"], c: 0, e: "Les logiciels déterminent le processeur, la RAM et la carte graphique nécessaires." },
+    { q: "À un ingénieur en génie civil qui travaille en 3D, on conseille…", a: ["une station de travail avec carte graphique dédiée", "un ultraportable d'entrée de gamme", "une tablette"], c: 0, e: "Les logiciels de calcul de structures et de 3D sont très gourmands." },
+    { q: "À un étudiant en droit, on conseille surtout…", a: ["un portable léger avec une bonne autonomie", "une station de travail", "un serveur"], c: 0, e: "Il rédige, lit et cherche : la mobilité prime." },
+    { q: "Un SSD, par rapport à un disque dur (HDD), est…", a: ["beaucoup plus rapide", "plus lent", "une mémoire vive"], c: 0, e: "C'est le stockage conseillé aujourd'hui." },
+    { q: "La mémoire vive (RAM) se compare à…", a: ["la table de travail", "l'armoire de rangement", "le cerveau"], c: 0, e: "Le processeur est le cerveau, le stockage l'armoire." } ],
+  "info/binaire": [
+    { q: "Un octet compte…", a: ["8 bits", "2 bits", "1 024 bits"], c: 0, e: "Soit 256 combinaisons." },
+    { q: "La machine utilise le binaire parce que…", a: ["elle ne connaît que deux états : le courant passe ou non", "c'est plus joli", "elle ne sait pas compter jusqu'à 10 par erreur"], c: 0, e: "On note ces deux états 0 et 1." },
+    { q: "Avec 3 bits, on peut former…", a: ["8 combinaisons", "3 combinaisons", "6 combinaisons"], c: 0, e: "2 × 2 × 2 = 8." },
+    { q: "1 Go vaut…", a: ["1 000 Mo", "1 000 Ko", "8 Mo"], c: 0, e: "Ko, Mo, Go, To : chaque unité vaut 1 000 fois la précédente." },
+    { q: "Un débit de 40 Mb/s correspond à…", a: ["5 Mo par seconde", "40 Mo par seconde", "320 Mo par seconde"], c: 0, e: "b = bit ; 8 bits = 1 octet." },
+    { q: "Le codage qui permet d'écrire toutes les langues, dont l'arabe, est…", a: ["Unicode / UTF-8", "ASCII", "HDMI"], c: 0, e: "ASCII ne code que 128 caractères." } ],
+  "info/bases": [
+    { q: "La base du système hexadécimal est…", a: ["16", "10", "2"], c: 0, e: "Ses chiffres : 0 à 9, puis A à F." },
+    { q: "En hexadécimal, la lettre F vaut…", a: ["15", "16", "6"], c: 0, e: "A = 10, B = 11, C = 12, D = 13, E = 14, F = 15." },
+    { q: "Le nombre 1021 peut-il être binaire ?", a: ["non, le chiffre 2 n'existe pas en binaire", "oui", "oui, s'il est pair"], c: 0, e: "Le binaire n'a que 0 et 1." },
+    { q: "En binaire, chaque rang vaut…", a: ["le double du rang situé à sa droite", "dix fois le rang de droite", "le rang de droite plus un"], c: 0, e: "1, 2, 4, 8, 16…" },
+    { q: "10 en base 2 vaut, en décimal…", a: ["2", "10", "16"], c: 0, e: "D'où l'importance d'indiquer la base en indice." } ],
+  "info/decbin": [
+    { q: "Pour convertir un nombre décimal en binaire, on divise…", a: ["par 2 jusqu'à obtenir un quotient égal à 0", "par 10", "par 2 jusqu'à obtenir un reste égal à 0"], c: 0, e: "On note chaque reste, 0 ou 1." },
+    { q: "Les restes des divisions successives se lisent…", a: ["de bas en haut", "de haut en bas", "en commençant par le premier"], c: 0, e: "Le dernier reste est le chiffre de gauche." },
+    { q: "17 s'écrit en binaire…", a: ["10001", "10011", "11000"], c: 0, e: "16 + 1." },
+    { q: "25 s'écrit en binaire…", a: ["11001", "10011", "11010"], c: 0, e: "16 + 8 + 1." },
+    { q: "30 s'écrit en binaire…", a: ["11110", "01111", "11101"], c: 0, e: "16 + 8 + 4 + 2." },
+    { q: "8 s'écrit en binaire…", a: ["1000", "111", "0001"], c: 0, e: "8 est une puissance de 2 : un 1 suivi de zéros." } ],
+  "info/bindec": [
+    { q: "Le nombre binaire 11 vaut en décimal…", a: ["3", "11", "2"], c: 0, e: "1 × 2 + 1 × 1." },
+    { q: "Dans un octet, le poids du chiffre de gauche est…", a: ["128", "256", "8"], c: 0, e: "128, 64, 32, 16, 8, 4, 2, 1." },
+    { q: "1111 en binaire vaut…", a: ["15", "16", "1 111"], c: 0, e: "8 + 4 + 2 + 1 = 2⁴ − 1." },
+    { q: "Ajouter un 0 à droite d'un nombre binaire…", a: ["le double", "ne change rien", "ajoute 1"], c: 0, e: "11 = 3, 110 = 6." },
+    { q: "Un nombre binaire terminé par 1 est…", a: ["impair", "pair", "toujours égal à 1"], c: 0, e: "Le rang de droite vaut 1." } ],
+  "info/hexa": [
+    { q: "Un chiffre hexadécimal correspond à…", a: ["4 bits", "8 bits", "2 bits"], c: 0, e: "Car 16 = 2⁴." },
+    { q: "11111111 en binaire s'écrit en hexadécimal…", a: ["FF", "11", "F0"], c: 0, e: "Deux paquets de 1111, soit F et F." },
+    { q: "2F en hexadécimal vaut en décimal…", a: ["47", "32", "215"], c: 0, e: "2 × 16 + 15." },
+    { q: "Pour passer du binaire à l'hexadécimal, on découpe en paquets de 4…", a: ["en partant de la droite", "en partant de la gauche", "au hasard"], c: 0, e: "On complète à gauche par des 0." },
+    { q: "La couleur #FF0000 est…", a: ["le rouge pur", "le vert pur", "le noir"], c: 0, e: "Rouge 255, vert 0, bleu 0." } ],
+  "info/synthese": [
+    { q: "22 s'écrit en binaire…", a: ["10110", "11010", "10101"], c: 0, e: "16 + 4 + 2." },
+    { q: "Pour numéroter 40 ordinateurs en binaire, il faut au minimum…", a: ["6 bits", "5 bits", "40 bits"], c: 0, e: "2⁵ = 32 est trop peu, 2⁶ = 64 suffit." },
+    { q: "En binaire, 1 + 1 donne…", a: ["10 (on écrit 0 et on retient 1)", "2", "11"], c: 0, e: "Le chiffre 2 n'existe pas en binaire." },
+    { q: "101 + 11 en binaire donne…", a: ["1000", "112", "110"], c: 0, e: "5 + 3 = 8." },
+    { q: "1F en hexadécimal vaut…", a: ["31", "115", "16"], c: 0, e: "1 × 16 + 15." } ]
+});
+
+// ===== Droit constitutionnel (cours du 11 novembre 2026) et compléments du même jour
+Object.assign(window.MINI, {
+  "const/etatnature": [
+    { q: "On écrit correctement…", a: ["l'état de nature", "l'État de nature", "l'état de Nature"], c: 0, e: "C'est une situation, celle où l'État n'existe pas encore." },
+    { q: "Les trois éléments de l'État sont…", a: ["un territoire, une population, un pouvoir politique souverain", "une armée, une monnaie, un drapeau", "un président, des ministres, des juges"], c: 0, e: "Définition classique, reprise par la Convention de Montevideo." },
+    { q: "Pour Hobbes, les hommes quittent l'état de nature pour obtenir…", a: ["la sécurité", "la richesse", "la volonté générale"], c: 0, e: "L'état de nature est une guerre de chacun contre chacun." },
+    { q: "Le cours s'appuie sur l'approche de…", a: ["Rousseau", "Hobbes", "Machiavel"], c: 0, e: "Du contrat social, 1762." },
+    { q: "Pour Rousseau, la loi exprime…", a: ["la volonté générale", "la volonté du plus fort", "la somme des intérêts particuliers"], c: 0, e: "La volonté du peuple tourné vers l'intérêt commun." },
+    { q: "« Le plus fort n'est jamais assez fort pour être toujours le maître » : le pouvoir doit devenir…", a: ["légitime", "plus violent", "héréditaire"], c: 0, e: "Transformer la force en droit et l'obéissance en devoir." } ],
+  "const/evolution": [
+    { q: "Pour le courant naturel, l'État est…", a: ["le fruit de l'évolution des sociétés humaines", "né d'un contrat", "une création divine"], c: 0, e: "Famille, village, clan, cité, puis État." },
+    { q: "« L'homme est par nature un animal politique » est une phrase…", a: ["d'Aristote", "de Hobbes", "de Rousseau"], c: 0, e: "La Politique." },
+    { q: "La charte de Kouroukan Fouga a été proclamée sous…", a: ["Soundjata Keïta", "Samory Touré", "Soumaoro Kanté"], c: 0, e: "Après la victoire de Kirina, selon la tradition en 1236." },
+    { q: "Machiavel a donné au mot « État » le sens de…", a: ["pouvoir politique et entité politique", "condition sociale", "province"], c: 0, e: "Dans Le Prince, écrit en 1513." },
+    { q: "Une langue vernaculaire est…", a: ["la langue propre à une communauté", "la langue officielle", "une langue étrangère"], c: 0, e: "Le baoulé, le bété, le sénoufo…" } ]
+});
+window.MINI["intro/chargepreuve"] = (window.MINI["intro/chargepreuve"] || []).concat([
+  { q: "En matière pénale, la preuve de la culpabilité incombe…", a: ["à l'accusation", "à l'accusé", "au greffier"], c: 0, e: "Toute personne poursuivie est présumée innocente." }]);
+window.MINI["intro/interpretation"] = (window.MINI["intro/interpretation"] || []).concat([
+  { q: "« L'exception confirme la règle » signifie que la règle…", a: ["s'applique à tous les cas non exceptés", "est annulée par l'exception", "n'a jamais d'exception"], c: 0, e: "Exceptio firmat regulam in casibus non exceptis." }]);
+window.MINI["metho/methode"] = (window.MINI["metho/methode"] || []).concat([
+  { q: "En dissertation juridique, le plan « thèse, antithèse, synthèse » est…", a: ["à éviter", "obligatoire", "conseillé"], c: 0, e: "On construit une démonstration en deux parties." }]);
+window.MINI["const/introduction"] = [
+  { q: "Le droit constitutionnel est une branche…", a: ["du droit public", "du droit privé", "du droit des affaires"], c: 0, e: "Il organise l'État et le pouvoir politique." },
+  { q: "Les deux objets du droit constitutionnel sont…", a: ["les institutions et les droits et libertés", "les contrats et les biens", "les crimes et les peines"], c: 0, e: "Il organise le pouvoir pour mieux le limiter." },
+  { q: "Au sens matériel, le droit constitutionnel comprend…", a: ["toutes les règles qui organisent le pouvoir, quelle que soit leur source", "seulement le texte de la Constitution", "seulement la jurisprudence"], c: 0, e: "Au sens formel, seulement le texte de la Constitution." },
+  { q: "La norme suprême de l'État est…", a: ["la Constitution", "la loi", "le décret"], c: 0, e: "Elle est au sommet de la hiérarchie des normes." },
+  { q: "L'expression « droit constitutionnel » apparaît…", a: ["à la fin du XVIIIᵉ siècle", "au Moyen Âge", "au XXᵉ siècle"], c: 0, e: "Avec les premières constitutions écrites (1787, 1789)." } ];
