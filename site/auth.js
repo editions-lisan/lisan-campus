@@ -57,6 +57,7 @@
         const info = x.profile ? Object.assign({}, x.profile) : null; if (info) delete info.updatedAt;
         return { uid: d.id, name: x.name || '', email: x.email || '', createdAt: iso(x.createdAt), lastLogin: iso(x.lastLogin), info, spaces: sp,
           done: Object.keys((x.progress && x.progress.done) || {}).length,
+          prog: { done: (x.progress && x.progress.done) || {}, quiz: (x.progress && x.progress.quiz) || {}, time: (x.progress && x.progress.time) || {}, days: (x.progress && x.progress.days) || {} },
           certs: Object.values(x.certificats || {}).filter(c => c && c.num).map(c => Object.assign({}, c, { date: iso(c.date) })),
           sugg: Object.entries(x.suggestions || {}).filter(([, v]) => v && v.texte).map(([id, v]) => Object.assign({ id }, v, { date: iso(v.date) })) };
       });

@@ -1175,3 +1175,29 @@ footer.site .wrap { padding-top: 46px; }
 .subject-head { position: relative; overflow: hidden; overflow: clip; flex-shrink: 0; isolation: isolate; background: linear-gradient(140deg, var(--solid) 0%, var(--solid-dk) 100%); }
 .subject-head::after { content: ""; position: absolute; z-index: -1; pointer-events: none; width: 230px; height: 230px; right: -70px; top: -76px; opacity: .2;
   background: var(--khatam) center / contain no-repeat; }
+
+/* ===== Lecteur des livres des Éditions Lisân (#lire-…) : pages dessinées une à une, sans téléchargement */
+.reader { margin-top: 8px; }
+.rd-bar { position: sticky; top: calc(72px + env(safe-area-inset-top, 0px)); z-index: 5; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 14px;
+  background: var(--solid, #123); color: #fff; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+.rd-back { color: #fff; text-decoration: none; font-size: 26px; line-height: 1; padding: 2px 8px; }
+.rd-t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.rd-t b, .rd-t small { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rd-t small { opacity: .8; font-size: 12px; }
+.rd-n { font-variant-numeric: tabular-nums; font-size: 13px; opacity: .9; white-space: nowrap; }
+.rd-z { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,.45); background: transparent; color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
+.rd-z:hover { background: rgba(255,255,255,.12); }
+.rd-note { margin: 10px 2px; }
+.rd-pages { --rd-k: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; padding-bottom: 40px; overflow-x: auto; }
+.rd-pages.zoomed { align-items: flex-start; }
+.rd-page { position: relative; width: min(calc(100% * var(--rd-k)), calc(820px * var(--rd-k))); max-width: none; background: #fff; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,.14);
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; flex: none; }
+.rd-page span { position: absolute; inset: 0; display: grid; place-items: center; color: #9aa3ad; font-size: 14px; }
+.rd-page.ok span { display: none; }
+.rd-page canvas { display: block; width: 100%; height: 100%; border-radius: 4px; pointer-events: none; }
+@media print { .reader { display: none !important; } }
+/* Administration : progression des élèves */
+.adm-prog { margin: 6px 0 2px; }
+.adm-bar { height: 7px; margin: 6px 0 4px; }
+.adm-pt { font-size: 13px; }
+.adm-pt tr.ok td { color: var(--ok, #1b7a3a); }

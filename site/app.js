@@ -717,7 +717,7 @@ function libLink(spId) {
   const nb = (window.LIVRES || []).filter(b => b.space === spId).length, D = (window.DOCS || []).filter(d => d.space === spId);
   if (!nb && !D.length) return '';
   const t = nb ? (nb > 1 ? 'Les livres de cet espace' : 'Le livre de cet espace') : 'Les documents de cet espace';
-  let sub = nb ? 'Livre de l’élève et cahier d’exercices, à lire ou à télécharger' : libList(D.map(d => DOC_KIND[d.kind] || String(d.kind || 'document').toLowerCase()).filter((k, i, a) => a.indexOf(k) === i)) + ', à lire ou à télécharger';
+  let sub = nb ? 'Livre de l’élève et cahier d’exercices, à lire en ligne' : libList(D.map(d => DOC_KIND[d.kind] || String(d.kind || 'document').toLowerCase()).filter((k, i, a) => a.indexOf(k) === i)) + ', à lire ou à télécharger';
   sub = sub.charAt(0).toUpperCase() + sub.slice(1);
   return `<a class="lib-link" href="#bibliotheque-${spId}"><span aria-hidden="true">📚</span><span><b>${t}</b><small>${esc(sub)}</small></span></a>`;
 }
@@ -729,7 +729,8 @@ function libAccess(spId) {
 function libDocRow(file, d, spId) {
   if (d.k === 'maitre') return `<div class="lib-doc lib-res"><span class="lib-ic" aria-hidden="true">🔒</span><div class="lib-dt"><b>${esc(d.name)}</b><small>Réservé aux enseignants et aux animateurs : il n’est pas proposé en ligne.</small></div><div class="lib-act"><a class="btn ghost small" href="#contact">Le demander</a></div></div>`;
   const acc = libAccess(spId), meta = [d.pages ? d.pages + ' pages' : '', d.mb ? String(d.mb).replace('.', ',') + ' Mo' : ''].filter(Boolean).join(' · ');
-  const act = acc === 'ok' ? `<a class="btn small" href="${file}" target="_blank" rel="noopener">Lire</a><a class="btn ghost small" href="${file}" download>Télécharger</a>`
+  // livres des Éditions Lisân : lecture en ligne seulement (lecteur du site) ; documents de cours : lecture et téléchargement
+  const act = acc === 'ok' ? (d.book ? `<a class="btn small" href="#lire-${d.book}~${d.k}">Lire en ligne</a>` : `<a class="btn small" href="${file}" target="_blank" rel="noopener">Lire</a><a class="btn ghost small" href="${file}" download>Télécharger</a>`)
     : acc === 'signin' ? `<button type="button" class="btn ghost small" data-auth="signin">Se connecter pour lire</button>`
     : `<a class="btn ghost small" href="#inscription-${spId}">S’inscrire pour lire</a>`;
   return `<div class="lib-doc"><span class="lib-ic" aria-hidden="true">${DOC_ICON[d.k] || '📄'}</span><div class="lib-dt">${d.kind ? `<span class="tag">${esc(d.kind)}</span>` : ''}<b>${esc(d.name)}</b><small>${esc([d.desc, meta].filter(Boolean).join(' · '))}</small></div><div class="lib-act">${act}</div></div>`;
@@ -740,13 +741,13 @@ function viewLibrary() {
   const A = AUTH(), u = A && A.user();
   return `${crumbs(['Bibliothèque'])}
     <div class="subject-head c-a"><span class="eyebrow">Éditions Lisân</span><h1>📚 Bibliothèque</h1>
-      <p class="lead">Les livres de la collection, avec le livre de l’élève et le cahier d’exercices, et les documents des cours de droit, à lire en ligne ou à télécharger en PDF. Le livret du maître est réservé aux enseignants et aux animateurs.</p>
-      ${A && !u ? `<p class="meta">La lecture et le téléchargement demandent la connexion Google et l’inscription à l’espace concerné. <button type="button" class="linkbtn" data-auth="signin">Se connecter</button></p>` : ''}</div>
+      <p class="lead">Les livres de la collection, avec le livre de l’élève et le cahier d’exercices, à lire en ligne sur le site, et les documents des cours de droit, à lire ou à télécharger en PDF. Le livret du maître est réservé aux enseignants et aux animateurs.</p>
+      ${A && !u ? `<p class="meta">La lecture demande la connexion Google et l’inscription à l’espace concerné. <button type="button" class="linkbtn" data-auth="signin">Se connecter</button></p>` : ''}</div>
     <nav class="lib-nav" aria-label="Rayons">${groups.map(g => `<button type="button" class="chip" data-scrollto="lib-${g.sp.id}">${g.sp.icon} ${esc(g.sp.title)}</button>`).join('')}</nav>
     ${groups.map(g => `<section class="lib-sec" id="lib-${g.sp.id}"><h2>${g.sp.icon} ${esc(g.sp.title)}</h2>
       ${g.books.map(b => `<article class="lib-book"><img class="lib-cover" src="livres/couv/Lisan_${b.id}_eleve.webp" alt="Couverture : ${esc(b.title)}" loading="lazy" width="160" height="226">
         <div class="lib-info"><h3>${esc(b.title)}</h3><p class="meta">${esc(b.sub)} · Éditions Lisân</p>
-        ${b.docs.map(d => libDocRow(`livres/Lisan_${b.id}_${d.k}.pdf`, d, b.space)).join('')}</div></article>`).join('')}
+        ${b.docs.map(d => libDocRow(`livres/Lisan_${b.id}_${d.k}.pdf`, Object.assign({ book: b.id }, d), b.space)).join('')}</div></article>`).join('')}
       ${g.docs.length ? `<article class="lib-book lib-docs"><div class="lib-info"><h3>Documents de cours</h3>${g.docs.map(d => libDocRow('livres/' + d.file, { k: d.kind || 'cours', kind: d.kind, name: d.title, desc: d.desc, pages: d.pages, mb: d.mb }, d.space)).join('')}</div></article>` : ''}
     </section>`).join('')}`;
 }
@@ -1136,7 +1137,7 @@ const PAGES = {
     { box: 'Les contenus de droit résument des cours et des textes publics : vérifiez toujours avec vos enseignants.', title: 'À savoir', kind: 'marge' },
   ] },
   confidentialite: { title: 'Politique de confidentialité', body: [
-    { p: '*Dernière mise à jour : 6 novembre 2026.*' },
+    { p: '*Dernière mise à jour : 12 novembre 2026.*' },
     { p: 'Les Éditions Lisân attachent une grande importance à la protection de vos données personnelles, conformément à la **loi ivoirienne n° 2013-450 du 19 juin 2013** relative à la protection des données à caractère personnel.' },
     { h: '1. Responsable du traitement' },
     { p: 'Éditions Lisân, représentées par Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Contact : la page [Contact](#contact) du site.' },
@@ -1146,7 +1147,7 @@ const PAGES = {
       '**Si vous vous inscrivez à un espace** : votre fiche d’inscription (civilité, nom, prénoms, date de naissance, téléphone, pays de résidence, situation actuelle et, si vous choisissez de les indiquer, votre ville, votre établissement, votre filière, votre niveau d’études, votre classe, votre formation, votre profession, votre projet d’études et l’année prévue pour le commencer ou le reprendre, ainsi que la manière dont vous avez connu le site ; pour les moins de 18 ans, le nom et le téléphone d’un parent ou tuteur), vos réponses aux questions de l’espace, vos inscriptions et votre progression.',
       '**Si vous obtenez un certificat** : vos civilité, prénom et nom, le parcours réussi, le nombre de leçons, le score à l’évaluation et la date. Ces informations sont inscrites au registre des certificats : **toute personne qui connaît le numéro du certificat** (ou scanne son code QR) peut les consulter, afin de vérifier qu’il est authentique. Aucune autre donnée n’y figure.',
       '**Si vous envoyez une suggestion** : son texte, son type et la leçon concernée, enregistrés avec votre fiche pour que nous puissions vous répondre.',
-      '**Qui y a accès** : seuls les Éditions Lisân, administrateur du site, consultent les fiches d’inscription, pour gérer les inscriptions et contacter les élèves au sujet de leurs cours.',
+      '**Qui y a accès** : seuls les Éditions Lisân, administrateur du site, consultent les comptes, les fiches d’inscription et la progression enregistrée dans les comptes (leçons terminées, résultats aux évaluations, temps d’étude), pour gérer les inscriptions, suivre et encourager les élèves et les contacter au sujet de leurs cours.',
       '**Si vous nous écrivez** par le formulaire de contact : votre nom, votre adresse e-mail et votre message, uniquement pour vous répondre.'] },
     { p: 'Ces données servent à **gérer vos inscriptions**, à **adapter les cours** à nos élèves et à **vous contacter au sujet de vos cours**. Vous ne recevez nos nouveautés que si vous l’avez demandé dans votre fiche. Vos données ne sont **ni vendues, ni cédées**.' },
     { p: 'Lisân Campus n’utilise **ni publicité, ni cookies de suivi, ni outil de mesure d’audience**.' },
@@ -1163,7 +1164,7 @@ const PAGES = {
     { p: 'Les élèves de moins de 18 ans s’inscrivent avec l’accord d’un parent ou d’un tuteur, dont le nom et le téléphone sont demandés dans la fiche d’inscription. Ils utilisent Lisân Campus sous la responsabilité de leurs parents ou de leur établissement.' },
   ] },
   conditions: { title: 'Conditions d’utilisation', body: [
-    { p: '*Dernière mise à jour : 23 octobre 2026.*' },
+    { p: '*Dernière mise à jour : 12 novembre 2026.*' },
     { h: '1. Objet' },
     { p: 'Lisân Campus est un site d’apprentissage gratuit édité par les Éditions Lisân. En l’utilisant, vous acceptez les présentes conditions.' },
     { h: '2. Accès' },
@@ -1173,7 +1174,7 @@ const PAGES = {
     { h: '4. Les certificats' },
     { p: 'Un certificat de réussite est délivré à l’élève inscrit qui termine toutes les leçons d’un parcours et réussit son évaluation finale avec au moins 80 %. Le grand certificat d’un espace récompense celui qui réussit tous les parcours de cet espace. Chaque certificat porte un numéro et un code QR, vérifiables sur la page [Vérifier un certificat](#verifier). Il atteste le travail accompli sur Lisân Campus ; ce n’est pas un diplôme d’État. Tout certificat obtenu de manière frauduleuse peut être annulé.' },
     { h: '5. Propriété intellectuelle' },
-    { p: 'Les textes, exercices, illustrations, le nom et le logo « Lisân » sont la propriété de Mouhamadou CISSEMA et des Éditions Lisân. Ils sont réservés à votre usage personnel et pédagogique : toute reproduction ou diffusion, même partielle, demande une autorisation écrite. Les récitations du Coran appartiennent à leurs ayants droit et sont diffusées par everyayah.com.' },
+    { p: 'Les textes, exercices, illustrations, le nom et le logo « Lisân » sont la propriété de Mouhamadou CISSEMA et des Éditions Lisân. Ils sont réservés à votre usage personnel et pédagogique : toute reproduction ou diffusion, même partielle, demande une autorisation écrite. Les livres des Éditions Lisân se lisent en ligne, dans le lecteur du site ; ils ne sont pas proposés au téléchargement. Les documents de cours de l’espace Droit peuvent être téléchargés pour votre usage personnel. Les récitations du Coran appartiennent à leurs ayants droit et sont diffusées par everyayah.com.' },
     { h: '6. Votre compte' },
     { p: 'Votre compte est personnel. Vous vous engagez à utiliser le site de manière loyale, sans chercher à en perturber le fonctionnement. Les Éditions Lisân peuvent suspendre un compte en cas d’abus.' },
     { h: '7. Droit applicable' },
@@ -1221,7 +1222,7 @@ function viewContact() {
 const navStack = [];
 function trackNav(h) { const n = navStack.length; if (n > 1 && navStack[n - 2] === h) navStack.pop(); else if (navStack[n - 1] !== h) navStack.push(h); if (navStack.length > 80) navStack.shift(); }
 function route() {
-  stopVoice(); closeMenu(); clearInterval(lessonClock); clearInterval(evalTimer);
+  stopVoice(); closeMenu(); clearInterval(lessonClock); clearInterval(evalTimer); if (typeof closeReader === 'function') closeReader();
   if (!location.hash) history.replaceState(null, '', '#accueil');
   const h = decodeURIComponent(location.hash.slice(1)) || 'accueil';
   trackNav(h);
@@ -1236,6 +1237,7 @@ function route() {
   else if (h.startsWith('q-') && subj(h.slice(2))) { const s = subj(h.slice(2)); html = authGate(s) || (inOrder(s, 'quiz') ? viewQuiz(s) : viewGate(s, 'order', 'quiz')); }
   else if (h.startsWith('f-') && subj(h.slice(2))) { const s = subj(h.slice(2)); const g = authGate(s); if (g) html = g; else { html = viewFlash(s); after = () => { drawFlash(); checkArVoice(); }; } }
   else if (h === 'bibliotheque' || (h.startsWith('bibliotheque-') && space(h.slice(13)))) { html = viewLibrary(); if (h !== 'bibliotheque') after = () => { const el = document.getElementById('lib-' + h.slice(13)); if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 60); }; }
+  else if (h.startsWith('lire-') && typeof readTarget === 'function' && readTarget(h)) { const t = readTarget(h); html = viewReader(t); after = () => bindReader(t); }
   else if (h === 'revisions') html = viewRevisions();
   else if (h === 'recherche') { html = viewSearch(); after = () => { const i = document.getElementById('ssearch'); let t; i.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => drawSearch(i.value), 150); }); drawSearch(''); }; }
   else if (h === 'glossaire') { html = viewGlossary(); after = () => { drawGlossary(''); document.getElementById('gsearch').addEventListener('input', e => drawGlossary(e.target.value)); }; }

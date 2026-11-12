@@ -1,7 +1,7 @@
 // ===== Lisân Campus · administration : liste des inscrits par espace, contact et export Excel
 // Page #admin, réservée à l'administrateur par les règles Firestore (lecture de toute la collection users).
 
-let adminRun = { list: null, err: '', sp: 'all', q: '', loading: false, tab: 'ins', rulesOk: true };
+let adminRun = { list: null, err: '', sp: 'all', q: '', loading: false, tab: 'ins', rulesOk: true, cq: '' };
 const ADMIN_FLAG = 'lc.admin';
 const isAdminCached = () => { try { return localStorage.getItem(ADMIN_FLAG) === '1'; } catch (e) { return false; } };
 const setAdminCached = v => { try { v ? localStorage.setItem(ADMIN_FLAG, '1') : localStorage.removeItem(ADMIN_FLAG); } catch (e) {} };
@@ -10,6 +10,40 @@ const civ = i => i && i.civilite === 'Madame' ? 'Mme' : 'M.';
 const waLink = i => { if (!i || !i.tel) return ''; let t = String(i.tel).replace(/\D/g, ''); const c = String(i.ind || '').replace(/\D/g, '');
   if (c && c !== '225') t = t.replace(/^0+/, ''); return `https://wa.me/${c}${t}`; };
 const telLink = i => i && i.tel ? `tel:${i.ind || ''}${String(i.tel).replace(/\D/g, '')}` : '';
+
+// ---------- progression des élèves (lue dans « progress » de chaque compte, synchronisée par le site)
+const fmtDur = sec => { const m = Math.round((+sec || 0) / 60); if (m < 1) return sec > 0 ? 'moins d’une minute' : '0 min'; const h = Math.floor(m / 60), r = m % 60;
+  return h ? `${h} h${r ? ' ' + String(r).padStart(2, '0') + ' min' : ''}` : `${m} min`; };
+const dayFr = k => k ? dateFr(k + 'T12:00:00') : '—';
+function progOf(u, spId) {                               // leçons terminées, parcours réussis et temps d'étude dans un espace
+  const P = u.prog || {}, done = P.done || {}, quiz = P.quiz || {}, time = P.time || {};
+  const subs = SUBJECTS.filter(s => spaceOf(s) === spId);
+  const parc = subs.map(s => { const n = s.lessons.length, d = s.lessons.filter(l => done[s.id + '/' + l.id]).length;
+    const e = quiz[s.id + '@eval'], o = quiz[s.id], best = e === undefined ? o : (o !== undefined && o >= LEGACY_QUIZ && o > e ? o : e);
+    const ok = d === n && ((e || 0) >= CERT_QUIZ || (o || 0) >= LEGACY_QUIZ);
+    return { s, n, d, best, ok }; });
+  const n = parc.reduce((a, p) => a + p.n, 0), d = parc.reduce((a, p) => a + p.d, 0);
+  const sec = Object.entries(time).filter(([k]) => subs.some(s => k.startsWith(s.id + '/'))).reduce((a, [, v]) => a + (+v || 0), 0);
+  const cur = parc.find(p => p.d > 0 && !p.ok) || parc.find(p => !p.ok) || null;
+  return { parc, n, d, pct: n ? Math.round(d * 100 / n) : 0, passed: parc.filter(p => p.ok).length, sec, cur };
+}
+function activity(u) {                                   // jours d'étude (secondes par jour, 120 derniers jours)
+  const D = (u.prog || {}).days || {}, keys = Object.keys(D).filter(k => D[k] > 0).sort();
+  let week = 0; const now = new Date();
+  for (let i = 0; i < 7; i++) { const x = new Date(now); x.setDate(now.getDate() - i); week += +D[dayKey(x)] || 0; }
+  let streak = 0; const x = new Date(); if (!D[dayKey(x)]) x.setDate(x.getDate() - 1);
+  while (D[dayKey(x)] > 0) { streak++; x.setDate(x.getDate() - 1); }
+  return { last: keys[keys.length - 1] || null, week, streak, days: keys.length };
+}
+const progBar = pct => `<div class="bar adm-bar"><i style="width:${Math.max(0, Math.min(100, pct))}%"></i></div>`;
+function progLine(u, id) {
+  const p = progOf(u, id), a = activity(u);
+  return `<div class="adm-prog">${progBar(p.pct)}<small><b>${p.d} / ${p.n} leçons</b> (${p.pct} %) · ${p.passed} / ${p.parc.length} parcours réussi${p.passed > 1 ? 's' : ''} · ${fmtDur(p.sec)} d’étude · dernière activité : ${dayFr(a.last)}</small></div>`;
+}
+function progTable(u, id) {
+  const p = progOf(u, id);
+  return `<div class="tablewrap"><table class="adm-pt"><thead><tr><th>Parcours</th><th>Leçons</th><th>Évaluation</th></tr></thead><tbody>${p.parc.map(x => `<tr${x.ok ? ' class="ok"' : ''}><td>${esc(x.s.title)}</td><td>${x.d} / ${x.n}</td><td>${x.best === undefined ? '—' : Number(x.best) + ' %'}${x.ok ? ' ✓' : ''}</td></tr>`).join('')}</tbody></table></div>`;
+}
 
 function adminRows() {                                   // une ligne par inscription (personne × espace)
   const rows = [];
@@ -125,20 +159,40 @@ function drawAdmin() {
   const noIns = list.filter(u => !Object.keys(u.spaces).length).length;
   const rows = adminFiltered(), certs = adminCerts(), suggs = adminSuggs();
   const stat = (n, t, c) => `<div class="stat${c ? ' c-' + c : ''}"><b>${n}</b><span>${esc(t)}</span></div>`;
+  const active = list.filter(u => activity(u).week > 0).length;
   const tabs = `<div class="chips adm-tabs" role="group" aria-label="Rubrique"><button type="button" class="chip" data-admin-tab="ins" aria-pressed="${R.tab === 'ins'}">👥 Inscrits (${all.length})</button>
+    <button type="button" class="chip" data-admin-tab="prog" aria-pressed="${R.tab === 'prog'}">📈 Progression</button>
+    <button type="button" class="chip" data-admin-tab="acc" aria-pressed="${R.tab === 'acc'}">👤 Comptes (${list.length})</button>
     <button type="button" class="chip" data-admin-tab="cert" aria-pressed="${R.tab === 'cert'}">🎓 Certificats (${certs.length})</button>
     <button type="button" class="chip" data-admin-tab="sugg" aria-pressed="${R.tab === 'sugg'}">💡 Suggestions (${suggs.length})</button>
     <button type="button" class="chip" data-admin-tab="msg" aria-pressed="${R.tab === 'msg'}">✉️ Messages (${(R.msgs || []).length})</button></div>`;
   const head = `<span class="eyebrow">Éditions Lisân</span><h1>Administration</h1>
     ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour pour les certificats et la sécurité renforcée.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
-    <div class="stats">${stat(list.length, 'comptes créés')}${stat(all.length, 'inscriptions')}${stat(fresh, 'nouvelles (7 jours)')}${stat(noIns, 'comptes sans inscription')}
+    <div class="stats">${stat(list.length, 'comptes créés')}${stat(all.length, 'inscriptions')}${stat(fresh, 'nouvelles (7 jours)')}${stat(noIns, 'comptes sans inscription')}${stat(active, 'actifs (7 jours)')}
       ${stat(certs.length, 'certificats délivrés')}${stat(suggs.length, 'suggestions')}
       ${SPACES.map(sp => stat(count(sp.id), sp.title, sp.color)).join('')}</div>${tabs}
-    <div class="actions"><button type="button" class="btn small" data-admin="xlsx">⬇ Télécharger en Excel</button>${R.tab === 'ins' ? '<button type="button" class="btn ghost small" data-admin="csv">⬇ CSV</button>' : ''}
+    <div class="actions"><button type="button" class="btn small" data-admin="xlsx">⬇ Télécharger en Excel</button>${R.tab === 'sugg' ? '<button type="button" class="btn ghost small" data-admin="sugdoc">⬇ Document des suggestions</button>' : ''}${R.tab === 'ins' ? '<button type="button" class="btn ghost small" data-admin="csv">⬇ CSV</button>' : ''}
       <button type="button" class="btn ghost small" data-admin="reload">↻ Actualiser</button></div>`;
   if (R.tab === 'cert') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${certs.length} certificat${certs.length > 1 ? 's' : ''} délivré${certs.length > 1 ? 's' : ''}.</p><div class="adm-list">${certCards(certs)}</div>`; return; }
   if (R.tab === 'msg') { const ms = R.msgs || [];
     box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${ms.length} message${ms.length > 1 ? 's' : ''} reçu${ms.length > 1 ? 's' : ''} par le formulaire de contact.</p><div class="adm-list">${msgCards(ms)}</div>`; return; }
+  if (R.tab === 'acc') {
+    box.innerHTML = `${head}<input class="search" id="admin-cq" type="search" placeholder="Rechercher : nom, e-mail…" value="${esc(R.cq)}" aria-label="Rechercher un compte">
+      <p class="meta" id="admin-msg" aria-live="polite">${list.length} compte${list.length > 1 ? 's' : ''} créé${list.length > 1 ? 's' : ''}, du plus récent au plus ancien. Un compte est créé à la première connexion Google ; l’inscription à un espace se fait ensuite avec la fiche.</p>
+      <div class="adm-list" id="acc-list">${accCards(accFiltered())}</div>`;
+    const cq = document.getElementById('admin-cq');
+    cq.addEventListener('input', () => { R.cq = cq.value; document.getElementById('acc-list').innerHTML = accCards(accFiltered()); });
+    return;
+  }
+  if (R.tab === 'prog') {
+    const pr = progRows();
+    box.innerHTML = `${head}
+      <div class="chips" role="group" aria-label="Filtrer par espace"><button type="button" class="chip" data-admin-sp="all" aria-pressed="${R.sp === 'all'}">Tous</button>
+        ${SPACES.map(sp => `<button type="button" class="chip" data-admin-sp="${sp.id}" aria-pressed="${R.sp === sp.id}">${sp.icon} ${esc(sp.title)}</button>`).join('')}</div>
+      <p class="meta" id="admin-msg" aria-live="polite">${pr.length} inscription${pr.length > 1 ? 's' : ''}, de l’activité la plus récente à la plus ancienne. La progression est celle que le site a synchronisée (élève connecté).</p>
+      <div class="adm-list">${progCards(pr)}</div>`;
+    return;
+  }
   if (R.tab === 'sugg') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${suggs.length} suggestion${suggs.length > 1 ? 's' : ''}, de la plus récente à la plus ancienne.</p><div class="adm-list">${suggCards(suggs)}</div>`; return; }
   box.innerHTML = `${head}
     <div class="chips" role="group" aria-label="Filtrer par espace"><button type="button" class="chip" data-admin-sp="all" aria-pressed="${R.sp === 'all'}">Tous (${all.length})</button>
@@ -175,15 +229,44 @@ function suggCards(rows) {
     <small>De ${esc(who(u))}${u.email ? ' · ' + esc(u.email) : ''}</small>
     <div class="actions">${waLink(u.info) ? `<a class="btn small" href="${waLink(u.info)}" target="_blank" rel="noopener">Répondre sur WhatsApp</a>` : ''}${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}?subject=${encodeURIComponent('Votre suggestion sur Lisân Campus')}">Répondre par e-mail</a>` : ''}</div></article>`).join('');
 }
+function progRows() {
+  return adminRows().filter(r => adminRun.sp === 'all' || r.id === adminRun.sp)
+    .map(r => Object.assign({ p: progOf(r.u, r.id), a: activity(r.u) }, r))
+    .sort((x, y) => String(y.a.last || '').localeCompare(String(x.a.last || '')) || y.p.d - x.p.d);
+}
+function progCards(rows) {
+  if (!rows.length) return '<p class="meta">Aucune inscription pour le moment.</p>';
+  return rows.map(({ u, id, p, a }) => { const sp = space(id);
+    return `<article class="adm-card c-${sp.color}"><div class="adm-top"><b>${esc(who(u))}</b><span class="tag">${sp.icon} ${esc(sp.title)}</span></div>
+      ${progBar(p.pct)}<p><b>${p.d} / ${p.n} leçons</b> (${p.pct} %) · ${p.passed} / ${p.parc.length} parcours réussi${p.passed > 1 ? 's' : ''} · ${fmtDur(p.sec)} d’étude</p>
+      <small>${p.cur ? 'En cours : ' + esc(p.cur.s.title) + ` (${p.cur.d} / ${p.cur.n})` : 'Tous les parcours sont réussis'} · cette semaine : ${fmtDur(a.week)} · série : ${a.streak} jour${a.streak > 1 ? 's' : ''} · dernière activité : ${dayFr(a.last)}</small>
+      <details><summary>Détail par parcours</summary>${progTable(u, id)}</details></article>`; }).join('');
+}
+function accFiltered() {
+  const q = adminRun.cq.trim().toLowerCase();
+  return (adminRun.list || []).filter(u => !q || [u.name, u.email, u.info && u.info.nom, u.info && u.info.prenom].join(' ').toLowerCase().includes(q))
+    .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+}
+function accCards(list) {
+  if (!list.length) return '<p class="meta">Aucun compte pour le moment.</p>';
+  return list.map(u => { const ids = Object.keys(u.spaces), a = activity(u), wa = waLink(u.info);
+    return `<article class="adm-card c-${ids.length ? 'a' : 'h'}"><div class="adm-top"><b>${esc(u.info ? who(u) : (u.name || 'Compte sans nom'))}</b><small>${u.createdAt ? 'créé le ' + dateFr(u.createdAt) : ''}</small></div>
+      <small>${esc(u.email || '')}${u.lastLogin ? ' · dernière connexion : ' + dateFr(u.lastLogin) : ''}</small>
+      <p>${ids.length ? ids.map(id => `<span class="tag">${space(id).icon} ${esc(space(id).title)}</span>`).join(' ') : '<span class="tag">Aucune inscription : fiche non remplie</span>'}</p>
+      <small>${u.done} leçon${u.done > 1 ? 's' : ''} terminée${u.done > 1 ? 's' : ''} · dernière activité : ${dayFr(a.last)}</small>
+      <div class="actions">${wa ? `<a class="btn small" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}?subject=${encodeURIComponent('Lisân Campus')}">E-mail</a>` : ''}</div></article>`; }).join('');
+}
 function adminCards(rows) {
   if (!rows.length) return '<p class="meta">Aucune inscription pour le moment.</p>';
   return rows.map(({ u, id, en }) => { const i = u.info || {}, sp = space(id), a = ageOf(i.naissance), wa = waLink(i);
     return `<article class="adm-card c-${sp.color}">
       <div class="adm-top"><b>${esc(civ(i))} ${esc(String(i.nom || '').toUpperCase())} ${esc(prenomFmt(i.prenom || u.name))}</b><span class="tag">${sp.icon} ${esc(sp.title)}</span></div>
       <small>N° ${esc(en.num)} · inscrit le ${dateFr(en.date)}</small>
+      ${progLine(u, id)}
       <p>${[a !== null ? a + ' ans' : '', STATUT_OLD[i.statut] || i.statut, [i.ville, paysOf(i)].filter(Boolean).join(', ')].filter(Boolean).map(esc).join(' · ')}</p>
       <div class="actions">${wa ? `<a class="btn small" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${i.tel ? `<a class="btn ghost small" href="${telLink(i)}">Appeler ${esc(telFr(i.ind, i.tel))}</a>` : ''}
         ${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}">E-mail</a>` : ''}</div>
+      <details><summary>Progression par parcours</summary>${progTable(u, id)}</details>
       <details><summary>Fiche complète</summary>${dl([['Adresse e-mail', u.email], ...infoRows(i), ...answerRows(id, en.reponses), ['Leçons terminées (compte)', String(u.done)],
         ['Dernière connexion', u.lastLogin ? dateFr(u.lastLogin) : '—']])}</details></article>`; }).join('');
 }
@@ -204,6 +287,14 @@ function sheetsData() {
   SPACES.forEach(sp => { const qs = QUESTIONS[sp.id] || [], rs = rows.filter(r => r.id === sp.id);
     out.push({ name: sp.title.replace(/[\\/?*[\]:]/g, ' ').slice(0, 31), head: [...COLS.map(c => c[0]), ...qs.map(q => q.l)], widths: [...COLS.map(c => c[1]), ...qs.map(() => 26)],
       data: rs.map(r => [...baseLine(r), ...qs.map(q => r.en.reponses[q.k] || '')]) }); });
+  out.push({ name: 'Progression', head: ['Nom', 'Espace', 'Leçons terminées', 'Leçons au total', 'Progression (%)', 'Parcours réussis', 'Parcours au total', 'En cours', 'Temps d’étude (min)', 'Cette semaine (min)', 'Série (jours)', 'Dernière activité', 'Téléphone', 'E-mail'],
+    widths: [28, 20, 10, 10, 10, 10, 10, 30, 12, 12, 10, 14, 18, 28],
+    data: rows.map(r => { const p = progOf(r.u, r.id), a = activity(r.u);
+      return [who(r.u), space(r.id).title, p.d, p.n, p.pct, p.passed, p.parc.length, p.cur ? p.cur.s.title : 'Terminé', Math.round(p.sec / 60), Math.round(a.week / 60), a.streak, a.last ? new Date(a.last + 'T12:00:00').toLocaleDateString('fr-FR') : '', telFr((r.u.info || {}).ind, (r.u.info || {}).tel), r.u.email]; }) });
+  out.push({ name: 'Comptes', head: ['Nom (compte Google)', 'Nom (fiche)', 'E-mail', 'Créé le', 'Dernière connexion', 'Inscriptions', 'Leçons terminées', 'Dernière activité'], widths: [26, 28, 30, 14, 16, 40, 10, 14],
+    data: (adminRun.list || []).slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || ''))).map(u => { const a = activity(u);
+      return [u.name || '', u.info ? who(u) : '', u.email || '', u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '', u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('fr-FR') : '',
+        Object.keys(u.spaces).map(id => space(id).title).join(', ') || 'Aucune', u.done, a.last ? new Date(a.last + 'T12:00:00').toLocaleDateString('fr-FR') : '']; }) });
   const cr = adminCerts();
   out.push({ name: 'Certificats', head: ['N° du certificat', 'Type', 'Parcours ou espace', 'Espace', 'Délivré le', 'Titulaire', 'Leçons', 'Quiz (%)', 'Téléphone', 'E-mail'], widths: [20, 16, 30, 24, 14, 28, 8, 9, 18, 28],
     data: cr.map(({ u, c }) => [c.num, c.type === 'espace' ? 'Grand certificat' : 'Parcours', c.titre, c.espace, c.date ? new Date(c.date).toLocaleDateString('fr-FR') : '', who(u), Number(c.lecons) || 0, c.quiz === null || c.quiz === undefined ? '' : Number(c.quiz), telFr((u.info || {}).ind, (u.info || {}).tel), u.email]) });
@@ -224,6 +315,20 @@ function exportXlsx() {
   msg.textContent = 'Préparation du fichier Excel…';
   const s = document.createElement('script'); s.src = 'vendor/xlsx.mini.min.js'; s.onload = go;
   s.onerror = () => { msg.textContent = 'Le fichier Excel n’a pas pu être préparé : utilisez l’export CSV.'; }; document.head.appendChild(s);
+}
+function exportSuggDoc() {                               // document des suggestions (HTML imprimable, s'ouvre partout ; à joindre pour l'analyse)
+  const sg = adminSuggs(), d = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+  const types = [...new Set(sg.map(r => r.x.type || 'Suggestion'))];
+  const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Lisân Campus · suggestions des élèves</title>
+<style>body{font:15px/1.55 system-ui,sans-serif;color:#1d2433;max-width:820px;margin:24px auto;padding:0 16px}h1{font-size:24px;margin:0}h2{font-size:18px;margin:28px 0 8px;color:#0f3d5e;border-bottom:2px solid #c8a24a;padding-bottom:4px}
+.s{border:1px solid #d9dee6;border-radius:10px;padding:10px 14px;margin:10px 0;page-break-inside:avoid}.m{color:#5b6475;font-size:13px}.t{white-space:pre-wrap;margin:6px 0}</style></head><body>
+<h1>Lisân Campus · suggestions des élèves</h1><p class="m">Éditions Lisân · document établi le ${esc(d)} · ${sg.length} suggestion${sg.length > 1 ? 's' : ''}</p>
+${types.map(t => `<h2>${esc(t)} (${sg.filter(r => (r.x.type || 'Suggestion') === t).length})</h2>` + sg.filter(r => (r.x.type || 'Suggestion') === t).map(({ u, x }, k) =>
+  `<div class="s"><div class="m">${k + 1}. ${x.date ? esc(dateFr(x.date)) : ''}${x.contexte ? ' · à propos de : ' + esc(x.contexte) : ''}</div><p class="t">${esc(x.texte || '')}</p><div class="m">De ${esc(who(u))}</div></div>`).join('')).join('')}
+${sg.length ? '' : '<p>Aucune suggestion pour le moment.</p>'}</body></html>`;
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+  a.download = `Lisan-Campus-suggestions-${stamp()}.html`; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  document.getElementById('admin-msg').textContent = 'Le document des suggestions a été téléchargé : il s’ouvre dans le navigateur et s’imprime en PDF.';
 }
 function exportCsv() {
   const rows = adminFiltered(), cell = v => { let t = String(v === undefined || v === null ? '' : v); if (/^[=+\-@\t\r]/.test(t)) t = "'" + t; return /[;"\n]/.test(t) ? `"${t.replace(/"/g, '""')}"` : t; };
@@ -253,6 +358,7 @@ document.addEventListener('click', e => {
   if (k === 'reload') loadAdmin();
   else if (k === 'xlsx') exportXlsx();
   else if (k === 'csv') exportCsv();
+  else if (k === 'sugdoc') exportSuggDoc();
   else if (k === 'copy') { const t = document.getElementById('admin-rules').textContent, m = document.getElementById('admin-copy');
     (navigator.clipboard ? navigator.clipboard.writeText(t) : Promise.reject()).then(() => { m.textContent = 'Règles copiées.'; },
       () => { const r = document.createRange(); r.selectNodeContents(document.getElementById('admin-rules')); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); m.textContent = 'Texte sélectionné : copiez-le avec « Copier ».'; }); }
