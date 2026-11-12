@@ -179,7 +179,8 @@ const AR_LEX = { qiyas: 'qiyâss', kanun: 'qânoûne', qanun: 'qânoûne', urf: 
   muslim: 'mouslim', mushaf: 'mous-haf', suhuf: 'souhouf', uthman: 'outhmâne', uthmani: 'outhmânî', umar: 'oumar', hasan: 'hassane', matn: 'matne', isnad: 'isnâde',
   tawhid: 'tawhîde', 'ra-y': 'raï', ray: 'raï', istihsan: 'istihsâne', istislah: 'istislâh', talfiq: 'talfîq', thabit: 'thâbite', abbas: 'abbâss', hadiths: 'hadîthe', hadith: 'hadîthe',
   daif: 'daïf', sahih: 'sahîh', ayat: 'âyâte', 'al-insan': 'al-insâne', far: 'far', asl: 'asl', illa: 'illa', wahy: 'wah-y', mursala: 'moursala', qawl: 'qawl', taqrir: 'taqrîr',
-  jibril: 'jibrîl', hira: 'hirâ', yamama: 'yamâma', hafsa: 'hafsa', 'abu': 'aboû', zahirisme: 'zâhirisme', majalla: 'majalla', 'char-iyya': 'char‘iyya', siyasa: 'siyâssa' };
+  jibril: 'jibrîl', hira: 'hirâ', yamama: 'yamâma', hafsa: 'hafsa', 'abu': 'aboû', zahirisme: 'zâhirisme', majalla: 'majalla', 'char-iyya': 'char‘iyya', siyasa: 'siyâssa', tanzil: 'tanzîl', ghayb: 'ghaïb', khadija: 'khadîja', umm: 'oumm', lawh: 'lawh', mahfuz: 'mahfoûz',
+  ikhlas: 'ikhlâss', riba: 'ribâ', sawm: 'sawm', hajj: 'hajj', naskh: 'naskh', thamud: 'thamoûd', tanzîl: 'tanzîl' };
 const lexKey = x => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[ḥṣḍṭẓ]/gi, c => c.normalize('NFD')[0]).toLowerCase().replace(/^['’‘ʿʾ]+|['’‘ʿʾ]+$/g, '').replace(/['’‘ʿʾ]/g, '-');
 function pronWord(w) {
   const m = w.match(ELIS), pre = m ? m[0] : '', x0 = w.slice(pre.length);

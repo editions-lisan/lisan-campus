@@ -319,6 +319,9 @@ window.MINI = {
     { q: "Les premiers versets révélés appartiennent à la sourate…", a: ["96, Al-'Alaq, qui commence par « Lis ! »", "1, Al-Fâtiha", "2, Al-Baqara"], c: 0, e: "Dans la grotte de Hirâ', en 610." },
     { q: "La première compilation du Coran a eu lieu sous…", a: ["Abû Bakr, après la bataille de Yamâma", "'Uthmân, vers 650", "'Alî"], c: 0, e: "Abû Bakr rassemble ; 'Uthmân uniformise et diffuse." },
     { q: "Qui fut chargé de réunir les fragments du Coran ?", a: ["Zayd ibn Thâbit", "Ibn 'Abbâs", "Qatâda"], c: 0, e: "Ancien scribe du Prophète, il dirigea aussi la commission de 'Uthmân." },
+    { q: "Les versets de la période de La Mecque sont surtout…", a: ["courts, rimés et imagés", "longs et techniques", "consacrés à l'héritage"], c: 0, e: "Les longues sourates juridiques viennent à Médine." },
+    { q: "Le jeûne du Ramadan devient obligatoire…", a: ["à Médine", "à La Mecque", "sous 'Uthmân"], c: 0, e: "Sourate 2, verset 183, révélée à Médine." },
+    { q: "L'abrogation (naskh), c'est…", a: ["le remplacement d'un verset antérieur par un verset plus récent", "la compilation du Coran", "la descente de la révélation"], c: 0, e: "Sourate 2, verset 106." },
   ],
   "dm/synthese": [
     { q: "Dans la hiérarchie des sources, la deuxième place revient à…", a: ["la Sunna", "l'Idjma'", "le Qiyas"], c: 0, e: "Coran, Sunna, Idjma', Qiyas." },
@@ -1687,3 +1690,45 @@ if (window.MINI["en/whatislaw"]) window.MINI["en/whatislaw"].push(
   { q: "An injunction is…", a: ["an equitable remedy", "an Act of Parliament", "a local custom"], c: 0, e: "Comme l'exécution en nature, la rescision et la rectification." },
   { q: "In the UK, a treaty applies in domestic law…", a: ["once incorporated by legislation", "as soon as it is signed", "only before the Supreme Court"], c: 0, e: "Le Royaume-Uni a un système dualiste." }
 );
+
+// Méthodologie : fiches de TD d'Introduction au droit
+Object.assign(window.MINI, {
+  "metho/td1": [
+    { q: "L'élément qui fait d'un usage une coutume est…", a: ["la conviction de son caractère obligatoire", "sa répétition seule", "sa publication"], c: 0, e: "C'est l'élément psychologique (opinio juris)." },
+    { q: "Le droit de propriété d'une personne est…", a: ["un droit subjectif", "le droit objectif", "une coutume"], c: 0, e: "Le droit objectif est l'ensemble des règles." },
+    { q: "Ce qui distingue avant tout le droit de la religion, c'est…", a: ["la sanction par l'autorité publique", "le fait de prescrire des conduites", "l'interdiction du meurtre"], c: 0, e: "La religion a une sanction spirituelle." },
+    { q: "La règle de droit est générale et impersonnelle parce qu'elle…", a: ["vise toutes les personnes dans la même situation, sans en nommer aucune", "s'applique à une seule personne", "n'est jamais sanctionnée"], c: 0, e: "Elle se distingue ainsi de la décision individuelle." } ],
+  "metho/td2": [
+    { q: "Les deux parties de la Constitution sont…", a: ["le préambule et le dispositif", "la loi et le règlement", "l'exposé des motifs et l'annexe"], c: 0, e: "Le préambule a la même valeur que le dispositif." },
+    { q: "Au sens formel, la loi est…", a: ["le texte voté par le Parlement et promulgué", "toute règle générale", "un arrêté du ministre"], c: 0, e: "Au sens matériel, c'est toute règle générale et obligatoire." },
+    { q: "Selon la Constitution ivoirienne, le domaine du règlement est…", a: ["de droit commun : tout ce qui n'est pas réservé à la loi", "limité et énuméré", "inexistant"], c: 0, e: "Articles 101 et 103 de la Constitution de 2016." } ],
+  "metho/td3": [
+    { q: "La coutume praeter legem…", a: ["comble le silence de la loi", "contredit la loi", "applique la loi à la lettre"], c: 0, e: "Elle est admise comme source complémentaire." },
+    { q: "Une loi qui n'est plus appliquée depuis longtemps…", a: ["reste en vigueur : la désuétude n'abroge pas la loi", "est abrogée de plein droit", "devient une coutume"], c: 0, e: "Seul le législateur abroge la loi." },
+    { q: "L'article 5 du Code civil interdit au juge…", a: ["de statuer par voie de disposition générale et réglementaire", "de juger dans le silence de la loi", "d'interpréter la loi"], c: 0, e: "L'article 4 lui impose au contraire de juger." },
+    { q: "La doctrine, c'est…", a: ["l'ensemble des travaux et opinions des juristes", "l'ensemble des décisions de justice", "la coutume écrite"], c: 0, e: "Elle explique, critique et inspire le droit." } ],
+  "metho/td4": [
+    { q: "La radiation d'un fonctionnaire relève…", a: ["du droit administratif", "du droit civil", "du droit commercial"], c: 0, e: "C'est un acte de l'administration." },
+    { q: "Pour contester sa radiation, le fonctionnaire forme…", a: ["un recours pour excès de pouvoir devant le Conseil d'État", "une action devant le tribunal de commerce", "un pourvoi devant la Cour de cassation"], c: 0, e: "En principe après un recours administratif préalable." },
+    { q: "Le litige entre un locataire et son bailleur relève…", a: ["du droit privé et du tribunal de première instance", "du droit public et du Conseil d'État", "du droit pénal seulement"], c: 0, e: "Le bail est un contrat entre particuliers." } ],
+  "metho/td5": [
+    { q: "Un conflit de lois dans l'espace suppose…", a: ["un élément d'extranéité", "deux lois successives", "un procès pénal"], c: 0, e: "Deux lois successives : conflit dans le temps." },
+    { q: "Les immeubles sont soumis à…", a: ["la loi du lieu où ils sont situés", "la loi nationale du propriétaire", "la loi choisie par le notaire"], c: 0, e: "C'est le rattachement réel." },
+    { q: "Selon le texte, le juge ne statue pas en équité parce que…", a: ["l'équité mène à l'arbitraire et à l'incohérence", "la loi l'interdit toujours expressément", "l'équité n'existe pas"], c: 0, e: "Il s'appuie plutôt sur les précédents." } ],
+  "metho/td6": [
+    { q: "Une règle supplétive…", a: ["s'applique si les parties ne l'ont pas écartée", "ne s'applique jamais", "s'impose malgré toute convention contraire"], c: 0, e: "La règle impérative, elle, ne peut être écartée." },
+    { q: "Selon Portalis, à défaut de texte, « tiennent lieu de loi »…", a: ["l'usage, la jurisprudence constante, l'opinion ou la maxime reçue", "la volonté du juge seul", "les règlements étrangers"], c: 0, e: "Coutume, jurisprudence et doctrine." },
+    { q: "Portalis est…", a: ["l'un des rédacteurs du Code civil de 1804", "un juge de la Cour de cassation", "l'auteur de la Constitution de 2016"], c: 0, e: "Discours préliminaire du projet de Code civil." } ],
+  "metho/td7": [
+    { q: "Le principe de spécialité signifie qu'une personne morale…", a: ["ne peut agir que dans le cadre de son objet", "ne peut jamais disparaître", "n'a pas de patrimoine"], c: 0, e: "Exemple : la mission sanitaire de l'hôpital." },
+    { q: "Une fondation est…", a: ["un groupement de biens affectés à une œuvre", "un groupement de personnes", "une collectivité territoriale"], c: 0, e: "Les associations et sociétés sont des groupements de personnes." },
+    { q: "Une société commerciale acquiert la personnalité morale par…", a: ["son immatriculation au RCCM", "sa seule création orale", "un arrêt de la Cour suprême"], c: 0, e: "Droit OHADA." } ],
+  "metho/td8": [
+    { q: "« A fortiori » signifie…", a: ["à plus forte raison", "par l'argument contraire", "au premier abord"], c: 0, e: "A contrario : par l'argument contraire." },
+    { q: "Les droits extrapatrimoniaux sont en principe…", a: ["incessibles et intransmissibles", "librement vendus", "saisissables par les créanciers"], c: 0, e: "Ils sont hors du patrimoine." },
+    { q: "Le droit au respect de la vie privée est…", a: ["un droit de la personnalité", "un droit réel", "un droit de créance"], c: 0, e: "C'est un droit extrapatrimonial." } ],
+  "metho/td9": [
+    { q: "L'embauche d'un salarié est…", a: ["un acte juridique (contrat de travail)", "un fait juridique", "une coutume"], c: 0, e: "Les effets sont voulus par les parties." },
+    { q: "Un vol avec effraction est…", a: ["un fait juridique volontaire", "un acte juridique", "un contrat"], c: 0, e: "L'auteur ne recherche pas les effets de droit (peine, réparation)." },
+    { q: "Le fait juridique se prouve…", a: ["par tout moyen", "uniquement par écrit", "uniquement par acte notarié"], c: 0, e: "L'acte juridique se prouve en principe par écrit." } ]
+});

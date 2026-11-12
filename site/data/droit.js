@@ -3643,3 +3643,215 @@ M_INFO.cards.push(...[["Hardware / software","Matériel / logiciel"],["Périphé
     ["injunction", "injonction : ordre du juge de faire ou de ne pas faire"]
   );
 })();
+// Droit musulman, chapitre 4 : les deux périodes de la révélation (La Mecque, Médine), d'après les pages 5 à 7 du cours
+(function () {
+  const L = M_DM.lessons.find(x => x.id === "revelation");
+  if (!L) return;
+  L.body[0] = { p: "Le chapitre 4 du cours retrace les **deux périodes de la révélation**, à La Mecque puis à Médine, puis la manière dont la parole révélée, d'abord transmise oralement, est devenue un **livre unique**, le *Mushaf*." };
+  const i = L.body.findIndex(b => b.p && /^Du vivant du Prophète/.test(b.p));
+  L.body.splice(i < 0 ? 3 : i, 0,
+    { p: "Le Coran présente les révélations faites au Prophète Muhammad comme issues d'un Livre conservé auprès de Dieu de toute éternité, la « Mère du Livre » (*Umm al-Kitâb*, sourate 43, verset 4), la « Table gardée » (*al-Lawh al-mahfûz*, sourate 85, verset 22). La Torah et l'Évangile, donnés auparavant aux juifs et aux chrétiens, viennent de cette même source." },
+    { p: "Inséparable de la vie du Prophète (vers 570-632), l'histoire du Coran, dont la « descente » (*tanzîl*) révèle aux hommes le « mystère » (*ghayb*) de leur destin, se divise en **deux phases**, étalées sur une vingtaine d'années : la période de **La Mecque** (610-622), puis celle de **Médine** (622-632)." },
+    { h: "Les révélations de la période de La Mecque (610-622)" },
+    { p: "Les premières révélations parviennent au Prophète vers 610, une quinzaine d'années après son mariage avec **Khadîja**, riche commerçante mecquoise. Elles frappent d'abord par leur forme : des énoncés **courts**, **rimés** (les versets se terminent par des sons identiques) et **rythmés**, d'une forme **elliptique** (qui ne développe pas toute la pensée). Ils évoquent des images fortes, empruntées au monde bédouin et à la nature (ciel, lune, montagnes, chamelle, eau), et des expressions du commerce (comptes, balance, richesses, fraude)." },
+    { p: "Sans être toujours explicites, ces messages font ressortir de grands thèmes : l'homme est mortel ; le Jugement conduira en enfer les mécréants et les riches corrompus, et réservera le paradis à ceux qui n'oublient pas le message de Dieu, qui prient et se montrent bons envers les pauvres et les orphelins. Le Prophète est chargé de rappeler ce qui avait été révélé auparavant à **Ibrâhîm** (Abraham) et à **Moûsâ** (Moïse) : le Coran reprend ainsi l'histoire de prophètes de la Bible (Moïse, Aaron, Joseph, Salomon) et de l'Évangile (Marie, Jésus)." },
+    { p: "Ces paroles ne sont pas entendues par les riches et les puissants, absorbés par leurs préoccupations terrestres. D'où la **condamnation sévère** de certaines de leurs pratiques, comme l'enterrement vivantes des nouveau-nées (sourate 81, versets 8 et 9). Le châtiment leur est promis, comme il a frappé Pharaon et les peuples qui s'étaient révoltés avant eux ('Âd, Thamoûd). Les révélations insistent aussi sur la **patience** et l'**endurance** dont le Prophète doit faire preuve." },
+    { p: "Les sourates mecquoises mettent en relief le **dogme central** de l'islam, l'unicité de Dieu (*Tawhîd*) : « Dis : Il est Allah, Unique. Allah, l'Absolu. [...] Et nul n'est égal à Lui » (sourate 112, *Al-Ikhlâs*). Elles prescrivent déjà la **prière** (*salât*), dont les cinq prières quotidiennes sont fixées peu avant l'Hégire, et appellent à l'**aumône** envers les pauvres, que Médine transformera en obligation chiffrée (*zakât*). Elles accordent enfin une grande importance aux mots, à l'écrit, au calame, aux feuillets et à la lecture du Livre, dont elles assurent la conservation." },
+    { h: "Les révélations de la période de Médine (622-632)" },
+    { p: "L'hostilité des clans puissants de La Mecque conduit le Prophète à émigrer au nord, à **Médine** : c'est l'**Hégire** (622). Il y trouve un milieu social et politique plus favorable, et devient le guide et le juge d'une communauté organisée." },
+    { p: "Les évocations du Jugement dernier s'atténuent ; le style devient moins imagé et moins poétique ; les versets et les sourates s'allongent et décrivent en détail **les pratiques et les comportements quotidiens** des croyants. Plusieurs grandes sourates de Médine s'adressent à la communauté (« Ô vous qui croyez… »), alors que les sourates mecquoises s'adressent le plus souvent à tous les hommes (« Ô hommes… ») ou aux mécréants (« Ô vous les mécréants… », sourate 109). Le style devient plus précis, pour un contenu plus concret : la vérité du Livre s'accompagne d'une **morale sociale**." },
+    { ul: [
+      "**La communauté** : la place centrale du Prophète, guide et juge des croyants.",
+      "**La famille** : le mariage, la polygamie limitée à quatre épouses sous condition d'équité (sourate 4, verset 3), le voile, le divorce, le remariage, l'adoption et l'héritage, avec des droits et des devoirs propres aux femmes et aux hommes.",
+      "**La guerre** avec les païens de La Mecque : le partage du butin (sourate 8) et le sort des prisonniers, libérés par grâce ou contre rançon (sourate 47, verset 4).",
+      "**Le commerce** : l'interdiction de l'usure (*ribâ*, sourate 2, versets 275 à 279) et des règles de prudence pour les dettes, à mettre par écrit devant témoins (sourate 2, verset 282).",
+      "**Le culte** : deux obligations nouvelles, le **jeûne** du mois de Ramadan (*sawm*, sourate 2, verset 183) et le **pèlerinage** à La Mecque (*hajj*, sourate 3, verset 97), avec leurs modalités : les ablutions avant la prière (sourate 5, verset 6), l'offrande d'un animal pour le pèlerinage ; s'y ajoutent les interdits alimentaires, comme la viande de porc (sourate 2, verset 173), et le calendrier lunaire (sourate 2, verset 189)."] },
+    { p: "Un passage essentiel concerne le texte lui-même : des versets nouvellement révélés sont venus **abroger** le contenu de versets antérieurs (sourate 2, verset 106). C'est la théorie de l'**abrogation** (*naskh*), capitale pour le juriste : quand deux versets semblent s'opposer, il faut savoir lequel est venu en dernier." },
+    { table: { h: ["", "La Mecque (610-622)", "Médine (622-632)"], r: [
+      ["**Forme**", "Versets courts, rimés, rythmés, imagés", "Versets et sourates longs, style précis"],
+      ["**Destinataires**", "Tous les hommes, les mécréants", "La communauté des croyants"],
+      ["**Thèmes**", "Unicité de Dieu, Jugement dernier, morale, récits des prophètes", "Vie quotidienne, famille, commerce, guerre, culte"],
+      ["**Obligations**", "La prière ; l'aumône encouragée", "Le jeûne, le pèlerinage ; la zakât chiffrée ; l'interdiction de l'usure"]] } },
+    { box: "Mecquoise ou médinoise, une sourate se reconnaît à sa **période** (avant ou après l'Hégire), mais aussi à sa **forme** (courte et imagée, ou longue et précise) et à son **contenu** (la foi, ou les règles de la vie en communauté). Les règles juridiques se trouvent surtout dans les sourates de Médine.", title: "À retenir", kind: "cle" },
+    { h: "De la transmission orale au texte écrit" }
+  );
+  M_DM.quiz.push(
+    { q: "Les sourates de la période de La Mecque se caractérisent surtout par…", a: ["des versets courts, rimés et imagés, centrés sur la foi", "des règles détaillées sur l'héritage", "l'interdiction de l'usure", "l'organisation du pèlerinage"], c: 0, e: "Les règles de la vie en communauté viennent surtout à Médine." },
+    { q: "Le jeûne du Ramadan et le pèlerinage sont prescrits…", a: ["à Médine", "à La Mecque, dès 610", "après la mort du Prophète", "par l'Idjma'"], c: 0, e: "Sourate 2, verset 183, et sourate 3, verset 97." },
+    { q: "La théorie selon laquelle un verset plus récent peut remplacer un verset antérieur s'appelle…", a: ["l'abrogation (naskh)", "le Qiyas", "le tanzîl", "le Talfîq"], c: 0, e: "Sourate 2, verset 106." },
+    { q: "Les sourates médinoises s'adressent souvent…", a: ["à la communauté : « Ô vous qui croyez… »", "seulement aux mécréants", "aux juifs uniquement", "aux califes"], c: 0, e: "Les mecquoises s'adressent plutôt à tous les hommes." }
+  );
+  M_DM.cards.push(
+    ["Tanzîl", "La « descente » de la révélation"],
+    ["Sourates mecquoises (610-622)", "Courtes, rimées, imagées : foi, Jugement, morale"],
+    ["Sourates médinoises (622-632)", "Longues, précises : famille, commerce, guerre, culte"],
+    ["Naskh", "Abrogation d'un verset antérieur par un verset plus récent"]
+  );
+})();
+// Méthodologie : les neuf fiches de TD d'Introduction au droit (M. DIANE, cours ; M. OUATTARA, TD ; année 2026-2027), avec corrigés
+(function () {
+  const Q = (q, ans) => [{ p: q }, { corrige: Array.isArray(ans) ? ans : [{ p: ans }] }];
+  const TD = [
+  { id: "td1", title: "TD 1 : les sources, le droit objectif, la coutume ; droit et religion", body: [
+    { p: "Première fiche des travaux dirigés d'Introduction au droit : cinq questions de cours, puis un sujet de dissertation. Cherche d'abord seul, puis ouvre le corrigé." },
+    { h: "Questions de cours" },
+    ...Q("**1. Donnez les sources de la règle de droit.**", [
+      { p: "On distingue les **sources formelles**, qui créent la règle, et les **autorités**, qui l'éclairent." },
+      { ul: ["**Sources écrites** : la **Constitution**, les **traités** et accords internationaux, la **loi** votée par le Parlement, les **règlements** (décrets, arrêtés) et les ordonnances.",
+        "**Source non écrite** : la **coutume**.",
+        "**Autorités** : la **jurisprudence** (les décisions des juges) et la **doctrine** (les travaux des juristes), qui interprètent et font évoluer le droit sans être, en principe, des sources formelles."] },
+      { p: "Ces sources sont ordonnées en une **hiérarchie des normes** : chaque norme doit respecter celle qui lui est supérieure (Constitution, traités, loi, règlement)." } ]),
+    ...Q("**2. Donnez la distinction entre le droit objectif et le droit subjectif.**", [
+      { p: "Le **droit objectif** est l'ensemble des **règles** qui organisent la vie en société et dont le respect est assuré par l'autorité publique : on parle *du* droit (le droit ivoirien, le droit civil)." },
+      { p: "Les **droits subjectifs** sont les **prérogatives** que le droit objectif reconnaît à une **personne** et qu'elle peut faire valoir en justice : *des* droits (le droit de propriété, le droit au respect de la vie privée, le droit d'une victime à réparation)." },
+      { p: "Les deux sont liés : c'est le droit objectif qui crée, reconnaît et protège les droits subjectifs." } ]),
+    ...Q("**3. Définissez la coutume. Quel élément donne véritablement à la coutume son sens de source du droit ? Justifiez.**", [
+      { p: "La **coutume** est une règle **non écrite**, née d'un **usage** répété et considérée comme **obligatoire** par ceux qui la suivent. Elle réunit deux éléments :" },
+      { ul: ["**L'élément matériel** : un usage **ancien**, **constant**, **général** et **notoire** (le *diuturnus usus*).", "**L'élément psychologique** : la **conviction** que cet usage est obligatoire (*opinio juris seu necessitatis*)."] },
+      { p: "C'est l'**élément psychologique** qui fait de l'usage une source du droit. Sans lui, la répétition n'est qu'une **habitude** ou une politesse, que chacun reste libre de ne pas suivre (offrir un cadeau à une fête). Avec lui, la règle s'impose et sa violation appelle une sanction." } ]),
+    ...Q("**4. La règle de droit est-elle dissuasive ou répressive ?**", [
+      { p: "Elle est **les deux**, à deux moments différents. **Avant** la violation, elle est **dissuasive** : la menace d'une sanction pousse chacun à la respecter (fonction préventive). **Après** la violation, elle devient **répressive** ou **réparatrice** : l'autorité publique applique la sanction (peine, nullité de l'acte, dommages-intérêts, exécution forcée)." },
+      { p: "Ce double effet découle de son caractère **coercitif** : son respect est garanti par la contrainte de l'État. Toutes les sanctions ne sont d'ailleurs pas des punitions : en droit civil, la sanction est le plus souvent une **réparation**." } ]),
+    ...Q("**5. Pourquoi dit-on que la règle de droit est générale et impersonnelle ?**", [
+      { p: "Parce qu'elle ne désigne **personne nommément** : elle s'applique à **toutes les personnes** qui se trouvent dans la situation qu'elle prévoit, aujourd'hui comme demain. Elle est formulée de façon **abstraite** (« toute personne », « le vendeur », « le conducteur »)." },
+      { p: "Ce caractère garantit l'**égalité** devant la loi et la **sécurité juridique**. Il distingue la règle de droit de la **décision individuelle** (la nomination d'un fonctionnaire, un jugement), qui vise une personne déterminée. Une règle qui ne concerne qu'une seule fonction (celle du Président de la République) reste impersonnelle : elle vise la fonction, non la personne qui l'occupe." } ]),
+    { h: "Sujet de dissertation : comparaison droit et religion" },
+    { p: "Pour la méthode, revois [La dissertation juridique](#l-metho.methode). Voici un corrigé sous forme de plan détaillé." },
+    { corrige: [
+      { p: "**Introduction.** Définir le **droit** (ensemble des règles de conduite sociale sanctionnées par l'autorité publique) et la **religion** (ensemble de croyances et de règles de conduite fondées sur la relation à Dieu). Intérêt : en Côte d'Ivoire, État **laïc** où coexistent plusieurs religions, et où le droit musulman est étudié comme système juridique. **Problématique** : le droit et la religion ne sont-ils que deux faces d'un même ordre normatif, ou deux ordres distincts ? **Annonce** : des règles proches (I), mais des ordres distincts (II)." },
+      { p: "**I. Des règles proches.** **A. Deux systèmes de règles de conduite** : l'un et l'autre prescrivent et interdisent (ne pas tuer, ne pas voler, respecter ses engagements), et visent une société ordonnée. **B. Des influences réciproques** : la religion a inspiré de nombreuses règles (le repos hebdomadaire, le mariage, l'interdiction du meurtre) ; certains systèmes reposent sur une source religieuse (le droit musulman, dont la Charia est la Loi révélée)." },
+      { p: "**II. Des ordres distincts.** **A. Par leur source et leur finalité** : le droit vient de l'**État** et vise l'**ordre social** extérieur ; la religion vient de la **révélation** ou de la croyance et vise le **salut** et la perfection intérieure. **B. Par leur sanction** : le droit est sanctionné par la **contrainte de l'autorité publique** ; la religion par une sanction **spirituelle** (dans l'au-delà, devant la conscience ou la communauté). Dans un État laïc, l'État ne sanctionne pas les obligations religieuses et protège la liberté de culte." },
+      { p: "**Conclusion.** Le droit et la religion se rencontrent par leur contenu, mais se séparent par leur source, leur but et leur sanction : c'est la **sanction étatique** qui fait la juridicité d'une règle." } ] }
+  ] },
+  { id: "td2", title: "TD 2 : la Constitution, la loi, arrêt et arrêté ; loi et règlement", body: [
+    { p: "Deuxième fiche : la règle de droit. Trois questions de cours, puis une dissertation sur la loi et le règlement." },
+    { h: "Questions de cours" },
+    ...Q("**1. Quelles sont les deux parties de la Constitution ?**", [
+      { p: "Le **préambule** et le **dispositif**. Le **préambule** proclame les valeurs, les principes et les droits fondamentaux auxquels le peuple est attaché ; il fait partie intégrante de la Constitution et a la même valeur juridique. Le **dispositif** est le corps du texte, divisé en articles : il organise les pouvoirs publics (le Président de la République, le Parlement, le Gouvernement, les juridictions) et leurs relations." } ]),
+    ...Q("**2. Définissez la loi.**", [
+      { p: "Au **sens formel**, la loi est le texte **voté par le Parlement** selon la procédure législative et **promulgué** par le Président de la République, dans les matières que la Constitution lui réserve (article 101 de la Constitution de 2016)." },
+      { p: "Au **sens matériel**, la loi désigne toute **règle de droit** générale, impersonnelle et obligatoire, quelle que soit l'autorité qui l'a édictée (une loi, un décret, un arrêté)." } ]),
+    ...Q("**3. Existe-t-il une différence entre un arrêt et un arrêté ? Justifiez.**", [
+      { p: "**Oui.** L'**arrêt** est une **décision de justice** rendue par une **cour** : une juridiction du second degré (cour d'appel) ou une juridiction suprême (Cour de cassation, Conseil d'État). L'**arrêté** est un **acte administratif** pris par une autorité administrative (ministre, préfet, maire) : il relève du pouvoir réglementaire ou de décisions individuelles, et non de la justice. Le premier tranche un litige ; le second édicte une règle ou une décision administrative, et peut d'ailleurs être attaqué devant le juge." } ]),
+    { h: "Dissertation : comparaison loi et règlement" },
+    { p: "Le texte de la fiche (S. Druffin-Bricca et L.-C. Henry) décrit la Constitution française de 1958 : la loi n'a plus un domaine illimité ; elle est cantonnée aux matières énumérées par l'article 34, et tout le reste relève du **règlement**. La Constitution ivoirienne de 2016 suit le même schéma : le domaine de la loi est **énuméré** par l'article 101, et l'article 103 donne un caractère réglementaire à toutes les autres matières." },
+    { p: "Ce sujet est traité en entier dans le parcours : [le sujet expliqué](#l-metho.sujet) et [la dissertation rédigée](#l-metho.corrige). Le plan à retenir :" },
+    { corrige: [
+      { p: "**I. Deux normes distinctes.** **A. Par leur auteur** : la loi est votée par le Parlement ; le règlement est pris par l'Exécutif (décrets du Président de la République, arrêtés des ministres et autorités administratives). **B. Par leur domaine** : la loi, domaine limité et énuméré (article 101) ; le règlement, domaine de droit commun (article 103)." },
+      { p: "**II. Deux normes liées.** **A. Le règlement d'application, subordonné à la loi** : il en précise la mise en œuvre et doit lui être conforme, sous le contrôle du juge administratif. **B. Le règlement autonome, au même niveau que la loi** mais dans un domaine différent : la hiérarchie classique s'en trouve bouleversée, comme le note le texte ; le juge constitutionnel veille au respect de la frontière entre les deux domaines." } ] }
+  ] },
+  { id: "td3", title: "TD 3 : les caractères de la règle de droit ; coutume, juge et doctrine", body: [
+    { p: "Troisième fiche : cinq questions de cours sur les caractères de la règle de droit et les sources non écrites." },
+    ...Q("**1. La coutume *praeter legem*.**", "C'est la coutume qui intervient **en dehors de la loi**, pour combler son silence : elle régit une matière que la loi n'a pas réglée. Elle est admise comme source du droit, car elle complète la loi sans la contredire. Exemple : les usages professionnels qui fixent un point que la loi n'a pas réglé, comme les délais de paiement en usage dans un secteur du commerce."),
+    ...Q("**2. Quels sont les caractères de la règle de droit ?**", [
+      { ul: ["**Générale et impersonnelle** : elle vise toutes les personnes placées dans la même situation, sans désigner personne.", "**Abstraite** : elle est formulée pour des situations types, non pour un cas particulier.", "**Obligatoire** : elle s'impose à tous ; nul ne peut s'y soustraire (même une règle supplétive s'applique si les parties ne l'ont pas écartée).", "**Coercitive** : son respect est assuré par une **sanction** de l'autorité publique ; c'est ce qui la distingue des règles morales ou religieuses.", "**Permanente** : elle s'applique de façon continue, de son entrée en vigueur à son abrogation."] } ]),
+    ...Q("**3. La coutume *contra legem*.**", "C'est la coutume **contraire à la loi**. Elle n'est pas admise : la loi l'emporte sur la coutume dans la hiérarchie des sources, et une loi ne cesse pas d'être en vigueur parce qu'elle n'est plus appliquée (la **désuétude** n'abroge pas la loi). Le juge doit écarter une coutume contraire à une loi impérative ; seul le législateur peut abroger la loi."),
+    ...Q("**4. Le pouvoir normatif du juge.**", [
+      { p: "En principe, le juge **n'a pas de pouvoir normatif** : il lui est interdit de statuer par voie de disposition générale et réglementaire (article 5 du Code civil), et ses décisions n'ont qu'une **autorité relative**, limitée à l'affaire jugée." },
+      { p: "En pratique, il crée du droit : obligé de juger même dans le silence ou l'obscurité de la loi, sous peine de **déni de justice** (article 4 du Code civil), il **interprète** et **complète** la loi. Quand la Cour de cassation répète la même solution, celle-ci devient une **jurisprudence** que les autres juges suivent : c'est une source d'**autorité**, sinon une source formelle." } ]),
+    ...Q("**5. Définissez la doctrine et dites quelle fonction elle remplit.**", [
+      { p: "La **doctrine** est l'ensemble des **opinions et des travaux des juristes** (professeurs, chercheurs, praticiens) qui étudient le droit : manuels, traités, articles, commentaires de décisions." },
+      { p: "Elle n'est pas une source formelle, mais elle remplit trois fonctions : **expliquer** et **systématiser** le droit (classer, définir, enseigner), **critiquer** les lois et les décisions, et **proposer** des réformes qui inspirent le législateur et le juge." } ])
+  ] },
+  { id: "td4", title: "TD 4 : droit public et droit privé ; le cas de M. ATEBA", body: [
+    { p: "Quatrième fiche, sur les branches du droit : un commentaire de texte, puis un cas pratique." },
+    { h: "Commentaire de texte : le critère du droit public et du droit privé (Ph. Malinvaud)" },
+    { p: "Le texte cherche le critère qui sépare le droit privé du droit public, et en retient deux : leur **objet** et leur **finalité**." },
+    { corrige: [
+      { p: "**I. Le critère de l'objet.** **A. Le droit privé régit les rapports des particuliers entre eux** (mariage, contrats, location d'un logement). **B. Le droit public organise l'État et les collectivités publiques et régit leurs relations avec les particuliers**, conformément à la définition de Montesquieu." },
+      { p: "**II. Le critère de la finalité.** **A. Le droit public poursuit l'intérêt général** et assure l'exercice de la **puissance publique** (prérogatives exorbitantes : expropriation, sanctions administratives). **B. Le droit privé vise des intérêts privés**. Limite à souligner : la frontière est parfois incertaine (droit pénal, droit du travail, entreprises publiques), d'où la notion de **droit mixte**." } ] },
+    { h: "Cas pratique : M. ATEBA" },
+    { p: "M. ATEBA, fonctionnaire au ministère de l'Enseignement supérieur, est **radié** de la fonction publique deux jours après une discussion avec son supérieur ; trois jours plus tard, son **bailleur**, proche de ce supérieur, décide de l'**expulser** du logement qu'il loue. Il demande quelle branche du droit s'applique à chaque problème, et quelles juridictions saisir." },
+    { corrige: [
+      { p: "**Problème 1 : la radiation.** La radiation est une décision prise par l'**administration** à l'égard d'un fonctionnaire, dans le cadre du **statut général de la fonction publique** : c'est du **droit public**, plus précisément du **droit administratif** (droit de la fonction publique). Une radiation ne peut intervenir sans procédure disciplinaire régulière ni droits de la défense : prise deux jours après une simple discussion, elle paraît irrégulière." },
+      { p: "**Juridiction compétente** : l'acte étant un **acte administratif**, M. ATEBA peut former un **recours pour excès de pouvoir** devant le **Conseil d'État**, juge de l'ordre administratif, pour en obtenir l'annulation, en principe après un **recours administratif préalable** (gracieux, auprès de l'auteur de l'acte, ou hiérarchique, auprès de son supérieur)." },
+      { p: "**Problème 2 : l'expulsion.** Le bail d'habitation est un **contrat entre particuliers** : c'est du **droit privé** (droit civil, droit des contrats et du bail). Un bailleur ne peut expulser son locataire de sa propre autorité : il lui faut un motif légal (loyers impayés, fin régulière du bail) et une **décision de justice**." },
+      { p: "**Juridiction compétente** : le **tribunal de première instance** (ou sa section détachée) du lieu de l'immeuble, juridiction de l'**ordre judiciaire** ; en cas d'urgence, son **juge des référés** peut ordonner que M. ATEBA reste dans les lieux." } ] }
+  ] },
+  { id: "td5", title: "TD 5 : conflit de lois, « dispose » et « stipule » ; le juge et la jurisprudence", body: [
+    { p: "Cinquième fiche, sur les sources du droit : deux questions, puis un commentaire de texte sur le rôle du juge." },
+    ...Q("**1. Quand dit-on qu'il y a conflit de lois dans l'espace ? Comment ce conflit est-il résolu ?**", [
+      { p: "Il y a **conflit de lois dans l'espace** quand une situation présente un **élément d'extranéité** (une partie étrangère, un bien ou un fait situé à l'étranger) et que **plusieurs lois nationales** pourraient s'y appliquer. Exemple : le mariage à Abidjan d'un Ivoirien et d'une Ghanéenne." },
+      { p: "Il est résolu par les **règles de conflit** du **droit international privé**, qui désignent la loi applicable grâce à un **critère de rattachement** :" },
+      { ul: ["l'état et la capacité des personnes : leur **loi nationale** ;", "les immeubles : la **loi du lieu de situation** du bien ;", "la forme des actes : la **loi du lieu** où l'acte est passé (*locus regit actum*) ;", "les contrats : la loi **choisie par les parties** ;", "les faits juridiques (accidents, délits) : la **loi du lieu** où ils se sont produits."] },
+      { p: "Voir la leçon [L'application de la loi dans l'espace](#l-intro.espace)." } ]),
+    ...Q("**2. Une règle de droit « dispose », un contrat ou ses clauses « stipulent ». Vrai ou faux ?**", "**Vrai.** La loi **dispose** (on parle des **dispositions** d'un texte : « l'article 6 du Code civil dispose que… ») ; le contrat **stipule** (on parle de ses **stipulations** : « le contrat stipule un loyer de 100 000 FCFA »). Écrire qu'une loi « stipule » est une faute de vocabulaire juridique."),
+    { h: "Commentaire de texte : le juge face à la loi" },
+    { p: "Le texte montre que le juge, simple applicateur de la loi en principe, doit en pratique la compléter, et qu'il le fait non par équité mais en s'appuyant sur les précédents : la **jurisprudence**." },
+    { corrige: [
+      { p: "**I. Le juge, en principe simple applicateur de la loi.** **A. Un office presque mécanique quand la loi est claire** : les faits établis, il leur applique la règle. **B. Une création de droit en principe interdite** : séparation des pouvoirs, interdiction des arrêts de règlement (article 5 du Code civil), **autorité relative** de la chose jugée." },
+      { p: "**II. Le juge, créateur nécessaire du droit.** **A. Une nécessité née des limites de la loi** : loi obscure ou douteuse, faits complexes que le législateur n'a pu prévoir ; or le juge doit juger (article 4 du Code civil, déni de justice). **B. Une création encadrée** : l'**équité** est rejetée, car elle mène à l'arbitraire et à l'incohérence (« Dieu nous garde de l'équité des parlements ») ; le juge fonde sa décision sur des raisons solides, notamment les **décisions antérieures** rendues dans des cas identiques : la jurisprudence, unifiée par la Cour de cassation." } ] }
+  ] },
+  { id: "td6", title: "TD 6 : règle impérative ou supplétive ; la citation de Portalis", body: [
+    { p: "Sixième fiche, sur les sources du droit : une question sur l'article 6 du Code civil, puis le commentaire d'une citation de Portalis." },
+    ...Q("**1. L'article 6 du Code civil : « On ne peut déroger, par des conventions particulières, aux lois qui intéressent l'ordre public et les bonnes mœurs ». La règle de droit est-elle par principe impérative ou interprétative ?**", [
+      { p: "L'article 6 distingue deux sortes de règles. Les règles **impératives** (d'ordre public) s'imposent sans que les parties puissent les écarter : leur contrat serait nul. Les règles **supplétives** (ou **interprétatives**) ne s'appliquent que si les parties n'en ont pas décidé autrement : elles complètent ou interprètent leur volonté." },
+      { p: "En raisonnant **a contrario**, l'article 6 signifie que l'on **peut** déroger aux lois qui n'intéressent ni l'ordre public ni les bonnes mœurs. Dans le domaine des intérêts privés et des contrats, le principe est donc la **liberté** : la règle est **supplétive** par principe, et **impérative** par exception, quand l'ordre public ou les bonnes mœurs sont en jeu (état des personnes, protection des incapables, droit pénal, droit du travail)." },
+      { p: "Attention : supplétive ne veut pas dire facultative. Tant que les parties ne l'ont pas écartée, une règle supplétive s'impose à elles et au juge." } ]),
+    { h: "Commentaire : la citation de Portalis" },
+    { p: "« À défaut de texte précis sur chaque matière, un usage ancien, constant et bien établi, une suite non interrompue de décisions semblables, une opinion ou une maxime reçue tiennent lieu de loi. » Jean-Étienne-Marie **Portalis**, l'un des rédacteurs du Code civil de 1804, *Discours préliminaire* du projet de Code civil (1801)." },
+    { corrige: [
+      { p: "**Introduction.** Présenter l'auteur et le contexte : le législateur ne peut tout prévoir. **Problématique** : quand la loi se tait, d'autres sources peuvent-elles en tenir lieu ?" },
+      { p: "**I. La loi, source principale mais nécessairement incomplète.** **A. L'impossibilité de tout prévoir** : « à défaut de texte précis sur chaque matière ». **B. L'obligation de juger malgré le silence de la loi** (article 4 du Code civil)." },
+      { p: "**II. Les sources qui « tiennent lieu de loi ».** **A. La coutume** : « un usage ancien, constant et bien établi » (élément matériel), suivi comme obligatoire. **B. La jurisprudence et la doctrine** : « une suite non interrompue de décisions semblables » (la jurisprudence constante) ; « une opinion ou une maxime reçue » (la doctrine et les adages, comme *nul ne peut se prévaloir de sa propre turpitude*). Nuance : ces sources sont **subsidiaires** ; elles complètent la loi sans pouvoir la contredire." } ] }
+  ] },
+  { id: "td7", title: "TD 7 : droit, morale et religion ; les personnes morales", body: [
+    { p: "Septième fiche : une question sur la spécificité de la règle de droit, puis un commentaire de texte sur les personnes morales." },
+    ...Q("**1. Les règles de droit se distinguent des règles religieuses et morales. Donnez les deux éléments principaux de leur distinction.**", [
+      { ul: ["**La sanction** : la règle de droit est sanctionnée par la **contrainte de l'autorité publique** (juge, force publique) ; la règle morale l'est par la conscience ou la réprobation sociale, la règle religieuse par une sanction spirituelle.", "**La finalité** : la règle de droit vise l'**ordre social** et ne s'intéresse qu'aux comportements extérieurs ; la morale vise le **perfectionnement intérieur** de la personne, la religion son **salut**."] },
+      { p: "On peut y ajouter la **source** : l'État pour le droit, la conscience pour la morale, la révélation pour la religion." } ]),
+    { h: "Commentaire de texte : la diversité des personnes morales (J.-L. Aubert et É. Savaux)" },
+    { corrige: [
+      { p: "**I. Une grande diversité de personnes morales.** **A. Les personnes morales de droit public**, qui exercent des prérogatives de puissance publique : l'**État**, les **collectivités territoriales** (en Côte d'Ivoire, les régions, les districts autonomes et les communes) et les **établissements publics** (une université publique, un hôpital, le CROU). **B. Les personnes morales de droit privé** : les **groupements de personnes** (sociétés commerciales, sociétés civiles, groupements d'intérêt économique, associations, syndicats) et les **groupements de biens** (les **fondations**)." },
+      { p: "**II. Une diversité de régimes.** **A. Un principe commun, la spécialité** : la personne morale ne peut agir que dans le cadre de son objet (la mission sanitaire de l'hôpital). **B. Une naissance et une fin très variables** : naissance par le « contrat social » pour l'État, par le contrat de société et l'immatriculation au **registre du commerce et du crédit mobilier** (RCCM, droit OHADA) pour les sociétés commerciales, par la déclaration pour les associations ; fin par l'arrivée du terme, la dissolution décidée par les membres, la réalisation de l'objet ou une décision de l'autorité." } ] }
+  ] },
+  { id: "td8", title: "TD 8 : les arguments a pari, a fortiori, a contrario ; les droits extrapatrimoniaux", body: [
+    { p: "Huitième fiche, sur la classification des droits : les arguments du raisonnement juridique, puis un commentaire de texte." },
+    ...Q("**1. Expliquez : « l'argument a priori », « l'argument a fortiori », « l'argument a contrario ».**", [
+      { ul: ["**A priori** (« au premier abord, avant examen ») : un jugement porté avant toute vérification des faits, par simple déduction d'un principe. Le juriste s'en méfie : il doit ensuite le confirmer par l'analyse. Le raisonnement juridique classique lui associe l'**argument a pari** (ou *a simili*, « par analogie ») : une règle prévue pour un cas s'applique à un cas semblable, pour la même raison.",
+        "**A fortiori** (« à plus forte raison ») : si la règle vaut pour un cas, elle vaut **encore plus** pour un cas où sa raison d'être est plus forte. Exemple : si un mineur ne peut vendre seul ses meubles, a fortiori il ne peut vendre seul ses immeubles.",
+        "**A contrario** (« par l'argument contraire ») : si la règle est prévue pour un cas précis, la solution **inverse** vaut pour le cas contraire. Exemple : l'article 6 du Code civil interdit de déroger aux lois d'ordre public ; a contrario, on peut déroger aux autres."] } ]),
+    { h: "Commentaire de texte : les droits extrapatrimoniaux (B. Beignier et C. Bléry)" },
+    { corrige: [
+      { p: "**I. Une notion définie par opposition aux droits patrimoniaux.** **A. Des droits sans valeur pécuniaire**, qui ne font pas partie du patrimoine : ils sont, en principe, **incessibles**, **intransmissibles** à cause de mort, **insaisissables** et **imprescriptibles**. **B. Des droits attachés à la personne**, qui expriment « une valeur plus intime de l'être »." },
+      { p: "**II. Une catégorie vaste et diverse.** **A. Des exemples caractéristiques** : les **actions d'état** (faire établir sa filiation) et les **droits de la personnalité** (droit au respect de la vie privée, à l'image, à l'honneur). **B. Un domaine plus large** : droit public et droit privé, droit interne et droit international (droits de l'homme). Nuance : leur atteinte se répare souvent en argent (dommages-intérêts), et certains ont un aspect patrimonial (l'exploitation commerciale de son image)." } ] }
+  ] },
+  { id: "td9", title: "TD 9 : actes et faits juridiques ; les situations de M. YACOUBA", body: [
+    { p: "Neuvième fiche : définir et comparer l'acte et le fait juridiques, puis qualifier sept situations." },
+    ...Q("**1. Définissez le fait juridique et identifiez ses catégories.**", [
+      { p: "Le **fait juridique** est un **événement**, volontaire ou non, auquel la loi attache des effets de droit **qui n'ont pas été voulus** par la personne concernée." },
+      { ul: ["**Les faits naturels** : la naissance, le décès, l'écoulement du temps.", "**Les faits humains involontaires** : un accident causé par imprudence (quasi-délit).", "**Les faits humains volontaires dont les effets ne sont pas recherchés** : un délit civil ou une infraction pénale ; l'auteur a voulu l'acte, non l'obligation de réparer ou la peine."] } ]),
+    ...Q("**2. Définissez l'acte juridique et identifiez ses catégories.**", [
+      { p: "L'**acte juridique** est une **manifestation de volonté** destinée à produire des **effets de droit** : créer, modifier, transmettre ou éteindre un droit." },
+      { ul: ["Selon le nombre de volontés : l'acte **unilatéral** (un testament, une reconnaissance d'enfant), la **convention** ou le **contrat** (vente, bail), l'acte **collectif** (la décision d'une assemblée générale).", "Selon la contrepartie : l'acte **à titre onéreux** (vente) ou **à titre gratuit** (donation).", "Selon le moment de ses effets : l'acte **entre vifs** ou **à cause de mort** (le testament)."] } ]),
+    ...Q("**3. Comparez le fait juridique et l'acte juridique.**", [
+      { table: { h: ["", "Acte juridique", "Fait juridique"], r: [["**Volonté**", "Les effets de droit sont **voulus**", "Les effets de droit sont **imposés** par la loi"], ["**Source des effets**", "La volonté, dans le cadre de la loi", "La loi seule"], ["**Preuve**", "En principe par **écrit** (article 1341 du Code civil)", "Par **tout moyen** (témoins, présomptions)"], ["**Exemples**", "Contrat, testament, mariage", "Accident, délit, naissance, décès"]] } } ]),
+    { h: "Cas pratique : les situations de M. YACOUBA" },
+    { corrige: [
+      { ol: [
+        "**Le legs de Mme Konan par testament** : **acte juridique** unilatéral, à titre gratuit et **à cause de mort** ; elle a voulu transmettre son véhicule, et le legs produira ses effets à son décès.",
+        "**La location d'une résidence au CROU par l'étudiant Coulibaly** : **acte juridique**, un contrat de bail ; les deux parties veulent les effets (logement contre loyer).",
+        "**La vente de matériel agricole par Ivoire Agri à la SOGB** : **acte juridique**, un contrat de vente commerciale à titre onéreux.",
+        "**Koné, cycliste renversé par un véhicule** : **fait juridique** involontaire ; l'accident fait naître, sans que personne ne l'ait voulu, une obligation de réparer à la charge du conducteur et de son assureur.",
+        "**Roland, vol avec bris de porte** : **fait juridique** volontaire ; Roland a voulu voler, non les effets de droit (peine, obligation de restituer et de réparer) : c'est une infraction pénale.",
+        "**Paul, accident de travail** : **fait juridique** involontaire ; la loi lui ouvre droit à une prise en charge au titre des accidents du travail (en Côte d'Ivoire, par la CNPS).",
+        "**L'embauche de Patrick comme commercial** : **acte juridique**, un contrat de travail voulu par l'employeur et le salarié."] } ] }
+  ] }
+  ];
+  TD.forEach(l => M_METHO.lessons.push(l));
+  M_METHO.quiz.push(
+    { q: "Quel élément fait d'un usage une coutume, source du droit ?", a: ["la conviction qu'il est obligatoire (élément psychologique)", "sa simple répétition", "son inscription au Journal officiel", "sa reconnaissance par un juge étranger"], c: 0, e: "Sans opinio juris, l'usage n'est qu'une habitude." },
+    { q: "La coutume contraire à la loi s'appelle…", a: ["la coutume contra legem", "la coutume praeter legem", "la coutume secundum legem", "la jurisprudence"], c: 0, e: "Elle n'est pas admise : la désuétude n'abroge pas la loi." },
+    { q: "Une loi « dispose » ; un contrat…", a: ["stipule", "dispose aussi", "décrète", "promulgue"], c: 0, e: "Les clauses d'un contrat sont ses stipulations." },
+    { q: "Raisonner « a contrario », c'est…", a: ["appliquer la solution inverse au cas contraire", "appliquer la règle à un cas semblable", "appliquer la règle à plus forte raison", "juger en équité"], c: 0, e: "Article 6 du Code civil : a contrario, on peut déroger aux autres lois." },
+    { q: "Un accident de la circulation est…", a: ["un fait juridique", "un acte juridique", "un contrat", "une coutume"], c: 0, e: "Ses effets de droit (réparer) ne sont pas voulus." },
+    { q: "Le testament est…", a: ["un acte juridique unilatéral à cause de mort", "un fait juridique", "un contrat synallagmatique", "un acte collectif"], c: 0, e: "Il produit ses effets au décès de son auteur." }
+  );
+  M_METHO.cards.push(
+    ["Coutume praeter legem / contra legem", "Comble le silence de la loi (admise) / contraire à la loi (rejetée)"],
+    ["Droit objectif / droits subjectifs", "Les règles / les prérogatives qu'elles reconnaissent aux personnes"],
+    ["Règle impérative / supplétive", "S'impose sans dérogation possible / s'applique si les parties ne l'ont pas écartée"],
+    ["A fortiori", "À plus forte raison"],
+    ["Acte juridique / fait juridique", "Effets de droit voulus / effets imposés par la loi"]
+  );
+})();
