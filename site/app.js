@@ -93,7 +93,7 @@ function revAnswer(id, ok) {
 
 // ---------- outils de texte
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-const md = s => esc(s).replace(/\[\[(.+?)\]\]/g, '<span class="ara" lang="ar" dir="rtl">$1</span>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>');
+const md = s => esc(s).replace(/\[\[(.+?)\]\]/g, '<span class="ara" lang="ar" dir="rtl">$1</span>').replace(/\[([^\]]+)\]\((#[\w.~-]+)\)/g, '<a href="$2">$1</a>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\*(.+?)\*/g, '<i>$1</i>');
 const plain = s => String(s).replace(/\[\[.+?\]\]/g, '').replace(/\*\*|\*/g, '');
 const arOnly = s => String(s).replace(/\[\[|\]\]/g, '');
 const ICON = '<svg viewBox="0 0 10 10" aria-hidden="true"><path d="M2 1l7 4-7 4z"/></svg>';

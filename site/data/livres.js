@@ -185,10 +185,13 @@ window.LIVRES = [
  }
 ];
 window.DOCS = [
- { space: "droit", kind: "Cours", title: "Cours de droit civil : le droit des personnes", desc: "Licence 1", file: "droit/cours-droit-civil-personnes.pdf", pages: 74, mb: 0.6 },
- { space: "droit", kind: "TD", title: "Travaux dirigés de droit civil : les personnes", desc: "Année 2026-2027 · trois séances", file: "droit/td-droit-civil-personnes-2026-2027.pdf", pages: 11, mb: 0.5 },
- { space: "droit", kind: "Méthode", title: "Fiche méthode : le cas pratique et le commentaire de décision", desc: "D’après les notes de cours et de TD", file: "droit/fiche-methode-cas-pratique-commentaire.pdf", pages: 14, mb: 0.2 },
- { space: "droit", kind: "Exercices", title: "Cahier d’exercices de méthodologie", desc: "Douze exercices progressifs et leurs corrigés", file: "droit/cahier-exercices-methodologie.pdf", pages: 11, mb: 0.2 },
+ { space: "droit", kind: "Cours", title: "Introduction à l’étude du droit", desc: "Cours complet · le droit objectif et les droits subjectifs · exercices corrigés et lexique", file: "droit/cours-introduction-etude-droit.pdf", pages: 29, mb: 0.4 },
+ { space: "droit", kind: "Cours", title: "Droit civil : le droit des personnes", desc: "Cours complet de M. TRAORE, travaux dirigés corrigés, schéma du procès civil, lexique ; polycopié et fiches de TD originaux en annexe", file: "droit/cours-droit-civil.pdf", pages: 139, mb: 1.7 },
+ { space: "droit", kind: "Cours", title: "Droit musulman : la Charia et ses sources", desc: "Cours complet d’après Dr Youssouf BAKAYOKO · révélation et compilation du Coran, bibliographie et lexique", file: "droit/cours-droit-musulman.pdf", pages: 21, mb: 0.3 },
+ { space: "droit", kind: "Cours", title: "Organisation judiciaire de la Côte d’Ivoire", desc: "Cours complet · principes, juridictions, magistrats et auxiliaires de justice · lexique", file: "droit/cours-organisation-judiciaire.pdf", pages: 31, mb: 0.5 },
+ { space: "droit", kind: "Cours", title: "Méthodologie juridique", desc: "Cours complet d’après M. OUATTARA · dissertation, cas pratique, commentaire d’arrêt et de texte, quatre ateliers et neuf TD corrigés", file: "droit/cours-methodologie-juridique.pdf", pages: 50, mb: 0.7 },
+ { space: "droit", kind: "Cours", title: "Techniques d’expression écrite", desc: "Cours complet · niveaux 1 et 2, textes du cours et exercices corrigés", file: "droit/cours-expression-ecrite.pdf", pages: 39, mb: 0.4 },
+ { space: "droit", kind: "Cours", title: "Économie politique", desc: "Cours complet d’après le Dr SANOGO Aly Balé · trois chapitres et exercices corrigés", file: "droit/cours-economie-politique.pdf", pages: 29, mb: 0.4 },
  { space: "droit", kind: "Lectures", title: "The Missing Will : roman juridique en anglais illustré", desc: "Legal Stories from Abidjan, livre 1 · niveau B1 · lexique, notes de droit et questions de lecture", file: "droit/the-missing-will.pdf", pages: 66, mb: 0.6 },
  { space: "droit", kind: "Code", title: "Code civil II : droit des biens et des obligations", desc: "Texte de référence", file: "droit/code-civil-ii.pdf", pages: 341, mb: 1.2 }
 ];

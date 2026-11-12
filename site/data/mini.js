@@ -1732,3 +1732,12 @@ Object.assign(window.MINI, {
     { q: "Un vol avec effraction est…", a: ["un fait juridique volontaire", "un acte juridique", "un contrat"], c: 0, e: "L'auteur ne recherche pas les effets de droit (peine, réparation)." },
     { q: "Le fait juridique se prouve…", a: ["par tout moyen", "uniquement par écrit", "uniquement par acte notarié"], c: 0, e: "L'acte juridique se prouve en principe par écrit." } ]
 });
+
+Object.assign(window.MINI, {
+  "metho/commtexte": [
+    { q: "Commenter un texte, c'est…", a: ["l'expliquer et l'apprécier en partant du texte", "le paraphraser fidèlement", "faire une dissertation sur son thème"], c: 0, e: "On part du texte et on y revient sans cesse." },
+    { q: "Avant de commenter une phrase du texte, il faut…", a: ["la citer entre guillemets", "la résumer de mémoire", "l'ignorer si elle est difficile"], c: 0, e: "Citer, puis expliquer et apprécier : jamais de commentaire sans citation." },
+    { q: "Un extrait d'ouvrage du doyen Carbonnier est…", a: ["un texte doctrinal", "un texte jurisprudentiel", "un texte législatif"], c: 0, e: "La doctrine regroupe les opinions des juristes." },
+    { q: "Le plan « I. Explication — II. Critique » est…", a: ["à éviter", "le plan obligatoire", "réservé aux textes législatifs"], c: 0, e: "Chaque partie doit à la fois expliquer et apprécier." },
+    { q: "L'introduction d'un commentaire de texte présente…", a: ["l'auteur, la date, la source et la nature du texte", "uniquement l'avis de l'étudiant", "la conclusion du devoir"], c: 0, e: "Puis le contexte, l'idée générale, la problématique et l'annonce du plan." } ]
+});
