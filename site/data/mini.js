@@ -1642,7 +1642,7 @@ window.MINI = {
   ],
   // ===================== MÉTHODOLOGIE : CAS PRATIQUE ET COMMENTAIRE
   "metho/caspratique": [
-    { q: "Dans un cas pratique qui pose plusieurs problèmes, chaque problème est traité…", a: ["sous un titre numéroté (I, II, III…), sans sous-parties A et B", "dans un plan en deux parties et deux sous-parties", "dans un seul paragraphe sans titre"], c: 0, e: "Le plan I, A, B ; II, A, B est celui de la dissertation et du commentaire." },
+    { q: "Dans un cas pratique qui pose plusieurs problèmes, chaque problème est traité…", a: ["sous un titre numéroté (I, II, III…), sans nécessairement de sous-parties A et B", "dans un plan en deux parties et deux sous-parties", "dans un seul paragraphe sans titre"], c: 0, e: "Le plan I, A, B ; II, A, B est celui de la dissertation et du commentaire." },
     { q: "Pour chaque problème, l'ordre des étapes est…", a: ["rappel des faits, problème, règle de droit, application, solution", "solution, règle de droit, faits", "application, règle de droit, problème"], c: 0, e: "Après l'intitulé : rappel des faits, énoncé du problème, règle, « en l'espèce », solution." },
     { q: "Quand les faits ne soulèvent qu'un seul problème, le cas pratique se rédige…", a: ["en bloc, sans titre numéroté ni annonce de plan", "en deux parties obligatoires", "sous forme de liste"], c: 0, e: "Faits, qualification, problème, règle, application, solution, en paragraphes liés." },
     { q: "La partie la plus valorisée du cas pratique est…", a: ["l'application : vérifier chaque condition de la règle, faits à l'appui", "le résumé des faits", "la récitation complète du cours"], c: 0, e: "On ne récite pas le cours : on raisonne sur les faits." },
@@ -1818,3 +1818,8 @@ window.MINI["const/introduction"] = [
   { q: "Au sens matériel, le droit constitutionnel comprend…", a: ["toutes les règles qui organisent le pouvoir, quelle que soit leur source", "seulement le texte de la Constitution", "seulement la jurisprudence"], c: 0, e: "Au sens formel, seulement le texte de la Constitution." },
   { q: "La norme suprême de l'État est…", a: ["la Constitution", "la loi", "le décret"], c: 0, e: "Elle est au sommet de la hiérarchie des normes." },
   { q: "L'expression « droit constitutionnel » apparaît…", a: ["à la fin du XVIIIᵉ siècle", "au Moyen Âge", "au XXᵉ siècle"], c: 0, e: "Avec les premières constitutions écrites (1787, 1789)." } ];
+window.MINI["metho/caspratique"].push(
+  { q: "Un cas pratique qui pose plusieurs problèmes comprend…", a: ["une introduction et un développement", "trois parties : thèse, antithèse, synthèse", "uniquement une liste de réponses"], c: 0, e: "Introduction : faits, qualification, problèmes, annonce du plan ; développement : un titre numéroté par problème." },
+  { q: "Dans la copie, les mots « Résumé des faits », « Qualification », « Plan »…", a: ["ne s'écrivent pas comme intitulés", "doivent être soulignés", "remplacent les transitions"], c: 0, e: "Ils guident le brouillon ; dans la copie, les paragraphes s'enchaînent." });
+window.MINI["metho/fichedecision"].push(
+  { q: "Les cinq étapes de la fiche de décision sont…", a: ["la nature, les faits, la procédure, le problème de droit, la solution", "l'accroche, le sens, la valeur, la portée, le plan", "le visa, les motifs, le moyen, le dispositif, le renvoi"], c: 0, e: "La nature de la décision réunit ses références : juridiction, date, parties." });
