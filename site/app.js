@@ -762,9 +762,36 @@ function viewHome() {
       ${step('🎧', 'Apprenez et écoutez', 'Des leçons courtes, lues à voix haute, sur téléphone ou sur ordinateur, même sans connexion.')}
       ${step('✅', 'Vérifiez vos acquis', 'Un mini-exercice corrigé après chaque leçon ; vos erreurs reviennent dans « Mes révisions » jusqu’à ce qu’elles soient acquises.')}
       ${step('🎓', 'Recevez votre certificat', 'Toutes les leçons terminées et l’évaluation finale réussie à 80 % : votre certificat, vérifiable en ligne.')}</section>
+    ${guideHome()}
     <div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Les livres des Éditions Lisân</h2><p>Les espaces « Apprendre l’arabe », « Lire le Coran pas à pas » et « Vivre l’islam en famille » accompagnent ces livres.</p></div>
     <section class="books" aria-label="Les livres">${BOOKS.map(([f, t, d, h]) => { const inner = `<img src="img/${f}.webp" alt="Couverture du livre « ${esc(t)} »" width="150" height="212" loading="lazy" decoding="async"><b>${esc(t)}</b><small>${esc(d)}</small>`;
       return h ? `<a class="book" href="#${h}">${inner}</a>` : `<div class="book">${inner}</div>`; }).join('')}</section>`;
+}
+// ---------- mode d'emploi en vidéo (1 min 28, format téléphone) : accueil et page #guide ; lecture seulement au toucher
+const GUIDE_STEPS = ['Ouvrez lisan-campus.pages.dev et ajoutez-le à l’écran d’accueil', 'Choisissez votre espace', 'Essayez la première leçon, en accès libre',
+  'Connectez-vous avec votre compte Google', 'Remplissez votre fiche d’inscription', 'Recevez votre numéro d’inscription', 'Lisez ou écoutez chaque leçon',
+  'Validez la leçon avec le mini-exercice', 'Révisez avec les cartes', 'Passez l’évaluation et obtenez votre certificat', 'Retrouvez tout le reste dans le menu'];
+const guideVideo = () => `<div class="gv-frame"><video class="gv" controls preload="none" playsinline poster="media/guide-poster.webp" controlslist="nodownload"
+    aria-label="Mode d’emploi de Lisân Campus en vidéo : créer son compte, s’inscrire, suivre une leçon et obtenir son certificat"><source src="media/guide-720.mp4" type="video/mp4"><source src="media/guide-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo du mode d’emploi">${HV_ICON.play}<span>Regarder · 1 min 28</span></button></div>`;
+function guideHome() {
+  return `<div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Le mode d’emploi en vidéo</h2><p>Créer son compte, s’inscrire, suivre une leçon et obtenir son certificat : tout en 1 min 28.</p></div>
+    <section class="guide">${guideVideo()}<div class="guide-txt"><ol>${GUIDE_STEPS.map(t => `<li>${t}</li>`).join('')}</ol>
+      <a class="btn ghost small" href="#guide">Ouvrir le mode d’emploi</a></div></section>`;
+}
+function viewGuide() {
+  return `${crumbs(['Mode d’emploi'])}<div class="page guide-page"><h1>Mode d’emploi en vidéo</h1>
+    <p class="lead">Lisân Campus en 1 min 28 : de la création du compte au certificat. Le son est commenté et le texte s’affiche à l’écran, pour suivre aussi sans le son.</p>
+    <section class="guide">${guideVideo()}<div class="guide-txt"><h2>Les onze étapes</h2><ol>${GUIDE_STEPS.map(t => `<li>${t}</li>`).join('')}</ol>
+      <p class="meta">Une question ? <a href="#contact">Écrivez-nous</a>.</p></div></section></div>`;
+}
+function bindGuide() {                                  // la vidéo du mode d'emploi met en pause la présentation et l'écoute en cours
+  document.querySelectorAll('video.gv').forEach(v => {
+    const btn = v.parentElement.querySelector('.gv-play'), show = on => { if (btn) btn.hidden = !on; };
+    if (btn) btn.onclick = () => { v.play().catch(() => {}); };
+    v.addEventListener('play', () => { show(false);
+      const hv = document.getElementById('hv'); if (hv && !hv.paused) hv.pause();
+      try { if (longPlaying()) stopVoice(); } catch (e) {} });
+    v.addEventListener('ended', () => show(true)); });
 }
 // ---------- vidéo de présentation (accueil) : lecture automatique sans le son, sauf économie de données ou animations réduites
 const HV_ICON = { pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>', play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
@@ -1367,7 +1394,8 @@ function route() {
   else if (h === 'suggestion') { html = viewSuggest(); after = bindSuggest; }
   else if (h === 'contact') { html = viewContact(); after = bindContact; }
   else if (PAGES[h]) html = viewPage(h);
-  else { html = viewHome(); after = bindHeroVideo; }
+  else if (h === 'guide') { html = viewGuide(); after = bindGuide; }
+  else { html = viewHome(); after = () => { bindHeroVideo(); bindGuide(); }; }
   V.innerHTML = html;
   V.classList.remove('enter', 'leave'); void V.offsetWidth; if (V.firstElementChild && !V.querySelector('.home-hero')) V.classList.add('enter');
   revealAll();
@@ -1511,6 +1539,7 @@ function renderDrawer() {
       ${item('verifier', '✅', 'Vérifier un certificat')}
       ${item('parametres', '⚙️', 'Paramètres')}
       <div class="dr-sec">Informations</div>
+      ${item('guide', '🎬', 'Mode d’emploi (vidéo)')}
       ${item('apropos', 'ℹ️', 'À propos')}
       ${item('contact', '✉️', 'Contact')}
       ${item('confidentialite', '🔐', 'Confidentialité')}
