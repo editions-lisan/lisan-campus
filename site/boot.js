@@ -10,8 +10,12 @@ if ('serviceWorker' in navigator) {
   // garde-fou contre une boucle de rechargements (au plus un rechargement automatique toutes les 15 secondes)
   const doReload = () => { try { const last = +sessionStorage.getItem('lc-sw-reload') || 0; if (Date.now() - last < 15000) return; sessionStorage.setItem('lc-sw-reload', String(Date.now())); } catch (e) {}
     pending = false; location.reload(); };
-  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!hadSW) return; if (Date.now() - t0 < 4000) doReload(); else pending = true; });
-  document.addEventListener('visibilitychange', () => { if (pending && document.visibilityState === 'hidden') doReload(); });
+  // une écoute en cours (leçon, récitation), même en pause sur l'écran verrouillé, n'est jamais coupée par une mise à
+  // jour : écran éteint ou application quittée, la page ne se recharge qu'une fois l'écoute terminée (lcAudioIdle)
+  const busy = () => { try { return !!(window.lcAudioBusy && window.lcAudioBusy()); } catch (e) { return false; } };
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (!hadSW) return; if (Date.now() - t0 < 4000 && !busy()) doReload(); else pending = true; });
+  document.addEventListener('visibilitychange', () => { if (pending && document.visibilityState === 'hidden' && !busy()) doReload(); });
+  window.lcAudioIdle = () => { if (pending && document.visibilityState === 'hidden' && !busy()) doReload(); };
   const reg = new Promise(res => window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').then(r => {
     document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') r.update().catch(() => {}); }); res(r); }).catch(() => res(null))));
   // tirer pour actualiser : existe-t-il une nouvelle version ? (lcSWNew) ; attendre qu'elle soit installée (lcSWReady)
@@ -21,7 +25,7 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.addEventListener('controllerchange', () => res(true), { once: true });
     reg.then(r => { if (!r || !(r.installing || r.waiting)) res(false); }); });
   window.lcCheckUpdate = () => {
-    const go = () => { if (location.hash && location.hash !== '#accueil') { pending = true; return; }   // l'élève est déjà reparti : la mise à jour attendra
+    const go = () => { if ((location.hash && location.hash !== '#accueil') || busy()) { pending = true; return; }   // l'élève est déjà reparti : la mise à jour attendra
       try { sessionStorage.setItem('lc-sw-reload', String(Date.now())); } catch (e) {} location.reload(); };
     if (pending) { go(); return; }
     reg.then(r => r && r.update().then(() => { if (r.installing || r.waiting) navigator.serviceWorker.addEventListener('controllerchange', go, { once: true }); })).catch(() => {});

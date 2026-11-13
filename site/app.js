@@ -292,7 +292,7 @@ function ttsPlayFrom(i) {
 function ttsPause() { if (!TTS.on || TTS.paused) return; TTS.paused = true; TTS.gen++; if (synth) synth.cancel(); keepAwake(false); lpUpdate(); }
 function ttsResume() { if (!TTS.on) return; ttsPlayFrom(TTS.idx); }
 function ttsStop() {
-  const was = TTS.on; TTS.on = false; TTS.paused = false; TTS.gen++;
+  audioIdle(); const was = TTS.on; TTS.on = false; TTS.paused = false; TTS.gen++;
   if (was && synth) synth.cancel();
   if (TTS.btn) TTS.btn.classList.remove('playing'); if (playingBtn === TTS.btn) playingBtn = null; TTS.btn = null;
   keepAwake(false); markSpeaking(-1); if (was) { lpHide(); mediaClear(); }
@@ -391,6 +391,9 @@ function checkArVoice() { const n = document.getElementById('noar'); if (n && sy
 // de ce passage ; pendant l'écoute, toucher un paragraphe y conduit, et le passage lu est surligné.
 const LISTEN = { route: '', text: '', cache: {} };
 const longPlaying = () => (TTS.on && TTS.long) || (AUD.rec && AUD.long) || (AUD.total > 1 && !!audioBtn);
+// pour boot.js : une écoute est en cours (en lecture, ou en pause sur l'écran verrouillé) : pas de rechargement de mise à jour
+window.lcAudioBusy = () => longPlaying() || (!player.paused && !player.ended);
+function audioIdle() { setTimeout(() => { try { if (window.lcAudioIdle) window.lcAudioIdle(); } catch (e) {} }, 300); }
 function chunkCount(text, forRec) { const sv = voices.ar; if (forRec) voices.ar = voices.ar || true; try { return ttsChunks(text, 'fr').length; } finally { voices.ar = sv; } }
 function lessonStarts(l, forRec) {                       // premier morceau lu de chaque bloc (même découpage que l'enregistrement)
   const k = l.id + '|' + forRec + '|' + l.body.length; if (LISTEN.cache[k]) return LISTEN.cache[k];
@@ -486,7 +489,7 @@ player.addEventListener('timeupdate', () => { if (!AUD.rec) return; const n = Da
 player.addEventListener('play', () => { if (AUD.rec) lpUpdate(); });
 player.addEventListener('pause', () => { if (AUD.rec) lpUpdate(); });
 player.preload = 'none';
-function stopAudio() { const was = (AUD.total > 1 || AUD.rec) && audioBtn; AUD.rec = false; AUD.long = false; AUD.marks = null; markSpeaking(-1); try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove("playing"); audioBtn = null; playlist = []; audioFallback = null; if (was) { AUD.total = 0; if (!TTS.on) { lpHide(); mediaClear(); } } }
+function stopAudio() { audioIdle(); const was = (AUD.total > 1 || AUD.rec) && audioBtn; AUD.rec = false; AUD.long = false; AUD.marks = null; markSpeaking(-1); try { player.pause(); } catch (e) {} if (audioBtn) audioBtn.classList.remove("playing"); audioBtn = null; playlist = []; audioFallback = null; if (was) { AUD.total = 0; if (!TTS.on) { lpHide(); mediaClear(); } } }
 let audioFallback = null;   // fichier de secours (le verset) si l'audio du mot seul ne se charge pas
 function playAudio(urls, btn, fallback) {
   if (btn && btn === audioBtn) { stopAudio(); if (synth) synth.cancel(); return; }
