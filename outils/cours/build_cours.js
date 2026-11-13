@@ -55,11 +55,13 @@ const DOCS = [
         ['Chapitre I · Les magistrats', ['magistrats', 'recrutement', 'statut', 'responsabilite']],
         ['Chapitre II · Les auxiliaires de justice', ['avocats', 'notaire', 'commissaire', 'greffier']]]],
     ] },
-  { id: 'const', m: S.M_CONST, file: 'cours-droit-constitutionnel.pdf', title: 'Droit constitutionnel', sub: "L'origine et la notion de l'État : éléments constitutifs, souveraineté, formes de l'État",
+  { id: 'const', m: S.M_CONST, file: 'cours-droit-constitutionnel.pdf', title: 'Droit constitutionnel', sub: "L'État, la Constitution et la participation du citoyen à l'exercice du pouvoir",
     parts: [
       ['Introduction', ['introduction']],
       ["Chapitre 1 · L'origine de l'État", ['etatnature', 'evolution']],
       ["Chapitre 2 · La notion de l'État", ['elements', 'souverainete', 'unitaire', 'compose']],
+      ['Chapitre 3 · La Constitution', ['constitution', 'formesconst', 'revision', 'controle']],
+      ["Chapitre 4 · La participation du citoyen à l'exercice du pouvoir", ['democratie', 'suffrage', 'scrutins']],
     ] },
   { id: 'metho', m: S.M_METHO, file: 'cours-methodologie-juridique.pdf', title: 'Méthodologie juridique', sub: 'Dissertation, cas pratique, commentaire d\'arrêt et commentaire de texte',
     parts: [

@@ -1872,5 +1872,54 @@ Object.assign(window.MINI, {
     { q: "Le bicamérisme fédéral illustre le principe…", a: ["de participation", "d'autonomie", "de superposition"], c: 0, e: "Une chambre représente les entités fédérées, à égalité." },
     { q: "La Confédération de Sénégambie unissait…", a: ["le Sénégal et la Gambie", "le Mali et le Sénégal", "la Gambie et la Guinée"], c: 0, e: "1982-1989." },
     { q: "Dans un État fédéral, l'ordre juridique de référence est…", a: ["l'ordre juridique fédéral", "celui de chaque État fédéré", "le droit international"], c: 0, e: "Principe de superposition ou de suprématie." },
-    { q: "Les affaires étrangères, la monnaie et la défense relèvent en général…", a: ["des organes fédéraux", "des États fédérés", "des communes"], c: 0, e: "Quel que soit le mode de répartition des compétences." } ]
+    { q: "Les affaires étrangères, la monnaie et la défense relèvent en général…", a: ["des organes fédéraux", "des États fédérés", "des communes"], c: 0, e: "Quel que soit le mode de répartition des compétences." } ],
+  "const/constitution": [
+    { q: "Pourquoi tout État possède-t-il une constitution ?", a: ["Parce qu'une personne morale n'existe qu'en vertu d'un statut", "Parce que l'ONU l'impose", "Parce que tout État est une démocratie"], c: 0, e: "Le statut de l'État, c'est sa constitution." },
+    { q: "La constitution au sens matériel comprend…", a: ["toutes les règles relatives aux organes de l'État, écrites ou coutumières", "seulement le texte constitutionnel", "seulement le préambule"], c: 0, e: "Elle s'attache au contenu, non à la forme." },
+    { q: "La constitution au sens formel est…", a: ["un texte écrit révisé selon une procédure spéciale", "l'ensemble des usages politiques", "une loi ordinaire"], c: 0, e: "Elle a une valeur supérieure aux autres normes." },
+    { q: "L'article 16 de la Déclaration de 1789 exige, pour qu'il y ait constitution…", a: ["la garantie des droits et la séparation des pouvoirs", "un roi", "un parti unique"], c: 0, e: "La constitution limite le pouvoir." },
+    { q: "La constitution sociale exprime…", a: ["le but assigné à l'État, ses valeurs", "le nombre de députés", "la procédure du référendum"], c: 0, e: "Souvent dans le préambule." },
+    { q: "L'État où l'administration agit sans être liée par le droit s'appelle…", a: ["l'État de police", "l'État de droit", "l'État fédéral"], c: 0, e: "Il s'oppose à l'État de droit (Rechtsstaat)." } ],
+  "const/formesconst": [
+    { q: "Le grand exemple de constitution largement coutumière est…", a: ["le Royaume-Uni", "les États-Unis", "la Côte d'Ivoire"], c: 0, e: "Avec des textes écrits : Magna Carta, Bill of Rights…" },
+    { q: "La première constitution entièrement écrite est celle de…", a: ["la Virginie, en 1776", "la France, en 1791", "l'Angleterre, en 1215"], c: 0, e: "Précédée d'une Déclaration des droits." },
+    { q: "Les quatre caractères de la coutume constitutionnelle sont…", a: ["répétition, constance, clarté, consensus", "écrit, publié, voté, promulgué", "ancienneté, religion, tradition, hérédité"], c: 0, e: "Ils en font un usage obligatoire." },
+    { q: "Une constitution révisée comme une loi ordinaire est…", a: ["souple", "rigide", "intangible"], c: 0, e: "La constitution rigide exige une procédure solennelle." },
+    { q: "Avec une constitution souple, le contrôle de constitutionnalité est…", a: ["impossible", "obligatoire", "confié au peuple"], c: 0, e: "Une loi contraire modifie la constitution." },
+    { q: "La Constitution ivoirienne est…", a: ["écrite et rigide", "coutumière et souple", "écrite et souple"], c: 0, e: "Titre XV, articles 177 et 178." } ],
+  "const/revision": [
+    { q: "Le pouvoir qui établit une nouvelle constitution est le pouvoir constituant…", a: ["originaire", "dérivé", "législatif"], c: 0, e: "Il est initial, inconditionné, souverain." },
+    { q: "Le pouvoir constituant dérivé est…", a: ["institué, conditionné et limité", "initial et souverain", "exercé par le juge"], c: 0, e: "Il révise la constitution selon ses règles." },
+    { q: "Les trois étapes de la révision d'une constitution rigide sont…", a: ["initiative, prise en considération, adoption", "promulgation, publication, exécution", "plainte, enquête, jugement"], c: 0, e: "L'adoption est la phase la plus solennelle." },
+    { q: "En Côte d'Ivoire, l'initiative de la révision appartient…", a: ["au Président de la République et aux membres du Parlement", "au seul Conseil constitutionnel", "aux seuls maires"], c: 0, e: "Article 177." },
+    { q: "Sans référendum, la révision ivoirienne exige…", a: ["les deux tiers des membres du Congrès", "la majorité simple des députés", "l'accord du Premier ministre"], c: 0, e: "Article 177 ; ainsi la révision du 19 mars 2020." },
+    { q: "La forme républicaine du gouvernement en Côte d'Ivoire…", a: ["ne peut faire l'objet d'aucune révision", "peut être révisée par décret", "peut être révisée par la Cour suprême"], c: 0, e: "Article 178, avec la laïcité de l'État." } ],
+  "const/controle": [
+    { q: "Le Conseil constitutionnel ivoirien contrôle la conformité de la loi…", a: ["au bloc de constitutionnalité", "aux décrets", "aux coutumes"], c: 0, e: "Article 126." },
+    { q: "Le contrôle a priori a lieu…", a: ["avant la promulgation de la loi", "pendant un procès", "après l'abrogation"], c: 0, e: "Entre le vote et la promulgation." },
+    { q: "Le contrôle des lois organiques est…", a: ["obligatoire", "facultatif", "interdit"], c: 0, e: "Article 134." },
+    { q: "L'exception d'inconstitutionnalité est soulevée…", a: ["par un plaideur, devant une juridiction", "par le Premier ministre seul", "par le préfet"], c: 0, e: "Article 135." },
+    { q: "Le plaideur qui soulève l'exception dispose, pour saisir le Conseil, de…", a: ["quinze jours", "trois mois", "un an"], c: 0, e: "Sinon, la juridiction statue." },
+    { q: "La procédure devant le Conseil constitutionnel est…", a: ["écrite, inquisitoriale et secrète", "orale et publique", "accusatoire"], c: 0, e: "Le juge dirige l'instruction." } ],
+  "const/democratie": [
+    { q: "Le régime où le pouvoir appartient à un petit nombre est…", a: ["l'oligarchie", "la monarchie", "la démocratie"], c: 0, e: "Situation intermédiaire." },
+    { q: "Le tyran tient son pouvoir…", a: ["de la force ou de la ruse", "de l'hérédité", "de l'élection"], c: 0, e: "Il l'exerce arbitrairement." },
+    { q: "« Le gouvernement du peuple, par le peuple, pour le peuple » est de…", a: ["Lincoln", "Churchill", "Nietzsche"], c: 0, e: "Gettysburg, 1863 ; article 49 de la Constitution ivoirienne." },
+    { q: "Le point de départ de la démocratie libérale est…", a: ["la primauté de l'individu", "la puissance de l'État", "la tradition"], c: 0, e: "Puis la liberté et le pluralisme." },
+    { q: "Le peuple qui élit des représentants et vote aussi par référendum vit en démocratie…", a: ["semi-directe", "directe", "censitaire"], c: 0, e: "Article 51 de la Constitution ivoirienne." },
+    { q: "Selon l'article 5 de la Déclaration de 1789, ce qui n'est pas défendu par la loi…", a: ["ne peut être empêché", "est interdit", "doit être autorisé par le préfet"], c: 0, e: "Conception libérale de la liberté." } ],
+  "const/suffrage": [
+    { q: "Dans le mandat représentatif, l'élu représente…", a: ["la nation entière", "seulement ses électeurs", "son parti"], c: 0, e: "Tout mandat impératif est nul (article 96)." },
+    { q: "En Côte d'Ivoire, on peut voter à partir de…", a: ["18 ans", "21 ans", "16 ans"], c: 0, e: "Article 52." },
+    { q: "L'inscription sur la liste électorale est une condition…", a: ["d'exercice du droit de vote", "de jouissance du droit de vote", "d'éligibilité au Sénat"], c: 0, e: "La nationalité et l'âge sont des conditions de jouissance." },
+    { q: "« Un homme, une voix » exprime le suffrage…", a: ["égal", "secret", "indirect"], c: 0, e: "Principe individualiste." },
+    { q: "Le passage par l'isoloir garantit le caractère…", a: ["secret du suffrage", "universel du suffrage", "égal du suffrage"], c: 0, e: "Le secret protège la liberté." },
+    { q: "Le suffrage réservé à ceux qui paient un certain impôt est…", a: ["censitaire", "universel", "direct"], c: 0, e: "Il a été remplacé par le suffrage universel." } ],
+  "const/scrutins": [
+    { q: "Au scrutin majoritaire à un tour, est élu…", a: ["celui qui a le plus de voix", "celui qui a la majorité absolue", "celui qui a le plus fort reste"], c: 0, e: "La majorité relative suffit." },
+    { q: "Avec 100 000 suffrages exprimés et 5 sièges, le quotient électoral est…", a: ["20 000", "50 001", "25 000"], c: 0, e: "100 000 ÷ 5." },
+    { q: "Le système du plus fort reste favorise…", a: ["les petits partis", "les grands partis", "le seul premier parti"], c: 0, e: "La plus forte moyenne favorise les grands." },
+    { q: "À la plus forte moyenne, la moyenne d'une liste se calcule…", a: ["voix ÷ (sièges obtenus + 1)", "voix ÷ nombre de listes", "reste ÷ quotient"], c: 0, e: "On ajoute un siège fictif." },
+    { q: "Le panachage permet à l'électeur…", a: ["de composer sa liste avec des candidats de listes différentes", "de voter deux fois", "de voter par procuration"], c: 0, e: "Le vote bloqué l'interdit." },
+    { q: "Le Président de la République de Côte d'Ivoire est élu…", a: ["au scrutin majoritaire à deux tours", "à la proportionnelle", "par le Congrès"], c: 0, e: "Article 56." } ]
 });
