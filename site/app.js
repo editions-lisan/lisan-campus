@@ -205,7 +205,7 @@ const ordFr = n => n === 1 ? 'premier' : numFr(n).replace(/e$/, '').replace(/cin
 const romain = r => { const v = { I: 1, V: 5, X: 10, L: 50 }; let n = 0; for (let i = 0; i < r.length; i++) n += v[r[i]] < (v[r[i + 1]] || 0) ? -v[r[i]] : v[r[i]]; return n; };
 const frNorm = t => String(t)
   .replace(/\bIer(?=[\s,.;:!?)-]|$)/g, 'premier')
-  .replace(/\b([IVXL]{1,6})(e|ème)(?=[\s,.;:!?)-]|$)/g, (m, r) => romain(r) < 30 ? ordFr(romain(r)) : m)
+  .replace(/\b1ᵉʳ/g, 'premier').replace(/(\d)ᵉ/g, '$1e').replace(/\b([IVXL]{1,6})(e|ème|ᵉ)(?=[\s,.;:!?)-]|$)/g, (m, r) => romain(r) < 30 ? ordFr(romain(r)) : m)
   .replace(/\b(Chapitre|Titre|Partie|Section|Livre|Tome|Leçon|Unité|Annexe|Niveau)\s+([IVX]{1,5})\b/g, (m, w, r) => w + ' ' + numFr(romain(r)))
   .replace(/(^|[.,;:]\s+)([IVX]{1,5})\.(?=\s|$)/g, (m, p, r) => p + numFr(romain(r)) + '.')
   .replace(/₍([₀-₉]+)₎/g, '$1')

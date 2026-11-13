@@ -1823,3 +1823,54 @@ window.MINI["metho/caspratique"].push(
   { q: "Dans la copie, les mots « Résumé des faits », « Qualification », « Plan »…", a: ["ne s'écrivent pas comme intitulés", "doivent être soulignés", "remplacent les transitions"], c: 0, e: "Ils guident le brouillon ; dans la copie, les paragraphes s'enchaînent." });
 window.MINI["metho/fichedecision"].push(
   { q: "Les cinq étapes de la fiche de décision sont…", a: ["la nature, les faits, la procédure, le problème de droit, la solution", "l'accroche, le sens, la valeur, la portée, le plan", "le visa, les motifs, le moyen, le dispositif, le renvoi"], c: 0, e: "La nature de la décision réunit ses références : juridiction, date, parties." });
+
+// ===== Droit constitutionnel : cours complet (origine et notion de l'État), novembre 2026
+Object.assign(window.MINI, {
+  "const/introduction": [
+    { q: "L'expression « droit constitutionnel » apparaît…", a: ["une quinzaine d'années avant la Révolution de 1789", "au Moyen Âge", "au XXᵉ siècle"], c: 0, e: "Lors de la crise entre la Grande-Bretagne et ses colonies d'Amérique." },
+    { q: "Le droit constitutionnel moderne se définit par trois objets :", a: ["les institutions, les normes et les libertés", "les biens, les contrats et les personnes", "les crimes, les délits et les peines"], c: 0, e: "La définition de Burdeau, limitée au pouvoir, ne suffit plus." },
+    { q: "Pour Georges Burdeau, le droit constitutionnel étudie…", a: ["la manière dont le pouvoir s'acquiert, s'exerce et se transmet", "les contrats entre particuliers", "les relations entre États"], c: 0, e: "Cet objet reste d'actualité mais ne suffit plus." },
+    { q: "Au Moyen Âge, le mot « état » désignait…", a: ["la condition juridique d'une personne", "le pays gouverné", "le gouvernement"], c: 0, e: "Machiavel lui donne ses sens modernes au XVIᵉ siècle." },
+    { q: "Le droit constitutionnel a d'abord eu pour objet…", a: ["les constitutions écrites, sur le modèle américain", "les coutumes africaines", "le droit des contrats"], c: 0, e: "Constitution des États-Unis de 1787." },
+    { q: "Au sens matériel, le droit constitutionnel comprend…", a: ["toutes les règles qui organisent le pouvoir, quelle que soit leur source", "seulement le texte de la Constitution", "seulement la jurisprudence"], c: 0, e: "Au sens formel, seulement le texte de la Constitution." } ],
+  "const/etatnature": [
+    { q: "Pour les théoriciens du contrat social, l'État est…", a: ["un phénomène volontaire, créé consciemment par les hommes", "un phénomène naturel qui s'impose", "une création divine"], c: 0, e: "Hobbes, Pufendorf, Locke, Rousseau." },
+    { q: "On écrit correctement…", a: ["l'état de nature", "l'État de nature", "l'état de Nature"], c: 0, e: "C'est une situation, celle où l'État n'existe pas encore." },
+    { q: "Dans l'état de nature décrit par Rousseau, les hommes sont…", a: ["libres et égaux, sans lien social", "en guerre permanente", "soumis à un roi"], c: 0, e: "« L'homme est né libre »." },
+    { q: "Pour Rousseau, la volonté générale naît…", a: ["de la communion des citoyens", "de l'addition des volontés individuelles", "de la volonté du plus fort"], c: 0, e: "Elle veut le bien du corps social tout entier." },
+    { q: "Grâce au contrat social, l'individu…", a: ["n'obéit qu'à lui-même en obéissant à la loi", "perd toute liberté", "obéit au plus fort"], c: 0, e: "Il gagne la liberté civile." },
+    { q: "Pour Hobbes, les hommes quittent l'état de nature pour obtenir…", a: ["la sécurité", "la richesse", "la volonté générale"], c: 0, e: "L'état de nature est une guerre de chacun contre chacun." } ],
+  "const/evolution": [
+    { q: "Pour Aristote, l'État est…", a: ["un phénomène naturel : l'homme est un animal politique", "le fruit d'un contrat", "une invention du XVIIIᵉ siècle"], c: 0, e: "L'État s'impose, il n'est pas l'œuvre délibérée des hommes." },
+    { q: "Les premières manifestations de l'État sont…", a: ["les cités grecques", "les États-Unis", "les royaumes du Moyen Âge"], c: 0, e: "Entre le VIᵉ et le IVᵉ siècle avant J.-C." },
+    { q: "La décolonisation est un mode de…", a: ["naissance d'un nouvel État", "disparition de la nation", "fédéralisme"], c: 0, e: "Comme la conquête ou la décomposition d'un État." },
+    { q: "La charte de Kouroukan Fouga a été proclamée sous…", a: ["Soundjata Keïta", "Samory Touré", "Soumaoro Kanté"], c: 0, e: "Selon la tradition en 1236." },
+    { q: "L'apparition d'un État résulte toujours…", a: ["d'un fait fondateur ou d'une succession d'étapes", "d'un engagement juridique", "d'un vote unanime"], c: 0, e: "Il n'y a pas de modèle unique." } ],
+  "const/elements": [
+    { q: "Les trois éléments constitutifs de l'État sont…", a: ["une population, un territoire, un pouvoir politique", "une armée, une monnaie, un drapeau", "une langue, une religion, un roi"], c: 0, e: "Ils doivent être réunis cumulativement." },
+    { q: "La conception objective de la nation est d'inspiration…", a: ["allemande", "française", "américaine"], c: 0, e: "Langue, religion, race, géographie." },
+    { q: "Pour Renan, la nation est…", a: ["un plébiscite de tous les jours", "une race", "un territoire"], c: 0, e: "C'est la conception subjective, française." },
+    { q: "Un apatride est une personne…", a: ["qui n'a aucune nationalité", "qui a deux nationalités", "qui vit à l'étranger"], c: 0, e: "L'étranger a la nationalité d'un autre État." },
+    { q: "Le territoire de l'État comprend…", a: ["le sol, le sous-sol, l'espace maritime et l'espace aérien", "seulement le sol", "seulement les villes"], c: 0, e: "La taille du territoire importe peu." },
+    { q: "Le droit des peuples à disposer d'eux-mêmes figure dans…", a: ["la Charte des Nations unies", "le Code civil", "la charte de Kouroukan Fouga"], c: 0, e: "Article 1ᵉʳ, paragraphe 2." } ],
+  "const/souverainete": [
+    { q: "La souveraineté, selon Jean Bodin, est…", a: ["absolue, perpétuelle et indivisible", "relative et partagée", "élue et révocable"], c: 0, e: "Les Six Livres de la République, 1576." },
+    { q: "La « compétence de la compétence » signifie que l'État…", a: ["fixe lui-même l'étendue de ses compétences", "n'a aucune compétence", "délègue tout à l'ONU"], c: 0, e: "C'est la marque de la souveraineté." },
+    { q: "La souveraineté externe signifie que l'État…", a: ["est indépendant des autres États", "commande à ses citoyens", "peut envahir ses voisins"], c: 0, e: "La souveraineté interne : il commande à tous sur son territoire." },
+    { q: "L'État est une personne morale distincte…", a: ["de la personne physique des gouvernants", "de son territoire", "de sa Constitution"], c: 0, e: "Les dirigeants passent, l'État demeure." },
+    { q: "L'État qui se soumet au droit qu'il a créé est…", a: ["un État de droit", "un État fédéral", "un protectorat"], c: 0, e: "Théorie de l'autolimitation." } ],
+  "const/unitaire": [
+    { q: "L'État unitaire a…", a: ["un seul centre de décision politique", "plusieurs constitutions", "des États fédérés"], c: 0, e: "Une seule catégorie de lois pour tout le territoire." },
+    { q: "Le préfet est une autorité…", a: ["déconcentrée, nommée par le pouvoir central", "décentralisée, élue", "fédérée"], c: 0, e: "Il est soumis au pouvoir hiérarchique." },
+    { q: "« Le même marteau qui frappe, mais on en a raccourci le manche » décrit…", a: ["la déconcentration", "la décentralisation", "la confédération"], c: 0, e: "Formule d'Odilon Barrot." },
+    { q: "En Côte d'Ivoire, les collectivités territoriales sont…", a: ["les régions et les communes", "les préfectures", "les cantons"], c: 0, e: "Constitution de 2016, article 170." },
+    { q: "Sur les collectivités décentralisées, l'État exerce…", a: ["une tutelle", "un pouvoir hiérarchique", "aucun contrôle"], c: 0, e: "Un contrôle de légalité, sans ordres." },
+    { q: "La Constitution ivoirienne proclame la République…", a: ["une et indivisible", "fédérale", "confédérale"], c: 0, e: "Article 49." } ],
+  "const/compose": [
+    { q: "Une confédération est créée par…", a: ["un traité international", "une constitution", "une loi"], c: 0, e: "Chaque État membre reste souverain." },
+    { q: "Un État fédéral naît…", a: ["d'une constitution", "d'un traité", "d'un décret"], c: 0, e: "Les entités fédérées n'ont pas de souveraineté externe." },
+    { q: "Le bicamérisme fédéral illustre le principe…", a: ["de participation", "d'autonomie", "de superposition"], c: 0, e: "Une chambre représente les entités fédérées, à égalité." },
+    { q: "La Confédération de Sénégambie unissait…", a: ["le Sénégal et la Gambie", "le Mali et le Sénégal", "la Gambie et la Guinée"], c: 0, e: "1982-1989." },
+    { q: "Dans un État fédéral, l'ordre juridique de référence est…", a: ["l'ordre juridique fédéral", "celui de chaque État fédéré", "le droit international"], c: 0, e: "Principe de superposition ou de suprématie." },
+    { q: "Les affaires étrangères, la monnaie et la défense relèvent en général…", a: ["des organes fédéraux", "des États fédérés", "des communes"], c: 0, e: "Quel que soit le mode de répartition des compétences." } ]
+});
