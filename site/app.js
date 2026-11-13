@@ -1519,7 +1519,7 @@ function renderDrawer() {
     </nav>`;
   document.getElementById('menu-close').onclick = closeMenu;
 }
-function openMenu() { renderDrawer(); drawer.hidden = false; scrim.hidden = false; requestAnimationFrame(() => document.body.classList.add('menu-open')); menuBtn.setAttribute('aria-expanded', 'true'); const f = drawer.querySelector('a, button'); if (f) f.focus(); }
+function openMenu() { renderDrawer(); if (typeof probeAdmin === 'function') probeAdmin(() => { if (!drawer.hidden) renderDrawer(); }); drawer.hidden = false; scrim.hidden = false; requestAnimationFrame(() => document.body.classList.add('menu-open')); menuBtn.setAttribute('aria-expanded', 'true'); const f = drawer.querySelector('a, button'); if (f) f.focus(); }
 function closeMenu() { if (!drawer || drawer.hidden) return; document.body.classList.remove('menu-open'); menuBtn.setAttribute('aria-expanded', 'false'); setTimeout(() => { drawer.hidden = true; scrim.hidden = true; }, 200); }
 menuBtn.onclick = () => drawer.hidden ? openMenu() : closeMenu();
 scrim.onclick = closeMenu;
@@ -1630,7 +1630,7 @@ document.addEventListener('click', e => {
   const gs = t.closest('[data-gspace]');
   if (gs) { glossSpace = gs.dataset.gspace; document.querySelectorAll('[data-gspace]').forEach(b => b.setAttribute('aria-pressed', b === gs)); drawGlossary(document.getElementById('gsearch').value); return; }
   const aut = t.closest('[data-auth]');
-  if (aut && AUTH()) { closeMenu(); if (aut.dataset.auth === 'signin') AUTH().signIn().then(route, () => {}); else AUTH().signOut().then(() => { location.hash = '#accueil'; route(); }); return; }
+  if (aut && AUTH()) { closeMenu(); if (aut.dataset.auth === 'signin') AUTH().signIn().then(route, () => {}); else AUTH().signOut().then(() => { if (typeof setAdminCached === 'function') setAdminCached(false); location.hash = '#accueil'; route(); }); return; }
   const en = t.closest('[data-enroll]');
   if (en && AUTH()) { location.hash = '#inscription-' + en.dataset.enroll; return; }
   const sto = t.closest('[data-scrollto]');
@@ -1760,7 +1760,7 @@ if (LA && LA.ready) {
   // on ne la redessine à la réponse de Google que si l'élève n'est pas celui que l'on croyait
   if (!LA.likely || LA.user()) boot();
   const sameUser = () => (LA.user() ? LA.user().uid : null) === bootUid;
-  LA.ready.then(() => { if (!booted) boot(); else if (!sameUser() || /^#(admin|certificat-|profil|inscription-)/.test(location.hash)) route(); }, boot);
+  LA.ready.then(() => { if (!booted) boot(); else if (!sameUser() || /^#(admin|certificat-|profil|inscription-)/.test(location.hash)) route(); if (typeof probeAdmin === 'function') probeAdmin(); }, boot);
   setTimeout(boot, 7000);
 } else boot();
 

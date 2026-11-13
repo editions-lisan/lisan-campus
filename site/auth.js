@@ -88,6 +88,11 @@
       const snap = await fb.firestore().collection('certificats').doc(num).get({ source: 'server' });
       if (!snap.exists) return null; const o = snap.data(); return Object.assign({}, o, { date: iso(o.date) });
     },
+    async adminProbe() {                                 // ce compte est-il l'administrateur ? (seul isAdmin() peut lister les comptes)
+      if (!user) return false;
+      try { await fb.firestore().collection('users').limit(1).get({ source: 'server' }); return true; }
+      catch (e) { if (/permission/.test((e && (e.code || e.message)) || '')) return false; throw e; }
+    },
     async certRulesOk() {                                // les règles Firestore autorisent-elles déjà les certificats ?
       try { await fb.firestore().collection('regles').doc('v4').get({ source: 'server' }); return true; }
       catch (e) { return !/permission/.test((e && (e.code || e.message)) || ''); }

@@ -5,6 +5,21 @@ let adminRun = { list: null, err: '', sp: 'all', q: '', loading: false, tab: 'in
 const ADMIN_FLAG = 'lc.admin';
 const isAdminCached = () => { try { return localStorage.getItem(ADMIN_FLAG) === '1'; } catch (e) { return false; } };
 const setAdminCached = v => { try { v ? localStorage.setItem(ADMIN_FLAG, '1') : localStorage.removeItem(ADMIN_FLAG); } catch (e) {} };
+// Le lien « Administration » du menu : on ne compte plus seulement sur la mémoire du téléphone (perdue si l'on vide les
+// données du navigateur, change d'appareil ou réinstalle l'application). Une fois connecté, le compte est vérifié une
+// fois auprès de Firestore (une lecture) ; un compte élève n'est revérifié qu'au bout de sept jours.
+const ADMIN_PROBE = 'lc.admin.probe';
+let adminProbing = false;
+function probeAdmin(onYes) {
+  const A = AUTH(), u = A && A.user && A.user();
+  if (!u || !u.uid || !A.adminProbe || adminProbing || isAdminCached()) return;
+  let p = null; try { p = JSON.parse(localStorage.getItem(ADMIN_PROBE) || 'null'); } catch (e) {}
+  if (p && p.uid === u.uid && !p.ok && Date.now() - p.t < 7 * 864e5) return;
+  adminProbing = true;
+  A.adminProbe().then(ok => { adminProbing = false;
+    try { localStorage.setItem(ADMIN_PROBE, JSON.stringify({ uid: u.uid, t: Date.now(), ok })); } catch (e) {}
+    if (ok) { setAdminCached(true); if (onYes) onYes(); } }, () => { adminProbing = false; });
+}
 
 const civ = i => i && i.civilite === 'Madame' ? 'Mme' : 'M.';
 const waLink = i => { if (!i || !i.tel) return ''; let t = String(i.tel).replace(/\D/g, ''); const c = String(i.ind || '').replace(/\D/g, '');
