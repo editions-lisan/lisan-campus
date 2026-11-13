@@ -11,6 +11,9 @@
 /sw.js
   Cache-Control: no-cache
 
+/livres/*
+  Cache-Control: no-cache
+
 /
   Cache-Control: no-cache
 

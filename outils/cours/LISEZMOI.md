@@ -11,3 +11,5 @@ Refaire les documents après toute modification des leçons :
 1. dans un dossier DEPS : `npm i pagedjs@0.4.3 hyphen @fontsource/literata` ;
 2. `DEPS=/chemin/node_modules node outils/cours/build_cours.js` (ou seulement certains : `… build_cours.js dm oj`) ;
 3. reporter le nombre de pages et la taille affichés dans `window.DOCS` (`site/data/livres.js`), puis changer `VERSION` dans `site/sw.js`.
+
+Après chaque document refait : `node outils/cours/versions.js` (pages, taille et empreinte `v` dans `site/data/livres.js` ; le lien du site change d'adresse et les téléphones reçoivent la nouvelle version), puis changer `VERSION` dans `site/sw.js`.
