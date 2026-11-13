@@ -767,20 +767,20 @@ function viewHome() {
     <section class="books" aria-label="Les livres">${BOOKS.map(([f, t, d, h]) => { const inner = `<img src="img/${f}.webp" alt="Couverture du livre « ${esc(t)} »" width="150" height="212" loading="lazy" decoding="async"><b>${esc(t)}</b><small>${esc(d)}</small>`;
       return h ? `<a class="book" href="#${h}">${inner}</a>` : `<div class="book">${inner}</div>`; }).join('')}</section>`;
 }
-// ---------- mode d'emploi en vidéo (1 min 28, format téléphone) : accueil et page #guide ; lecture seulement au toucher
-const GUIDE_STEPS = ['Ouvrez lisan-campus.pages.dev et ajoutez-le à l’écran d’accueil', 'Choisissez votre espace', 'Essayez la première leçon, en accès libre',
+// ---------- mode d'emploi en vidéo (1 min 33, format téléphone) : accueil et page #guide ; lecture seulement au toucher
+const GUIDE_STEPS = ['Ouvrez lisan-campus.pages.dev sur téléphone ou sur ordinateur (sur téléphone, ajoutez-le à l’écran d’accueil)', 'Choisissez votre espace', 'Essayez la première leçon, en accès libre',
   'Connectez-vous avec votre compte Google', 'Remplissez votre fiche d’inscription', 'Recevez votre numéro d’inscription', 'Lisez ou écoutez chaque leçon',
   'Validez la leçon avec le mini-exercice', 'Révisez avec les cartes', 'Passez l’évaluation et obtenez votre certificat', 'Retrouvez tout le reste dans le menu'];
 const guideVideo = () => `<div class="gv-frame"><video class="gv" controls preload="none" playsinline poster="media/guide-poster.webp" controlslist="nodownload"
-    aria-label="Mode d’emploi de Lisân Campus en vidéo : créer son compte, s’inscrire, suivre une leçon et obtenir son certificat"><source src="media/guide-720.mp4" type="video/mp4"><source src="media/guide-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo du mode d’emploi">${HV_ICON.play}<span>Regarder · 1 min 28</span></button></div>`;
+    aria-label="Mode d’emploi de Lisân Campus en vidéo : créer son compte, s’inscrire, suivre une leçon et obtenir son certificat"><source src="media/guide-720.mp4" type="video/mp4"><source src="media/guide-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo du mode d’emploi">${HV_ICON.play}<span>Regarder · 1 min 33</span></button></div>`;
 function guideHome() {
-  return `<div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Le mode d’emploi en vidéo</h2><p>Créer son compte, s’inscrire, suivre une leçon et obtenir son certificat : tout en 1 min 28.</p></div>
+  return `<div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Le mode d’emploi en vidéo</h2><p>Créer son compte, s’inscrire, suivre une leçon et obtenir son certificat, sur téléphone comme sur ordinateur : tout en 1 min 33.</p></div>
     <section class="guide">${guideVideo()}<div class="guide-txt"><ol>${GUIDE_STEPS.map(t => `<li>${t}</li>`).join('')}</ol>
       <a class="btn ghost small" href="#guide">Ouvrir le mode d’emploi</a></div></section>`;
 }
 function viewGuide() {
   return `${crumbs(['Mode d’emploi'])}<div class="page guide-page"><h1>Mode d’emploi en vidéo</h1>
-    <p class="lead">Lisân Campus en 1 min 28 : de la création du compte au certificat. Le son est commenté et le texte s’affiche à l’écran, pour suivre aussi sans le son.</p>
+    <p class="lead">Lisân Campus en 1 min 33 : de la création du compte au certificat, sur téléphone comme sur ordinateur, avec le même compte et la même progression. Le son est commenté et le texte s’affiche à l’écran, pour suivre aussi sans le son.</p>
     <section class="guide">${guideVideo()}<div class="guide-txt"><h2>Les onze étapes</h2><ol>${GUIDE_STEPS.map(t => `<li>${t}</li>`).join('')}</ol>
       <p class="meta">Une question ? <a href="#contact">Écrivez-nous</a>.</p></div></section></div>`;
 }
