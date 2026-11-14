@@ -631,6 +631,24 @@ nav.quick { display: none; gap: 4px; align-items: center; }
 .step .ic { width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; font-size: 25px; background: var(--accent-soft); }
 .step h3 { font-size: 19px; }
 .step p { margin: 0; color: var(--muted); font-size: 15px; }
+/* actualité juridique (#actualites et accueil) */
+.actus { display: grid; gap: 14px; margin-top: 14px; }
+.actu { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; }
+.actu[hidden] { display: none; }
+.actu-m { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 6px; }
+.actu-m time { font-size: 13.5px; color: var(--muted); }
+.actu h3 { font-size: 18px; line-height: 1.3; margin: 0 0 6px; }
+.actu p { margin: 0 0 10px; line-height: 1.55; }
+.actu-f { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; align-items: baseline; }
+.actu-src { font-weight: 700; }
+.actu-c { color: var(--muted); }
+.actu-chips { margin-top: 10px; }
+.actu .emo, .actu-chips .emo { font-size: 1em; }
+.actus-home { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: stretch; }
+.actus-home .actu { display: flex; flex-direction: column; }
+.actus-home .actu h3 { font-size: 16.5px; flex: 1; }
+.actus-home > .btn { grid-column: 1 / -1; justify-self: start; }
+@media (max-width: 760px) { .actus-home { grid-template-columns: 1fr; } }
 /* mode d'emploi en vidéo (accueil et #guide) : vidéo au format téléphone et liste des étapes */
 .guide { display: grid; grid-template-columns: minmax(0, 300px) 1fr; gap: 22px; align-items: start; background: var(--surface); border: 1px solid var(--line); border-radius: 22px; padding: 18px; }
 .gv-frame { position: relative; border-radius: 18px; overflow: hidden; background: #16204a; aspect-ratio: 9 / 16; box-shadow: 0 16px 34px rgba(20, 28, 46, .22); }

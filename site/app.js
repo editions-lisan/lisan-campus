@@ -762,6 +762,7 @@ function viewHome() {
       ${step('🎧', 'Apprenez et écoutez', 'Des leçons courtes, lues à voix haute, sur téléphone ou sur ordinateur, même sans connexion.')}
       ${step('✅', 'Vérifiez vos acquis', 'Un mini-exercice corrigé après chaque leçon ; vos erreurs reviennent dans « Mes révisions » jusqu’à ce qu’elles soient acquises.')}
       ${step('🎓', 'Recevez votre certificat', 'Toutes les leçons terminées et l’évaluation finale réussie à 80 % : votre certificat, vérifiable en ligne.')}</section>
+    ${actusHome()}
     ${guideHome()}
     <div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Les livres des Éditions Lisân</h2><p>Les espaces « Apprendre l’arabe », « Lire le Coran pas à pas » et « Vivre l’islam en famille » accompagnent ces livres.</p></div>
     <section class="books" aria-label="Les livres">${BOOKS.map(([f, t, d, h]) => { const inner = `<img src="img/${f}.webp" alt="Couverture du livre « ${esc(t)} »" width="150" height="212" loading="lazy" decoding="async"><b>${esc(t)}</b><small>${esc(d)}</small>`;
@@ -792,6 +793,39 @@ function bindGuide() {                                  // la vidéo du mode d'e
       const hv = document.getElementById('hv'); if (hv && !hv.paused) hv.pause();
       try { if (longPlaying()) stopVoice(); } catch (e) {} });
     v.addEventListener('ended', () => show(true)); });
+}
+// ---------- actualité juridique et judiciaire en Côte d'Ivoire (data/actus.js) : page #actualites et encadré de l'accueil
+const actuDate = d => new Date(d + 'T12:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const actuHost = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; } };
+function actuCard(a, short) {
+  const R = (window.RUBRIQUES || {})[a.cat] || [a.cat, '📰'];
+  return `<article class="actu" data-cat="${esc(a.cat)}"><div class="actu-m"><span class="tag">${R[1]} ${esc(R[0])}</span><time datetime="${esc(a.d)}">${actuDate(a.d)}</time></div>
+    <h3>${esc(a.titre)}</h3>${short ? '' : `<p>${esc(a.texte)}</p>`}
+    <div class="actu-f">${a.src ? `<a class="actu-src" href="${esc(a.src[1])}" target="_blank" rel="noopener noreferrer">Source : ${esc(a.src[0])} <span aria-hidden="true">↗</span></a>` : ''}
+    ${!short && a.cours && a.cours.length ? `<span class="actu-c">Pour comprendre : ${a.cours.map(([t, h]) => `<a href="${esc(h)}">${esc(t)}</a>`).join(' · ')}</span>` : ''}</div></article>`;
+}
+function actusHome() {
+  const A = window.ACTUS; if (!A || !A.items || !A.items.length) return '';
+  return `<div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Actualité juridique</h2><p>Les dernières nouvelles du droit et de la justice en Côte d’Ivoire, résumées et reliées aux leçons.</p></div>
+    <section class="actus-home">${A.items.slice(0, 3).map(a => actuCard(a, true)).join('')}
+    <a class="btn ghost small" href="#actualites">Toute l’actualité juridique</a></section>`;
+}
+function viewActus() {
+  const A = window.ACTUS || { items: [] }, R = window.RUBRIQUES || {};
+  const cats = Object.keys(R).filter(k => A.items.some(a => a.cat === k));
+  return `${crumbs(['Actualité juridique'])}<div class="page actus-page"><h1>Actualité juridique et judiciaire</h1>
+    <p class="lead">Lois, réformes de la justice, institutions, concours : l’essentiel de l’actualité du droit en Côte d’Ivoire, résumé simplement. Chaque information renvoie à sa source et, quand c’est possible, à la leçon qui aide à la comprendre.</p>
+    <p class="meta">Mise à jour : ${A.maj ? actuDate(A.maj) : '—'} · ${A.items.length} information${A.items.length > 1 ? 's' : ''}</p>
+    ${cats.length > 1 ? `<div class="chips actu-chips" role="group" aria-label="Rubriques"><button type="button" class="chip" aria-pressed="true" data-acat="">Tout</button>${cats.map(k => `<button type="button" class="chip" aria-pressed="false" data-acat="${k}">${R[k][1]} ${esc(R[k][0])}</button>`).join('')}</div>` : ''}
+    <div class="actus">${A.items.map(a => actuCard(a, false)).join('')}</div>
+    <p class="meta actu-note">Une information à signaler (nouvelle loi, décision, concours) ? <a href="#contact">Écrivez-nous</a>.</p></div>`;
+}
+function bindActus() {
+  document.querySelectorAll('[data-acat]').forEach(b => b.onclick = () => {
+    const c = b.dataset.acat;
+    document.querySelectorAll('[data-acat]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    document.querySelectorAll('.actus .actu').forEach(el => { el.hidden = !!c && el.dataset.cat !== c; });
+  });
 }
 // ---------- vidéo de présentation (accueil) : lecture automatique sans le son, sauf économie de données ou animations réduites
 const HV_ICON = { pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>', play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
@@ -1395,6 +1429,7 @@ function route() {
   else if (h === 'contact') { html = viewContact(); after = bindContact; }
   else if (PAGES[h]) html = viewPage(h);
   else if (h === 'guide') { html = viewGuide(); after = bindGuide; }
+  else if (h === 'actualites') { html = viewActus(); after = bindActus; }
   else { html = viewHome(); after = () => { bindHeroVideo(); bindGuide(); }; }
   V.innerHTML = html;
   V.classList.remove('enter', 'leave'); void V.offsetWidth; if (V.firstElementChild && !V.querySelector('.home-hero')) V.classList.add('enter');
@@ -1539,6 +1574,7 @@ function renderDrawer() {
       ${item('verifier', '✅', 'Vérifier un certificat')}
       ${item('parametres', '⚙️', 'Paramètres')}
       <div class="dr-sec">Informations</div>
+      ${item('actualites', '📰', 'Actualité juridique')}
       ${item('guide', '🎬', 'Mode d’emploi (vidéo)')}
       ${item('apropos', 'ℹ️', 'À propos')}
       ${item('contact', '✉️', 'Contact')}
