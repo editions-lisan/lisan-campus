@@ -4,6 +4,14 @@
 window.ACTUS = {
   maj: '2026-11-14',
   items: [
+    { d: '2026-11-13', cat: 'lois', titre: 'Le Sénat adopte dix projets de loi en séance plénière',
+      texte: 'Réunis en séance plénière à Yamoussoukro le 13 novembre 2026, les sénateurs ont adopté à l’unanimité les dix projets de loi examinés en commission du 5 au 10 novembre. Parmi eux : la modification de la loi sur la répression des infractions aux actes uniformes de l’OHADA, la modification de l’article 51 du Code électoral, la ratification de l’ordonnance modifiant l’article 803 du Code maritime, ainsi que la ratification d’ordonnances fiscales (article 411 du Code général des impôts, taux réduit de TVA) et de l’ordonnance créant le MCA-Côte d’Ivoire régional. Les autres textes portent sur les PME et ETI, le guichet unique de développement des PME, l’accord avec la Millennium Challenge Corporation et l’amélioration génétique animale.',
+      src: ['RTI Info', 'https://rti.info/les-dix-projets-de-loi-adoptes-a-lunanimite-par-les-senateurs/'],
+      cours: [['La loi', '#l-intro.loi']] },
+    { d: '2026-11-09', cat: 'justice', titre: 'Rentrée judiciaire à la Cour d’appel de Bouaké',
+      texte: 'La Cour d’appel de Bouaké a tenu le 9 novembre 2026 son audience solennelle de rentrée pour l’année judiciaire 2026-2027. Neuf magistrats y ont été installés et cinq magistrats débutants ont prêté serment. La juridiction a rendu 1 387 décisions pour 1 522 affaires enregistrées, contre 1 151 décisions l’année précédente. Le thème retenu portait sur les atteintes à l’autorité de la justice.',
+      src: ['KOACI', 'https://www.koaci.com/article/2026/11/10/cote-divoire/justice/cote-divoire-bouake-la-cour-dappel-lance-son-annee-avec-9-nouveaux-magistrats-et-un-bilan-en-hausse_202461.html'],
+      cours: [['La cour d’appel et la cour d’appel de commerce', '#l-oj.appel']] },
     { d: '2026-11-09', cat: 'lois', titre: 'OHADA : le Sénat adapte la loi pénale aux nouveaux actes uniformes',
       texte: 'Le Sénat a adopté à l’unanimité, à Yamoussoukro, le projet de loi modifiant la loi n° 2017-727 du 9 novembre 2017 relative à la répression des infractions aux actes uniformes de l’OHADA. Présenté par le ministre de la Justice, Jean Sansan Kambilé, le texte crée de nouvelles infractions pour tenir compte de l’acte uniforme sur les systèmes comptables des entités à but non lucratif (en vigueur depuis le 1er janvier 2024) et de l’acte uniforme révisé sur les procédures simplifiées de recouvrement et les voies d’exécution (en vigueur depuis le 16 février 2024) : il réprime notamment le fait de rendre indisponibles des biens saisis.',
       src: ['AIP', 'https://www.aip.ci/cote-divoire-aip-le-senat-adopte-la-modification-de-la-loi-sur-la-repression-des-infractions-aux-actes-uniformes-de-lohada/'],
