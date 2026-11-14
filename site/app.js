@@ -851,8 +851,8 @@ function viewSpace(sp) {
 // ---------- bibliothèque : les livres des Éditions Lisân (élève, maître, exercices) et les documents de cours.
 // Lecture et téléchargement après connexion et inscription à l’espace du livre (comme les leçons) ; sans connexion
 // configurée (aperçu), tout est libre.
-const DOC_ICON = { eleve: '📗', maitre: '📘', exercices: '📙', cours: '📄', Cours: '📄', TD: '📝', 'Méthode': '🧭', Exercices: '✍️', Lectures: '📖', Code: '📕' };
-const DOC_KIND = { Cours: 'cours', TD: 'travaux dirigés', 'Méthode': 'fiche méthode', Code: 'Code civil' };
+const DOC_ICON = { eleve: '📗', maitre: '📘', exercices: '📙', cours: '📄', Cours: '📄', TD: '📝', 'Méthode': '🧭', Exercices: '✍️', Lectures: '📖', Code: '📕', 'Texte officiel': '⚖️' };
+const DOC_KIND = { Cours: 'cours', TD: 'travaux dirigés', 'Méthode': 'fiche méthode', 'Texte officiel': 'Constitution', Code: 'Code civil' };
 const libList = l => l.length > 1 ? l.slice(0, -1).join(', ') + ' et ' + l[l.length - 1] : (l[0] || '');
 function libLink(spId) {
   const nb = (window.LIVRES || []).filter(b => b.space === spId).length, D = (window.DOCS || []).filter(d => d.space === spId);

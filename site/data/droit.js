@@ -4670,6 +4670,7 @@ const M_CONST = {
   M_CONST.lessons.push(
     { id: "constitution", title: "La Constitution (1) : approches juridiques", body: [
       { p: "**Tout État possède une constitution** : même dans une tyrannie, pour peu qu'il existe un minimum de rationalité politique, une règle gouverne l'exercice du pouvoir. Surtout, l'État contemporain est une **personne morale** ; or le propre d'une personne morale est de n'exister qu'**en vertu d'un statut** (comme une société commerciale n'existe que par ses statuts). **Le statut de l'État, c'est sa constitution.** Ce chapitre précise la notion de constitution (définition et formes), puis son élaboration, sa révision et le contrôle de constitutionnalité." },
+      { box: "Le texte intégral de la Constitution ivoirienne du 8 novembre 2016, à jour de la révision du 19 mars 2020, est dans la [bibliothèque](#bibliotheque-droit), avec un sommaire détaillé. Garde-le sous la main pour lire les articles cités dans le cours.", title: "Le texte de la Constitution", kind: "marge" },
       { h: "Section 1. Les approches juridiques de la constitution" },
       { p: "La constitution peut se définir d'un point de vue **matériel** (ce qu'elle contient) et d'un point de vue **formel** (sa forme et sa valeur)." },
       { h: "§ 1. La constitution, statut de l'État et instrument de limitation du pouvoir" },
