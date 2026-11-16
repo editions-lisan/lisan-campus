@@ -2,8 +2,12 @@
 // Chaque information : date de l'événement (AAAA-MM-JJ), rubrique (RUBRIQUES), titre, résumé, source vérifiable
 // et, si possible, la leçon du site qui aide à la comprendre. La plus récente en premier ; 60 informations au plus.
 window.ACTUS = {
-  maj: '2026-11-14',
+  maj: '2026-11-16',
   items: [
+    { d: '2026-11-13', cat: 'lois', titre: 'Loi de finances 2027 : les députés adoptent le budget en commission',
+      texte: 'Le 13 novembre 2026 à Abidjan, la Commission des affaires économiques et financières de l’Assemblée nationale a adopté à l’unanimité le projet de loi de finances pour l’année 2027. Le budget de l’État y est arrêté à 18 466,1 milliards de francs CFA, en équilibre entre ressources et charges. Le texte doit maintenant être examiné en séance plénière par les députés, puis par le Sénat, avant sa promulgation.',
+      src: ['AIP', 'https://www.aip.ci/cote-divoire-aip-les-deputes-adoptent-en-commission-un-budget-de-18-466-milliards-fcfa-pour-2027/'],
+      cours: [['La loi', '#l-intro.loi']] },
     { d: '2026-11-13', cat: 'lois', titre: 'Le Sénat adopte dix projets de loi en séance plénière',
       texte: 'Réunis en séance plénière à Yamoussoukro le 13 novembre 2026, les sénateurs ont adopté à l’unanimité les dix projets de loi examinés en commission du 5 au 10 novembre. Parmi eux : la modification de la loi sur la répression des infractions aux actes uniformes de l’OHADA, la modification de l’article 51 du Code électoral, la ratification de l’ordonnance modifiant l’article 803 du Code maritime, ainsi que la ratification d’ordonnances fiscales (article 411 du Code général des impôts, taux réduit de TVA) et de l’ordonnance créant le MCA-Côte d’Ivoire régional. Les autres textes portent sur les PME et ETI, le guichet unique de développement des PME, l’accord avec la Millennium Challenge Corporation et l’amélioration génétique animale.',
       src: ['RTI Info', 'https://rti.info/les-dix-projets-de-loi-adoptes-a-lunanimite-par-les-senateurs/'],
@@ -28,6 +32,10 @@ window.ACTUS = {
       texte: 'La commission des affaires économiques et financières de l’Assemblée nationale a adopté à l’unanimité le projet de loi portant réglementation bancaire, qui transpose une loi uniforme de l’UMOA et remplace le cadre national en vigueur depuis 2009. Le texte s’applique aux banques, aux établissements de crédit et de paiement et aux émetteurs de monnaie électronique ; il traite aussi de la finance islamique et des FinTech, renforce la protection des déposants et prévoit l’intervention précoce auprès des établissements en difficulté.',
       src: ['AIP', 'https://www.aip.ci/cote-divoire-aip-les-deputes-adoptent-deux-reformes-majeures-dans-les-secteurs-bancaire-et-commercial/'],
       cours: [] },
+    { d: '2026-11-03', cat: 'justice', titre: 'Cour d’appel d’Abidjan : 7 792 décisions rendues en 2025-2026',
+      texte: 'À l’audience solennelle de rentrée judiciaire 2026-2027, le premier président de la Cour d’appel d’Abidjan, M. Dembélé Tahirou, a présenté le bilan de l’année écoulée : 7 792 décisions rendues, toutes matières confondues, soit une hausse de 16,16 % par rapport à l’année précédente. La cour statue en appel sur les jugements des tribunaux de son ressort, en matière civile, sociale et pénale.',
+      src: ['AIP', 'https://www.aip.ci/cote-divoire-aip-la-cour-dappel-dabidjan-enregistre-une-nette-progression-de-son-rendement-au-cours-de-lannee-judiciaire-2025-2026/'],
+      cours: [['La cour d’appel et la cour d’appel de commerce', '#l-oj.appel']] },
     { d: '2026-10-14', cat: 'justice', titre: 'Vers un pôle des juridictions pénales, économiques et financières',
       texte: 'Le Conseil des ministres a adopté un projet de loi portant création, compétences et organisation du pôle des juridictions pénales, économiques et financières. Il prévoit deux degrés : un pôle pénal économique et financier, juridiction spécialisée de premier degré, et une cour d’appel pénale, économique et financière pour les recours. Le Gouvernement veut ainsi mieux juger les infractions économiques et financières, dont certaines sont transnationales. Le texte doit encore être voté par le Parlement.',
       src: ['Nord-Sud', 'https://www.nordsud.info/justice-financiere-emploi-mines-les-mesures-adoptees-en-conseil-des-ministres/'],
