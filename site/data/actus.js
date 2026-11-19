@@ -2,8 +2,16 @@
 // Chaque information : date de l'événement (AAAA-MM-JJ), rubrique (RUBRIQUES), titre, résumé, source vérifiable
 // et, si possible, la leçon du site qui aide à la comprendre. La plus récente en premier ; 60 informations au plus.
 window.ACTUS = {
-  maj: '2026-11-16',
+  maj: '2026-11-19',
   items: [
+    { d: '2026-11-17', cat: 'lois', titre: 'Dissolution de la CEI : la commission des affaires générales adopte la loi de ratification',
+      texte: 'Le 17 novembre 2026, la Commission des affaires générales et institutionnelles de l’Assemblée nationale a adopté, à l’unanimité des membres présents et représentés, le projet de loi portant ratification de l’ordonnance n° 2026-265 du 6 mai 2026, qui dissout la Commission électorale indépendante (CEI), créée par la loi n° 2001-634 du 9 octobre 2001. Le texte était présenté par le ministre de l’Intérieur et de la Sécurité, qui a annoncé des consultations avec les acteurs politiques sur le futur organe chargé des élections. Une ordonnance, prise par le Gouvernement dans le domaine de la loi, doit être ratifiée par le Parlement ; le projet doit encore être voté en séance plénière.',
+      src: ['KOACI', 'https://www.koaci.com/article/2026/11/17/cote-divoire/politique/cote-divoire-dissolution-de-la-cei-vagondo-diomande-annonce-des-consultations-politiques-pour-rassurer_202732.html'],
+      cours: [['La loi', '#l-intro.loi'], ['Le régime représentatif et le suffrage', '#l-const.suffrage']] },
+    { d: '2026-11-17', cat: 'justice', titre: 'Tribunal militaire d’Abidjan : plus de 623 audiences et une réforme du code de procédure en préparation',
+      texte: 'Le 17 novembre 2026 à Abidjan, le Tribunal militaire a présenté son bilan : il a tenu plus de 623 audiences au cours de l’année judiciaire 2025-2026, soit une hausse de plus de 15 %. Un séminaire de validation de la réforme du code de procédure militaire est annoncé pour le mois prochain, avec le ministère de la Justice, le barreau et les défenseurs militaires. Le tribunal militaire est une juridiction spécialisée en raison de la qualité des personnes jugées.',
+      src: ['AIP', 'https://www.aip.ci/cote-divoire-aip-justice-militaire-plus-de-623-audiences-tenues-et-une-reforme-du-code-de-procedure-en-vue-a-abidjan/'],
+      cours: [['Juridictions non permanentes : tribunal militaire et Haute Cour', '#l-oj.nonpermanentes']] },
     { d: '2026-11-13', cat: 'lois', titre: 'Loi de finances 2027 : les députés adoptent le budget en commission',
       texte: 'Le 13 novembre 2026 à Abidjan, la Commission des affaires économiques et financières de l’Assemblée nationale a adopté à l’unanimité le projet de loi de finances pour l’année 2027. Le budget de l’État y est arrêté à 18 466,1 milliards de francs CFA, en équilibre entre ressources et charges. Le texte doit maintenant être examiné en séance plénière par les députés, puis par le Sénat, avant sa promulgation.',
       src: ['AIP', 'https://www.aip.ci/cote-divoire-aip-les-deputes-adoptent-en-commission-un-budget-de-18-466-milliards-fcfa-pour-2027/'],
