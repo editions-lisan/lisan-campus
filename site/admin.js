@@ -173,12 +173,14 @@ function drawAdmin() {
   const fresh = all.filter(r => new Date(r.en.date).getTime() > week).length;
   const noIns = list.filter(u => !Object.keys(u.spaces).length).length;
   const rows = adminFiltered(), certs = adminCerts(), suggs = adminSuggs(), avis = adminAvis();
+  const felic = R.felic = felicRows();
   const stat = (n, t, c) => `<div class="stat${c ? ' c-' + c : ''}"><b>${n}</b><span>${esc(t)}</span></div>`;
   const active = list.filter(u => activity(u).week > 0).length;
   const tabs = `<div class="chips adm-tabs" role="group" aria-label="Rubrique"><button type="button" class="chip" data-admin-tab="ins" aria-pressed="${R.tab === 'ins'}">👥 Inscrits (${all.length})</button>
     <button type="button" class="chip" data-admin-tab="prog" aria-pressed="${R.tab === 'prog'}">📈 Progression</button>
     <button type="button" class="chip" data-admin-tab="acc" aria-pressed="${R.tab === 'acc'}">👤 Comptes (${list.length})</button>
     <button type="button" class="chip" data-admin-tab="cert" aria-pressed="${R.tab === 'cert'}">🎓 Certificats (${certs.length})</button>
+    <button type="button" class="chip" data-admin-tab="felic" aria-pressed="${R.tab === 'felic'}">🎉 Félicitations${felic.filter(r => !r.sent).length ? ` (${felic.filter(r => !r.sent).length} à envoyer)` : ''}</button>
     <button type="button" class="chip" data-admin-tab="avis" aria-pressed="${R.tab === 'avis'}">⭐ Avis (${avis.length})</button>
     <button type="button" class="chip" data-admin-tab="sugg" aria-pressed="${R.tab === 'sugg'}">💡 Suggestions (${suggs.length})</button>
     <button type="button" class="chip" data-admin-tab="msg" aria-pressed="${R.tab === 'msg'}">✉️ Messages (${(R.msgs || []).length})</button></div>`;
@@ -209,6 +211,8 @@ function drawAdmin() {
       <div class="adm-list">${progCards(pr)}</div>`;
     return;
   }
+  if (R.tab === 'felic') { const todo = felic.filter(r => !r.sent).length;
+    box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${felic.length} réussite${felic.length > 1 ? 's' : ''} (parcours et espaces), dont ${todo} à féliciter. Le message est prêt et modifiable : envoyez-le sur WhatsApp ou par e-mail ; il est alors marqué comme envoyé sur cet appareil.</p><div class="adm-list">${felicCards(felic)}</div>`; return; }
   if (R.tab === 'avis') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${avis.length} avis donné${avis.length > 1 ? 's' : ''} à la fin d’un parcours ou d’un espace.</p>${avisSummary(avis)}<div class="adm-list">${avisCards(avis)}</div>`; return; }
   if (R.tab === 'sugg') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${suggs.length} suggestion${suggs.length > 1 ? 's' : ''}, de la plus récente à la plus ancienne.</p><div class="adm-list">${suggCards(suggs)}</div>`; return; }
   box.innerHTML = `${head}
@@ -239,6 +243,59 @@ function avisCards(rows) {
     ${x.impressions ? `<small>Impressions</small><p class="sugg-text">${esc(x.impressions)}</p>` : ''}${x.ameliorations ? `<small>Suggestions d’amélioration</small><p class="sugg-text">${esc(x.ameliorations)}</p>` : ''}
     <small>De ${esc(who(u))}${u.email ? ' · ' + esc(u.email) : ''}</small>
     ${x.impressions || x.ameliorations ? `<div class="actions">${waLink(u.info) ? `<a class="btn small" href="${waLink(u.info)}" target="_blank" rel="noopener">Répondre sur WhatsApp</a>` : ''}${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}?subject=${encodeURIComponent('Votre avis sur Lisân Campus')}">Répondre par e-mail</a>` : ''}</div>` : ''}</article>`).join('');
+}
+// ---------- félicitations : un message prêt à envoyer (WhatsApp, e-mail) à chaque élève qui a réussi un parcours ou tout un espace
+const FELIC_KEY = 'lc.felic';                            // messages déjà envoyés (sur cet appareil)
+const felicSent = () => { try { return JSON.parse(localStorage.getItem(FELIC_KEY) || '{}') || {}; } catch (e) { return {}; } };
+const felicMark = (k, on) => { const m = felicSent(); if (on) m[k] = Date.now(); else delete m[k]; try { localStorage.setItem(FELIC_KEY, JSON.stringify(m)); } catch (e) {} };
+const FELIC_DOUA = { arabe: 'Qu’Allah bénisse vos efforts et vous accorde la réussite (Bârakallâhu fîk).', coran: 'Qu’Allah bénisse vos efforts et fasse du Coran la lumière de votre cœur (Bârakallâhu fîk).', islam: 'Qu’Allah bénisse vos efforts et vous accorde la science utile (Bârakallâhu fîk).' };
+function felicRows() {                                   // une ligne par parcours réussi, et par espace réussi en entier (plusieurs parcours)
+  const out = [], sent = felicSent();
+  (adminRun.list || []).forEach(u => Object.keys(u.spaces).forEach(id => {
+    const sp = space(id); if (!sp) return; const p = progOf(u, id), cert = key => (u.certs || []).find(c => c.key === key) || null;
+    const next = p.parc.find(y => !y.ok);
+    p.parc.filter(x => x.ok).forEach(x => out.push({ k: u.uid + '|p:' + x.s.id, u, sp, kind: 'p', s: x.s, best: x.best, c: cert('p:' + x.s.id), next: next && next.s, all: p.passed === p.parc.length && p.parc.length > 1 }));
+    if (p.parc.length > 1 && p.passed === p.parc.length) out.push({ k: u.uid + '|e:' + id, u, sp, kind: 'e', n: p.parc.length, c: cert('e:' + id) });
+  }));
+  out.forEach(r => { r.sent = sent[r.k] || 0; });
+  return out.sort((a, b) => (!!a.sent - !!b.sent) || String((b.c || {}).date || '').localeCompare(String((a.c || {}).date || '')));
+}
+function felicText(r) {
+  const i = r.u.info || {}, nom = `${i.civilite === 'Madame' ? 'Madame' : i.civilite ? 'Monsieur' : ''} ${prenomFmt(i.prenom || r.u.name)} ${String(i.nom || '').toUpperCase()}`.replace(/\s+/g, ' ').trim();
+  const L = [`Bonjour ${nom || ''},`.replace(' ,', ','), ''];
+  if (r.kind === 'e') {
+    L.push(`Toute l’équipe des Éditions Lisân vous adresse ses plus chaleureuses félicitations : vous avez réussi les ${r.n} parcours de l’espace « ${r.sp.title} » de Lisân Campus. C’est un très beau résultat, fruit de votre travail et de votre persévérance.`);
+    L.push('', r.c ? `Votre grand certificat n° ${r.c.num} est vérifiable en ligne : ${verifUrl(r.c.num)}` : `Votre grand certificat vous attend : connectez-vous sur ${SITE_URL}#espace-${r.sp.id} pour l’obtenir.`);
+  } else {
+    L.push(`Toute l’équipe des Éditions Lisân vous adresse ses chaleureuses félicitations : vous avez terminé le parcours « ${r.s.title} »${r.s.title === r.sp.title ? '' : ` (espace « ${r.sp.title} »)`} de Lisân Campus${r.best !== undefined && r.best !== null ? `, avec ${Number(r.best)} % à l’évaluation finale` : ''}.`);
+    L.push('', r.c ? `Votre certificat de réussite n° ${r.c.num} est vérifiable en ligne : ${verifUrl(r.c.num)}` : `Votre certificat de réussite vous attend : connectez-vous sur ${SITE_URL}#m-${r.s.id} pour l’obtenir.`);
+    if (r.next) L.push('', `Prochaine étape : le parcours « ${r.next.title} » vous attend : ${SITE_URL}#m-${r.next.id}`);
+    else if (r.all) L.push('', `Vous avez réussi tous les parcours de l’espace : votre grand certificat de l’espace vous attend aussi.`);
+  }
+  if (FELIC_DOUA[r.sp.id]) L.push('', FELIC_DOUA[r.sp.id]);
+  L.push('', 'Merci pour votre confiance et bonne continuation !', '', 'Mouhamadou CISSEMA', 'Éditions Lisân · Lisân Campus', SITE_URL);
+  return L.join('\n');
+}
+const felicSubject = r => r.kind === 'e' ? `Félicitations : espace « ${r.sp.title} » réussi — Lisân Campus` : `Félicitations : parcours « ${r.s.title} » réussi — Lisân Campus`;
+function felicCards(rows) {
+  if (!rows.length) return '<p class="meta">Aucun parcours réussi pour le moment.</p>';
+  return rows.map((r, n) => { const wa = waLink(r.u.info);
+    return `<article class="adm-card c-${r.sp.color}${r.sent ? ' felic-sent' : ''}"><div class="adm-top"><b>${esc(who(r.u))}</b><span class="tag">${r.kind === 'e' ? '🏅 Espace réussi' : '🎓 Parcours réussi'}</span></div>
+      <small>${esc(r.kind === 'e' || r.s.title === r.sp.title ? (r.kind === 'e' ? r.sp.title : r.s.title) : r.s.title + ' · ' + r.sp.title)}${r.c ? ' · certificat n° ' + esc(r.c.num) + ' du ' + dateFr(r.c.date) : ' · certificat pas encore demandé'}${r.sent ? ' · <b>message envoyé le ' + dateFr(r.sent) + '</b>' : ''}</small>
+      <details${r.sent ? '' : ' open'}><summary>Message de félicitations</summary><textarea class="felic-t" id="felic-${n}" rows="12" aria-label="Message de félicitations (modifiable)">${esc(felicText(r))}</textarea></details>
+      <div class="actions">${wa ? `<button type="button" class="btn small" data-felic="wa" data-n="${n}">Envoyer sur WhatsApp</button>` : ''}${r.u.email ? `<button type="button" class="btn ${wa ? 'ghost ' : ''}small" data-felic="mail" data-n="${n}">Envoyer par e-mail</button>` : ''}
+        <button type="button" class="btn ghost small" data-felic="copy" data-n="${n}">Copier</button>
+        <button type="button" class="linkbtn small-l" data-felic="${r.sent ? 'unsent' : 'sent'}" data-n="${n}">${r.sent ? 'Marquer comme non envoyé' : 'Marquer comme envoyé'}</button></div></article>`; }).join('');
+}
+function felicAction(b) {
+  const rows = adminRun.felic || [], r = rows[+b.dataset.n]; if (!r) return;
+  const ta = document.getElementById('felic-' + b.dataset.n), txt = ta ? ta.value : felicText(r), k = b.dataset.felic;
+  if (k === 'wa') { window.open(waLink(r.u.info) + '?text=' + encodeURIComponent(txt), '_blank', 'noopener'); felicMark(r.k, true); }
+  else if (k === 'mail') { location.href = `mailto:${r.u.email}?subject=${encodeURIComponent(felicSubject(r))}&body=${encodeURIComponent(txt)}`; felicMark(r.k, true); }
+  else if (k === 'copy') { const done = () => { b.textContent = 'Copié ✓'; };
+    try { navigator.clipboard.writeText(txt).then(done, () => { ta.select(); b.textContent = 'Sélectionné : copiez'; }); } catch (e) { if (ta) ta.select(); } return; }
+  else felicMark(r.k, k === 'sent');
+  setTimeout(drawAdmin, k === 'mail' ? 600 : 0);
 }
 function adminSuggs() { const out = []; (adminRun.list || []).forEach(u => (u.sugg || []).forEach(x => out.push({ u, x }))); return out.sort((a, b) => String(b.x.date).localeCompare(String(a.x.date))); }
 const who = u => { const i = u.info || {}; return `${civ(i)} ${String(i.nom || '').toUpperCase()} ${prenomFmt(i.prenom || u.name)}`.trim(); };
@@ -389,6 +446,8 @@ document.addEventListener('click', e => {
     z.insertAdjacentHTML('beforeend', `<span class="meta">Annuler définitivement le certificat ${esc(n)} ? Il ne sera plus reconnu à la vérification.</span><button type="button" class="btn bad small" data-revoke-yes="${esc(n)}">Oui, annuler</button>`); rv.remove(); return; }
   const ry = e.target.closest('[data-revoke-yes]');
   if (ry) { ry.disabled = true; AUTH().adminRevoke(ry.dataset.revokeYes).then(loadAdmin, loadAdmin); return; }
+  const fb_ = e.target.closest('[data-felic]');
+  if (fb_) { felicAction(fb_); return; }
   const tb = e.target.closest('[data-admin-tab]');
   if (tb) { adminRun.tab = tb.dataset.adminTab; drawAdmin(); return; }
   if (!b) return;

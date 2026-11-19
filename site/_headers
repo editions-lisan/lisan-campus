@@ -14,6 +14,9 @@
 /livres/*
   Cache-Control: no-cache
 
+/media/*
+  Cache-Control: no-cache
+
 /
   Cache-Control: no-cache
 

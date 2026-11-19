@@ -50,7 +50,10 @@ h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-heigh
 .nf small { display: block; font-size: 19px; font-weight: 400; color: #586174; margin-top: 2px; }
 .rc { width: 380px; height: 190px; border-radius: 16px; box-shadow: 0 20px 40px rgba(20,28,46,.25); background-size: cover; }
 .rc.bk { width: 262px; height: 372px; border-radius: 6px 14px 14px 6px; box-shadow: -6px 0 0 #3a2a4a inset, 0 24px 48px rgba(20,28,46,.35); }
-.rc.rp { width: 200px; height: 230px; border-radius: 10px; border: 6px solid #fbf7ef; }
+.rc.rp { width: 200px; height: 230px; border-radius: 10px; border: 6px solid #fbf7ef; background-position: top center; }
+.rc.stars { background: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+.rc.stars b { font-size: 34px; letter-spacing: 2px; color: #e0a526; }
+.rc.stars span { font-family: "Literata", serif; font-weight: 800; font-size: 26px; color: #141c2e; }
 /* scène 5 */
 #s4-title { left: 84px; top: 96px; width: 740px; font-size: 58px; color: #141c2e; }
 #s4-title span { color: #23468f; }
@@ -96,9 +99,9 @@ h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-heigh
   <div class="abs card" id="k0" style="--c:#2b3f8f"><div class="ic"><svg viewBox="0 0 52 52"><path d="M8 10h36a4 4 0 0 1 4 4v18a4 4 0 0 1-4 4H24l-10 8v-8H8a4 4 0 0 1-4-4V14a4 4 0 0 1 4-4z"/><path d="M17 23h18M17 29h11"/></svg></div>
     <h3>Apprendre l’arabe</h3><p>Lire, écrire et parler, du niveau 0 au niveau 3</p></div>
   <div class="abs card" id="k1" style="--c:#0e6b4f"><div class="ic"><svg viewBox="0 0 52 52"><path d="M26 14c-5-4-12-5-20-4v28c8-1 15 0 20 4 5-4 12-5 20-4V10c-8-1-15 0-20 4z"/><path d="M26 14v28"/></svg></div>
-    <h3>Lire le Coran pas à pas</h3><p>Lettres, signes de lecture, mots et versets</p></div>
+    <h3>Lire le Coran pas à pas</h3><p>Niveaux 1 et 2 : la lecture, puis le tajwîd</p></div>
   <div class="abs card" id="k2" style="--c:#23468f"><div class="ic"><svg viewBox="0 0 52 52"><path d="M26 8v36M14 44h24M10 14h32"/><path d="M10 14l-6 14a7 7 0 0 0 12 0zM42 14l-6 14a7 7 0 0 0 12 0z"/></svg></div>
-    <h3>Droit · Licence&nbsp;1</h3><p>Neuf matières, exercices corrigés, romans en anglais</p></div>
+    <h3>Droit · Licence&nbsp;1</h3><p>Dix matières, exercices corrigés, actualité commentée</p></div>
   <div class="abs card" id="k3" style="--c:#5a3fc0"><div class="ic"><svg viewBox="0 0 52 52"><path d="M26 6c1.5 9 5 12.5 14 14-9 1.5-12.5 5-14 14-1.5-9-5-12.5-14-14 9-1.5 12.5-5 14-14z"/><path d="M40 32c.7 4 2.4 5.6 6 6-3.6.7-5.3 2.4-6 6-.7-3.6-2.4-5.3-6-6 3.6-.4 5.3-2 6-6z"/></svg></div>
     <h3>Formation à l’IA avec Claude</h3><p>Comprendre l’IA et bien s’en servir</p></div>
   <div class="abs card" id="k4" style="--c:#b0601a"><div class="ic"><svg viewBox="0 0 52 52"><path d="M10 44V24l16-12 16 12v20z"/><path d="M21 44V32h10v12M26 6v6"/><circle cx="26" cy="24" r="3"/></svg></div>
@@ -107,15 +110,15 @@ h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-heigh
   <!-- scène 4 : les nouveautés -->
   <div id="n-eyebrow" class="abs eyebrow">Nouveau</div>
   <h2 id="n-title" class="abs">Le Campus <span>s’agrandit</span></h2>
-  <div class="abs nf" id="nf0" style="top:218px"><img src="../../site/emoji/1f4c8.svg" alt=""><div>Économie politique<small>et neuf matières de la licence 1 de droit</small></div></div>
-  <div class="abs nf" id="nf1" style="top:304px"><img src="../../site/emoji/270d.svg" alt=""><div>Exercices corrigés et schémas<small>à la fin de chaque leçon de cours</small></div></div>
-  <div class="abs nf" id="nf2" style="top:390px"><img src="../../site/emoji/1f4d6.svg" alt=""><div>Roman juridique en anglais<small>The Missing Will, un roman illustré à lire et à écouter</small></div></div>
-  <div class="abs nf" id="nf3" style="top:476px"><img src="../../site/emoji/1f3a7.svg" alt=""><div>Écoute même écran éteint<small>sept vitesses, voix enregistrées</small></div></div>
+  <div class="abs nf" id="nf0" style="top:218px"><img src="../../site/emoji/1f4f0.svg" alt=""><div>Actualité juridique commentée<small>chaque information expliquée pas à pas, avec un test</small></div></div>
+  <div class="abs nf" id="nf1" style="top:304px"><img src="../../site/emoji/1f4d6.svg" alt=""><div>Lire le Coran 2 : le tajwîd<small>40 leçons, du niveau 1 à la récitation juste</small></div></div>
+  <div class="abs nf" id="nf2" style="top:390px"><img src="../../site/emoji/1f3db.svg" alt=""><div>Droit constitutionnel<small>et la Constitution à jour de la révision de 2023</small></div></div>
+  <div class="abs nf" id="nf3" style="top:476px"><img src="../../site/emoji/2b50.svg" alt=""><div>Votre avis compte<small>des étoiles et vos idées à la fin de chaque parcours</small></div></div>
   <div class="abs nf" id="nf4" style="top:562px"><img src="../../site/emoji/1f3c5.svg" alt=""><div>Évaluations et certificats<small>vérifiables en ligne par code QR</small></div></div>
-  <div class="abs rc rp" id="rc1" style="background-image:url(../../site/img/romans/part1.svg)"></div>
-  <div class="abs rc rp" id="rc2" style="background-image:url(../../site/img/romans/part3.svg)"></div>
-  <div class="abs rc rp" id="rc3" style="background-image:url(../../site/img/romans/part2.svg)"></div>
-  <div class="abs rc bk" id="rc0" style="background-image:url(../../site/img/romans/will.svg)"></div>
+  <div class="abs rc bk" id="rc0" style="background-image:url(img/n_coran2.jpg)"></div>
+  <div class="abs rc rp" id="rc1" style="background-image:url(img/n_actu.jpg)"></div>
+  <div class="abs rc rp" id="rc2" style="background-image:url(img/n_const.jpg)"></div>
+  <div class="abs rc rp stars" id="rc3"><b>★★★★★</b><span>Votre avis</span></div>
 
   <!-- scène 5 : le téléphone -->
   <h2 id="s4-title" class="abs">Tout le Campus <span>dans votre téléphone</span></h2>
@@ -125,7 +128,7 @@ h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-heigh
   <div class="abs feat" id="f3" style="top:470px"><svg viewBox="0 0 44 44"><circle cx="22" cy="22" r="21" fill="#1d7a45"/><path d="M13 22.5l6 6 12-13" stroke="#fff" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>Même hors connexion</div>
   <div class="abs" id="cta">Gratuit · <b>lisan-campus.pages.dev</b></div>
   <div class="abs" id="phone"><div id="screen"><div id="notch"></div>
-    <img id="sc0" src="img/s_home.png" alt=""><img id="sc1" src="img/s_schema.png" alt=""><img id="sc2" src="img/s_roman.png" alt=""></div></div>
+    <img id="sc0" src="img/s_home.png" alt=""><img id="sc1" src="img/s_actu.png" alt=""><img id="sc2" src="img/s_coran2.png" alt=""></div></div>
 
   <div class="abs" id="fade"></div>
 </div>
@@ -174,7 +177,7 @@ function render(t) {
   anim('n-eyebrow', t, 10.5, .5, 16.15, .4, { oy: -30 });
   anim('n-title', t, 10.62, .6, 16.15, .4, { oy: -30 });
   for (let k = 0; k < 5; k++) anim('nf' + k, t, 11.15 + k * .42, .5, 16.1 + k * .03, .4, { dx: -40, dy: 0, ox: -60 });
-  const RX = [880, 738, 1010, 860], RY = [150, 190, 210, 330], RR = [2, -11, 9, -4];
+  const RX = [860, 744, 1046, 1004], RY = [104, 330, 150, 424], RR = [2, -9, 8, -4];
   RX.forEach((x, k) => { const el = $('rc' + k); el.style.left = x + 'px'; el.style.top = RY[k] + 'px';
     anim('rc' + k, t, 12.4 + k * .2, .7, 16.1 + k * .04, .45, { dx: 260, dy: 0, r: RR[k], back: true, ox: 300 });
     if (t > 13.4 && t < 16.1) el.style.transform += ` translateY(${Math.sin((t - 13.4) * 2 + k) * 3}px)`; });
