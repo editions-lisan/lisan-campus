@@ -172,19 +172,20 @@ function drawAdmin() {
   const count = id => all.filter(r => r.id === id).length;
   const fresh = all.filter(r => new Date(r.en.date).getTime() > week).length;
   const noIns = list.filter(u => !Object.keys(u.spaces).length).length;
-  const rows = adminFiltered(), certs = adminCerts(), suggs = adminSuggs();
+  const rows = adminFiltered(), certs = adminCerts(), suggs = adminSuggs(), avis = adminAvis();
   const stat = (n, t, c) => `<div class="stat${c ? ' c-' + c : ''}"><b>${n}</b><span>${esc(t)}</span></div>`;
   const active = list.filter(u => activity(u).week > 0).length;
   const tabs = `<div class="chips adm-tabs" role="group" aria-label="Rubrique"><button type="button" class="chip" data-admin-tab="ins" aria-pressed="${R.tab === 'ins'}">👥 Inscrits (${all.length})</button>
     <button type="button" class="chip" data-admin-tab="prog" aria-pressed="${R.tab === 'prog'}">📈 Progression</button>
     <button type="button" class="chip" data-admin-tab="acc" aria-pressed="${R.tab === 'acc'}">👤 Comptes (${list.length})</button>
     <button type="button" class="chip" data-admin-tab="cert" aria-pressed="${R.tab === 'cert'}">🎓 Certificats (${certs.length})</button>
+    <button type="button" class="chip" data-admin-tab="avis" aria-pressed="${R.tab === 'avis'}">⭐ Avis (${avis.length})</button>
     <button type="button" class="chip" data-admin-tab="sugg" aria-pressed="${R.tab === 'sugg'}">💡 Suggestions (${suggs.length})</button>
     <button type="button" class="chip" data-admin-tab="msg" aria-pressed="${R.tab === 'msg'}">✉️ Messages (${(R.msgs || []).length})</button></div>`;
   const head = `<span class="eyebrow">Éditions Lisân</span><h1>Administration</h1>
     ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour pour les certificats et la sécurité renforcée.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
     <div class="stats">${stat(list.length, 'comptes créés')}${stat(all.length, 'inscriptions')}${stat(fresh, 'nouvelles (7 jours)')}${stat(noIns, 'comptes sans inscription')}${stat(active, 'actifs (7 jours)')}
-      ${stat(certs.length, 'certificats délivrés')}${stat(suggs.length, 'suggestions')}
+      ${stat(certs.length, 'certificats délivrés')}${stat(avis.length ? (avis.reduce((a, r) => a + r.x.note, 0) / avis.length).toFixed(1).replace('.', ',') + ' ★' : '—', avis.length + ' avis')}${stat(suggs.length, 'suggestions')}
       ${SPACES.map(sp => stat(count(sp.id), sp.title, sp.color)).join('')}</div>${tabs}
     <div class="actions"><button type="button" class="btn small" data-admin="xlsx">⬇ Télécharger en Excel</button>${R.tab === 'sugg' ? '<button type="button" class="btn ghost small" data-admin="sugdoc">⬇ Document des suggestions</button>' : ''}${R.tab === 'ins' ? '<button type="button" class="btn ghost small" data-admin="csv">⬇ CSV</button>' : ''}
       <button type="button" class="btn ghost small" data-admin="reload">↻ Actualiser</button></div>`;
@@ -208,6 +209,7 @@ function drawAdmin() {
       <div class="adm-list">${progCards(pr)}</div>`;
     return;
   }
+  if (R.tab === 'avis') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${avis.length} avis donné${avis.length > 1 ? 's' : ''} à la fin d’un parcours ou d’un espace.</p>${avisSummary(avis)}<div class="adm-list">${avisCards(avis)}</div>`; return; }
   if (R.tab === 'sugg') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${suggs.length} suggestion${suggs.length > 1 ? 's' : ''}, de la plus récente à la plus ancienne.</p><div class="adm-list">${suggCards(suggs)}</div>`; return; }
   box.innerHTML = `${head}
     <div class="chips" role="group" aria-label="Filtrer par espace"><button type="button" class="chip" data-admin-sp="all" aria-pressed="${R.sp === 'all'}">Tous (${all.length})</button>
@@ -220,6 +222,24 @@ function drawAdmin() {
     const n = adminFiltered().length; document.getElementById('admin-msg').textContent = `${n} inscription${n > 1 ? 's' : ''} affichée${n > 1 ? 's' : ''}.`; });
 }
 function adminCerts() { const out = []; (adminRun.list || []).forEach(u => (u.certs || []).forEach(c => out.push({ u, c }))); return out.sort((a, b) => String(b.c.date).localeCompare(String(a.c.date))); }
+function adminAvis() { const out = []; (adminRun.list || []).forEach(u => (u.avis || []).forEach(x => out.push({ u, x }))); return out.sort((a, b) => String(b.x.date).localeCompare(String(a.x.date))); }
+const stars = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+function avisSummary(rows) {                             // moyenne et répartition des notes, par parcours ou espace
+  if (!rows.length) return '';
+  const by = {}; rows.forEach(({ x }) => { const k = x.cle; (by[k] = by[k] || { titre: x.titre, espace: x.espace, n: [0, 0, 0, 0, 0, 0], tot: 0, c: 0 }); by[k].n[x.note]++; by[k].tot += x.note; by[k].c++; });
+  const list = Object.values(by).sort((a, b) => b.c - a.c);
+  return `<div class="tablewrap stk"><table class="adm-pt"><thead><tr><th>Parcours ou espace</th><th>Avis</th><th>Moyenne</th><th>Répartition (1 à 5 ★)</th></tr></thead><tbody>${list.map(r =>
+    `<tr><td data-l="Parcours ou espace">${esc(r.titre)}${r.espace && r.espace !== r.titre ? ` <small>· ${esc(r.espace)}</small>` : ''}</td><td data-l="Avis">${r.c}</td><td data-l="Moyenne"><b>${(r.tot / r.c).toFixed(1).replace('.', ',')}</b> <span class="st">${stars(Math.round(r.tot / r.c))}</span></td>
+    <td data-l="Répartition">${[1, 2, 3, 4, 5].map(k => `${k}★ ${r.n[k]}`).join(' · ')}</td></tr>`).join('')}</tbody></table></div>`;
+}
+function avisCards(rows) {
+  if (!rows.length) return '<p class="meta">Aucun avis pour le moment. Les élèves le donnent à la fin d’un parcours ou d’un espace, avant leur certificat.</p>';
+  return rows.map(({ u, x }) => `<article class="adm-card c-${x.note >= 4 ? 'b' : x.note === 3 ? 'a' : 'h'}"><div class="adm-top"><b>${esc(x.titre || x.cle)}</b><small>${x.date ? dateFr(x.date) : ''}</small></div>
+    <p><span class="st" aria-label="${x.note} sur 5">${stars(x.note)}</span> · ${esc(['', 'Décevant', 'Moyen', 'Bien', 'Très bien', 'Excellent'][x.note] || '')}</p>
+    ${x.impressions ? `<small>Impressions</small><p class="sugg-text">${esc(x.impressions)}</p>` : ''}${x.ameliorations ? `<small>Suggestions d’amélioration</small><p class="sugg-text">${esc(x.ameliorations)}</p>` : ''}
+    <small>De ${esc(who(u))}${u.email ? ' · ' + esc(u.email) : ''}</small>
+    ${x.impressions || x.ameliorations ? `<div class="actions">${waLink(u.info) ? `<a class="btn small" href="${waLink(u.info)}" target="_blank" rel="noopener">Répondre sur WhatsApp</a>` : ''}${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}?subject=${encodeURIComponent('Votre avis sur Lisân Campus')}">Répondre par e-mail</a>` : ''}</div>` : ''}</article>`).join('');
+}
 function adminSuggs() { const out = []; (adminRun.list || []).forEach(u => (u.sugg || []).forEach(x => out.push({ u, x }))); return out.sort((a, b) => String(b.x.date).localeCompare(String(a.x.date))); }
 const who = u => { const i = u.info || {}; return `${civ(i)} ${String(i.nom || '').toUpperCase()} ${prenomFmt(i.prenom || u.name)}`.trim(); };
 function certCards(rows) {
@@ -313,6 +333,9 @@ function sheetsData() {
   const cr = adminCerts();
   out.push({ name: 'Certificats', head: ['N° du certificat', 'Type', 'Parcours ou espace', 'Espace', 'Délivré le', 'Titulaire', 'Leçons', 'Quiz (%)', 'Téléphone', 'E-mail'], widths: [20, 16, 30, 24, 14, 28, 8, 9, 18, 28],
     data: cr.map(({ u, c }) => [c.num, c.type === 'espace' ? 'Grand certificat' : 'Parcours', c.titre, c.espace, c.date ? new Date(c.date).toLocaleDateString('fr-FR') : '', who(u), Number(c.lecons) || 0, c.quiz === null || c.quiz === undefined ? '' : Number(c.quiz), telFr((u.info || {}).ind, (u.info || {}).tel), u.email]) });
+  const av = adminAvis();
+  out.push({ name: 'Avis', head: ['Date', 'Parcours ou espace', 'Espace', 'Note (sur 5)', 'Impressions', 'Suggestions d’amélioration', 'De', 'Téléphone', 'E-mail'], widths: [12, 30, 22, 10, 60, 60, 26, 18, 28],
+    data: av.map(({ u, x }) => [x.date ? new Date(x.date).toLocaleDateString('fr-FR') : '', x.titre || x.cle, x.espace || '', x.note, x.impressions || '', x.ameliorations || '', who(u), telFr((u.info || {}).ind, (u.info || {}).tel), u.email]) });
   const sg = adminSuggs();
   out.push({ name: 'Suggestions', head: ['Date', 'Type', 'À propos de', 'Suggestion', 'De', 'Téléphone', 'E-mail'], widths: [12, 26, 30, 70, 26, 18, 28],
     data: sg.map(({ u, x }) => [x.date ? new Date(x.date).toLocaleDateString('fr-FR') : '', x.type || '', x.contexte || '', x.texte || '', who(u), telFr((u.info || {}).ind, (u.info || {}).tel), u.email]) });

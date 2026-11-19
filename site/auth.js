@@ -59,7 +59,8 @@
           done: Object.keys((x.progress && x.progress.done) || {}).length,
           prog: { done: (x.progress && x.progress.done) || {}, quiz: (x.progress && x.progress.quiz) || {}, time: (x.progress && x.progress.time) || {}, days: (x.progress && x.progress.days) || {} },
           certs: Object.values(x.certificats || {}).filter(c => c && c.num).map(c => Object.assign({}, c, { date: iso(c.date) })),
-          sugg: Object.entries(x.suggestions || {}).filter(([, v]) => v && v.texte).map(([id, v]) => Object.assign({ id }, v, { date: iso(v.date) })) };
+          sugg: Object.entries(x.suggestions || {}).filter(([, v]) => v && v.texte && v.type !== 'avis').map(([id, v]) => Object.assign({ id }, v, { date: iso(v.date) })),
+          avis: Object.values(x.suggestions || {}).filter(v => v && v.type === 'avis' && v.note).map(v => Object.assign({}, v, { date: iso(v.date) })) };
       });
     },
     uid: () => user && user.uid,
@@ -109,6 +110,16 @@
     },
     adminDeleteMessage: id => within(fb.firestore().collection('messages').doc(id).delete()),
     suggestions: () => Object.values((me() && profile && profile.sugg) || {}).sort((a, b) => String(b.date).localeCompare(String(a.date))),
+    avisFor: key => ((me() && profile && profile.avis) || {})[key] || null,
+    giveAvis(x) {                                        // avis de fin de parcours ou d'espace : une entrée par clé, dans la rubrique « suggestions »
+      if (!user) return Promise.reject(new Error('non connecté'));
+      const cle = String(x.cle || '').slice(0, 60), id = 'avis_' + cle.replace(/[^a-z0-9]+/gi, '_');
+      const note = Math.max(1, Math.min(5, Math.round(+x.note || 0)));
+      const rec = { type: 'avis', cle, titre: String(x.titre || '').slice(0, 120), espace: String(x.espace || '').slice(0, 120), note,
+        impressions: String(x.impressions || '').slice(0, 1500), ameliorations: String(x.ameliorations || '').slice(0, 1500), date: fb.firestore.FieldValue.serverTimestamp() };
+      return within(doc().set({ suggestions: { [id]: rec } }, { merge: true })).then(() => {
+        profile = profile || { spaces: {} }; profile.avis = profile.avis || {}; profile.avis[cle] = Object.assign({}, rec, { date: new Date().toISOString() }); cache.set('profile', profile); });
+    },
     suggest(x) {                                         // suggestion : enregistrée dans la fiche de l'élève, lue par l'administrateur
       if (!user) return Promise.reject(new Error('non connecté'));
       const id = 's' + Date.now().toString(36);
@@ -194,8 +205,10 @@
             Object.entries(d.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date) || new Date().toISOString(), reponses: v.reponses || {} }; });
             const info = d.profile ? Object.assign({}, d.profile) : null; if (info) delete info.updatedAt;
             const certs = {}; Object.entries(d.certificats || {}).forEach(([k, v]) => { if (v && v.num) certs[k] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() }); });
-            const sugg = {}; Object.entries(d.suggestions || {}).forEach(([k, v]) => { if (v && v.texte) sugg[k] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() }); });
-            profile = { spaces: sp, info, certs, sugg };
+            const sugg = {}, avis = {}; Object.entries(d.suggestions || {}).forEach(([k, v]) => {
+              if (v && v.type === 'avis' && v.cle && v.note) avis[v.cle] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() });
+              else if (v && v.texte) sugg[k] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() }); });
+            profile = { spaces: sp, info, certs, sugg, avis };
             cache.set('profile', profile);
             mergeProgress(d.progress);
             await doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp(),

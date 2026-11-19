@@ -1187,7 +1187,7 @@
 "n": "55",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -1212,7 +1212,7 @@
 "n": "56",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -1261,7 +1261,7 @@
 "n": "57",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -1316,7 +1316,7 @@
 "n": "59",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -1365,7 +1365,7 @@
 "n": "62",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -1588,7 +1588,7 @@
 "n": "74",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -1679,7 +1679,7 @@
 "n": "78",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -1692,7 +1692,7 @@
 "n": "79",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -1927,23 +1927,23 @@
 "n": "90",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2023"
 },
 {
 "k": "para",
-"t": "Les pouvoirs de chaque chambre expirent à la fin de la session ordinaire de la dernière année de sa législature.",
+"t": "Les pouvoirs de chaque chambre expirent à la fin de la deuxième session ordinaire de la dernière année de sa législature.",
 "ital": false,
 "li": false
 },
 {
 "k": "para",
-"t": "Les élections des députés et des sénateurs ont lieu avant l’expiration des pouvoirs de chaque chambre.",
+"t": "Les élections des députés et des sénateurs ont lieu après l’élection présidentielle.",
 "ital": false,
 "li": false
 },
 {
 "k": "para",
-"t": "Toutefois, dans l’impossibilité d’organiser les élections des députés et des sénateurs avant l’expiration des pouvoirs de chaque chambre, le Parlement demeure en fonction jusqu’à l’organisation desdites élections.",
+"t": "Toutefois, dans l’impossibilité d’organiser les élections des députés et des sénateurs, le Parlement demeure en fonction jusqu’à l’organisation desdites élections.",
 "ital": false,
 "li": false
 },
@@ -1955,7 +1955,7 @@
 },
 {
 "k": "para",
-"t": "Le montant des indemnités et les avantages des parlementaires sont fixés par la loi organique.",
+"t": "Le statut des parlementaires, le montant de leurs indemnités et leurs avantages sont déterminés par la loi organique.",
 "ital": false,
 "li": false
 },
@@ -2024,29 +2024,47 @@
 "n": "94",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2023"
 },
 {
 "k": "para",
-"t": "Chaque année, le Parlement se réunit de plein droit en une session ordinaire.",
+"t": "Chaque année, le Parlement se réunit de plein droit en deux sessions ordinaires.",
 "ital": false,
 "li": false
 },
 {
 "k": "para",
-"t": "La session de l’Assemblée nationale commence le premier jour ouvrable du mois d’avril et prend fin le dernier jour ouvrable du mois de décembre.",
+"t": "La première session de l’Assemblée nationale commence le troisième lundi ouvrable du mois de janvier et prend fin le dernier jour ouvrable du mois de juin.",
 "ital": false,
 "li": false
 },
 {
 "k": "para",
-"t": "La session du Sénat commence sept (7) jours ouvrables après celle de l’Assemblée nationale et prend fin sept (7) jours ouvrables avant la clôture de la session de l’Assemblée nationale.",
+"t": "La première session du Sénat commence sept jours ouvrables après celle de l’Assemblée nationale et prend fin sept jours ouvrables avant la clôture de la première session de l’Assemblée nationale.",
 "ital": false,
 "li": false
 },
 {
 "k": "para",
-"t": "Chaque chambre fixe le nombre de jours des séances qu’elle peut tenir au cours de la session ordinaire.",
+"t": "La deuxième session de l’Assemblée nationale commence le premier jour ouvrable du mois d’octobre et prend fin le dernier jour ouvrable du mois de décembre.",
+"ital": false,
+"li": false
+},
+{
+"k": "para",
+"t": "La deuxième session du Sénat commence sept jours ouvrables après celle de l’Assemblée nationale et prend fin sept jours ouvrables avant la clôture de la deuxième session de l’Assemblée nationale.",
+"ital": false,
+"li": false
+},
+{
+"k": "para",
+"t": "Chaque chambre fixe le nombre de jours des séances qu’elle peut tenir au cours des sessions ordinaires.",
+"ital": false,
+"li": false
+},
+{
+"k": "para",
+"t": "Toutefois, en cas de nécessité justifiée par les circonstances, l’Assemblée nationale et le Sénat se réunissent en Congrès, à la demande du Président de la République, et procèdent exceptionnellement au réaménagement de la durée de leurs sessions ordinaires.",
 "ital": false,
 "li": false
 },
@@ -2187,7 +2205,7 @@
 "n": "101",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -2540,18 +2558,19 @@
 {
 "k": "art",
 "n": "107",
-"nouveau": false,
-"annex": false
+"nouveau": true,
+"annex": false,
+"loi": "2023"
 },
 {
 "k": "para",
-"t": "Les membres du Parlement ont le droit d'amendement.",
+"t": "Le Président de la République et les membres du Parlement ont le droit d’amendement. Les amendements du Président de la République sont présentés par les membres du Gouvernement.",
 "ital": false,
 "li": false
 },
 {
 "k": "para",
-"t": "Les propositions et amendements déposés par les membres du Parlement ne sont pas recevables lorsque leur adoption aurait pour conséquence, soit une diminution des ressources publiques, soit la création ou l'aggravation d'une charge publique, à moins qu'ils ne soient accompagnés d'une proposition d'augmentation de recettes ou d'économies équivalentes.",
+"t": "Les propositions et amendements déposés par les membres du Parlement ne sont pas recevables lorsque leur adoption aurait pour conséquence, soit une diminution des ressources publiques, soit la création ou l’aggravation d’une charge publique, à moins qu’ils ne soient accompagnés d’une proposition d’augmentation de recettes ou d’économies équivalentes.",
 "ital": false,
 "li": false
 },
@@ -2578,7 +2597,7 @@
 "n": "109",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3365,7 +3384,7 @@
 "n": "134",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3420,7 +3439,7 @@
 "n": "137",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3553,7 +3572,7 @@
 "n": "143",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3566,7 +3585,7 @@
 "n": "144",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3597,7 +3616,7 @@
 "n": "146",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3652,7 +3671,7 @@
 "n": "147",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3671,7 +3690,7 @@
 "n": "148",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3684,7 +3703,7 @@
 "n": "149",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3709,7 +3728,7 @@
 "n": "150",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3722,7 +3741,7 @@
 "n": "151",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -3885,7 +3904,7 @@
 "n": "160",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -4258,7 +4277,7 @@
 "n": "177",
 "nouveau": true,
 "annex": false,
-"loi": true
+"loi": "2020"
 },
 {
 "k": "para",
@@ -4329,100 +4348,76 @@
 {
 "k": "chap",
 "n": "I",
-"t": "DE LA DESIGNATION DU VICE-PRESIDENT DE LA REPUBLIQUE",
-"tt": "De la désignation du vice-Président de la République"
+"t": "ABROGE",
+"tt": "Abrogé"
 },
 {
 "k": "art",
 "n": "179",
 "nouveau": false,
-"annex": false
+"annex": false,
+"abroge": true
 },
 {
 "k": "para",
-"t": "Le Président de la République en exercice à la date de la promulgation de la présente Constitution nomme le vice-Président de la République, après vérification de ses conditions d'éligibilité par le Conseil constitutionnel. Le Président de la République met fin à ses fonctions.",
+"t": "Abrogé par la loi constitutionnelle n° 2023-693 du 25 juillet 2023.",
 "ital": false,
-"li": false
-},
-{
-"k": "para",
-"t": "Le vice-Président de la République ainsi nommé prête serment, dans les conditions fixées par la loi, devant le Conseil constitutionnel, réuni en audience solennelle.",
-"ital": false,
-"li": false
+"li": false,
+"abroge": true
 },
 {
 "k": "chap",
 "n": "II",
-"t": "DE LA VACANCE DE LA PRESIDENCE DE LA REPUBLIQUE",
-"tt": "De la vacance de la Présidence de la République"
+"t": "ABROGE",
+"tt": "Abrogé"
 },
 {
 "k": "art",
 "n": "180",
 "nouveau": false,
-"annex": false
+"annex": false,
+"abroge": true
 },
 {
 "k": "para",
-"t": "En cas de vacance de la Présidence de la République par décès, démission ou empêchement absolu du Président de la République, les fonctions de Président de la République sont exercées par le vice-Président de la République.",
+"t": "Abrogé par la loi constitutionnelle n° 2023-693 du 25 juillet 2023.",
 "ital": false,
-"li": false
-},
-{
-"k": "para",
-"t": "Le nouveau Président de la République achève le mandat du Président de la République élu. Il ne peut faire usage des articles 70, 75 alinéa 1 et 177. Le vice-Président de la République exerçant les fonctions de Président de la République ne peut pas nommer de vice-Président pendant la durée du mandat restant à courir.",
-"ital": false,
-"li": false
-},
-{
-"k": "para",
-"t": "Si le nouveau Président de la République se trouve à son tour empêché, pour quelque cause que ce soit, les fonctions de Président de la République sont exercées par le Gouvernement dans l’ordre protocolaire.",
-"ital": false,
-"li": false
+"li": false,
+"abroge": true
 },
 {
 "k": "chap",
 "n": "III",
-"t": "DU STATUT DES INSTITUTIONS",
-"tt": "Du statut des institutions"
+"t": "ABROGE",
+"tt": "Abrogé"
 },
 {
 "k": "art",
 "n": "181",
-"nouveau": true,
+"nouveau": false,
 "annex": false,
-"loi": true
+"abroge": true
 },
 {
 "k": "para",
-"t": "Jusqu’à la mise en place des nouvelles Institutions, les Institutions établies continuent d’exercer leurs fonctions et attributions conformément aux lois et règlements en vigueur.",
+"t": "Abrogé par la loi constitutionnelle n° 2023-693 du 25 juillet 2023.",
 "ital": false,
-"li": false
-},
-{
-"k": "para",
-"t": "Les attributions de la Cour suprême sont dévolues respectivement à la Cour de Cassation, s’agissant du contentieux judiciaire, et au Conseil d’Etat, s’agissant du contentieux administratif.",
-"ital": false,
-"li": false
+"li": false,
+"abroge": true
 },
 {
 "k": "art",
 "n": "182",
-"nouveau": true,
+"nouveau": false,
 "annex": false,
-"loi": true
+"abroge": true
 },
 {
 "k": "para",
-"t": "Le mandat du Parlement élu après l’entrée en vigueur de la présente Constitution s’achève en décembre 2020.",
+"t": "Abrogé par la loi constitutionnelle n° 2023-693 du 25 juillet 2023.",
 "ital": false,
-"li": false
-},
-{
-"k": "para",
-"t": "Toutefois, dans l’impossibilité d’organiser les élections des députés et des sénateurs à cette échéance, le Parlement demeure en fonction jusqu’à l’organisation desdites élections.",
-"ital": false,
-"li": false
+"li": false,
+"abroge": true
 },
 {
 "k": "chap",

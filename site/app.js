@@ -798,16 +798,24 @@ function bindGuide() {                                  // la vidéo du mode d'e
 // ---------- actualité juridique et judiciaire en Côte d'Ivoire (data/actus.js) : page #actualites et encadré de l'accueil
 const actuDate = d => new Date(d + 'T12:00:00Z').toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 const actuHost = u => { try { return new URL(u).hostname.replace(/^www\./, ''); } catch (e) { return ''; } };
+// procédures suivies pas à pas sur la page d'une information (data/actus.js : etapes: [procédure, étape atteinte])
+const PROCEDURES = {
+  loi: ['Projet adopté en Conseil des ministres', 'Dépôt sur le bureau d’une chambre', 'Commission puis séance plénière de la première chambre', 'Commission puis séance plénière de la seconde chambre', 'Promulgation par le Président de la République', 'Publication au Journal officiel', 'Entrée en vigueur'],
+  finances: ['Projet adopté en Conseil des ministres', 'Dépôt à l’Assemblée nationale', 'Commission des affaires économiques et financières', 'Séance plénière de l’Assemblée nationale', 'Sénat : commission puis séance plénière', 'Promulgation', 'Publication au Journal officiel', 'Entrée en vigueur le 1er janvier'],
+  ordonnance: ['Loi d’habilitation votée par le Parlement', 'Ordonnance adoptée en Conseil des ministres', 'Publication : l’ordonnance s’applique', 'Dépôt du projet de loi de ratification', 'Examen par les deux chambres : commissions, séances plénières', 'Promulgation et publication de la loi de ratification'],
+};
+const actuHref = a => a.id ? '#actu-' + a.id : '#actualites';
 function actuCard(a, short) {
   const R = (window.RUBRIQUES || {})[a.cat] || [a.cat, '📰'];
+  const more = a.comprendre && a.comprendre.length;
   return `<article class="actu" data-cat="${esc(a.cat)}"><div class="actu-m"><span class="tag">${R[1]} ${esc(R[0])}</span><time datetime="${esc(a.d)}">${actuDate(a.d)}</time></div>
-    <h3>${esc(a.titre)}</h3>${short ? '' : `<p>${esc(a.texte)}</p>`}
-    <div class="actu-f">${a.src ? `<a class="actu-src" href="${esc(a.src[1])}" target="_blank" rel="noopener noreferrer">Source : ${esc(a.src[0])} <span aria-hidden="true">↗</span></a>` : ''}
-    ${!short && a.cours && a.cours.length ? `<span class="actu-c">Pour comprendre : ${a.cours.map(([t, h]) => `<a href="${esc(h)}">${esc(t)}</a>`).join(' · ')}</span>` : ''}</div></article>`;
+    <h3>${a.id ? `<a href="${actuHref(a)}">${esc(a.titre)}</a>` : esc(a.titre)}</h3>${short ? '' : `<p>${esc(a.texte)}</p>`}
+    ${more ? `<a class="actu-go" href="${actuHref(a)}">🎓 Comprendre cette actualité <span aria-hidden="true">→</span></a>` : ''}
+    ${short ? '' : `<div class="actu-f">${a.src ? `<a class="actu-src" href="${esc(a.src[1])}" target="_blank" rel="noopener noreferrer">Source : ${esc(a.src[0])} <span aria-hidden="true">↗</span></a>` : ''}</div>`}</article>`;
 }
 function actusHome() {
   const A = window.ACTUS; if (!A || !A.items || !A.items.length) return '';
-  return `<div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Actualité juridique</h2><p>Les dernières nouvelles du droit et de la justice en Côte d’Ivoire, résumées et reliées aux leçons.</p></div>
+  return `<div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Actualité juridique</h2><p>Les dernières nouvelles du droit et de la justice en Côte d’Ivoire, expliquées pas à pas et reliées aux leçons.</p></div>
     <section class="actus-home">${A.items.slice(0, 3).map(a => actuCard(a, true)).join('')}
     <a class="btn ghost small" href="#actualites">Toute l’actualité juridique</a></section>`;
 }
@@ -815,7 +823,7 @@ function viewActus() {
   const A = window.ACTUS || { items: [] }, R = window.RUBRIQUES || {};
   const cats = Object.keys(R).filter(k => A.items.some(a => a.cat === k));
   return `${crumbs(['Actualité juridique'])}<div class="page actus-page"><h1>Actualité juridique et judiciaire</h1>
-    <p class="lead">Lois, réformes de la justice, institutions, concours : l’essentiel de l’actualité du droit en Côte d’Ivoire, résumé simplement. Chaque information renvoie à sa source et, quand c’est possible, à la leçon qui aide à la comprendre.</p>
+    <p class="lead">Lois, justice, institutions, concours : l’actualité du droit en Côte d’Ivoire, lue avec un regard de juriste. Chaque information est accompagnée d’un commentaire qui explique les notions et les mécanismes qu’elle met en jeu (commissions, majorités, navette, promulgation, juridictions…), des textes en vigueur qui s’appliquent et d’un petit test.</p>
     <p class="meta">Mise à jour : ${A.maj ? actuDate(A.maj) : '—'} · ${A.items.length} information${A.items.length > 1 ? 's' : ''}</p>
     ${cats.length > 1 ? `<div class="chips actu-chips" role="group" aria-label="Rubriques"><button type="button" class="chip" aria-pressed="true" data-acat="">Tout</button>${cats.map(k => `<button type="button" class="chip" aria-pressed="false" data-acat="${k}">${R[k][1]} ${esc(R[k][0])}</button>`).join('')}</div>` : ''}
     <div class="actus">${A.items.map(a => actuCard(a, false)).join('')}</div>
@@ -827,6 +835,39 @@ function bindActus() {
     document.querySelectorAll('[data-acat]').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
     document.querySelectorAll('.actus .actu').forEach(el => { el.hidden = !!c && el.dataset.cat !== c; });
   });
+}
+const actuFind = id => ((window.ACTUS || {}).items || []).find(a => a.id === id);
+function actuSteps(e) {
+  const P = PROCEDURES[e[0]]; if (!P) return '';
+  return `<section class="actu-sec"><h2>Où en est le texte ?</h2><ol class="psteps">${P.map((t, i) => `<li class="${i < e[1] ? 'done' : i === e[1] ? 'here' : 'next'}"${i === e[1] ? ' aria-current="step"' : ''}><span class="pn" aria-hidden="true">${i < e[1] ? '✓' : i + 1}</span><span class="pt">${esc(t)}${i === e[1] ? ' <b class="pnow">← cette actualité</b>' : ''}</span></li>`).join('')}</ol></section>`;
+}
+function viewActu(id) {
+  const a = actuFind(id); if (!a) return viewActus();
+  const R = (window.RUBRIQUES || {})[a.cat] || [a.cat, '📰'];
+  const T = a.test || [];
+  return `${crumbs(['Actualité juridique', 'actualites'], [a.titre.length > 48 ? a.titre.slice(0, 46) + '…' : a.titre])}<div class="page actu-page">
+    <div class="actu-m"><span class="tag">${R[1]} ${esc(R[0])}</span><time datetime="${esc(a.d)}">${actuDate(a.d)}</time></div>
+    <h1>${esc(a.titre)}</h1>
+    <section class="actu-sec actu-fait"><h2>L’information</h2><p>${esc(a.texte)}</p>
+      ${a.src ? `<p class="actu-f"><a class="actu-src" href="${esc(a.src[1])}" target="_blank" rel="noopener noreferrer">Source : ${esc(a.src[0])} <span aria-hidden="true">↗</span></a></p>` : ''}</section>
+    ${a.etapes ? actuSteps(a.etapes) : ''}
+    ${a.comprendre && a.comprendre.length ? `<section class="actu-sec"><h2>Comprendre cette actualité</h2><p class="meta">Les questions qu’un étudiant de première année se pose en lisant cette information, et les réponses du cours.</p>
+      ${a.comprendre.map(([q, r], i) => `<div class="cq"><h3><span class="cqn">${i + 1}</span>${md(q)}</h3><p>${md(r)}</p></div>`).join('')}</section>` : ''}
+    ${a.retenir ? `<div class="box cle"><b class="k">À retenir</b><div>${md(a.retenir)}</div></div>` : ''}
+    ${a.textes && a.textes.length ? `<section class="actu-sec"><h2>Textes cités</h2><ul class="actu-txt">${a.textes.map(t => `<li>${md(t)}</li>`).join('')}</ul>
+      <p class="meta">Vérifiés en vigueur le ${actuDate(a.verif || (window.ACTUS || {}).maj)}, dans leur dernière rédaction (Constitution de 2016 révisée en 2020 et en 2023). La <a href="#bibliotheque-droit">Constitution</a> est dans la bibliothèque.</p></section>` : ''}
+    ${T.length ? `<section class="actu-sec"><h2>Testez-vous</h2><div class="atest">${T.map(([q, opts, e], i) => `<div class="atq" data-i="${i}"><p class="atq-q">${md(q)}</p><div class="atq-o">${shuffle(opts.map((o, k) => [o, k])).map(([o, k]) => `<button type="button" class="opt" data-ok="${k === 0 ? 1 : 0}">${md(o)}</button>`).join('')}</div><p class="atq-e" hidden>${md(e)}</p></div>`).join('')}</div></section>` : ''}
+    ${a.cours && a.cours.length ? `<section class="actu-sec"><h2>Pour aller plus loin dans le cours</h2><div class="actu-cours">${a.cours.map(([t, h]) => `<a class="btn ghost small" href="${esc(h)}">📘 ${esc(t)}</a>`).join('')}</div></section>` : ''}
+    <p class="actu-back"><a href="#actualites">← Toute l’actualité juridique</a></p></div>`;
+}
+function bindActu() {
+  document.querySelectorAll('.atq').forEach(q => q.querySelectorAll('.opt').forEach(b => b.onclick = () => {
+    if (q.classList.contains('done')) return; q.classList.add('done');
+    q.querySelectorAll('.opt').forEach(x => { x.disabled = true; if (x.dataset.ok === '1') x.classList.add('right'); });
+    if (b.dataset.ok !== '1') b.classList.add('wrong');
+    const e = q.querySelector('.atq-e'); e.hidden = false;
+    e.insertAdjacentHTML('afterbegin', `<b>${b.dataset.ok === '1' ? 'Bonne réponse.' : 'Pas tout à fait.'}</b> `);
+  }));
 }
 // ---------- vidéo de présentation (accueil) : lecture automatique sans le son, sauf économie de données ou animations réduites
 const HV_ICON = { pause: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3v14H7zM14 5h3v14h-3z"/></svg>', play: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>',
@@ -1105,7 +1146,7 @@ function viewQuiz(s) {
       <div class="actions"><button type="button" class="btn ghost" data-eval-finish>Terminer et voir mon résultat</button></div></div>
       <div class="qresult" id="qresult" hidden></div>
       <div class="actions" id="quiz-end" hidden><a class="btn ghost" href="#m-${s.id}">Retour au parcours</a></div>
-      <div class="cert-panel ok" id="quiz-cert" hidden><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Parcours réussi !</b><small>Toutes les leçons sont terminées et l’évaluation est réussie : votre certificat vous attend.</small></div><a class="btn small" href="#m-${s.id}">Obtenir mon certificat</a></div>
+      <div class="cert-panel ok" id="quiz-cert" hidden><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Parcours réussi !</b><small>Toutes les leçons sont terminées et l’évaluation est réussie : votre certificat vous attend.</small><a class="avis-cta" href="${avisHash((singleSpace(space(spaceOf(s))) ? 'e:' + spaceOf(s) : 'p:' + s.id))}"><span aria-hidden="true">⭐</span> Donner mon avis sur ce parcours</a></div><a class="btn small" href="#m-${s.id}">Obtenir mon certificat</a></div>
     </div>
     <aside class="qside c-${s.color}" aria-label="Évaluation"><span class="eyebrow">Temps restant</span><span class="ring" id="qs-ring" style="--p:100">${Math.round(total / 60)}:00</span>
       <b id="qs-t">0 / ${N} réponses</b><span class="meta" id="qs-m">Les réponses ne sont corrigées qu’à la fin.</span>
@@ -1313,7 +1354,7 @@ const PAGES = {
     { box: 'Les contenus de droit résument des cours et des textes publics : vérifiez toujours avec vos enseignants.', title: 'À savoir', kind: 'marge' },
   ] },
   confidentialite: { title: 'Politique de confidentialité', body: [
-    { p: '*Dernière mise à jour : 12 novembre 2026.*' },
+    { p: '*Dernière mise à jour : 19 novembre 2026.*' },
     { p: 'Les Éditions Lisân attachent une grande importance à la protection de vos données personnelles, conformément à la **loi ivoirienne n° 2013-450 du 19 juin 2013** relative à la protection des données à caractère personnel.' },
     { h: '1. Responsable du traitement' },
     { p: 'Éditions Lisân, représentées par Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Contact : la page [Contact](#contact) du site.' },
@@ -1323,6 +1364,7 @@ const PAGES = {
       '**Si vous vous inscrivez à un espace** : votre fiche d’inscription (civilité, nom, prénoms, date de naissance, téléphone, pays de résidence, situation actuelle et, si vous choisissez de les indiquer, votre ville, votre établissement, votre filière, votre niveau d’études, votre classe, votre formation, votre profession, votre projet d’études et l’année prévue pour le commencer ou le reprendre, ainsi que la manière dont vous avez connu le site ; pour les moins de 18 ans, le nom et le téléphone d’un parent ou tuteur), vos réponses aux questions de l’espace, vos inscriptions et votre progression.',
       '**Si vous obtenez un certificat** : vos civilité, prénom et nom, le parcours réussi, le nombre de leçons, le score à l’évaluation et la date. Ces informations sont inscrites au registre des certificats : **toute personne qui connaît le numéro du certificat** (ou scanne son code QR) peut les consulter, afin de vérifier qu’il est authentique. Aucune autre donnée n’y figure.',
       '**Si vous envoyez une suggestion** : son texte, son type et la leçon concernée, enregistrés avec votre fiche pour que nous puissions vous répondre.',
+      '**Si vous donnez votre avis** à la fin d’un parcours ou d’un espace : votre note (de 1 à 5 étoiles), vos impressions et vos suggestions d’amélioration, enregistrées avec votre fiche. Elles servent à améliorer les cours ; la note n’a aucune incidence sur le certificat.',
       '**Qui y a accès** : seuls les Éditions Lisân, administrateur du site, consultent les comptes, les fiches d’inscription et la progression enregistrée dans les comptes (leçons terminées, résultats aux évaluations, temps d’étude), pour gérer les inscriptions, suivre et encourager les élèves et les contacter au sujet de leurs cours.',
       '**Si vous nous écrivez** par le formulaire de contact : votre nom, votre adresse e-mail et votre message, uniquement pour vous répondre.'] },
     { p: 'Ces données servent à **gérer vos inscriptions**, à **adapter les cours** à nos élèves et à **vous contacter au sujet de vos cours**. Vous ne recevez nos nouveautés que si vous l’avez demandé dans votre fiche. Vos données ne sont **ni vendues, ni cédées**.' },
@@ -1427,10 +1469,12 @@ function route() {
   else if (h.startsWith('certificat-') && AUTH()) { const n = h.slice(11); html = viewCert(n); after = () => bindCert(n); }
   else if (h === 'verifier' || h.startsWith('verifier-')) { const n = h.slice(9); html = viewVerify(n); after = () => bindVerify(n); }
   else if (h === 'suggestion') { html = viewSuggest(); after = bindSuggest; }
+  else if (h.startsWith('avis-')) { const k = h.slice(5).replace('~', ':'); html = viewAvis(k); after = () => bindAvis(k); }
   else if (h === 'contact') { html = viewContact(); after = bindContact; }
   else if (PAGES[h]) html = viewPage(h);
   else if (h === 'guide') { html = viewGuide(); after = bindGuide; }
   else if (h === 'actualites') { html = viewActus(); after = bindActus; }
+  else if (h.startsWith('actu-')) { const id = h.slice(5); html = viewActu(id); after = actuFind(id) ? bindActu : bindActus; }
   else { html = viewHome(); after = () => { bindHeroVideo(); bindGuide(); }; }
   V.innerHTML = html;
   V.classList.remove('enter', 'leave'); void V.offsetWidth; if (V.firstElementChild && !V.querySelector('.home-hero')) V.classList.add('enter');

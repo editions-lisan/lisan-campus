@@ -1,5 +1,5 @@
-// Constitution de la République de Côte d'Ivoire (loi n° 2016-886 du 8 novembre 2016, telle que modifiée par la loi
-// constitutionnelle n° 2020-348 du 19 mars 2020) : édition de la bibliothèque de Lisân Campus, mise en pages comme les
+// Constitution de la République de Côte d'Ivoire (loi n° 2016-886 du 8 novembre 2016, telle que modifiée par les lois
+// constitutionnelles n° 2020-348 du 19 mars 2020 et n° 2023-693 du 25 juillet 2023) : édition de la bibliothèque de Lisân Campus, mise en pages comme les
 // documents de cours (Paged.js puis Chromium), avec un sommaire détaillé et des signets.
 // Texte : constitution.json, produit par extract.py à partir du document source.
 // Usage : DEPS=/chemin/node_modules node outils/constitution/build_constitution.js
@@ -12,7 +12,8 @@ const WORK = path.join(require('os').tmpdir(), 'lisan-cours'); fs.mkdirSync(WORK
 const items = JSON.parse(fs.readFileSync(path.join(__dirname, 'constitution.json'), 'utf8'));
 
 const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-const txt = s => hy(esc(s).replace(/\bn° /g, 'n° ').replace(/(\d) (\d{3})\b/g, '$1 $2'));
+const txt = s => hy(esc(s).replace(/\bn° /g, 'n°\u00a0').replace(/(\d) (\d{3})\b/g, '$1 $2'));
+const LOIS = { 2020: 'n°\u00a02020-348 du 19 mars 2020', 2023: 'n°\u00a02023-693 du 25 juillet 2023' };
 const chapName = n => n === 'PREMIER' ? 'Chapitre premier' : 'Chapitre ' + n;
 const artName = n => n === '1' || n === 'PREMIER' ? 'Article premier' : 'Article ' + n;
 
@@ -46,18 +47,18 @@ items.forEach((x, i) => {
     case 'art': {
       const id = annex ? '' : ` id="a${x.n}"`;
       body += `<h3 class="art"${id}>${artName(x.n)}${x.nouveau ? ' <span class="nv">nouveau</span>' : ''}</h3>`;
-      if (x.loi && !annex) body += `<p class="loi">Rédaction issue de la loi constitutionnelle n° 2020-348 du 19 mars 2020</p>`;
+      if (x.loi && !annex) body += `<p class="loi">Rédaction issue de la loi constitutionnelle ${LOIS[x.loi]}</p>`;
       break; }
     case 'annexe':
       annex = true; body += `</div><div class="part annex"><h1 id="annexe" data-run="Annexe · Loi constitutionnelle n° 2020-348"><span class="tn">Annexe</span><span class="sep"> · </span><br>Loi constitutionnelle n° 2020-348 du 19 mars 2020</h1>`; break;
     case 'annexhead':
       body += `<p class="axsub">modifiant la loi n° 2016-886 du 8 novembre 2016 portant Constitution de la République de Côte d’Ivoire</p>
-        <p class="axnote">Texte de la loi de révision, tel qu’il a été promulgué. Ses dispositions sont déjà intégrées, sous la mention « nouveau », dans le texte de la Constitution qui précède.</p>`; break;
+        <p class="axnote">Texte de la loi de révision, tel qu’il a été promulgué. Ses dispositions sont intégrées, sous la mention « nouveau », dans le texte de la Constitution qui précède, à l’exception de celles que la loi constitutionnelle n° 2023-693 du 25 juillet 2023 a depuis modifiées (articles 90 et 94) ou abrogées (articles 181 et 182).</p>`; break;
     case 'para': {
       const m = x.t.match(/^(Fait à Abidjan, le [^A-Z]+?\d{4})\s+(.+)$/);
       if (m) { body += `<p class="sign">${esc(m[1])}<br><b>${esc(m[2])}</b></p>`; break; }
       if (x.li) { (list = list || []).push(`<li>${txt(x.t)}</li>`); break; }
-      body += `<p${x.ital ? ' class="serment"' : ''}>${txt(x.t)}</p>`; break; }
+      body += `<p${x.abroge ? ' class="abr"' : x.ital ? ' class="serment"' : ''}>${txt(x.t)}</p>`; break; }
   }
 });
 flush(); body = body.replace(/^<\/div>/, '') + '</div>';
@@ -142,6 +143,7 @@ h3.art{font:700 10.6pt/1.3 Atk;color:var(--navy);margin:5mm 0 1.6mm;padding-left
 p.loi{font:400 8.2pt Atk;color:var(--mut);margin:-.6mm 0 1.8mm 3.7mm;break-after:avoid}
 ul{margin:0 0 2.4mm;padding-left:6mm} li{margin:0 0 .9mm;text-align:justify}
 ul li::marker{color:var(--gold)}
+p.abr{font-style:italic;color:var(--mut);margin-left:3.7mm}
 p.serment{font-style:italic;margin-left:6mm;margin-right:4mm;color:#26304a}
 .annex{font-size:9.6pt}
 .annex h3.art{font-size:9.8pt;margin-top:3.6mm}
@@ -156,12 +158,12 @@ const html = `<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>
 <script>window.PagedConfig={auto:true,after:()=>{window.__done=true}}</script>
 <script src="file://${path.join(DEPS, 'pagedjs/dist/paged.polyfill.js')}"></script></head><body>
 <section class="cover"><div class="band">${KHATAM}<p class="lvl">Bibliothèque · Textes officiels</p><p class="ct">Constitution de la République de Côte d’Ivoire</p>
-<p class="cs">Loi n° 2016-886 du 8 novembre 2016, telle que modifiée par la loi constitutionnelle n° 2020-348 du 19 mars 2020</p></div>
-<div class="cbot"><p class="cby">Texte intégral à jour de la révision du 19 mars 2020</p><p class="cy">Préambule · ${nArt} articles · seize titres</p>
-<p class="cn">Sommaire détaillé, articles modifiés en 2020 signalés, loi de révision en annexe</p>
+<p class="cs">Loi n° 2016-886 du 8 novembre 2016, telle que modifiée par les lois constitutionnelles n° 2020-348 du 19 mars 2020 et n° 2023-693 du 25 juillet 2023</p></div>
+<div class="cbot"><p class="cby">Texte intégral à jour des révisions de 2020 et de 2023</p><p class="cy">Préambule · ${nArt} articles · seize titres</p>
+<p class="cn">Sommaire détaillé, articles modifiés en 2020 et en 2023 signalés, loi de révision de 2020 en annexe</p>
 <div class="brand"><img src="file://${path.join(SITE, 'logo.png')}" alt=""><div><b>Lisân Campus</b><span>Éditions Lisân · édition numérique</span></div></div></div></section>
 <section class="front"><h2 class="fh">Sommaire</h2><ol class="toc">${tocHTML}</ol>
-<p class="note">La Constitution du 8 novembre 2016 est reproduite dans sa rédaction issue de la loi constitutionnelle n° 2020-348 du 19 mars 2020 : les ${nNew} articles modifiés portent la mention « nouveau », et la loi de révision est reproduite en annexe. Seul le texte publié au Journal officiel de la République de Côte d’Ivoire fait foi.</p></section>
+<p class="note">La Constitution du 8 novembre 2016 est reproduite dans sa rédaction issue des lois constitutionnelles n° 2020-348 du 19 mars 2020 et n° 2023-693 du 25 juillet 2023 : les ${nNew} articles modifiés portent la mention « nouveau » et l’indication de la loi qui leur a donné leur rédaction actuelle. La révision de 2023 a modifié les articles 90, 94 et 107 (deux sessions ordinaires du Parlement, droit d’amendement du Président de la République) et abrogé les articles 179 à 182, dispositions transitoires devenues sans objet. La loi de révision de 2020 est reproduite en annexe. Seul le texte publié au Journal officiel de la République de Côte d’Ivoire fait foi.</p></section>
 ${body}</body></html>`;
 
 (async () => {

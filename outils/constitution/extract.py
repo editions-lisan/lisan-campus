@@ -1,5 +1,6 @@
-# Extrait la Constitution (loi n° 2016-886 du 8 novembre 2016, telle que modifiée par la loi constitutionnelle n° 2020-348
-# du 19 mars 2020) du PDF source et la range dans constitution.json : préambule, titres, chapitres, articles, paragraphes.
+# Extrait la Constitution (loi n° 2016-886 du 8 novembre 2016, telle que modifiée par les lois constitutionnelles n° 2020-348
+# du 19 mars 2020 et n° 2023-693 du 25 juillet 2023) du PDF source et la range dans constitution.json : préambule, titres,
+# chapitres, articles, paragraphes. Le document source s'arrête à la révision de 2020 : celle de 2023 est reportée plus bas (REV2023).
 # Usage : python3 outils/constitution/extract.py <source.pdf>
 import json, re, sys, unicodedata
 import pymupdf as fitz
@@ -85,7 +86,7 @@ for ln in L:
         continue
     m = RE_LOI.match(t)
     if m:
-        a = next(x for x in reversed(items) if x['k'] == 'art'); a['loi'] = True; end_para()
+        a = next(x for x in reversed(items) if x['k'] == 'art'); a['loi'] = '2020'; end_para()
         if m.group(1).strip(): add_para(m.group(1).strip(), False, False)
         continue
     # intitulé d'un titre ou d'un chapitre (lignes en gras, centrées)
@@ -144,11 +145,42 @@ for x in items[k + 1:j]:
 # la rédaction en vigueur est celle de la loi constitutionnelle n° 2020-348 (reprise de l'annexe)
 k, j = article('62', False); ka, ja = article('62', True)
 items[k + 1:j] = [dict(x) for x in items[ka + 1:ja]]
-items[k]['nouveau'] = True; items[k]['loi'] = True
+items[k]['nouveau'] = True; items[k]['loi'] = '2020'
 # annexe : « CHAPITRE 4 NOUVEAU », intitulé sur la ligne suivante
 for i, x in enumerate(items):
     if x['k'] == 'chap' and x['n'] == '4' and x['t'] == 'NOUVEAU' and items[i + 1]['k'] == 'para':
         x['t'] = items[i + 1]['t']; x['nouveau'] = True; del items[i + 1]; break
+# révision du 25 juillet 2023 (loi constitutionnelle n° 2023-693, adoptée par le Congrès le 25 juillet 2023, jugée conforme
+# par la décision du Conseil constitutionnel n° CI-2023-007/DCC/04-08/CC/SG du 4 août 2023) : articles 90, 94 et 107
+# nouveaux ; chapitres 1 à 3 du titre XVI (articles 179 à 182) abrogés. Texte vérifié sur l'édition consolidée de la
+# Présidence de la République (presidence.ci, juin 2025).
+REV2023 = {
+ '90': ['Les pouvoirs de chaque chambre expirent à la fin de la deuxième session ordinaire de la dernière année de sa législature.',
+        'Les élections des députés et des sénateurs ont lieu après l’élection présidentielle.',
+        'Toutefois, dans l’impossibilité d’organiser les élections des députés et des sénateurs, le Parlement demeure en fonction jusqu’à l’organisation desdites élections.',
+        'Une loi organique fixe le nombre des membres de chaque chambre, les conditions d’éligibilité et de nomination, le régime des inéligibilités et incompatibilités, les modalités de scrutin ainsi que les conditions dans lesquelles il y a lieu d’organiser de nouvelles élections ou de procéder à de nouvelles nominations, en cas de vacance de siège de député ou de sénateur.',
+        'Le statut des parlementaires, le montant de leurs indemnités et leurs avantages sont déterminés par la loi organique.'],
+ '94': ['Chaque année, le Parlement se réunit de plein droit en deux sessions ordinaires.',
+        'La première session de l’Assemblée nationale commence le troisième lundi ouvrable du mois de janvier et prend fin le dernier jour ouvrable du mois de juin.',
+        'La première session du Sénat commence sept jours ouvrables après celle de l’Assemblée nationale et prend fin sept jours ouvrables avant la clôture de la première session de l’Assemblée nationale.',
+        'La deuxième session de l’Assemblée nationale commence le premier jour ouvrable du mois d’octobre et prend fin le dernier jour ouvrable du mois de décembre.',
+        'La deuxième session du Sénat commence sept jours ouvrables après celle de l’Assemblée nationale et prend fin sept jours ouvrables avant la clôture de la deuxième session de l’Assemblée nationale.',
+        'Chaque chambre fixe le nombre de jours des séances qu’elle peut tenir au cours des sessions ordinaires.',
+        'Toutefois, en cas de nécessité justifiée par les circonstances, l’Assemblée nationale et le Sénat se réunissent en Congrès, à la demande du Président de la République, et procèdent exceptionnellement au réaménagement de la durée de leurs sessions ordinaires.'],
+ '107': ['Le Président de la République et les membres du Parlement ont le droit d’amendement. Les amendements du Président de la République sont présentés par les membres du Gouvernement.',
+         'Les propositions et amendements déposés par les membres du Parlement ne sont pas recevables lorsque leur adoption aurait pour conséquence, soit une diminution des ressources publiques, soit la création ou l’aggravation d’une charge publique, à moins qu’ils ne soient accompagnés d’une proposition d’augmentation de recettes ou d’économies équivalentes.'],
+}
+for n, ps in REV2023.items():
+    k, j = article(n, False)
+    items[k + 1:j] = [{'k': 'para', 't': t, 'ital': False, 'li': False} for t in ps]
+    items[k]['nouveau'] = True; items[k]['loi'] = '2023'
+for n in ('179', '180', '181', '182'):
+    k, j = article(n, False)
+    items[k + 1:j] = [{'k': 'para', 't': 'Abrogé par la loi constitutionnelle n° 2023-693 du 25 juillet 2023.', 'ital': False, 'li': False, 'abroge': True}]
+    items[k]['nouveau'] = False; items[k].pop('loi', None); items[k]['abroge'] = True
+t16 = next(i for i, x in enumerate(items) if x['k'] == 'titre' and x['n'] == 'XVI')
+for x in items[t16:]:
+    if x['k'] == 'chap' and x['n'] in ('I', 'II', 'III'): x['t'] = 'ABROGE'
 # intitulés lisibles (le document source les écrit en capitales sans accents)
 TT = {
  'DES DROITS, DES LIBERTES ET DES DEVOIRS': 'Des droits, des libertés et des devoirs', 'DES DROITS ET DES LIBERTES': 'Des droits et des libertés',
@@ -185,7 +217,7 @@ TT = {
  'DES LIMITES AU POUVOIR DE REVISION': 'Des limites au pouvoir de révision', 'DES DISPOSITIONS TRANSITOIRES ET FINALES': 'Des dispositions transitoires et finales',
  'DE LA DESIGNATION DU VICE-PRESIDENT DE LA REPUBLIQUE': 'De la désignation du vice-Président de la République',
  'DE LA VACANCE DE LA PRESIDENCE DE LA REPUBLIQUE': 'De la vacance de la Présidence de la République', 'DU STATUT DES INSTITUTIONS': 'Du statut des institutions',
- 'DE LA CONTINUITE LEGISLATIVE': 'De la continuité législative', 'DE L’ENTREE EN VIGUEUR DE LA CONSTITUTION': 'De l’entrée en vigueur de la Constitution',
+ 'ABROGE': 'Abrogé', 'DE LA CONTINUITE LEGISLATIVE': 'De la continuité législative', 'DE L’ENTREE EN VIGUEUR DE LA CONSTITUTION': 'De l’entrée en vigueur de la Constitution',
 }
 for x in items:
     if x['k'] in ('titre', 'chap', 'sect'):

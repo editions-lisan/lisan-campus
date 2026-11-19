@@ -39,8 +39,8 @@ function certPanelSubject(s) {
   const sp = space(spaceOf(s));
   if (singleSpace(sp)) return certPanelSpace(sp);
   const st = parcoursStatus(s), mine = myCertFor(A, 'p:' + s.id);
-  if (mine) return `<div class="cert-panel ok"><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Votre certificat de réussite est prêt.</b><small>N° ${esc(mine.num)} · délivré le ${dateFr(mine.date)}</small></div><a class="btn small" href="#certificat-${mine.num}">Voir mon certificat</a></div>`;
-  if (st.ok) return `<div class="cert-panel ok"><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Félicitations ! Vous avez terminé ce parcours.</b><small>Votre certificat de réussite vous attend.</small></div>${issueBtn('parcours', s.id, sp)}</div>`;
+  if (mine) return `<div class="cert-panel ok"><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Votre certificat de réussite est prêt.</b><small>N° ${esc(mine.num)} · délivré le ${dateFr(mine.date)}</small>${avisLine('p:' + s.id)}</div><a class="btn small" href="#certificat-${mine.num}">Voir mon certificat</a></div>`;
+  if (st.ok) return `<div class="cert-panel ok"><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Félicitations ! Vous avez terminé ce parcours.</b><small>Votre certificat de réussite vous attend.${avisAsk('p:' + s.id)}</small>${avisLine('p:' + s.id)}</div>${issueBtn('parcours', s.id, sp)}</div>`;
   return `<div class="cert-panel"><span class="cp-ic" aria-hidden="true">🎓</span><div><b>Certificat de réussite</b><ul class="cp-list">
     <li class="${st.p.d === st.p.n ? 'ok' : ''}">Terminer les ${st.p.n} leçons <span>(${st.p.d} / ${st.p.n})</span></li>
     ${st.needQuiz ? `<li class="${st.qok ? 'ok' : ''}">Réussir l’évaluation avec au moins ${CERT_QUIZ} % <span>(${st.q === undefined ? 'pas encore fait' : 'meilleur score : ' + st.q + ' %'})</span></li>` : ''}</ul></div></div>`;
@@ -49,8 +49,8 @@ function certPanelSpace(sp) {
   const A = AUTH(); if (!A) return '';
   const st = spaceStatus(sp), mine = myCertFor(A, 'e:' + sp.id), one = singleSpace(sp);
   const title = one ? 'Certificat de réussite' : 'Grand certificat de l’espace';
-  if (mine) return `<div class="cert-panel ok gold"><span class="cp-ic" aria-hidden="true">🏅</span><div><b>Votre ${title.toLowerCase()} est prêt.</b><small>N° ${esc(mine.num)} · délivré le ${dateFr(mine.date)}</small></div><a class="btn small" href="#certificat-${mine.num}">Voir mon certificat</a></div>`;
-  if (st.ok) return `<div class="cert-panel ok gold"><span class="cp-ic" aria-hidden="true">🏅</span><div><b>Bravo ! Vous avez terminé ${one ? 'ce parcours' : 'toutes les leçons de cet espace'}.</b><small>Votre ${title.toLowerCase()} vous attend.</small></div>${issueBtn('espace', sp.id, sp)}</div>`;
+  if (mine) return `<div class="cert-panel ok gold"><span class="cp-ic" aria-hidden="true">🏅</span><div><b>Votre ${title.toLowerCase()} est prêt.</b><small>N° ${esc(mine.num)} · délivré le ${dateFr(mine.date)}</small>${avisLine('e:' + sp.id)}</div><a class="btn small" href="#certificat-${mine.num}">Voir mon certificat</a></div>`;
+  if (st.ok) return `<div class="cert-panel ok gold"><span class="cp-ic" aria-hidden="true">🏅</span><div><b>Bravo ! Vous avez terminé ${one ? 'ce parcours' : 'toutes les leçons de cet espace'}.</b><small>Votre ${title.toLowerCase()} vous attend.${avisAsk('e:' + sp.id)}</small>${avisLine('e:' + sp.id)}</div>${issueBtn('espace', sp.id, sp)}</div>`;
   if (one) { const s = st.ss[0], ps = st.st[0];
     return `<div class="cert-panel"><span class="cp-ic" aria-hidden="true">🎓</span><div><b>${title}</b><ul class="cp-list">
       <li class="${ps.p.d === ps.p.n ? 'ok' : ''}">Terminer les ${ps.p.n} leçons <span>(${ps.p.d} / ${ps.p.n})</span></li>
@@ -194,6 +194,83 @@ function bindVerify(num) {
   if (num) check(num);
 }
 
+// ---------- avis des élèves : à la fin de chaque parcours (clé « p:<parcours> ») et de chaque espace (clé « e:<espace> »)
+// Une note de 1 à 5 étoiles, des impressions et des suggestions d'amélioration ; enregistrés dans la fiche de l'élève
+// (rubrique « suggestions », type « avis », une entrée par parcours ou espace, modifiable) et lus dans l'onglet Avis de #admin.
+// AVIS_POUR_CERTIFICAT : 'non' = avis toujours facultatif ; 'note' = la note en étoiles est demandée avant la délivrance
+// d'un certificat (impressions et suggestions facultatives) ; 'complet' = note et impressions demandées.
+const AVIS_POUR_CERTIFICAT = 'note';
+const AVIS_NOTES = ['', 'Décevant', 'Moyen', 'Bien', 'Très bien', 'Excellent'];
+const avisHash = key => '#avis-' + key.replace(':', '~');
+const myAvis = key => { const A = AUTH(); return A && A.user() && A.avisFor ? A.avisFor(key) : null; };
+const starsTxt = n => '★'.repeat(n) + '☆'.repeat(5 - n);
+let avisNext = null;                                     // certificat à délivrer juste après l'avis : { kind, id }
+function avisTarget(key) {
+  const [t, id] = String(key).split(':');
+  if (t === 'p') { const s = subj(id); if (!s) return null; const sp = space(spaceOf(s)); return { kind: 'parcours', obj: s, titre: s.title, sp, ok: parcoursStatus(s).ok, back: '#m-' + s.id }; }
+  if (t === 'e') { const sp = space(id); if (!sp) return null; return { kind: 'espace', obj: sp, titre: sp.title, sp, ok: spaceStatus(sp).ok, back: '#espace-' + sp.id }; }
+  return null;
+}
+function avisLine(key) {                                 // dans les bandeaux de fin de parcours ou d'espace
+  const A = AUTH(); if (!A || !A.user()) return '';
+  const a = myAvis(key);
+  return a ? `<small class="avis-done">Votre avis : <span class="st" aria-label="${a.note} étoile${a.note > 1 ? 's' : ''} sur 5">${starsTxt(a.note)}</span> · <a href="${avisHash(key)}">modifier</a></small>`
+    : `<a class="avis-cta" href="${avisHash(key)}"><span aria-hidden="true">⭐</span> Donner mon avis sur ${key[0] === 'e' ? 'cet espace' : 'ce parcours'}</a>`;
+}
+const avisAsk = key => AVIS_POUR_CERTIFICAT !== 'non' && !myAvis(key) && !(AUTH() && AUTH().certFor && AUTH().user() && AUTH().certFor(key)) ? ' Avant de le recevoir, vous donnerez votre avis en quelques secondes.' : '';
+function viewAvis(key) {
+  const A = AUTH(), T = avisTarget(key), head = T ? crumbs([T.sp.title, 'espace-' + T.sp.id], ['Votre avis']) : crumbs(['Votre avis']);
+  if (!T) return `${head}<div class="enroll"><h1>Votre avis</h1><p>Ce parcours n’existe pas.</p></div>`;
+  if (!A) return `${head}<div class="enroll"><h1>Votre avis</h1><p>Écrivez-nous depuis la page <a href="#contact">Contact</a>.</p></div>`;
+  if (!A.user()) return `${head}<div class="gate"><span class="sp-icon" aria-hidden="true">⭐</span><h1>Votre avis</h1><p class="lead">Connectez-vous pour donner votre avis sur « ${esc(T.titre)} ».</p>
+    <div class="actions"><button type="button" class="btn" data-auth="signin">Se connecter avec Google</button></div></div>`;
+  if (!T.ok) return `${head}<div class="enroll"><h1>Votre avis sur « ${esc(T.titre)} »</h1><p class="lead">Vous pourrez donner votre avis une fois ${T.kind === 'espace' ? 'cet espace terminé' : 'ce parcours terminé (toutes les leçons et l’évaluation réussie)'}.</p>
+    <div class="actions"><a class="btn" href="${T.back}">Revenir ${T.kind === 'espace' ? 'à l’espace' : 'au parcours'}</a></div></div>`;
+  const a = myAvis(key) || {}, gate = !!(avisNext && avisHash(avisNext.kind === 'parcours' ? 'p:' + avisNext.id : 'e:' + avisNext.id) === avisHash(key));
+  const needImp = AVIS_POUR_CERTIFICAT === 'complet' && gate;
+  const what = T.kind === 'espace' ? 'cet espace' : 'ce parcours';
+  return `${head}<div class="enroll avis"><span class="eyebrow">Votre avis compte</span><h1>Votre avis sur « ${esc(T.titre)} »</h1>
+    <p class="lead">${gate ? 'Avant la délivrance de votre certificat, dites-nous en quelques secondes ce que vous avez pensé de ' + what + '. Votre note n’a aucune incidence sur le certificat : elle sert seulement à améliorer les cours.' : 'Votre note et vos remarques aident les Éditions Lisân à améliorer chaque leçon. Quelques secondes suffisent.'}</p>
+    <form class="form enroll-form" id="avis-form" novalidate>
+      <fieldset class="group"><legend>Votre note <span class="req" aria-hidden="true">*</span></legend>
+        <div class="stars" role="radiogroup" aria-label="Note de 1 à 5 étoiles">${[1, 2, 3, 4, 5].map(n => `<label class="star${a.note >= n ? ' on' : ''}"><input type="radio" name="note" value="${n}"${a.note === n ? ' checked' : ''}><span class="si" aria-hidden="true">★</span><span class="sr">${n} étoile${n > 1 ? 's' : ''} : ${AVIS_NOTES[n]}</span></label>`).join('')}</div>
+        <p class="star-l" id="star-l" aria-live="polite">${a.note ? AVIS_NOTES[a.note] : 'Touchez une étoile'}</p><small class="err" id="avis-err" hidden></small></fieldset>
+      <fieldset class="group"><legend>Vos impressions${needImp ? ' <span class="req" aria-hidden="true">*</span>' : ' <small>(facultatif)</small>'}</legend>
+        <label class="fld"><span class="lbl sr">Vos impressions</span><textarea name="impressions" rows="4" maxlength="1500" placeholder="Ce que vous avez aimé, ce qui vous a été le plus utile, ce qui vous a gêné…">${esc(a.impressions || '')}</textarea></label></fieldset>
+      <fieldset class="group"><legend>Vos suggestions d’amélioration <small>(facultatif)</small></legend>
+        <label class="fld"><span class="lbl sr">Vos suggestions d’amélioration</span><textarea name="ameliorations" rows="4" maxlength="1500" placeholder="Une leçon à expliquer autrement, un exercice à ajouter, une erreur repérée, une idée…">${esc(a.ameliorations || '')}</textarea></label></fieldset>
+      <div class="actions"><button type="submit" class="btn">${gate ? 'Envoyer et recevoir mon certificat' : a.note ? 'Mettre à jour mon avis' : 'Envoyer mon avis'}</button>${gate ? '' : `<a class="btn ghost" href="${T.back}">Plus tard</a>`}</div>
+      <p class="meta" id="avis-msg" aria-live="polite"></p></form></div>`;
+}
+function bindAvis(key) {
+  const f = document.getElementById('avis-form'); if (!f) return;
+  const T = avisTarget(key), labs = [...f.querySelectorAll('.star')], lab = document.getElementById('star-l'), err = document.getElementById('avis-err');
+  const paint = n => labs.forEach((l, i) => l.classList.toggle('on', i < n));
+  f.querySelectorAll('[name=note]').forEach(r => r.addEventListener('change', () => { const n = +r.value; paint(n); lab.textContent = AVIS_NOTES[n]; err.hidden = true; }));
+  f.addEventListener('submit', e => { e.preventDefault();
+    const n = +((f.querySelector('[name=note]:checked') || {}).value || 0);
+    const imp = f.elements.impressions.value.trim(), am = f.elements.ameliorations.value.trim();
+    const gate = !!(avisNext && (avisNext.kind === 'parcours' ? 'p:' : 'e:') + avisNext.id === key);
+    if (!n) { err.textContent = 'Choisissez une note de 1 à 5 étoiles.'; err.hidden = false; return; }
+    if (gate && AVIS_POUR_CERTIFICAT === 'complet' && imp.length < 10) { err.textContent = 'Écrivez vos impressions en quelques mots.'; err.hidden = false; return; }
+    const m = document.getElementById('avis-msg'), b = f.querySelector('button[type=submit]'); b.disabled = true; m.textContent = 'Envoi…';
+    const next = () => {
+      if (gate) { const nx = avisNext; avisNext = null; m.textContent = 'Merci ! Délivrance du certificat…'; issueCertFor(nx.kind, nx.kind === 'parcours' ? subj(nx.id) : space(nx.id), b, m); return; }
+      m.textContent = 'Merci ! Votre avis a bien été transmis aux Éditions Lisân.'; setTimeout(() => { if (location.hash === avisHash(key)) location.hash = T.back; }, 1600); };
+    AUTH().giveAvis({ cle: key, titre: T.titre, espace: T.sp.title, note: n, impressions: imp, ameliorations: am })
+      .then(next)
+      .catch(er => { if (gate && er && /permission/.test(er.code || er.message || '')) return next();   // l'avis ne doit jamais bloquer le certificat
+        b.disabled = false; m.textContent = 'L’envoi n’a pas abouti. Vérifiez votre connexion internet et réessayez.'; });
+  });
+}
+function issueCertFor(kind, obj, btn, msgEl) {           // délivre le certificat (registre public + fiche de l'élève), puis l'affiche
+  btn.disabled = true; btn.textContent = 'Délivrance du certificat…';
+  AUTH().issueCert(certData(kind, obj)).then(c => { location.hash = '#certificat-' + c.num; })
+    .catch(err => { btn.disabled = false; btn.textContent = 'Obtenir mon certificat';
+      const msg = err && /permission/.test(err.code || err.message || '') ? 'La délivrance des certificats est en cours d’activation. Réessayez un peu plus tard.' : 'Le certificat n’a pas pu être délivré. Vérifiez votre connexion internet et réessayez.';
+      if (msgEl) msgEl.textContent = msg; else btn.insertAdjacentHTML('afterend', `<small class="err">${msg}</small>`); });
+}
+
 // ---------- suggestions
 let suggestCtx = '';
 const SUGG_TYPES = ['Un nouveau cours ou un nouveau livre', 'Une amélioration d’une leçon', 'Une erreur à corriger', 'Une idée pour le site', 'Autre'];
@@ -241,11 +318,9 @@ document.addEventListener('click', e => {
   const ci = e.target.closest('[data-cert]');
   if (ci && AUTH()) { const [kind, id] = ci.dataset.cert.split(':'); const obj = kind === 'parcours' ? subj(id) : space(id); if (!obj) return;
     const st = kind === 'parcours' ? parcoursStatus(obj) : spaceStatus(obj); if (!st.ok) return;
-    ci.disabled = true; ci.textContent = 'Délivrance du certificat…';
-    AUTH().issueCert(certData(kind, obj)).then(c => { location.hash = '#certificat-' + c.num; })
-      .catch(err => { ci.disabled = false; ci.textContent = 'Obtenir mon certificat';
-        const msg = err && /permission/.test(err.code || err.message || '') ? 'La délivrance des certificats est en cours d’activation. Réessayez un peu plus tard.' : 'Le certificat n’a pas pu être délivré. Vérifiez votre connexion internet et réessayez.';
-        ci.insertAdjacentHTML('afterend', `<small class="err">${msg}</small>`); });
+    const key = (kind === 'parcours' ? 'p:' : 'e:') + id;
+    if (AVIS_POUR_CERTIFICAT !== 'non' && !myAvis(key)) { avisNext = { kind, id }; location.hash = avisHash(key); return; }
+    issueCertFor(kind, obj, ci);
     return; }
   if (e.target.closest('[data-cert-print]')) { document.body.classList.add('printing-cert'); window.print(); setTimeout(() => document.body.classList.remove('printing-cert'), 500); return; }
   const sh = e.target.closest('[data-cert-share]');
