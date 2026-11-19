@@ -128,8 +128,9 @@ const SPACES = [
       'Les versets et les hadiths sont donnés en arabe vocalisé, avec leur traduction et leur référence. Les exercices écrits, les carnets et les ateliers sont dans le **cahier d’activités** ; le déroulement des séances et les précisions de fiqh mâlikite, dans le **livret de l’animateur**.',
       'La religion se transmet auprès de maîtres qualifiés : ce compagnon accompagne les séances en famille, à la mosquée ou à l’école, il ne les remplace pas.'] },
   { id: 'coran', title: 'Lire le Coran pas à pas', eyebrow: 'Collection « Lire le Coran pas à pas »', icon: '📖', color: 'n',
-    lead: 'Le compagnon du livre : 43 leçons, des lignes de lecture et la récitation lente d’al-Ḥouṣarî pour vérifier.',
-    intro: ['Ce compagnon suit les dix étapes et les 43 leçons du livre : objectifs, lettres et signes étudiés, lignes de lecture, mots du Coran et sourates courtes.',
+    lead: 'Les compagnons des deux livres : la lecture en 43 leçons, puis le tajwîd en 40 leçons, avec la récitation lente d’al-Ḥouṣarî pour vérifier.',
+    intro: ['Le premier parcours suit les dix étapes et les 43 leçons du niveau 1 (la lecture) : objectifs, lettres et signes étudiés, lignes de lecture, mots du Coran et sourates courtes.',
+      'Le second, « Lire le Coran pas à pas 2 », suit les dix étapes et les 40 leçons du niveau 2 : le **tajwîd** (points de sortie, qualités des lettres, noûn et mîm sâkin, madd, arrêts, particularités de Ḥafṣ) et la récitation de sourates du dernier hizb. Il s’ouvre quand le premier parcours est réussi.',
       'Les récitations sont celles du cheikh **Maḥmoûd Khalîl al-Ḥouṣarî**, en lecture lente d’enseignement (Ḥafṣ ‘an ‘Âṣim). Aucune voix de synthèse n’est utilisée pour le Coran.',
       'La lecture du Coran s’apprend auprès d’un maître : ce compagnon sert à réviser entre deux séances.'] },
 ];
@@ -713,7 +714,7 @@ function lastLesson() {
 }
 const BOOKS = [['je-lis-l-arabe', 'Je lis l’arabe !', 'Niveau 0 · les lettres', 'm-a0'], ['je-parle-arabe-1', 'Je parle arabe !', 'Niveau 1 · A1 – A2', 'm-a1'],
   ['je-parle-arabe-2', 'Je parle arabe ! 2', 'Niveau 2 · A2 – B1', 'm-a2'], ['je-parle-arabe-3', 'Je parle arabe ! 3', 'Niveau 3 · B1 – B2', 'm-a3'],
-  ['lire-le-coran', 'Lire le Coran pas à pas', '10 étapes · 43 leçons', 'm-qr'], ['vivre-l-islam-1', 'Vivre l’islam en famille', 'Niveau 1 · L’Islâm', 'm-is1'],
+  ['lire-le-coran', 'Lire le Coran pas à pas', '10 étapes · 43 leçons', 'm-qr'], ['lire-le-coran-2', 'Lire le Coran pas à pas 2', 'Niveau 2 · le tajwîd', 'm-qr2'], ['vivre-l-islam-1', 'Vivre l’islam en famille', 'Niveau 1 · L’Islâm', 'm-is1'],
   ['vivre-l-islam-2', 'Vivre l’islam en famille 2', 'Niveau 2 · L’Îmân', 'm-is2']];
 const nf = n => n.toLocaleString('fr-FR');
 // découpe un titre en mots animés un à un (la virgule reste collée au mot précédent)
@@ -1305,7 +1306,7 @@ const PAGES = {
       '**Formation à l’IA avec Claude** : comprendre l’intelligence artificielle et s’en servir avec méthode et prudence, dans toutes les disciplines.',
       '**Vivre l’islam en famille** : l’enseignement islamique pour toute la famille, compagnon des livres (niveaux 1 et 2).',
       '**Apprendre l’arabe** : les compagnons des livres « Je lis l’arabe ! » (niveau 0) et « Je parle arabe ! » (niveaux 1 à 3).',
-      '**Lire le Coran pas à pas** : le compagnon du livre, avec la récitation lente d’al-Ḥouṣarî.'] },
+      '**Lire le Coran pas à pas** : les compagnons des livres (niveau 1 : la lecture ; niveau 2 : le tajwîd), avec la récitation lente d’al-Ḥouṣarî.'] },
     { h: 'Comment utiliser le Campus' },
     { ol: ['Choisissez un espace sur la page d’accueil, puis un parcours.', 'Lisez ou écoutez chaque leçon, réussissez son mini-exercice, puis marquez-la comme terminée.', 'Révisez avec les cartes et « Mes révisions », puis passez l’évaluation du certificat.',
       'Installez l’application depuis les **Paramètres** pour l’utiliser hors connexion.'] },

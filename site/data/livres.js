@@ -132,6 +132,32 @@ window.LIVRES = [
   ]
  },
  {
+  "id": "lire-le-coran-2",
+  "space": "coran",
+  "title": "Lire le Coran pas à pas 2",
+  "sub": "Niveau 2 · le tajwîd, de la lecture juste à la récitation (Ḥafṣ)",
+  "docs": [
+   {
+    "k": "eleve",
+    "name": "Livre de l’élève",
+    "pages": 220,
+    "mb": 7.3
+   },
+   {
+    "k": "maitre",
+    "name": "Livret du maître",
+    "pages": 45,
+    "mb": 1.4
+   },
+   {
+    "k": "exercices",
+    "name": "Cahier d’exercices",
+    "pages": 56,
+    "mb": 1.5
+   }
+  ]
+ },
+ {
   "id": "vivre-l-islam-1",
   "space": "islam",
   "title": "Vivre l’islam en famille · Niveau 1",
