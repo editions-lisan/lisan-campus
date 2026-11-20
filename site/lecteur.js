@@ -1,5 +1,5 @@
 // ===== Lisân Campus · lecteur des livres des Éditions Lisân (#lire-<livre>~<document>)
-// Les livres de la collection se lisent en ligne, page par page, sans bouton de téléchargement
+// Les livres de la collection se lisent en ligne, page par page, sans bouton de téléchargement (sauf pour le compte d'administration)
 // (pdf.js, chargé à la demande depuis vendor/). Les documents de cours de l'espace Droit restent, eux, téléchargeables.
 // Comme le reste du contrôle d'accès, ce lecteur organise la lecture ; il ne rend pas le fichier impossible à copier.
 
@@ -23,9 +23,9 @@ function viewReader(t) {
       <a class="rd-back" href="#bibliotheque-${sp.id}" aria-label="Retour à la bibliothèque">‹</a>
       <div class="rd-t"><b>${esc(t.b.title)}</b><small>${esc(t.d.name)}</small></div>
       <span class="rd-n" id="rd-n" aria-live="polite">…</span>
-      <button type="button" class="rd-z" data-rd="out" aria-label="Réduire">−</button><button type="button" class="rd-z" data-rd="in" aria-label="Agrandir">+</button>
+      <button type="button" class="rd-z" data-rd="out" aria-label="Réduire">−</button><button type="button" class="rd-z" data-rd="in" aria-label="Agrandir">+</button>${libAdmin() ? `<a class="rd-z rd-dl" href="${t.file}" download="${t.file.split('/').pop()}" aria-label="Télécharger le PDF" title="Télécharger le PDF">⤓</a>` : ''}
     </div>
-    <p class="meta rd-note">Les livres des Éditions Lisân se lisent en ligne, sur le site ; ils ne sont pas téléchargeables. Votre page est retenue pour la prochaine lecture.</p>
+    <p class="meta rd-note">${libAdmin() ? 'Compte d’administration : ce livre est aussi téléchargeable (bouton ⤓).' : 'Les livres des Éditions Lisân se lisent en ligne, sur le site ; ils ne sont pas téléchargeables.'} Votre page est retenue pour la prochaine lecture.</p>
     <div class="rd-pages" id="rd-pages"><p class="lead rd-wait">Ouverture du livre…</p></div></div>`;
 }
 function loadPdfJs() {

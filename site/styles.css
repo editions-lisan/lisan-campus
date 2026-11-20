@@ -1279,6 +1279,7 @@ footer.site .wrap { padding-top: 46px; }
 .rd-n { font-variant-numeric: tabular-nums; font-size: 13px; opacity: .9; white-space: nowrap; }
 .rd-z { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,.45); background: transparent; color: #fff; font-size: 20px; line-height: 1; cursor: pointer; }
 .rd-z:hover { background: rgba(255,255,255,.12); }
+.rd-dl { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; font-size: 18px; }
 .rd-note { margin: 10px 2px; }
 .rd-pages { --rd-k: 1; display: flex; flex-direction: column; align-items: center; gap: 12px; padding-bottom: 40px; overflow-x: auto; }
 .rd-pages.zoomed { align-items: flex-start; }

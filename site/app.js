@@ -955,8 +955,12 @@ function libLink(spId) {
   sub = sub.charAt(0).toUpperCase() + sub.slice(1);
   return `<a class="lib-link" href="#bibliotheque-${spId}"><span aria-hidden="true">📚</span><span><b>${t}</b><small>${esc(sub)}</small></span></a>`;
 }
+// Compte d'administration (vérifié par la règle Firestore isAdmin, voir probeAdmin() dans admin.js) : tous les livres
+// sont aussi téléchargeables, sans inscription aux espaces ; le livret du maître, lui, n'est jamais mis en ligne.
+const libAdmin = () => { const A = AUTH(); return !!(A && A.user() && typeof isAdminCached === 'function' && isAdminCached()); };
 function libAccess(spId) {
   const A = AUTH(); if (!A) return 'ok';
+  if (libAdmin()) return 'ok';
   if (!A.user()) return 'signin';
   return A.enrolled(spId) ? 'ok' : 'enroll';
 }
@@ -964,7 +968,8 @@ function libDocRow(file, d, spId) {
   if (d.k === 'maitre') return `<div class="lib-doc lib-res"><span class="lib-ic" aria-hidden="true">🔒</span><div class="lib-dt"><b>${esc(d.name)}</b><small>Réservé aux enseignants et aux animateurs : il n’est pas proposé en ligne.</small></div><div class="lib-act"><a class="btn ghost small" href="#contact">Le demander</a></div></div>`;
   const acc = libAccess(spId), meta = [d.pages ? d.pages + ' pages' : '', d.mb ? String(d.mb).replace('.', ',') + ' Mo' : ''].filter(Boolean).join(' · ');
   // livres des Éditions Lisân : lecture en ligne seulement (lecteur du site) ; documents de cours : lecture et téléchargement
-  const act = acc === 'ok' ? (d.book ? `<a class="btn small" href="#lire-${d.book}~${d.k}">Lire en ligne</a>` : `<a class="btn small" href="${file}" target="_blank" rel="noopener">Lire</a><a class="btn ghost small" href="${file}" download>Télécharger</a>`)
+  const dlName = d.book ? file.split('/').pop() : '';
+  const act = acc === 'ok' ? (d.book ? `<a class="btn small" href="#lire-${d.book}~${d.k}">Lire en ligne</a>${libAdmin() ? `<a class="btn ghost small" href="${file}" download="${dlName}">Télécharger</a>` : ''}` : `<a class="btn small" href="${file}" target="_blank" rel="noopener">Lire</a><a class="btn ghost small" href="${file}" download>Télécharger</a>`)
     : acc === 'signin' ? `<button type="button" class="btn ghost small" data-auth="signin">Se connecter pour lire</button>`
     : `<a class="btn ghost small" href="#inscription-${spId}">S’inscrire pour lire</a>`;
   return `<div class="lib-doc"><span class="lib-ic" aria-hidden="true">${DOC_ICON[d.k] || '📄'}</span><div class="lib-dt">${d.kind ? `<span class="tag">${esc(d.kind)}</span>` : ''}<b>${esc(d.name)}</b><small>${esc([d.desc, meta].filter(Boolean).join(' · '))}</small></div><div class="lib-act">${act}</div></div>`;
@@ -973,7 +978,9 @@ function viewLibrary() {
   const L = window.LIVRES || [], D = window.DOCS || [];
   const groups = SPACES.map(sp => ({ sp, books: L.filter(b => b.space === sp.id), docs: D.filter(d => d.space === sp.id) })).filter(g => g.books.length || g.docs.length);
   const A = AUTH(), u = A && A.user();
+  if (u && !libAdmin() && typeof probeAdmin === 'function') setTimeout(() => probeAdmin(() => { if (/^#bibliotheque/.test(location.hash)) route(); }), 0);
   return `${crumbs(['Bibliothèque'])}
+      ${libAdmin() ? '<p class="meta">Compte d’administration : tous les livres de la collection sont aussi téléchargeables.</p>' : ''}
     <div class="subject-head c-a"><span class="eyebrow">Éditions Lisân</span><h1>📚 Bibliothèque</h1>
       <p class="lead">Les livres de la collection, avec le livre de l’élève et le cahier d’exercices, à lire en ligne sur le site, et les documents des cours de droit, à lire ou à télécharger en PDF. Le livret du maître est réservé aux enseignants et aux animateurs.</p>
       ${A && !u ? `<p class="meta">La lecture demande la connexion Google et l’inscription à l’espace concerné. <button type="button" class="linkbtn" data-auth="signin">Se connecter</button></p>` : ''}</div>
