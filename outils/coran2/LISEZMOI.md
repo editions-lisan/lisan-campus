@@ -13,7 +13,7 @@ Une seule source pour quatre sorties : le livre de l'élève (Word + PDF), le ca
 
 Dossier de travail `LC2_BASE` contenant :
 - `qj/package/dist/quran.json` et `quran_fr.json` (texte uthmani du Mouss-haf de Médine) ;
-- `lc1/x/` : le livre Word du niveau 1 décompressé (gabarit : styles, polices intégrées, icônes, schéma de l'appareil de la parole) ; les polices intégrées doivent être installées pour LibreOffice (`~/.fonts`).
+- `lc1/x/` : le gabarit Word, produit par `python3 gabarit.py` (page A4 et marges, bandeau d'en-tête, pied de page et numéro de page, styles par défaut, icônes des rubriques et schéma de l'appareil de la parole de `assets/gabarit/`) ; il reproduit la mise en page du livre Word du niveau 1, qui n'est plus nécessaire. Polices à installer pour LibreOffice (`~/.fonts`) : Nunito (normal, gras, italique, gras italique), Nunito ExtraBold, Quicksand Bold, Fredoka Bold (instances statiques des polices variables de Google Fonts, avec ces noms de famille), Lisan Naskh (`site/fonts/LisanNaskh-R.woff2` et `-B.woff2` en TTF) et Lisan Naskh Mono (la même sans les tables de couleur COLR/CPAL, pour le texte blanc des bandeaux).
 
 ```
 LC2_BASE=/chemin/travail python3 main.py out/LC2.docx      # livre de l'élève (+ PDF)
@@ -24,7 +24,13 @@ LC2_BASE=/chemin/travail python3 gen_site.py               # site/data/coran2.js
 
 Les modules d'étapes doivent être importés dans l'ordre (2 à 10) : le choix automatique des exemples en dépend. Après une modification qui déplace les pages, recalculer `pages.json` à partir des PDF (bandeaux « ÉTAPE n • LEÇON n »).
 
-Sur le site : `livres/Lisan_lire-le-coran-2_eleve.pdf` et `_exercices.pdf` (lecture en ligne seulement) ; le livret du maître n'est pas mis en ligne.
+Sur le site : `livres/Lisan_lire-le-coran-2_eleve.pdf` et `_exercices.pdf` (lecture en ligne seulement ; téléchargement pour le compte d'administration) ; le livret du maître n'est pas mis en ligne. Version écran allégée par Ghostscript, sans réduire les images pour garder des codes QR nets, puis `pages`/`mb` mis à jour dans `site/data/livres.js` :
+
+```
+gs -q -dNOPAUSE -dBATCH -dSAFER -sDEVICE=pdfwrite -dCompatibilityLevel=1.6 -dPDFSETTINGS=/ebook -dDownsampleColorImages=false -dDetectDuplicateImages=true -sOutputFile=Lisan_lire-le-coran-2_eleve.pdf out/LC2.pdf
+```
+
+Dans le livre et le cahier, chaque carte « Mots du Coran » montre ce que l'on entend et son lien « Écouter » et son code QR mènent à l'extrait de la récitation d'al-Ḥouṣarî publié sur le site (`audio/qr2/`, voir plus bas ; `mot_audio()` et `mot_display()` de `blocks.py`) : lancer `mots_build.py` avant `main.py`.
 
 ## Audio des « mots du Coran » (site)
 

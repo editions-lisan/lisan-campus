@@ -141,7 +141,7 @@ window.LIVRES = [
     "k": "eleve",
     "name": "Livre de l’élève",
     "pages": 220,
-    "mb": 7.3
+    "mb": 4.8
    },
    {
     "k": "maitre",
@@ -153,7 +153,7 @@ window.LIVRES = [
     "k": "exercices",
     "name": "Cahier d’exercices",
     "pages": 56,
-    "mb": 1.5
+    "mb": 1.0
    }
   ]
  },

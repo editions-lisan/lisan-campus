@@ -139,9 +139,48 @@ def qr_for(s, a):
 from suras import SURAS
 def ref(s, a): return f'{SURAS[s]}, {a}'
 
+SITE_URL = 'https://lisan-campus.pages.dev/'
+
+def qr_url(u, name):
+    """code QR d'une adresse quelconque (fichier imglc2_qr_<name>.png)"""
+    name = f'imglc2_qr_{name}.png'; p = QRDIR + '/' + name
+    if not os.path.exists(p):
+        q = qrcode.QRCode(border=1, box_size=8, error_correction=qrcode.constants.ERROR_CORRECT_M); q.add_data(u); q.make(fit=True)
+        q.make_image(fill_color='#1E2B26', back_color='white').save(p)
+    MEDIA_NEW[name] = p
+    return img_rel(name), url_rel(u)
+
+_MA = None
+def mot_audio(s, a, mk):
+    """extrait du site (mots_build.py → mots_audio.json) qui fait entendre exactement cette carte, ou None"""
+    global _MA
+    if _MA is None:
+        import json
+        f = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'mots_audio.json')
+        _MA = json.load(open(f, encoding='utf8')) if os.path.exists(f) else {}
+    import mots_plan
+    plain = re.sub('[⟦⟧⟨⟩⟪⟫]', '', mk)
+    for m in _MA.values():
+        os_, oa, oi, oj = m['orig']
+        if (os_, oa) == (s, a) and mots_plan.words(os_, oa, oi, oj) == plain: return m
+    return None
+
+def mot_display(mk, m):
+    """la carte montre ce que l'on entend : le mot (couleurs de la règle) et, au besoin, le mot voisin ajouté"""
+    import mots_plan
+    plain = re.sub('[⟦⟧⟨⟩⟪⟫]', '', mk)
+    if m['text'] == plain: return mk
+    os_, oa, oi, oj = m['orig']
+    if (m['s'], m['a']) == (os_, oa) and m['i'] <= oi and oj <= m['j']:
+        pre = mots_plan.words(os_, oa, m['i'], oi - 1) if m['i'] < oi else ''
+        post = mots_plan.words(os_, oa, oj + 1, m['j']) if oj < m['j'] else ''
+        return ' '.join(x for x in (pre, mk, post) if x)
+    return m['text']
+
 def MOTS(cards, field='Je lis :', key=None, arsz=52, cols=3):
-    """cards : (markup arabe, sourate, verset, note facultative)."""
-    x = P(R('Lisez d’abord seul, puis écoutez la récitation pour vérifier (lien « Écouter » ou code QR).', i=True, color=GREY_T), keep=True, after=30, line=252)
+    """cards : (markup arabe, sourate, verset, note facultative). « Écouter » et le code QR mènent à l'extrait de la
+    récitation d'al-Ḥouṣarî qui fait entendre exactement la carte (site Lisân Campus), sinon au verset."""
+    x = P(R('Lisez d’abord seul, puis écoutez al-Ḥouṣarî réciter exactement ce qui est écrit (lien « Écouter » ou code QR).', i=True, color=GREY_T), keep=True, after=30, line=252)
     if key: x += P(R('Vérifiez vos réponses :') + CORLINK(key), keep=True, after=30, line=252)
     w = FULL // cols; widths = [w] * cols; widths[-1] += FULL - w * cols
     rows = []
@@ -150,8 +189,16 @@ def MOTS(cards, field='Je lis :', key=None, arsz=52, cols=3):
         for j in range(cols):
             if i + j >= len(cards): row.append(tc(P(''), widths[j], 'F3F6FB', (31, 80, 31, 80))); continue
             mk, s, a, note = (cards[i + j] + (None,))[:4]
-            rq, ru = qr_for(s, a)
-            c = P(AR(mk, sz=arsz), jc='center', bidi=True, after=40, line=240, keep=True)
+            m = mot_audio(s, a, mk)
+            if m:
+                if m['why'].startswith('remplacé') and m['note']: note = m['note']
+                mk = mot_display(mk, m); s, a = m['s'], m['a']
+                if m['waqf'] and re.search(r'([\u064B-\u0650\u0656\u0657\u065E]|\u0651)[^\u0621-\u064A]*$|[\u064B\u0657][^\u0621-\u064A]*[اى][^\u0621-\u064A]*$', re.sub('[⟦⟧⟨⟩⟪⟫]', '', mk).strip()) and 'arrêt' not in (note or ''):
+                    note = (note + ' · ' if note else '') + 'lu à l’arrêt'
+                rq, ru = qr_url(SITE_URL + 'audio/qr2/' + m['file'], 'mot_' + m['file'][:-4])
+            else:
+                rq, ru = qr_for(s, a)
+            c = P(AR(mk, sz=arsz if len(re.sub('[⟦⟧⟨⟩⟪⟫]', '', mk)) <= 26 else max(34, arsz - 14)), jc='center', bidi=True, after=40, line=240, keep=True)
             if note: c += P(rich(note, sz=22, color='1C4570', arsz=30), jc='center', after=20, line=240, keep=True)
             c += P(f'<w:hyperlink r:id="{ru}" w:history="1">{IMG(rq, 504000, 504000, "qr")}</w:hyperlink>' + R('  ') + R(ref(s, a), i=True, color=GREY_T, pos=10), jc='center', after=30, line=240, keep=True)
             c += P(f'<w:hyperlink r:id="{ru}" w:history="1">' + R('►︎', font='Segoe UI Symbol', color=LINK) + R(' Écouter', font='Nunito ExtraBold', b=True, color=LINK, u=True) + '</w:hyperlink>', jc='center', after=10, line=240, keep=(i == 0 or bool(field)))
