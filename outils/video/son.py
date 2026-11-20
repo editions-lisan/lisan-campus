@@ -1,4 +1,4 @@
-"""Lisân Campus · bande-son originale de la vidéo de présentation (16 s), entièrement synthétisée.
+"""Lisân Campus · bande-son originale de la vidéo de présentation (62 s), entièrement synthétisée.
 
 Instruments fabriqués ici, sans aucun échantillon : corde pincée façon oud (Karplus-Strong),
 tambour sur cadre façon daf, clochettes, nappe grave, souffles de transition.
@@ -13,7 +13,7 @@ import numpy as np
 from scipy.signal import butter, sosfilt, fftconvolve
 
 SR = 44100
-T = 23.0
+T = 62.0
 N = int(SR * T)
 rng = np.random.default_rng(1447)          # graine fixe : la bande-son est toujours la même
 DAF = '--daf' in sys.argv                  # --daf : percussions seules, sans instrument mélodique
@@ -90,83 +90,106 @@ def pad(f, dur, att=1.5, rel=1.5):
     env = np.minimum(1, t / att) * np.minimum(1, (dur - t) / rel)
     return lowpass(s * env, 900) * 0.10
 
-# ---------- nappe de fond (ré + la), du début à la fin
+# ---------- minutage : le même que index.html (S, scènes et lignes)
+S = dict(marque=(0, 3.3), collection=(3.3, 8.7), espaces=(8.7, 13.4), arabe=(13.4, 18.8), coran=(18.8, 24.6), islam=(24.6, 29.6),
+         droit=(29.6, 37.8), ia=(37.8, 43.0), outils=(43.0, 49.0), biblio=(49.0, 54.8), fin=(54.8, 62.0))
+# pour chaque scène d'espace : nombre d'étiquettes, de lignes, de tuiles, badge
+ESP = dict(arabe=(0, 4, 0, False), coran=(0, 4, 0, True), islam=(0, 3, 0, False), droit=(10, 3, 0, False),
+           ia=(8, 2, 0, False), outils=(0, 0, 6, False), biblio=(0, 4, 0, False))
+ROOT = dict(arabe=0, coran=5, islam=7, droit=0, ia=5, outils=7, biblio=0)   # tonalité de chaque scène (demi-tons depuis ré)
+
+# ---------- nappe de fond : accord tenu qui change avec les scènes
 if not DAF:
-    place(pad(hz(-12), T - 0.2, 2.0, 1.4), 0.0, 1.0, -0.2)
-    place(pad(hz(-5), T - 1.0, 2.5, 1.4), 0.8, 0.7, 0.25)
+    segs = [(0.0, S['espaces'][1], 0)] + [(S[k][0], S[k][1], ROOT[k]) for k in ESP] + [(S['fin'][0], T, 0)]
+    for a, b, r in segs:
+        d = b - a + 1.2
+        place(pad(hz(r - 12), d, 1.0, 1.0), max(0, a - 0.4), 0.9, -0.2)
+        place(pad(hz(r - 5), d, 1.2, 1.0), max(0, a - 0.3), 0.6, 0.25)
 
 # ---------- scène 1 : la marque
 place(dum(1.0), 0.15, 1.1)
 if DAF:
-    place(tak(0.4), 0.15, 0.5, 0.0)                         # le logo : coup grave et anneaux
-    for tt, pan in ((0.95, 0.3), (1.35, -0.3), (1.7, 0.2)): # le titre, le texte arabe, la devise
+    place(tak(0.4), 0.15, 0.5, 0.0)
+    for tt, pan in ((0.95, 0.3), (1.35, -0.3), (1.7, 0.2)):
         place(tak(bright=0.8), tt, 0.38, pan)
     place(dum(0.8), 1.7, 0.45)
 else:
-    for k, deg in enumerate([0, 7, 12, 16]):                # clochettes à l'apparition du logo
+    for k, deg in enumerate([0, 7, 12, 16]):
         place(bell(hz(deg, D3 * 2)), 0.18 + k * 0.07, 0.55, -0.4 + k * 0.27)
-    place(oud(hz(12), 2.0, .6), 0.95, 0.6, 0.1)             # le titre
-    place(oud(hz(16), 2.0, .5), 1.35, 0.5, -0.1)            # le texte arabe
-    place(oud(hz(19), 2.4, .5), 1.7, 0.45, 0.2)             # la devise
+    place(oud(hz(12), 2.0, .6), 0.95, 0.6, 0.1)
+    place(oud(hz(16), 2.0, .5), 1.35, 0.5, -0.1)
+    place(oud(hz(19), 2.4, .5), 1.7, 0.45, 0.2)
 
-# ---------- rythme du daf (environ 96 battements par minute), de 2,0 s à 22,1 s
+# ---------- rythme du daf (96 battements par minute), de 2,0 s à la fin ; plus léger pendant la fin
 beat = 60 / 96
-pattern = [('D', 0), ('t', 1), ('t', 1.5), ('D', 2), ('t', 3), ('t', 3.5)]   # dum, tak tak, dum, tak tak
-t0 = 2.0
+pattern = [('D', 0), ('t', 1), ('t', 1.5), ('D', 2), ('t', 3), ('t', 3.5)]
+END = T - 1.0
 bar = 0
-while t0 + bar * 4 * beat < 22.1:
+while 2.0 + bar * 4 * beat < END:
     for kind, pos in pattern:
-        tt = t0 + (bar * 4 + pos) * beat
-        if tt >= 22.1:
+        tt = 2.0 + (bar * 4 + pos) * beat
+        if tt >= END:
             break
+        g = 0.75 if tt > S['fin'][0] + 2.5 else 1.0
         if kind == 'D':
-            place(dum(), tt, 0.55, 0.0)
+            place(dum(), tt, 0.5 * g, 0.0)
         else:
-            place(tak(bright=0.6 + 0.4 * (pos % 1 == 0)), tt, 0.32, 0.35 if pos % 1 else -0.3)
+            place(tak(bright=0.6 + 0.4 * (pos % 1 == 0)), tt, 0.28 * g, 0.35 if pos % 1 else -0.3)
     bar += 1
 
-# ---------- transitions
-for tt in (2.95, 6.55, 10.05, 16.1):
-    place(whoosh(0.75), tt, 1.0, 0.0)
-place(whoosh(0.9, up=False), 16.45, 0.8, 0.5)               # le téléphone glisse
-place(whoosh(0.8, up=False), 12.35, 0.7, 0.4)               # les romans arrivent
+# ---------- transitions : un souffle à chaque changement de scène
+for k in list(S)[1:]:
+    place(whoosh(0.75), S[k][0] - 0.4, 0.9, 0.0)
+place(whoosh(0.9, up=False), S['arabe'][0] - 0.1, 0.8, 0.5)     # le téléphone glisse
 
-# ---------- scène 2 : les cinq livres arrivent, une note par livre (mélodie montante)
-for k, deg in enumerate([0, 4, 5, 7, 12]):
-    if DAF: place(tak(bright=0.5 + 0.1 * k), 3.6 + k * 0.13 + 0.2, 0.42, -0.6 + k * 0.3)
-    else: place(oud(hz(deg), 1.6, .55), 3.6 + k * 0.13 + 0.2, 0.55, -0.6 + k * 0.3)
-if DAF: place(dum(), 3.6 + 4 * 0.13 + 0.2, 0.5)
-for k, deg in enumerate([16, 17, 19]):                      # les trois étiquettes
-    if DAF: place(tak(0.12, bright=1.0), 4.75 + k * 0.22, 0.3, -0.3 + k * 0.3)
-    else: place(bell(hz(deg, D3)), 4.75 + k * 0.22, 0.35, -0.3 + k * 0.3)
+def note(t, deg, base=D3, kind='oud', gain=0.5, pan=0.0):
+    if DAF:
+        place(tak(bright=0.7) if kind != 'dum' else dum(0.5), t, gain * 0.8, pan)
+    elif kind == 'bell':
+        place(bell(hz(deg, base)), t, gain * 0.75, pan)
+    else:
+        place(oud(hz(deg, base), 1.7, .5), t, gain, pan)
 
-# ---------- scène 3 : les cinq espaces
+# ---------- scène 2 : huit couvertures (mélodie montante), trois étiquettes
+a = S['collection'][0]
+for k, deg in enumerate([0, 1, 4, 5, 7, 8, 10, 12]):
+    note(a + .35 + k * .11 + .2, deg, gain=0.5, pan=-0.6 + k * 0.17)
+for k, deg in enumerate([16, 17, 19]):
+    note(a + 1.6 + k * .22, deg, kind='bell', gain=0.45, pan=-0.3 + k * 0.3)
+
+# ---------- scène 3 : cinq espaces
+a = S['espaces'][0]
 for k, deg in enumerate([7, 8, 12, 13, 16]):
-    if DAF: place(dum(0.5) if k % 2 == 0 else tak(), 7.7 + k * 0.16 + 0.15, 0.5 if k % 2 == 0 else 0.4, -0.5 + k * 0.33)
-    else: place(oud(hz(deg), 1.8, .5), 7.7 + k * 0.16 + 0.15, 0.55, -0.5 + k * 0.25)
-if not DAF: place(oud(hz(0), 2.4, .3), 8.6, 0.4, 0.0)
+    note(a + .6 + k * .16 + .15, deg, gain=0.55, pan=-0.5 + k * 0.25)
 
-# ---------- scène 4 : les nouveautés (une clochette par ligne, une note par roman)
-for k, deg in enumerate([12, 13, 16, 17, 19]):
-    if DAF: place(tak(bright=0.8), 11.15 + k * 0.42 + 0.1, 0.38, -0.4 + k * 0.2)
-    else: place(bell(hz(deg, D3 * 2)), 11.15 + k * 0.42 + 0.1, 0.38, -0.4 + k * 0.2)
-for k, deg in enumerate([0, 4, 7, 12]):
-    if DAF: place(dum(0.5), 12.4 + k * 0.2 + 0.15, 0.4)
-    else: place(oud(hz(deg), 1.8, .5), 12.4 + k * 0.2 + 0.15, 0.5, 0.2 + k * 0.15)
+# ---------- scènes des espaces : badge, étiquettes, lignes, tuiles
+for key, (ntag, nrow, ntile, badge) in ESP.items():
+    a, b = S[key]; r = ROOT[key]
+    note(a + .25, r + 12, kind='oud', gain=0.45, pan=-0.2)                                  # le titre
+    if badge:
+        for k in range(3): note(a + .9 + k * .06, [12, 16, 19][k] + r, base=D3 * 2, kind='bell', gain=0.4)
+    for j in range(ntag):
+        note(a + .7 + j * .1 + .1, HIJAZ[j % len(HIJAZ)] + r, base=D3 * 2, kind='bell', gain=0.22, pan=-0.5 + (j % 4) * 0.33)
+    r0 = a + (.8 + ntag * .1 if ntag else .8)
+    for j in range(nrow):
+        note(r0 + j * .38 + .1, [0, 4, 7, 12][j] + r, kind='oud', gain=0.42, pan=-0.3 + j * 0.2)
+    for j in range(ntile):
+        note(a + .8 + j * .22 + .12, HIJAZ[j + 2] + r, base=D3 * 2, kind='bell', gain=0.32, pan=-0.4 + (j % 3) * 0.4)
+place(bell(hz(19, D3 * 2), 2.6), S['biblio'][0] + 2.7, 0.45, 0.3)                     # le certificat
 
-# ---------- scène 5 : les quatre atouts, puis l'adresse du site
-for k, deg in enumerate([12, 16, 17, 19]):
-    if DAF: place(tak(bright=0.9), 17.35 + k * 0.38 + 0.1, 0.4, -0.3 + k * 0.2)
-    else: place(bell(hz(deg, D3 * 2)), 17.35 + k * 0.38 + 0.1, 0.4, -0.3 + k * 0.2)
-if DAF:                                                      # roulement de daf, puis coup final sur l'adresse
+# ---------- fin : le logo, puis l'adresse du site (accord final)
+a = S['fin'][0]
+for k, deg in enumerate([0, 7, 12, 16]):
+    note(a + .15 + k * .07, deg, base=D3 * 2, kind='bell', gain=0.5, pan=-0.4 + k * 0.27)
+if DAF:
     for k in range(10):
-        place(tak(0.1, bright=0.7), 18.60 + k * 0.06, 0.12 + 0.03 * k, -0.2 + 0.04 * k)
-    place(tak(0.6), 19.20, 0.55, 0.0)
+        place(tak(0.1, bright=0.7), a + 0.7 + k * 0.06, 0.12 + 0.03 * k, -0.2 + 0.04 * k)
+    place(tak(0.6), a + 1.3, 0.55, 0.0)
 else:
-    for k, deg in enumerate([0, 7, 12]):                     # accord final sur l'adresse
-        place(oud(hz(deg), 2.6, .6), 19.20 + k * 0.05, 0.55, -0.3 + k * 0.3)
-    place(bell(hz(12, D3 * 2), 3.0), 19.25, 0.5, 0.0)
-place(dum(1.2), 19.20, 0.8)
+    for k, deg in enumerate([0, 7, 12]):
+        place(oud(hz(deg), 2.6, .6), a + 1.3 + k * 0.05, 0.55, -0.3 + k * 0.3)
+    place(bell(hz(12, D3 * 2), 3.0), a + 1.35, 0.5, 0.0)
+place(dum(1.2), a + 1.3, 0.8)
 
 # ---------- réverbération légère, fondu final pour boucler avec le début
 ir_t = np.arange(int(1.4 * SR)) / SR
@@ -175,7 +198,7 @@ ir = np.array([lowpass(ch, 6000) for ch in ir]) * 0.05
 wet = np.array([fftconvolve(mix[c], ir[c])[:N] for c in range(2)])
 out = mix * 0.85 + wet * 0.6
 tt = np.arange(N) / SR
-fade = np.clip((T - tt) / 0.65, 0, 1) * np.clip(tt / 0.05, 0, 1)
+fade = np.clip((T - tt) / 0.9, 0, 1) * np.clip(tt / 0.05, 0, 1)
 out *= fade
 out /= np.max(np.abs(out)) / 0.89
 

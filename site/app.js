@@ -896,7 +896,7 @@ function heroVideo() {
   const auto = heroAuto();
   return `<section class="hero-video" aria-label="Présentation de Lisân Campus en vidéo"><div class="hv-frame">
     <video id="hv" ${auto ? 'autoplay preload="auto"' : 'preload="none"'} muted loop playsinline poster="media/poster.webp" disablepictureinpicture
-      aria-label="Lisân Campus en 16 secondes : les livres des Éditions Lisân, les quatre espaces et le Campus sur téléphone">
+      aria-label="Lisân Campus en une minute : les livres des Éditions Lisân, les cinq espaces, les outils pour apprendre, la bibliothèque et les certificats">
       <source src="media/campus-720.mp4" type="video/mp4" media="(min-width: 700px)"><source src="media/campus-720.webm" type="video/webm" media="(min-width: 700px)">
       <source src="media/campus-480.mp4" type="video/mp4"><source src="media/campus-480.webm" type="video/webm"></video>
     <div class="hv-ctrl"><button type="button" class="hv-btn hv-snd" id="hv-snd" aria-label="Activer le son" aria-pressed="false">${HV_ICON.mute}<span>Son</span></button>

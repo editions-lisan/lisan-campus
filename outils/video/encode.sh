@@ -14,5 +14,5 @@ enc() { # $1 largeur $2 hauteur $3 suffixe $4 crf h264 $5 crf vp9 $6 débit audi
 }
 if [ "$4" -gt "$5" ]; then S1=$5; else S1=$4; fi
 enc $4 $5 $S1 26 36 96k
-if [ -n "$6" ]; then if [ "$6" -gt "$7" ]; then S2=$7; else S2=$6; fi; enc $6 $7 $S2 28 38 80k; fi
+if [ -n "$6" ]; then if [ "$6" -gt "$7" ]; then S2=$7; else S2=$6; fi; enc $6 $7 $S2 30 41 64k; fi
 ls -la "$OUT"/$N-*
