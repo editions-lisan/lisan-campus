@@ -24,6 +24,22 @@ def wurl(s, a, i):
 def vurl(s, a):
     return f'https://everyayah.com/data/Husary_Muallim_128kbps/{s:03d}{a:03d}.mp3'
 
+# audio des mots (mots_build.py → mots_audio.json : passage choisi, extrait découpé dans la récitation)
+import json as _json, os as _os, functools as _ft
+@_ft.lru_cache(None)
+def _mots_audio():
+    f = _os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'mots_audio.json')
+    return _json.load(open(f, encoding='utf8')) if _os.path.exists(f) else {}
+def mots_audio_entry(n, s, a, i, j): return _mots_audio().get(f'{n}:{s}:{a}:{i}:{j}')
+def verse_text(s, a):
+    import mots_plan
+    return ' '.join(mots_plan.quran()[(s, a)])
+def ends_with_vowel(t):
+    """le dernier mot finit-il par une voyelle brève ou un tanwîn (qui change à l'arrêt) ?"""
+    t = t.strip()
+    if re.search(r'[\u064B\u0657][^\u0621-\u064A]*[اى][^\u0621-\u064A]*$', t): return True     # tanwîn + alif : « -an » devient « -â »
+    return bool(re.search(r'([\u064B-\u0650\u0656\u0657\u065E]|\u0651)[^\u0621-\u064A]*$', t))
+
 # ---------------------------------------------------------------- éléments « Je découvre »
 def dec_docx(items, C, L):
     x = ''
@@ -156,14 +172,21 @@ def lesson_site(sp, es, pages=None):
     if sp.get('lis_corr'): body.append({'corrige': [{'ul': [site_txt(c) for c in sp['lis_corr']]}]})
     if sp.get('mots'):
         body.append({'h': 'Des mots du Coran'})
-        body.append({'p': 'Lisez d’abord **seul** en appliquant la règle, puis écoutez : **« Le mot »** fait entendre le mot seul, **« Le verset »** le verset entier récité lentement par **al-Ḥouṣarî**.'})
+        body.append({'p': 'Lisez d’abord **seul** en appliquant la règle, puis écoutez : **« Le mot »** fait entendre exactement ce qui est écrit sur la carte, tel que **al-Ḥouṣarî** le récite (lu comme la leçon le demande) ; **« Le verset »** fait entendre le verset entier, récité lentement, et l’affiche.'})
         qw = []
+        from blocks import ref as refname
         for c in sp['mots']:
             mk, s, a, note, i, j = c
-            from blocks import ref as refname
-            qw.append([plain_ar(mk), refname(s, a) + (' · ' + re.sub(r'\*', '', site_txt(note)) if note else ''), vurl(s, a), wurl(s, a, i) if i == j else vurl(s, a)])
+            m = mots_audio_entry(n, s, a, i, j)
+            if m:
+                s, a = m['s'], m['a']
+                meta = refname(s, a) + (' · ' + re.sub(r'\*', '', site_txt(m['note'])) if m['note'] else '')
+                if m['waqf'] and ends_with_vowel(m['text']) and 'arrêt' not in meta: meta += ' · lu à l’arrêt'
+                qw.append([m['text'], meta, vurl(s, a), 'audio/qr2/' + m['file'], verse_text(s, a)])
+            else:
+                qw.append([plain_ar(mk), refname(s, a) + (' · ' + re.sub(r'\*', '', site_txt(note)) if note else ''), vurl(s, a), wurl(s, a, i) if i == j else vurl(s, a)])
         body.append({'qwords': qw})
-    body.append({'box': 'Le tajwîd s’apprend auprès d’un maître, de bouche à oreille : ce compagnon sert à **réviser** entre deux séances. Les versets sont récités par al-Ḥouṣarî (lecture de Ḥafṣ) ; les mots seuls proviennent de l’audio mot à mot de Quran.com.', 'title': 'Avec le maître', 'kind': 'marge'})
+    body.append({'box': 'Le tajwîd s’apprend auprès d’un maître, de bouche à oreille : ce compagnon sert à **réviser** entre deux séances. Les versets et les mots sont récités par al-Ḥouṣarî (al-Muṣḥaf al-mu‘allim, lecture de Ḥafṣ ‘an ‘Âṣim) ; chaque mot est un extrait de sa récitation.', 'title': 'Avec le maître', 'kind': 'marge'})
     return {'id': f't{n}', 'title': f'Leçon {n} : {sp["title"]}', 'body': body}
 
 # ---------------------------------------------------------------- cahier d'exercices

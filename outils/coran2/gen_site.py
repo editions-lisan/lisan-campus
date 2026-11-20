@@ -22,6 +22,18 @@ for es in ETS:
             q, a = sp['mini'][1]
             quiz.append({'q': site_txt(q), 'a': [site_txt(x) for x in a], 'c': 0, 'e': site_txt(sp['ret'][0])})
 
+# Arabe affiché en police coranique Amiri Quran : tanwîn « successif » du Mouss-haf de Médine codé selon Unicode
+# (le texte source suit le codage du Complexe du roi Fahd : ٗ ٞ ٖ), et chadda toujours avant la voyelle, comme dans le Mouss-haf
+TANWIN = str.maketrans({'\u0657': '\u08F0', '\u065E': '\u08F1', '\u0656': '\u08F2'})
+def ar_fix(x):
+    if isinstance(x, str):
+        x = re.sub('([\u064B-\u0650\u0656\u0657\u065E])\u0651', '\u0651\\1', x)
+        return x.translate(TANWIN)
+    if isinstance(x, list): return [ar_fix(y) for y in x]
+    if isinstance(x, dict): return {k: ar_fix(v) for k, v in x.items()}
+    return x
+lessons, quiz, cards, minis = ar_fix(lessons), ar_fix(quiz), ar_fix(cards), ar_fix(minis)
+
 M = {'id': 'qr2', 'space': 'coran', 'lang': 'ar', 'noVoice': True, 'noLessonVoice': True, 'color': 'n',
      'title': 'Lire le Coran pas à pas 2', 'subtitle': '10 étapes, 40 leçons · le tajwîd, de la lecture juste à la récitation (Ḥafṣ)',
      'lessons': lessons, 'quiz': quiz, 'cards': cards}

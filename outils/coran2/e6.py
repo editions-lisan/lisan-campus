@@ -86,7 +86,7 @@ L23 = lesson(e=E, n=23, title='Lettres identiques, sœurs et voisines', ar='قَ
          ('tip', 'attention', 'Une fusion incomplète', ['Dans ' + W(5, 28, 2) + ' (Al-Mâ’ida, 28) et ' + W(27, 22, 5) + ' (An-Naml, 22), le ṭâ’ entre dans le tâ’ mais on garde son **épaisseur** : la langue se colle pour le ṭâ’ et l’on prononce un tâ’, sans relâcher l’épaisseur.']),
          ('t', 'Dans ' + W(77, 20, 1) + ' ' + W(77, 20, 2) + ' (Al-Moursalât, 20), le qâf entre dans le kâf : on dit le plus souvent « nakhloukkoum », en fusion complète.')],
     ecoute=['Écoutez ' + W(2, 256, 5) + ' ' + W(2, 256, 6) + ' : le dâl a disparu, on entend un tâ’ doublé. Écoutez ' + W(5, 28, 2) + ' : le ṭâ’ laisse une couleur épaisse avant le tâ’.'],
-    ret=['Lettre sans voyelle + lettre **identique**, **sœur** ou **voisine** → souvent **idghâm**.', 'Le Mouss-haf l’annonce : pas de soukoun sur la première, chadda sur la seconde.', 'Fusion incomplète dans بَسَطتَّ / أَحَطتُ : on garde l’épaisseur du ṭâ’.'],
+    ret=['Lettre sans voyelle + lettre **identique**, **sœur** ou **voisine** → souvent **idghâm**.', 'Le Mouss-haf l’annonce : pas de soukoun sur la première, chadda sur la seconde.', 'Fusion incomplète dans بَسَطتَ / أَحَطتُ : on garde l’épaisseur du ṭâ’.'],
     lis=[[h(21, 87, 3, 4, 'ذ'), h(2, 60, 6, 7, 'ب'), h(2, 16, 7, 8, 'ت'), h(5, 61, 5, 6, 'د')], [h(2, 256, 5, 6, 'د'), h(3, 69, 1, 2, 'ت'), h(10, 89, 3, 4, 'ت'), h(4, 64, 11, 12, 'ذ')],
          [h(7, 176, 20, 21, 'ث'), h(11, 42, 14, 15, 'ب'), h(17, 24, 7, 8, 'ل'), h(77, 20, 2, 2, 'ق')], [W(5, 28, 2), W(27, 22, 5), W(39, 56, 7)]],
     lis_corr=['Ligne 1 : lettres identiques. Ligne 2 : lettres sœurs. Ligne 3 : sœurs (ث ذ, ب م) puis voisines (ل ر, ق ك). Ligne 4 : fusion incomplète, le ṭâ’ garde son épaisseur.'],

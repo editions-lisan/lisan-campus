@@ -25,3 +25,20 @@ LC2_BASE=/chemin/travail python3 gen_site.py               # site/data/coran2.js
 Les modules d'étapes doivent être importés dans l'ordre (2 à 10) : le choix automatique des exemples en dépend. Après une modification qui déplace les pages, recalculer `pages.json` à partir des PDF (bandeaux « ÉTAPE n • LEÇON n »).
 
 Sur le site : `livres/Lisan_lire-le-coran-2_eleve.pdf` et `_exercices.pdf` (lecture en ligne seulement) ; le livret du maître n'est pas mis en ligne.
+
+## Audio des « mots du Coran » (site)
+
+Sur le site, « Le mot » fait entendre **exactement ce qui est écrit sur la carte**, tel qu'al-Ḥouṣarî le récite (al-Muṣḥaf al-mu‘allim, lecture de Ḥafṣ ; fichiers verset par verset d'EveryAyah, dépôt GitHub `Raf0707/q7h_husary_muallim`), lu comme la leçon le demande. Fabrication :
+
+- `mots_plan.py` choisit le passage de chaque carte : un mot qui commence par une hamza de liaison ou une lettre doublée par l'assimilation est pris en tête d'un autre verset (sinon avec le mot précédent) ; si le mot suivant commence par une lettre doublée ou par l'article devant une lettre solaire, il est ajouté ; quand la règle se fait entendre à l'arrêt (qalqala, madd ‘âriḍ et lîn, râ’ à l'arrêt, « comment m'arrêter »…), une occurrence en fin de verset ; remplacements choisis à la main dans `REMPLACE`. La carte du site affiche le passage retenu (le livre garde ses exemples).
+- `mots_ctc.py` cale chaque lettre dans le temps par alignement forcé sur le texte du verset (modèle Omnilingual ASR 300M CTC de Meta, version ONNX de sherpa-onnx, licence Apache 2.0) et coupe juste avant l'attaque de la première lettre prononcée du mot suivant (creux d'énergie) ; aux pauses du récitateur, l'extrait va jusqu'au silence (rebond de la qalqala, ghounna, allongement entiers). Contrôle : le même modèle compare « exactement le texte écrit » aux hypothèses « une lettre du mot voisin en plus » et « une lettre du mot coupée » ; un écart négatif signale l'extrait pour une écoute (`doute` dans `mots_audio.json`).
+- `mots_audio.py` : lecture des fichiers, fondu, niveau égalisé, MP3 mono 64 kb/s.
+- `mots_build.py` fabrique tout (`site/audio/qr2/*.mp3` et `mots_audio.json`, repris par `lesson.py`) ; `mots_rapport.py sortie.xlsx` produit le tableau des corrections (hors site).
+
+```
+HUSARY_DIR=…/q7h_husary_muallim OMNI=…/sherpa-onnx-omnilingual-asr-1600-languages-300M-ctc-int8-2025-11-12 \
+QALIGN=…/Husary_Muallim_128kbps.json LC2_BASE=/chemin/travail python3 mots_build.py && python3 gen_site.py
+```
+
+`QALIGN` (minutage quran-align de C. Fair, CC BY 4.0) ne sert plus qu'à vérifier qu'un verset existe. Changer `VERSION` dans `mots_build.py` refait tous les extraits.
+

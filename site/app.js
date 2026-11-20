@@ -681,9 +681,11 @@ function renderBlock(b, s) {
       ${b.texte.lines.map(a => `<button type="button" class="dl-ar" data-say="${esc(a)}" data-lang="ar"><span class="ara" lang="ar" dir="rtl">${esc(a)}</span></button>`).join('')}
       <p class="fr">${md(b.texte.fr)}</p></div>`;
   if (b.lines) return `<div class="rlines" dir="rtl">${b.lines.map(r => `<div class="rline">${(Array.isArray(r) ? r : [r]).map(w => `<span class="ara" lang="ar">${esc(w)}</span>`).join('')}</div>`).join('')}</div>`;
-  // mot du Coran : d'abord le mot seul (audio mot à mot ; à défaut, le verset), puis le verset entier par al-Ḥouṣarî
-  if (b.qwords) return `<div class="qwords">${b.qwords.map(([w, r, u, wu]) => `<div class="qw"><span class="ara" lang="ar" dir="rtl">${esc(w)}</span><span class="meta">${esc(r)}</span>
-      <div class="qw-act">${wu ? `<button type="button" class="btn small" data-audio="${esc(JSON.stringify([wu]))}" data-fallback="${esc(u)}">${ICON}Le mot</button>` : ''}<button type="button" class="btn ${wu ? 'ghost ' : ''}small" data-audio="${esc(JSON.stringify([u]))}">${ICON}Le verset</button></div></div>`).join('')}</div>`;
+  // mot du Coran : « Le mot » fait entendre exactement ce qui est écrit (extrait de la récitation, lu comme la leçon le
+  // demande) ; « Le verset » fait entendre le verset entier et en affiche le texte
+  if (b.qwords) return `<div class="qwords">${b.qwords.map(([w, r, u, wu, v]) => `<div class="qw"><span class="ara" lang="ar" dir="rtl">${esc(w)}</span><span class="meta">${esc(r)}</span>
+      ${v ? `<span class="ara qw-v" lang="ar" dir="rtl">${esc(v)}</span>` : ''}
+      <div class="qw-act">${wu ? `<button type="button" class="btn small" data-audio="${esc(JSON.stringify([wu]))}" data-fallback="${esc(u)}">${ICON}Le mot</button>` : ''}<button type="button" class="btn ${wu ? 'ghost ' : ''}small" data-verse="1" data-audio="${esc(JSON.stringify([u]))}">${ICON}Le verset</button></div></div>`).join('')}</div>`;
   if (b.qverses) return `<div class="qverses"><div class="actions"><button type="button" class="btn small" data-audio="${esc(JSON.stringify(b.qverses.verses.map(v => v[2])))}">${ICON}Écouter toute la sourate</button></div>
       ${b.qverses.verses.map(([v, r, u], i) => `<div class="qv"><span class="ara" lang="ar" dir="rtl">${esc(v)} <span class="vnum">﴿${(i + 1).toLocaleString('ar-EG')}﴾</span></span>
       <button type="button" class="btn ghost small" data-audio="${esc(JSON.stringify([u]))}">${ICON}Verset ${i + 1}</button></div>`).join('')}</div>`;
@@ -1038,7 +1040,7 @@ function viewLesson(found) {
       return `<a href="#l-${s.id}.${x.id}" class="${j === i ? 'on' : ''}${dn ? ' done' : ''}${lk ? ' locked' : ''}"${j === i ? ' aria-current="page"' : ''}><span>${dn ? '✓' : lk ? '🔒' : j + 1}</span>${esc(x.title)}</a>`; }).join('')}</nav>
     <div class="ls-act"><a class="btn small" href="#q-${s.id}">${inOrder(s, 'quiz') ? '' : '🔒 '}Évaluation</a><a class="btn ghost small" href="#f-${s.id}">Cartes</a></div></aside>`;
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], [lessonPos(s, i)])}
-    <div class="duo duo-r"><article class="lesson read c-${s.color}">
+    <div class="duo duo-r"><article class="lesson read c-${s.color} s-${s.id}">
       <span class="eyebrow">${esc(s.title)} · ${lessonPos(s, i)}</span>
       <h1>${esc(l.title)}</h1>${l.ar ? `<p class="ara title-ar" lang="ar" dir="rtl">${esc(l.ar)}</p>` : ''}
       ${noVoice}${(s.lang === 'ar' && !s.noVoice) || (!s.noLessonVoice && /\[\[/.test(text)) ? noAr : ''}${s.noVoice ? noAudio : ''}
@@ -1152,7 +1154,7 @@ function viewQuiz(s) {
   const qs = evalBank(s).map(q => ({ ...q, order: q.vf ? [0, 1] : shuffle(q.a.map((_, k) => k)) })), N = qs.length, total = N * EVAL_SEC;
   quizRun = { s, answered: 0, right: 0, qs, picks: [], end: 0, total, started: false, over: false };
   return head + `<p class="lead">${N} questions tirées au sort parmi toutes celles du parcours · ${Math.round(total / 60)} minutes en tout · une seule réponse par question, sans correction avant la fin · au moins ${PASS()} % pour réussir.${best !== undefined ? ` Votre meilleur score : ${best} %.` : ''}</p></div>
-    <div class="duo duo-r"><div class="quiz read c-${s.color}" id="evalq">
+    <div class="duo duo-r"><div class="quiz read c-${s.color} s-${s.id}" id="evalq">
       <div class="notice" id="eval-start"><b>Prêt ?</b> Le temps démarre dès que vous commencez. En cas d’échec, une nouvelle tentative, avec d’autres questions, sera possible au bout de 10 minutes.
         <div class="actions"><button type="button" class="btn" data-eval-start>Commencer l’évaluation</button></div></div>
       <div id="eval-qs" hidden><div class="etimer" id="etimer" role="timer">⏱ <b>${Math.round(total / 60)}:00</b> <span>0 / ${N} réponses</span></div><div class="qbar" aria-hidden="true"><i id="qbar"></i></div>${qs.map((q, n) => `<div class="q" data-q="${n}"><b>${n + 1}. ${md(q.q)}</b>
@@ -1208,7 +1210,7 @@ function viewFlash(s) {
   return `${crumbs([sp.title, 'espace-' + sp.id], [s.title, 'm-' + s.id], ['Cartes'])}
     <div class="subject-head c-${s.color}"><h1>Cartes : ${esc(s.title)}</h1><p class="lead">Touchez la carte pour voir la réponse, puis dites si vous la saviez. Les cartes à revoir reviennent en premier.</p></div>
     ${s.lang === 'ar' && !s.noVoice ? noAr : ''}
-    <div class="flash c-${s.color}" id="flash"></div>`;
+    <div class="flash c-${s.color} s-${s.id}" id="flash"></div>`;
 }
 function drawFlash() {
   const el = document.getElementById('flash'); if (!el || !flashRun) return;
@@ -1420,7 +1422,7 @@ const PAGES = {
     { p: '**Cloudflare, Inc.** (service Cloudflare Pages), San Francisco, États-Unis — www.cloudflare.com. Le code du site est conservé sur GitHub ; les comptes et les messages sont enregistrés sur Firebase (Google), en Europe.' },
     { h: 'Crédits' },
     { ul: ['Polices : Literata, Atkinson Hyperlegible et Noto Sans (licence SIL Open Font) ; **Lisan Naskh**, dérivée de Noto Naskh Arabic, avec le code couleur des voyelles des Éditions Lisân (licence SIL Open Font).',
-      'Récitations du Coran : cheikh Maḥmoûd Khalîl al-Ḥouṣarî, lecture d’enseignement (al-mou‘allim), diffusées par everyayah.com ; mots du Coran prononcés seuls : audio mot à mot de Quran.com (audio.qurancdn.com).',
+      'Récitations du Coran : cheikh Maḥmoûd Khalîl al-Ḥouṣarî, lecture d’enseignement (al-mou‘allim), diffusées par everyayah.com ; mots du Coran prononcés seuls : audio mot à mot de Quran.com (audio.qurancdn.com) ; dans « Lire le Coran pas à pas 2 », chaque mot est un extrait de la récitation d’al-Ḥouṣarî, calé lettre par lettre (modèle de reconnaissance de la parole Omnilingual ASR de Meta, licence Apache 2.0) et lu comme la leçon le demande. Police coranique Amiri Quran (projet Amiri, licence SIL OFL).',
       'Voix de lecture : la synthèse vocale de votre appareil.',
       'Pictogrammes : Fluent Emoji de Microsoft et, pour les drapeaux, flag-icons (licence MIT ; textes des licences dans le fichier emoji/LICENCES.txt du site).',
       'Export des listes au format Excel : SheetJS (licence Apache 2.0) ; codes QR des certificats : qrcode-generator de Kazuhiko Arase (licence MIT).',
@@ -1736,7 +1738,7 @@ document.addEventListener('click', e => {
   if (back && !back.target && !back.hasAttribute('data-reload') && !e.ctrlKey && !e.metaKey && !e.shiftKey && navStack.length > 1
       && decodeURIComponent(back.getAttribute('href').slice(1)) === navStack[navStack.length - 2]) { e.preventDefault(); history.back(); return; }
   const au = t.closest('[data-audio]');
-  if (au) { playAudio(JSON.parse(au.dataset.audio), au, au.dataset.fallback); return; }
+  if (au) { if (au.hasAttribute('data-verse')) au.closest('.qw')?.classList.add('open'); playAudio(JSON.parse(au.dataset.audio), au, au.dataset.fallback); return; }
   const sayB = t.closest('[data-say]');
   if (sayB) { speak(sayB.dataset.say, sayB.dataset.lang, sayB.classList.contains('btn') || sayB.classList.contains('sp-en') ? sayB : null); return; }   // paragraphe de texte anglais : son enregistrement s'il existe
   const tr = t.closest('[data-trad]');
