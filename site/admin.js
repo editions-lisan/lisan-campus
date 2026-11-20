@@ -78,10 +78,39 @@ function viewAdmin() {
     <p class="lead">Connectez-vous avec le compte Google de l’administrateur.</p><div class="actions"><button type="button" class="btn" data-auth="signin">Se connecter avec Google</button></div></div>`;
   return `${head}<div id="admin" class="admin"></div>`;
 }
-function bindAdmin() { if (!document.getElementById('admin')) return; if (!adminRun.list && !adminRun.loading) loadAdmin(); else drawAdmin(); }
+function bindAdmin() { if (!document.getElementById('admin')) return; if (!adminRun.list && !adminRun.loading) loadAdmin(); else { drawAdmin(); if (!adminRun.err) adminLive(); } }
+// liste en direct : un compte qui se crée, une inscription ou une progression apparaissent aussitôt (sans « Actualiser »)
+function adminLive() {
+  const A = AUTH(); if (!A || !A.adminWatch || adminRun.unsub) return;
+  adminRun.unsub = A.adminWatch((list, changes, fromCache) => {
+    const before = new Set((adminRun.list || []).map(u => u.uid)), first = !adminRun.liveAt;
+    adminRun.list = list; adminRun.liveAt = Date.now(); adminRun.live = !fromCache;
+    if (!first) { const fresh = list.filter(u => !before.has(u.uid));
+      fresh.forEach(u => adminToast(`Nouveau compte : ${u.name || u.email || 'élève'}`));
+      const mod = changes.filter(c => c.type === 'modified').length; if (mod && !fresh.length) adminRun.changed = (adminRun.changed || 0) + mod; }
+    if (!document.getElementById('admin') || adminRun.loading) return;
+    const busy = document.activeElement && document.getElementById('admin').contains(document.activeElement) && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+    if (busy) { adminRun.stale = true; const n = document.getElementById('adm-live'); if (n) n.innerHTML = adminLiveLine(); } else drawAdmin();
+  }, () => { adminRun.unsub = null; adminRun.live = false; const n = document.getElementById('adm-live'); if (n) n.innerHTML = adminLiveLine(); });
+}
+function adminStop() { if (adminRun.unsub) { try { adminRun.unsub(); } catch (e) {} } adminRun.unsub = null; adminRun.liveAt = 0; }
+window.addEventListener('hashchange', () => { if (!/^#admin\b/.test(location.hash)) adminStop(); });
+const whenFr = iso => { if (!iso) return '—'; const t = new Date(iso).getTime(), m = Math.round((Date.now() - t) / 60000);
+  if (m < 1) return 'à l’instant'; if (m < 60) return `il y a ${m} min`; if (new Date(t).toDateString() === new Date().toDateString()) return `aujourd’hui à ${hm(t)}`; return dateFr(iso); };
+const hm = ms => new Date(ms).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+function adminLiveLine() {
+  const R = adminRun;
+  if (R.unsub && R.live) return `<span class="live-dot" aria-hidden="true"></span> En direct · mis à jour à ${hm(R.liveAt)}${R.stale ? ' · <button type="button" class="linkbtn" data-admin="redraw">afficher les nouveautés</button>' : ''}`;
+  if (R.unsub) return `<span class="live-dot off" aria-hidden="true"></span> Connexion au direct…`;
+  return `<span class="live-dot off" aria-hidden="true"></span> Direct interrompu · <button type="button" class="linkbtn" data-admin="reload">reprendre</button>`;
+}
+function adminToast(t) {
+  let z = document.getElementById('adm-toasts'); if (!z) { z = document.createElement('div'); z.id = 'adm-toasts'; z.setAttribute('aria-live', 'polite'); document.body.appendChild(z); }
+  const e = document.createElement('div'); e.className = 'adm-toast'; e.textContent = '🔔 ' + t; z.appendChild(e); setTimeout(() => e.remove(), 6000);
+}
 function loadAdmin() {
-  adminRun.loading = true; adminRun.err = ''; drawAdmin();
-  AUTH().adminList().then(async list => { adminRun.list = list; adminRun.rulesOk = await AUTH().certRulesOk();
+  adminRun.loading = true; adminRun.err = ''; drawAdmin(); adminStop();
+  AUTH().adminList().then(async list => { adminRun.list = list; adminRun.rulesOk = await AUTH().certRulesOk(); adminLive();
     adminRun.registry = null; if (adminRun.rulesOk) { try { adminRun.registry = await AUTH().adminRegistry(); } catch (e) {} }
     adminRun.msgs = []; if (adminRun.rulesOk && AUTH().adminMessages) { try { adminRun.msgs = await AUTH().adminMessages(); } catch (e) {} } adminRun.loading = false; setAdminCached(true); drawAdmin(); if (typeof renderDrawer === 'function') renderDrawer(); })
     .catch(e => { adminRun.loading = false; adminRun.list = null;
@@ -160,7 +189,7 @@ const rulesBox = (A, intro) => `<details class="panel"${intro.open ? ' open' : '
     <p class="meta" id="admin-copy" aria-live="polite"></p></details>`;
 function drawAdmin() {
   const box = document.getElementById('admin'); if (!box) return;
-  const A = AUTH(), R = adminRun;
+  const A = AUTH(), R = adminRun; R.stale = false;
   if (R.loading) { box.innerHTML = '<h1>Administration</h1><p class="lead">Chargement des inscrits…</p>'; return; }
   if (R.err === 'denied') {
     box.innerHTML = `<h1>Administration</h1><div class="notice">Cette page est réservée à l’administrateur de Lisân Campus.</div>
@@ -176,6 +205,7 @@ function drawAdmin() {
   const felic = R.felic = felicRows();
   const stat = (n, t, c) => `<div class="stat${c ? ' c-' + c : ''}"><b>${n}</b><span>${esc(t)}</span></div>`;
   const active = list.filter(u => activity(u).week > 0).length;
+  const today = list.filter(u => u.lastLogin && new Date(u.lastLogin).toDateString() === new Date().toDateString()).length;
   const tabs = `<div class="chips adm-tabs" role="group" aria-label="Rubrique"><button type="button" class="chip" data-admin-tab="ins" aria-pressed="${R.tab === 'ins'}">👥 Inscrits (${all.length})</button>
     <button type="button" class="chip" data-admin-tab="prog" aria-pressed="${R.tab === 'prog'}">📈 Progression</button>
     <button type="button" class="chip" data-admin-tab="acc" aria-pressed="${R.tab === 'acc'}">👤 Comptes (${list.length})</button>
@@ -186,9 +216,10 @@ function drawAdmin() {
     <button type="button" class="chip" data-admin-tab="msg" aria-pressed="${R.tab === 'msg'}">✉️ Messages (${(R.msgs || []).length})</button></div>`;
   const head = `<span class="eyebrow">Éditions Lisân</span><h1>Administration</h1>
     ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour pour les certificats et la sécurité renforcée.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
-    <div class="stats">${stat(list.length, 'comptes créés')}${stat(all.length, 'inscriptions')}${stat(fresh, 'nouvelles (7 jours)')}${stat(noIns, 'comptes sans inscription')}${stat(active, 'actifs (7 jours)')}
+    <div class="stats">${stat(list.length, 'comptes créés')}${stat(all.length, 'inscriptions')}${stat(fresh, 'nouvelles (7 jours)')}${stat(noIns, 'comptes sans inscription')}${stat(today, 'connectés aujourd’hui')}${stat(active, 'actifs (7 jours)')}
       ${stat(certs.length, 'certificats délivrés')}${stat(avis.length ? (avis.reduce((a, r) => a + r.x.note, 0) / avis.length).toFixed(1).replace('.', ',') + ' ★' : '—', avis.length + ' avis')}${stat(suggs.length, 'suggestions')}
       ${SPACES.map(sp => stat(count(sp.id), sp.title, sp.color)).join('')}</div>${tabs}
+    <p class="meta adm-live" id="adm-live" aria-live="polite">${adminLiveLine()}</p>
     <div class="actions"><button type="button" class="btn small" data-admin="xlsx">⬇ Télécharger en Excel</button>${R.tab === 'sugg' ? '<button type="button" class="btn ghost small" data-admin="sugdoc">⬇ Document des suggestions</button>' : ''}${R.tab === 'ins' ? '<button type="button" class="btn ghost small" data-admin="csv">⬇ CSV</button>' : ''}
       <button type="button" class="btn ghost small" data-admin="reload">↻ Actualiser</button></div>`;
   if (R.tab === 'cert') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${certs.length} certificat${certs.length > 1 ? 's' : ''} délivré${certs.length > 1 ? 's' : ''}.</p><div class="adm-list">${certCards(certs)}</div>`; return; }
@@ -337,13 +368,13 @@ function progCards(rows) {
 function accFiltered() {
   const q = adminRun.cq.trim().toLowerCase();
   return (adminRun.list || []).filter(u => !q || [u.name, u.email, u.info && u.info.nom, u.info && u.info.prenom].join(' ').toLowerCase().includes(q))
-    .sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    .sort((a, b) => String(b.createdAt || b.lastLogin || '').localeCompare(String(a.createdAt || a.lastLogin || '')));
 }
 function accCards(list) {
   if (!list.length) return '<p class="meta">Aucun compte pour le moment.</p>';
   return list.map(u => { const ids = Object.keys(u.spaces), a = activity(u), wa = waLink(u.info);
-    return `<article class="adm-card c-${ids.length ? 'a' : 'h'}"><div class="adm-top"><b>${esc(u.info ? who(u) : (u.name || 'Compte sans nom'))}</b><small>${u.createdAt ? 'créé le ' + dateFr(u.createdAt) : ''}</small></div>
-      <small>${esc(u.email || '')}${u.lastLogin ? ' · dernière connexion : ' + dateFr(u.lastLogin) : ''}</small>
+    return `<article class="adm-card c-${ids.length ? 'a' : 'h'}"><div class="adm-top"><b>${esc(u.info ? who(u) : (u.name || 'Compte sans nom'))}</b><small>${u.createdAt ? 'créé ' + (Date.now() - new Date(u.createdAt) < 864e5 ? whenFr(u.createdAt) : 'le ' + dateFr(u.createdAt)) : ''}</small></div>
+      <small>${esc(u.email || '')}${u.lastLogin ? ' · dernière connexion : ' + whenFr(u.lastLogin) : ''}</small>
       <p>${ids.length ? ids.map(id => `<span class="tag">${space(id).icon} ${esc(space(id).title)}</span>`).join(' ') : '<span class="tag">Aucune inscription : fiche non remplie</span>'}</p>
       <small>${u.done} leçon${u.done > 1 ? 's' : ''} terminée${u.done > 1 ? 's' : ''} · dernière activité : ${dayFr(a.last)}</small>
       <div class="actions">${wa ? `<a class="btn small" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}?subject=${encodeURIComponent('Lisân Campus')}">E-mail</a>` : ''}</div></article>`; }).join('');
@@ -453,6 +484,7 @@ document.addEventListener('click', e => {
   if (!b) return;
   const k = b.dataset.admin;
   if (k === 'reload') loadAdmin();
+  else if (k === 'redraw') drawAdmin();
   else if (k === 'xlsx') exportXlsx();
   else if (k === 'csv') exportCsv();
   else if (k === 'sugdoc') exportSuggDoc();

@@ -769,6 +769,19 @@ function viewHome() {
     <section class="books" aria-label="Les livres">${BOOKS.map(([f, t, d, h]) => { const inner = `<img src="img/${f}.webp" alt="Couverture du livre « ${esc(t)} »" width="150" height="212" loading="lazy" decoding="async"><b>${esc(t)}</b><small>${esc(d)}</small>`;
       return h ? `<a class="book" href="#${h}">${inner}</a>` : `<div class="book">${inner}</div>`; }).join('')}</section>`;
 }
+// ---------- navigateur intégré à une application (Facebook, Instagram, TikTok…) : Google y refuse la connexion ;
+// on explique comment ouvrir le site dans Chrome ou Safari au lieu de laisser la connexion échouer
+const IN_APP = [[/FBAN|FBAV|FB_IAB|FBIOS/, 'Facebook'], [/Instagram/, 'Instagram'], [/musical_ly|TikTok|BytedanceWebview/i, 'TikTok'], [/Snapchat/, 'Snapchat'], [/LinkedInApp/, 'LinkedIn'], [/Line\//, 'LINE'], [/; wv\)/, '']];
+function inAppBrowser() { const ua = navigator.userAgent || ''; const m = IN_APP.find(([r]) => r.test(ua)); return m ? (m[1] || 'une application') : ''; }
+function inAppNotice(el) {
+  const app = inAppBrowser();
+  if (el.closest('#drawer')) { const n = document.getElementById('ios-help'); if (n) { n.querySelector('.notice').textContent = `Vous êtes dans le navigateur de ${app}, où Google n’autorise pas la connexion : touchez le menu (⋮ ou ···) puis « Ouvrir dans le navigateur » (Chrome ou Safari).`; n.hidden = false; scrollTo(0, 0); } return; }
+  const box = el.closest('.actions') || el.parentElement; if (!box || (box.nextElementSibling && box.nextElementSibling.classList.contains('inapp'))) return;
+  box.insertAdjacentHTML('afterend', `<div class="notice inapp" role="alert"><b>Ouvrez Lisân Campus dans votre navigateur pour vous connecter.</b> Vous êtes dans le navigateur de ${esc(app)}, où Google n’autorise pas la connexion. Touchez le menu (⋮ ou ···) puis « Ouvrir dans le navigateur » (Chrome ou Safari), ou copiez l’adresse :
+    <div class="actions"><button type="button" class="btn small" data-copy-url="1">Copier l’adresse du site</button></div></div>`);
+  const c = box.parentElement.querySelector('[data-copy-url]'); if (c) c.onclick = () => { const u = 'https://lisan-campus.pages.dev/' + location.hash;
+    try { navigator.clipboard.writeText(u).then(() => { c.textContent = 'Adresse copiée : collez-la dans Chrome ou Safari'; }); } catch (e) { c.textContent = u; } };
+}
 // ---------- mode d'emploi en vidéo (format téléphone, outils/video/guide) : accueil et page #guide ; lecture seulement au toucher
 const GUIDE_DUR = '1 min 41';                            // durée de media/guide-720.mp4 (à changer quand la vidéo est refaite)
 const GUIDE_STEPS = ['Ouvrez lisan-campus.pages.dev sur téléphone ou sur ordinateur (sur téléphone, ajoutez-le à l’écran d’accueil)', 'Choisissez votre espace', 'Essayez la première leçon, en accès libre',
@@ -1742,7 +1755,7 @@ document.addEventListener('click', e => {
   const gs = t.closest('[data-gspace]');
   if (gs) { glossSpace = gs.dataset.gspace; document.querySelectorAll('[data-gspace]').forEach(b => b.setAttribute('aria-pressed', b === gs)); drawGlossary(document.getElementById('gsearch').value); return; }
   const aut = t.closest('[data-auth]');
-  if (aut && AUTH()) { closeMenu(); if (aut.dataset.auth === 'signin') AUTH().signIn().then(route, () => {}); else AUTH().signOut().then(() => { if (typeof setAdminCached === 'function') setAdminCached(false); location.hash = '#accueil'; route(); }); return; }
+  if (aut && AUTH()) { closeMenu(); if (aut.dataset.auth === 'signin' && inAppBrowser()) { inAppNotice(aut); return; } if (aut.dataset.auth === 'signin') AUTH().signIn().then(route, () => {}); else AUTH().signOut().then(() => { if (typeof setAdminCached === 'function') setAdminCached(false); location.hash = '#accueil'; route(); }); return; }
   const en = t.closest('[data-enroll]');
   if (en && AUTH()) { location.hash = '#inscription-' + en.dataset.enroll; return; }
   const sto = t.closest('[data-scrollto]');

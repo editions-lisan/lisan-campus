@@ -52,17 +52,16 @@
     async adminList() {                                  // administration : toutes les fiches (règle Firestore réservée à l'administrateur)
       if (!user) throw Object.assign(new Error('non connecté'), { code: 'unauthenticated' });
       const snap = await fb.firestore().collection('users').get({ source: 'server' });
-      return snap.docs.map(d => { const x = d.data() || {}, sp = {};
-        Object.entries(x.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date), reponses: v.reponses || {} }; });
-        const info = x.profile ? Object.assign({}, x.profile) : null; if (info) delete info.updatedAt;
-        return { uid: d.id, name: x.name || '', email: x.email || '', createdAt: iso(x.createdAt), lastLogin: iso(x.lastLogin), info, spaces: sp,
-          done: Object.keys((x.progress && x.progress.done) || {}).length,
-          prog: { done: (x.progress && x.progress.done) || {}, quiz: (x.progress && x.progress.quiz) || {}, time: (x.progress && x.progress.time) || {}, days: (x.progress && x.progress.days) || {} },
-          certs: Object.values(x.certificats || {}).filter(c => c && c.num).map(c => Object.assign({}, c, { date: iso(c.date) })),
-          sugg: Object.entries(x.suggestions || {}).filter(([, v]) => v && v.texte && v.type !== 'avis').map(([id, v]) => Object.assign({ id }, v, { date: iso(v.date) })),
-          avis: Object.values(x.suggestions || {}).filter(v => v && v.type === 'avis' && v.note).map(v => Object.assign({}, v, { date: iso(v.date) })) };
-      });
+      return snap.docs.map(adminRow);
     },
+    // administration en direct : la liste se met à jour dès qu'un élève se connecte, s'inscrit ou progresse
+    // (une lecture par fiche au départ, puis une lecture par fiche modifiée) ; renvoie la fonction qui arrête l'écoute
+    adminWatch(onList, onErr) {
+      if (!user) { onErr(Object.assign(new Error('non connecté'), { code: 'unauthenticated' })); return () => {}; }
+      return fb.firestore().collection('users').onSnapshot({ includeMetadataChanges: false },
+        snap => onList(snap.docs.map(adminRow), snap.docChanges().map(c => ({ type: c.type, uid: c.doc.id })), snap.metadata.fromCache), onErr);
+    },
+
     uid: () => user && user.uid,
     async adminRegistry() {                              // administration : numéros présents au registre des certificats
       const snap = await fb.firestore().collection('certificats').get({ source: 'server' }); return new Set(snap.docs.map(d => d.id));
@@ -148,6 +147,16 @@
       clearTimeout(timer); dueAt = due; timer = setTimeout(flush, due - Date.now());
     },
   };
+  function adminRow(d) { const x = d.data() || {}, sp = {};
+        Object.entries(x.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date), reponses: v.reponses || {} }; });
+        const info = x.profile ? Object.assign({}, x.profile) : null; if (info) delete info.updatedAt;
+        return { uid: d.id, name: x.name || '', email: x.email || '', createdAt: iso(x.createdAt), lastLogin: iso(x.lastLogin), info, spaces: sp,
+          done: Object.keys((x.progress && x.progress.done) || {}).length,
+          prog: { done: (x.progress && x.progress.done) || {}, quiz: (x.progress && x.progress.quiz) || {}, time: (x.progress && x.progress.time) || {}, days: (x.progress && x.progress.days) || {} },
+          certs: Object.values(x.certificats || {}).filter(c => c && c.num).map(c => Object.assign({}, c, { date: iso(c.date) })),
+          sugg: Object.entries(x.suggestions || {}).filter(([, v]) => v && v.texte && v.type !== 'avis').map(([id, v]) => Object.assign({ id }, v, { date: iso(v.date) })),
+          avis: Object.values(x.suggestions || {}).filter(v => v && v.type === 'avis' && v.note).map(v => Object.assign({}, v, { date: iso(v.date) })) };
+  }
   const doc = () => fb.firestore().collection('users').doc(user.uid);
   let dueAt = 0;
   function flush() { clearTimeout(timer); timer = null; dueAt = 0; if (user && fb) doc().set({ progress: progressData() }, { merge: true }).catch(() => {}); }
@@ -190,6 +199,7 @@
     await load(BASE + 'firebase-auth-compat.js');
     await load(BASE + 'firebase-firestore-compat.js');
     fb = window.firebase; fb.initializeApp(CFG);
+    try { fb.firestore().settings({ experimentalAutoDetectLongPolling: true, merge: true }); } catch (e) {}
     try { fb.firestore().enablePersistence({ synchronizeTabs: true }).catch(() => {}); } catch (e) {}
     await fb.auth().setPersistence(fb.auth.Auth.Persistence.LOCAL).catch(() => {});
     await new Promise(res => {
@@ -198,8 +208,11 @@
         user = u; pending = false;
         cache.set('user', u ? { uid: u.uid, displayName: u.displayName || '', email: u.email || '', photoURL: u.photoURL || '' } : null);
         if (u) {
+          // le compte apparaît tout de suite dans l'administration, même si la suite est lente (réseau faible)
+          doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(() => {});
           try {
-            const snap = await doc().get();
+            const snap = await within(doc().get(), 15000);
+            if (!snap || !snap.data) throw new Error('lecture trop lente');
             const d = snap.exists ? snap.data() : {};
             const sp = {};
             Object.entries(d.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date) || new Date().toISOString(), reponses: v.reponses || {} }; });
@@ -212,9 +225,12 @@
             cache.set('profile', profile);
             mergeProgress(d.progress);
             await doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp(),
-              ...(snap.exists ? {} : { createdAt: fb.firestore.FieldValue.serverTimestamp() }),
+              ...(d.createdAt ? {} : { createdAt: fb.firestore.FieldValue.serverTimestamp() }),
               progress: progressData() }, { merge: true });
-          } catch (e) { /* hors connexion : on garde les inscriptions en cache */ }
+          } catch (e) {                                  // hors connexion ou réseau lent : on garde les inscriptions en cache, et on réessaie plus tard
+            setTimeout(() => { if (user && user.uid === u.uid) doc().get().then(sn => { const d = sn.data() || {}; mergeProgress(d.progress);
+              doc().set({ ...(d.createdAt ? {} : { createdAt: fb.firestore.FieldValue.serverTimestamp() }), progress: progressData() }, { merge: true }).catch(() => {}); }).catch(() => {}); }, 20000);
+          }
         } else { profile = null; cache.set('profile', null); }
         if (first) { first = false; res(); } else if (typeof route === 'function') route();
       });
