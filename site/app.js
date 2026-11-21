@@ -813,6 +813,17 @@ const GUIDE_STEPS = ['Ouvrez lisan-campus.pages.dev sur téléphone ou sur ordin
 const NB_FR = ['zéro', 'une', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze'];
 const guideVideo = () => `<div class="gv-frame"><video class="gv" controls preload="none" playsinline poster="media/guide-poster.webp" controlslist="nodownload"
     aria-label="Mode d’emploi de Lisân Campus en vidéo : créer son compte, s’inscrire, suivre une leçon et obtenir son certificat"><source src="media/guide-720.mp4" type="video/mp4"><source src="media/guide-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo du mode d’emploi">${HV_ICON.play}<span>Regarder · ${GUIDE_DUR}</span></button></div>`;
+// vidéo « Réviser le droit (L1) avec Lisân Campus » (outils/video/droit), en tête de l'espace Droit
+const DROIT_DUR = '1 min 13';
+const droitVideo = () => `<div class="gv-frame"><video class="gv" controls preload="none" playsinline poster="media/droit-poster.webp" controlslist="nodownload"
+    aria-label="Réviser le droit de première année avec Lisân Campus : écouter les leçons, s’exercer, cas pratiques, évaluations, cours en PDF"><source src="media/droit-720.mp4" type="video/mp4"><source src="media/droit-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo des révisions de droit">${HV_ICON.play}<span>Regarder · ${DROIT_DUR}</span></button></div>`;
+const droitRevisions = () => `<section class="guide droit-rev">${droitVideo()}<div class="guide-txt"><h2>Réviser le droit, même sans coin calme</h2><ul>
+    <li><b>Écoutez</b> chaque leçon : la voix continue écran éteint, dans le gbaka comme à la maison.</li>
+    <li><b>Vérifiez</b> vos acquis : trois questions à la fin de chaque leçon.</li>
+    <li><b>Cas pratiques</b> et exercices d’application, avec le corrigé rédigé : les faits, la règle, l’application, la conclusion.</li>
+    <li><b>Cartes</b> de vocabulaire et <a href="#revisions">Mes révisions</a> : vos erreurs reviennent jusqu’à ce qu’elles soient acquises.</li>
+    <li><b>Évaluation</b> de chaque matière : 20 questions avec le chrono, comme le jour de la compo.</li>
+    <li><b>Cours complets en PDF</b> et Constitution à jour : <a href="#bibliotheque-droit">la bibliothèque</a>.</li></ul></div></section>`;
 function guideHome() {
   return `<div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Le mode d’emploi en vidéo</h2><p>Créer son compte, s’inscrire, suivre une leçon et obtenir son certificat, sur téléphone comme sur ordinateur : tout en ${GUIDE_DUR}.</p></div>
     <section class="guide">${guideVideo()}<div class="guide-txt"><ol>${GUIDE_STEPS.map(t => `<li>${t}</li>`).join('')}</ol>
@@ -960,7 +971,7 @@ function viewSpace(sp) {
     ${reg}
     ${libLink(sp.id)}
     ${certPanelSpace(sp)}</aside>
-    <div class="duo-main"><section class="subjects">${ss.map(card).join('')}</section></div></div>`;
+    <div class="duo-main">${sp.id === 'droit' ? droitRevisions() : ''}<section class="subjects">${ss.map(card).join('')}</section></div></div>`;
 }
 // ---------- bibliothèque : les livres des Éditions Lisân (élève, maître, exercices) et les documents de cours.
 // Lecture et téléchargement après connexion et inscription à l’espace du livre (comme les leçons) ; sans connexion
@@ -1494,7 +1505,7 @@ function route() {
   const gate = (s, i) => { const a = access(s, i); return a === 'ok' ? null : viewGate(s, a, i); };
   // quiz et cartes : connexion et inscription seulement (l'ordre du quiz est vérifié à part)
   const authGate = s => { const a = access(s, 1); return a === 'ok' || a === 'order' ? null : viewGate(s, a, a === 'prev' ? undefined : 1); };
-  if (h.startsWith('espace-') && space(h.slice(7))) html = viewSpace(space(h.slice(7)));
+  if (h.startsWith('espace-') && space(h.slice(7))) { html = viewSpace(space(h.slice(7))); after = bindGuide; }
   else if (h.startsWith('m-') && subj(h.slice(2))) html = viewSubject(subj(h.slice(2)));
   else if (h.startsWith('l-') && findLesson(h.slice(2))) { const f = findLesson(h.slice(2)); const g = gate(f.s, f.i);
     if (g) html = g; else { html = viewLesson(f); keep = true; after = afterLesson; } }

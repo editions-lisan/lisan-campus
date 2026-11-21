@@ -4,6 +4,7 @@
 |---|---|---|---|
 | Présentation (62 s, 1280 × 720, musique) | `campus-720` et `campus-480` (MP4 et WebM), `poster.webp` | accueil, lecture automatique sans le son | `index.html` (animation `render(t)`), `son.py` (bande-son) |
 | Mode d'emploi (≈ 1 min 40, 720 × 1280, voix commentée et sous-titres) | `guide-720` (MP4 et WebM), `guide-poster.webp` | accueil (« Le mode d'emploi en vidéo ») et page `#guide` | dossier `guide/` |
+| Réviser le droit (1 min 13, 720 × 1280, voix, sous-titres, code QR) | `droit-720` (MP4 et WebM), `droit-poster.webp` | en tête de l'espace Droit ; à envoyer sur WhatsApp | dossier `droit/` |
 
 **Règle : à chaque nouvelle fonctionnalité ou nouveauté visible par les élèves, mettre à jour l'une ou l'autre vidéo selon le besoin, dans le même envoi.**
 - Nouveau parcours, nouvel espace, nouvelle rubrique : la présentation (cartes `CARDS` des « Cinq espaces », scène de l'espace concerné dans `SC`, scènes « Pour bien apprendre » et « Bibliothèque et certificats ») ; si elle change la façon de se servir du site, aussi le mode d'emploi.
@@ -31,3 +32,6 @@ Onze scènes, minutage dans `S` (`index.html`) : la marque ; les huit livres de 
 6. reporter la durée dans `GUIDE_DUR` et les étapes dans `GUIDE_STEPS` (`site/app.js`), changer `VERSION` dans `site/sw.js`.
 
 Les vidéos ne passent pas par le cache hors connexion ; `/media/*` est servi en `Cache-Control: no-cache` (les téléphones revérifient la version).
+
+## Réviser le droit (`droit/`)
+Même chaîne que le mode d'emploi, avec l'élève de démonstration inscrite à l'espace Droit : `node droit/captures.js` (captures `droit/img/d_*.png`, positions `droit/captures.json`), `droit/scenes.json` (sept scènes : matières, écoute, mini-exercice, cas pratiques, cartes et révisions, évaluation, cours en PDF), `python3 droit/voix.py <voix siwis>` → `droit/data.js` et `droit/droit.wav`, vérifier avec `droit/droit.html#40`, puis `node render.js droit/droit.html 720 1280 /tmp/droit-master.mp4` et `sh encode.sh /tmp/droit-master.mp4 droit/droit.wav droit 720 1280` ; affiche : instant 5,5 s sans le sous-titre → `site/media/droit-poster.webp` ; durée dans `DROIT_DUR` (`site/app.js`). Code QR de la fin : `droit/img/qr.png` (vers `#espace-droit`).

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>Lisân Campus · réviser le droit (vidéo)</title>
+<!-- Vidéo « Réviser le droit (L1) avec Lisân Campus » (720 × 1280) : render(t) dessine l'instant t ; scènes et minutage dans data.js (voix.py) -->
+<link rel="stylesheet" href="../../fonts/fontsource-literata-5.1.0/package/800.css">
+<link rel="stylesheet" href="../../fonts/fontsource-atkinson-hyperlegible-5.1.0/package/400.css">
+<link rel="stylesheet" href="../../fonts/fontsource-atkinson-hyperlegible-5.1.0/package/700.css">
+<style>
+@font-face { font-family: "Lisan Naskh"; src: url(../../../site/fonts/LisanNaskh-R.woff2) format("woff2"); font-weight: 400; }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #000; }
+#stage { position: relative; width: 720px; height: 1280px; overflow: hidden; font-family: "Atkinson Hyperlegible", sans-serif; color: #fff;
+  background: radial-gradient(900px 1100px at 30% 15%, #2a3a7a 0%, #1e2a5a 45%, #131b3f 100%); }
+.abs { position: absolute; will-change: transform, opacity; }
+#pattern { left: -240px; top: -240px; opacity: .09; }
+.eyebrow { font-weight: 700; letter-spacing: .2em; text-transform: uppercase; color: #f0b24a; font-size: 21px; }
+h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-height: 1.1; }
+/* en-tête des étapes */
+#hd { left: 40px; right: 40px; top: 58px; }
+#hd .eyebrow { display: block; margin-bottom: 10px; }
+#hd h2 { font-size: 50px; }
+#dots { left: 40px; right: 40px; top: 196px; display: flex; gap: 6px; }
+#dots i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255,255,255,.18); }
+#dots i.on { background: #f0b24a; }
+/* téléphone */
+#phone { left: 152px; top: 232px; width: 416px; height: 768px; border-radius: 54px; background: #0b1022; padding: 14px;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.08), 0 40px 80px rgba(0,0,0,.45); }
+#screen { position: relative; width: 388px; height: 740px; border-radius: 40px; overflow: hidden; background: #eef1f4; }
+#view { position: absolute; left: 0; right: 0; top: 34px; bottom: 0; overflow: hidden; }
+#view img { position: absolute; left: 0; top: 0; width: 388px; }
+#sbar { position: absolute; left: 0; right: 0; top: 0; height: 34px; background: #fff; z-index: 4; display: flex; align-items: center; justify-content: space-between; padding: 4px 30px 0 34px; font: 700 15px "Atkinson Hyperlegible"; color: #141c2e; }
+#sbar span { display: flex; gap: 6px; align-items: center; }
+#sbar i { display: inline-block; width: 22px; height: 11px; border: 2px solid #141c2e; border-radius: 3px; position: relative; }
+#sbar i::after { content: ""; position: absolute; left: 1px; top: 1px; bottom: 1px; width: 13px; background: #141c2e; border-radius: 1px; }
+#notch { position: absolute; left: 50%; top: 8px; width: 92px; height: 24px; margin-left: -46px; background: #0b1022; border-radius: 14px; z-index: 5; }
+.tap { position: absolute; width: 64px; height: 64px; margin: -32px 0 0 -32px; border-radius: 50%; z-index: 4; pointer-events: none; }
+.tap b { position: absolute; inset: 10px; border-radius: 50%; background: rgba(240,178,74,.55); border: 3px solid #fff; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
+.tap i { position: absolute; inset: 0; border-radius: 50%; border: 4px solid #f0b24a; }
+/* ordinateur (étape 1) */
+#desk { left: 40px; top: 600px; width: 470px; }
+#desk .scr { width: 470px; height: 294px; border-radius: 14px 14px 4px 4px; border: 10px solid #0b1022; background-size: cover; background-position: top center; box-shadow: 0 30px 60px rgba(0,0,0,.5); }
+#desk .base { width: 530px; height: 18px; margin-left: -30px; border-radius: 0 0 16px 16px; background: linear-gradient(#cfd6e4, #9aa6bd); }
+#desk .lab { position: absolute; left: 290px; top: -66px; width: 330px; background: #fff; color: #141c2e; border-radius: 16px; padding: 12px 16px; box-shadow: 0 16px 34px rgba(0,0,0,.35); font-size: 20px; line-height: 1.3; }
+#desk .lab b { display: block; font-family: "Literata", serif; font-size: 25px; color: #23468f; }
+/* sous-titres */
+#cap { left: 34px; right: 34px; bottom: 34px; background: rgba(9,13,30,.82); border: 1.5px solid rgba(255,255,255,.14); border-radius: 22px; padding: 18px 24px;
+  font-size: 28px; line-height: 1.36; text-align: center; color: #fff; }
+#cap.lite { background: transparent; border-color: transparent; }
+/* ouverture et fin */
+.ctr { left: 0; right: 0; text-align: center; }
+#logo { left: 50%; width: 170px; height: 170px; margin-left: -85px; filter: drop-shadow(0 18px 30px rgba(0,0,0,.35)); }
+#i-eb { top: 452px; }
+#i-title { top: 492px; font-size: 92px; }
+#i-title span, #o-title span { color: #9fbaf5; }
+#i-ar { top: 624px; font-family: "Literata", serif; font-weight: 800; font-size: 54px; color: #f0b24a; }
+#i-pill { left: 50%; top: 740px; width: 340px; margin-left: -170px; height: 72px; border-radius: 36px; background: #f0b24a; color: #141c2e; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 700; box-shadow: 0 14px 30px rgba(0,0,0,.3); }
+.ichip { top: 850px; height: 50px; padding: 0 20px; border-radius: 25px; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.3); display: flex; align-items: center; font-size: 22px; font-weight: 700; }
+#o-title { top: 430px; font-size: 84px; }
+#o-url { left: 50%; top: 556px; width: 470px; margin-left: -235px; height: 72px; border-radius: 36px; background: #fff; color: #1e2a5a; display: flex; align-items: center; justify-content: center; gap: 12px; font-size: 30px; font-weight: 700; }
+#o-url svg { width: 30px; height: 30px; }
+#o-bye { top: 668px; font-family: "Literata", serif; font-weight: 800; font-size: 40px; color: #f0b24a; }
+#o-qr { left: 50%; top: 760px; width: 236px; height: 236px; margin-left: -118px; border-radius: 22px; background: #fff; padding: 10px; box-shadow: 0 18px 36px rgba(0,0,0,.35); }
+#o-qr img { width: 216px; height: 216px; display: block; }
+#o-sub { top: 1030px; font-size: 24px; color: #d9e2f7; }
+#fade { inset: 0; background: #0d1226; opacity: 0; }
+</style></head><body>
+<div id="stage">
+  <svg id="pattern" class="abs" width="1200" height="1760" aria-hidden="true"><defs><pattern id="st" width="120" height="120" patternUnits="userSpaceOnUse">
+    <g fill="none" stroke="#f0b24a" stroke-width="1.6" transform="translate(60 60)"><rect x="-30" y="-30" width="60" height="60"/><rect x="-30" y="-30" width="60" height="60" transform="rotate(45)"/><circle r="12"/></g>
+    <path d="M0 60H30M90 60H120M60 0V30M60 90V120" stroke="#f0b24a" stroke-width="1.2"/></pattern></defs><rect width="100%" height="100%" fill="url(#st)"/></svg>
+
+  <img id="logo" class="abs" src="../img/logo.png" alt="">
+  <div id="i-eb" class="abs ctr eyebrow">Éditions Lisân</div>
+  <h1 id="i-title" class="abs ctr">Lisân <span>Campus</span></h1>
+  <div id="i-ar" class="abs ctr">Spécial révisions</div>
+  <div id="i-pill" class="abs">⚖️ L1 Droit</div>
+  <div id="ic0" class="abs ichip">Écouter</div><div id="ic1" class="abs ichip">S’exercer</div><div id="ic2" class="abs ichip">Cas pratiques</div><div id="ic3" class="abs ichip">Évaluations</div>
+
+  <div id="hd" class="abs"><span class="eyebrow" id="hd-eb"></span><h2 id="hd-t"></h2></div>
+  <div id="dots" class="abs"></div>
+  <div id="phone" class="abs"><div id="screen"><div id="notch"></div><div id="sbar"><b>9:41</b><span>●●●● <i></i></span></div><div id="view"><div class="tap" id="tap" style="opacity:0"><i></i><b></b></div></div></div></div>
+
+  <h1 id="o-title" class="abs ctr">Lisân <span>Campus</span></h1>
+  <div id="o-url" class="abs"><svg viewBox="0 0 24 24" fill="none" stroke="#23468f" stroke-width="2.2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.5 3 14.5 0 18M12 3c-3 3.5-3 14.5 0 18"/></svg>lisan-campus.pages.dev</div>
+  <div id="o-bye" class="abs ctr">Bon courage pour les compos !</div>
+  <div id="o-qr" class="abs"><img src="img/qr.png" alt=""></div>
+  <div id="o-sub" class="abs ctr">Gratuit · connexion avec Google · Éditions Lisân</div>
+
+  <div id="cap" class="abs"></div>
+  <div id="fade" class="abs"></div>
+</div>
+<script src="data.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const clamp = x => Math.max(0, Math.min(1, x));
+const ease = x => 1 - Math.pow(1 - x, 3);
+const easeIO = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+const back = x => { const c1 = 1.4, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
+const prog = (t, a, d) => clamp((t - a) / d);
+const K = 388 / 390;                                       // pixels CSS de la capture → pixels de l'écran du téléphone
+const SC = window.SCENES, STEPS = window.STEPS;
+$('dots').innerHTML = Array.from({ length: STEPS }, () => '<i></i>').join('');
+// une image par plan (une même capture peut servir plusieurs fois)
+const imgs = {};
+SC.forEach(s => (s.shots || []).forEach(sh => { if (!imgs[sh.img]) { const im = new Image(); im.src = 'img/d_' + sh.img + '.png'; im.style.opacity = 0; $('view').insertBefore(im, $('tap')); imgs[sh.img] = im; } }));
+window.ready = Promise.all(Object.values(imgs).map(im => im.decode().catch(() => {})));
+function set(id, op, tf) { const e = typeof id === 'string' ? $(id) : id; e.style.opacity = op; e.style.transform = tf || 'none'; }
+function inOut(t, a, d, o, od) { return ease(prog(t, a, d)) * (1 - easeIO(prog(t, o, od))); }
+function render(t) {
+  $('pattern').style.transform = `translate(${-t * 6}px, ${-t * 4}px) rotate(${t * .25}deg)`;
+  const i = Math.max(0, SC.findIndex((s, k) => t < s.t0 + s.d || k === SC.length - 1)), s = SC[i], lt = t - s.t0, f = lt / s.d;
+  const first = SC.findIndex(x => x.step), lastStep = SC.length - 2, T = window.T;
+  // ouverture
+  const I = SC[0], iEnd = I.d - .55;
+  set('logo', inOut(t, .1, .8, iEnd, .45), `translateY(${(1 - back(prog(t, .1, .8))) * 40 - 30 * easeIO(prog(t, iEnd, .45))}px) scale(${.6 + .4 * back(prog(t, .1, .8))})`);
+  $('logo').style.top = '256px';
+  [['i-eb', .55], ['i-title', .75], ['i-ar', 1.1], ['i-pill', 1.6]].forEach(([id, a]) => set(id, inOut(t, a, .6, iEnd, .45), `translateY(${(1 - ease(prog(t, a, .6))) * 26 - 30 * easeIO(prog(t, iEnd, .45))}px)`));
+  if (!render.chips) { const w = [0, 1, 2, 3].map(k => $('ic' + k).offsetWidth), gap = 12, tot = w.reduce((a, b) => a + b, 0) + gap * 3; let x = (720 - tot) / 2;
+    render.chips = w.map(v => { const l = x; x += v + gap; return l; }); }
+  for (let k = 0; k < 4; k++) { $('ic' + k).style.left = render.chips[k] + 'px';
+    set('ic' + k, inOut(t, 2.2 + k * .35, .5, iEnd, .45), `translateY(${(1 - back(prog(t, 2.2 + k * .35, .5))) * 30}px)`); }
+  // en-tête d'étape
+  const step = s.step, prevStep = i > 0 ? SC[i - 1].step : null;
+  const hOp = step ? (prevStep === step ? 1 : ease(prog(lt, .05, .45))) * (i === lastStep ? 1 - easeIO(prog(t, s.t0 + s.d - .5, .45)) : 1) : 0;
+  if (step) { $('hd-eb').textContent = `Réviser le droit · ${step} / ${STEPS}`; $('hd-t').textContent = s.title; }
+  set('hd', hOp, `translateY(${(1 - ease(prog(lt, .05, .45))) * (prevStep === step ? 0 : 18)}px)`);
+  [...$('dots').children].forEach((d, k) => d.classList.toggle('on', !!step && k < step));
+  set('dots', step ? Math.min(1, hOp * 1.5) : 0);
+  // téléphone : entre à la première étape, sort avant la fin
+  const pa = SC[first].t0, pz = SC[lastStep].t0 + SC[lastStep].d - .5;
+  set('phone', ease(prog(t, pa - .2, .7)) * (1 - easeIO(prog(t, pz, .5))), `translateY(${(1 - ease(prog(t, pa - .2, .7))) * 260 + 120 * easeIO(prog(t, pz, .5))}px)`);
+  // plans de la scène en cours (et fondu depuis la scène précédente)
+  Object.values(imgs).forEach(im => { im.style.opacity = 0; });
+  const tap = $('tap'); tap.style.opacity = 0;
+  if (s.shots) {
+    s.shots.forEach((sh, k) => {
+      const a = sh.at * s.d, b = k + 1 < s.shots.length ? s.shots[k + 1].at * s.d : s.d, im = imgs[sh.img];
+      if (lt < a - .01) return;
+      const op = (k === 0 && i > 0 && SC[i - 1].shots ? prog(lt, 0, .35) : (k === 0 ? 1 : prog(lt, a, .35)));
+      const y = sh.y0 + (sh.y1 - sh.y0) * easeIO(prog(lt, a + .3, Math.max(.5, b - a - .6)));
+      im.style.opacity = Math.max(+im.style.opacity, op); im.style.transform = `translateY(${-y * K}px)`; im.style.zIndex = k + 1;
+      if (sh.tap && lt >= a) { const tt = lt - sh.tap[2] * s.d;
+        if (tt > -.25 && tt < 1.1) { tap.style.left = sh.tap[0] * K + 'px'; tap.style.top = (sh.tap[1] - y) * K + 'px';
+          tap.style.opacity = clamp((tt + .25) / .25) * (1 - prog(tt, .7, .4));
+          tap.querySelector('b').style.transform = `scale(${tt < 0 ? 1.25 : 1 - .15 * Math.sin(Math.min(1, tt / .2) * Math.PI)})`;
+          tap.querySelector('i').style.transform = `scale(${1 + 1.2 * prog(tt, 0, .6)})`; tap.querySelector('i').style.opacity = tt < 0 ? 0 : 1 - prog(tt, 0, .6); } }
+    });
+    if (i > 0 && SC[i - 1].shots && lt < .35) { const ps = SC[i - 1], sh = ps.shots[ps.shots.length - 1], im = imgs[sh.img];
+      if (im.style.opacity < 1 && sh.img !== s.shots[0].img) { im.style.opacity = 1 - prog(lt, 0, .35); im.style.transform = `translateY(${-sh.y1 * K}px)`; im.style.zIndex = 0; } }
+  } else if (i > 0 && SC[i - 1].shots) { const ps = SC[i - 1], sh = ps.shots[ps.shots.length - 1]; const im = imgs[sh.img]; im.style.opacity = 1; im.style.transform = `translateY(${-sh.y1 * K}px)`; }
+  // fin
+  const O = SC[SC.length - 1], oa = O.t0;
+  set('o-title', ease(prog(t, oa + .2, .6)), `translateY(${(1 - ease(prog(t, oa + .2, .6))) * 26}px)`);
+  set('o-url', ease(prog(t, oa + .55, .6)), `scale(${.85 + .15 * back(prog(t, oa + .55, .6))})`);
+  set('o-bye', ease(prog(t, oa + .95, .6)), `translateY(${(1 - ease(prog(t, oa + .95, .6))) * 20}px)`);
+  set('o-qr', ease(prog(t, oa + 1.3, .6)), `scale(${.8 + .2 * back(prog(t, oa + 1.3, .6))})`);
+  set('o-sub', ease(prog(t, oa + 1.7, .6)));
+  if (t >= oa) { $('logo').style.top = '210px'; set('logo', ease(prog(t, oa, .7)), `scale(${.7 + .3 * back(prog(t, oa, .7))})`); }
+  // sous-titres
+  const cap = $('cap');
+  if (cap.dataset.i !== String(i)) { cap.dataset.i = i; cap.textContent = s.caption; }
+  const cop = s.kind === 'outro' ? 0 : ease(prog(lt, .12, .35)) * (1 - easeIO(prog(lt, s.d - .3, .3)));
+  set(cap, cop, `translateY(${(1 - ease(prog(lt, .12, .35))) * 14}px)`);
+  $('fade').style.opacity = easeIO(prog(t, T - .6, .6));
+}
+window.render = render;
+render(+(location.hash.slice(1) || 3));
+</script>
+</body></html>

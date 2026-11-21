@@ -2,3 +2,5 @@ outils/fonts/
 outils/video/guide/img/
 outils/video/guide/guide.wav
 __pycache__/
+outils/video/droit/img/d_*.png
+outils/video/droit/droit.wav
