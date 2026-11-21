@@ -1291,6 +1291,7 @@ footer.site .wrap { padding-top: 46px; }
 @media print { .reader { display: none !important; } }
 /* Administration : progression des élèves */
 .adm-prog { margin: 6px 0 2px; }
+.adm-seen { display: block; margin: 2px 0 4px; }
 .adm-bar { height: 7px; margin: 6px 0 4px; }
 .adm-pt { font-size: 13px; }
 .adm-pt tr.ok td { color: var(--ok, #1b7a3a); }

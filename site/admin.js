@@ -50,6 +50,13 @@ function activity(u) {                                   // jours d'étude (seco
   while (D[dayKey(x)] > 0) { streak++; x.setDate(x.getDate() - 1); }
   return { last: keys[keys.length - 1] || null, week, streak, days: keys.length };
 }
+function lastUse(u) {                                    // dernière utilisation du site : ouverture connectée (lastLogin), envoi de la progression (progress.at), à défaut dernier jour d'étude
+  const t = [u.lastLogin, u.seenAt].filter(Boolean).map(x => new Date(x).getTime()).filter(x => x > 0), d = activity(u).last;
+  if (d) t.push(new Date(d + 'T00:00:00').getTime());
+  return t.length ? Math.max(...t) : 0;
+}
+const useDay = u => { const d = activity(u).last; return !!d && lastUse(u) === new Date(d + 'T00:00:00').getTime(); };   // seul le jour est connu
+const useFr = u => { const t = lastUse(u); return !t ? '—' : useDay(u) ? dayFr(activity(u).last) : whenFr(new Date(t).toISOString()); };
 const progBar = pct => `<div class="bar adm-bar"><i style="width:${Math.max(0, Math.min(100, pct))}%"></i></div>`;
 function progLine(u, id) {
   const p = progOf(u, id), a = activity(u);
@@ -243,7 +250,7 @@ function drawAdmin() {
     box.innerHTML = `${head}
       <div class="chips" role="group" aria-label="Filtrer par espace"><button type="button" class="chip" data-admin-sp="all" aria-pressed="${R.sp === 'all'}">Tous</button>
         ${SPACES.map(sp => `<button type="button" class="chip" data-admin-sp="${sp.id}" aria-pressed="${R.sp === sp.id}">${sp.icon} ${esc(sp.title)}</button>`).join('')}</div>
-      <p class="meta" id="admin-msg" aria-live="polite">${pr.length} inscription${pr.length > 1 ? 's' : ''}, de l’activité la plus récente à la plus ancienne. La progression est celle que le site a synchronisée (élève connecté).</p>
+      <p class="meta" id="admin-msg" aria-live="polite">${pr.length} inscription${pr.length > 1 ? 's' : ''}, de la personne qui a utilisé le site le plus récemment à la plus ancienne. La progression est celle que le site a synchronisée (élève connecté).</p>
       <div class="adm-list">${progCards(pr)}</div>`;
     return;
   }
@@ -360,14 +367,16 @@ function suggCards(rows) {
 function progRows() {
   return adminRows().filter(r => adminRun.sp === 'all' || r.id === adminRun.sp)
     .map(r => Object.assign({ p: progOf(r.u, r.id), a: activity(r.u) }, r))
-    .sort((x, y) => String(y.a.last || '').localeCompare(String(x.a.last || '')) || y.p.d - x.p.d);
+    .map(r => Object.assign({ t: lastUse(r.u) }, r))
+    .sort((x, y) => y.t - x.t || String(x.u.uid).localeCompare(String(y.u.uid)) || y.p.d - x.p.d);
 }
 function progCards(rows) {
   if (!rows.length) return '<p class="meta">Aucune inscription pour le moment.</p>';
   return rows.map(({ u, id, p, a }) => { const sp = space(id);
     return `<article class="adm-card c-${sp.color}"><div class="adm-top"><b>${esc(who(u))}</b><span class="tag">${sp.icon} ${esc(sp.title)}</span></div>
+      <small class="adm-seen">🕒 Dernière utilisation : <b>${useFr(u)}</b></small>
       ${progBar(p.pct)}<p><b>${p.d} / ${p.n} leçons</b> (${p.pct} %) · ${p.passed} / ${p.parc.length} parcours réussi${p.passed > 1 ? 's' : ''} · ${fmtDur(p.sec)} d’étude</p>
-      <small>${p.cur ? 'En cours : ' + esc(p.cur.s.title) + ` (${p.cur.d} / ${p.cur.n})` : 'Tous les parcours sont réussis'} · cette semaine : ${fmtDur(a.week)} · série : ${a.streak} jour${a.streak > 1 ? 's' : ''} · dernière activité : ${dayFr(a.last)}</small>
+      <small>${p.cur ? 'En cours : ' + esc(p.cur.s.title) + ` (${p.cur.d} / ${p.cur.n})` : 'Tous les parcours sont réussis'} · cette semaine : ${fmtDur(a.week)} · série : ${a.streak} jour${a.streak > 1 ? 's' : ''} · dernier jour d’étude : ${dayFr(a.last)}</small>
       <details><summary>Détail par parcours</summary>${progTable(u, id)}</details></article>`; }).join('');
 }
 function accFiltered() {
@@ -439,10 +448,10 @@ function sheetsData() {
   SPACES.forEach(sp => { const qs = QUESTIONS[sp.id] || [], rs = rows.filter(r => r.id === sp.id);
     out.push({ name: sp.title.replace(/[\\/?*[\]:]/g, ' ').slice(0, 31), head: [...COLS.map(c => c[0]), ...qs.map(q => q.l)], widths: [...COLS.map(c => c[1]), ...qs.map(() => 26)],
       data: rs.map(r => [...baseLine(r), ...qs.map(q => r.en.reponses[q.k] || '')]) }); });
-  out.push({ name: 'Progression', head: ['Nom', 'Espace', 'Leçons terminées', 'Leçons au total', 'Progression (%)', 'Parcours réussis', 'Parcours au total', 'En cours', 'Temps d’étude (min)', 'Cette semaine (min)', 'Série (jours)', 'Dernière activité', 'Téléphone', 'E-mail'],
-    widths: [28, 20, 10, 10, 10, 10, 10, 30, 12, 12, 10, 14, 18, 28],
-    data: rows.map(r => { const p = progOf(r.u, r.id), a = activity(r.u);
-      return [who(r.u), space(r.id).title, p.d, p.n, p.pct, p.passed, p.parc.length, p.cur ? p.cur.s.title : 'Terminé', Math.round(p.sec / 60), Math.round(a.week / 60), a.streak, a.last ? new Date(a.last + 'T12:00:00').toLocaleDateString('fr-FR') : '', telFr((r.u.info || {}).ind, (r.u.info || {}).tel), r.u.email]; }) });
+  out.push({ name: 'Progression', head: ['Nom', 'Espace', 'Leçons terminées', 'Leçons au total', 'Progression (%)', 'Parcours réussis', 'Parcours au total', 'En cours', 'Temps d’étude (min)', 'Cette semaine (min)', 'Série (jours)', 'Dernier jour d’étude', 'Dernière utilisation', 'Téléphone', 'E-mail'],
+    widths: [28, 20, 10, 10, 10, 10, 10, 30, 12, 12, 10, 14, 18, 18, 28],
+    data: rows.slice().sort((x, y) => lastUse(y.u) - lastUse(x.u) || String(x.u.uid).localeCompare(String(y.u.uid))).map(r => { const p = progOf(r.u, r.id), a = activity(r.u), t = lastUse(r.u);
+      return [who(r.u), space(r.id).title, p.d, p.n, p.pct, p.passed, p.parc.length, p.cur ? p.cur.s.title : 'Terminé', Math.round(p.sec / 60), Math.round(a.week / 60), a.streak, a.last ? new Date(a.last + 'T12:00:00').toLocaleDateString('fr-FR') : '', t ? new Date(t).toLocaleString('fr-FR', useDay(r.u) ? { dateStyle: 'short' } : { dateStyle: 'short', timeStyle: 'short' }) : '', telFr((r.u.info || {}).ind, (r.u.info || {}).tel), r.u.email]; }) });
   out.push({ name: 'Comptes', head: ['Nom (compte Google)', 'Nom (fiche)', 'E-mail', 'Créé le', 'Dernière connexion', 'Inscriptions', 'Leçons terminées', 'Dernière activité'], widths: [26, 28, 30, 14, 16, 40, 10, 14],
     data: (adminRun.list || []).slice().sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || ''))).map(u => { const a = activity(u);
       return [u.name || '', u.info ? who(u) : '', u.email || '', u.createdAt ? new Date(u.createdAt).toLocaleDateString('fr-FR') : '', u.lastLogin ? new Date(u.lastLogin).toLocaleDateString('fr-FR') : '',

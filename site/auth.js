@@ -162,7 +162,7 @@
   function adminRow(d) { const x = d.data() || {}, sp = {};
         Object.entries(x.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date), reponses: v.reponses || {} }; });
         const info = x.profile ? Object.assign({}, x.profile) : null; if (info) delete info.updatedAt;
-        return { uid: d.id, name: x.name || '', email: x.email || '', createdAt: iso(x.createdAt), lastLogin: iso(x.lastLogin), info, spaces: sp,
+        return { uid: d.id, name: x.name || '', email: x.email || '', createdAt: iso(x.createdAt), lastLogin: iso(x.lastLogin), seenAt: iso(x.progress && x.progress.at), info, spaces: sp,
           done: Object.keys((x.progress && x.progress.done) || {}).length,
           prog: { done: (x.progress && x.progress.done) || {}, quiz: (x.progress && x.progress.quiz) || {}, time: (x.progress && x.progress.time) || {}, days: (x.progress && x.progress.days) || {} },
           certs: Object.values(x.certificats || {}).filter(c => c && c.num).map(c => Object.assign({}, c, { date: iso(c.date) })),
@@ -186,7 +186,7 @@
   // tout ce qui suit l'élève d'un appareil à l'autre (les questions à revoir sont limitées aux 400 plus récentes)
   function progressData() {
     const rev = Object.entries(state.rev || {}).sort((a, b) => (b[1].t || 0) - (a[1].t || 0)).slice(0, 400);
-    return { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time, days: state.days || {}, minis: state.minis || {}, rev: Object.fromEntries(rev) };
+    return { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time, days: state.days || {}, minis: state.minis || {}, rev: Object.fromEntries(rev), at: fb.firestore.FieldValue.serverTimestamp() };   // at : heure du dernier envoi (ordre de l'onglet Progression)
   }
   function mergeProgress(remote) {
     if (!remote) return;

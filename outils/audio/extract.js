@@ -1,7 +1,7 @@
 // Extrait, avec les fonctions mêmes du site, le texte de chaque leçon à enregistrer (morceaux français / arabe)
 const fs=require('fs');global.window=global;global.document={};
 const D='/home/claude/lisan-campus/site/';
-let src='';for(const f of ['data/droit.js','data/romans.js','data/ia.js','data/arabe.js','data/coran.js','data/islam.js']) src+=fs.readFileSync(D+f,'utf8')+'\n';
+let src='';for(const f of ['data/droit.js','data/romans.js','data/ia.js','data/arabe.js','data/coran.js','data/coran2.js','data/islam.js']) src+=fs.readFileSync(D+f,'utf8')+'\n';
 src+=fs.readFileSync(D+'boot.js','utf8').split('\n').filter(l=>l.startsWith('const SUBJECTS'))[0]+'\nglobal.SUBJECTS=SUBJECTS;';
 eval(src);
 const app=fs.readFileSync(D+'app.js','utf8');

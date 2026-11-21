@@ -236,11 +236,11 @@ window.MINI = {
   ],
   "dc/etatcivil": [
     { q: "Hors commune, l'officier de l'état civil est…", a: ["le sous-préfet", "le préfet", "le juge des tutelles"], c: 0, e: "Dans la commune, c'est le maire." },
-    { q: "Le délai pour déclarer une naissance est de…", a: ["3 mois après l'accouchement", "15 jours", "1 an"], c: 0, e: "Article 41 de la loi n° 2018-862 ; le décès se déclare dans les 15 jours." },
+    { q: "Le délai pour déclarer une naissance est de…", a: ["3 mois après l'accouchement", "15 jours", "1 an"], c: 0, e: "Article 41 de la loi n° 2018-862 ; ensuite, 9 mois pour l'enregistrer sur attestation de collecte. Le décès se déclare dans les 15 jours." },
     { q: "Les registres de l'état civil sont tenus…", a: ["en double exemplaire", "en un seul exemplaire", "seulement sous forme numérique"], c: 0, e: "Un exemplaire reste au centre, l'autre va au greffe du tribunal." },
   ],
   "dc/etatcivil2": [
-    { q: "Une naissance non déclarée dans le délai se régularise par…", a: ["un jugement supplétif", "un acte notarié", "une simple attestation du chef de village"], c: 0, e: "Le jugement est transcrit et tient lieu d'acte." },
+    { q: "Une naissance ni déclarée ni collectée dans les délais se régularise par…", a: ["un jugement supplétif", "un acte notarié", "une simple attestation du chef de village"], c: 0, e: "Le jugement est transcrit et tient lieu d'acte." },
     { q: "Les actes de l'état civil font foi…", a: ["jusqu'à inscription de faux", "jusqu'à preuve contraire", "pendant 10 ans"], c: 0, e: "Ce sont des actes authentiques." },
     { q: "Une erreur matérielle d'orthographe dans un acte se corrige par…", a: ["une rectification administrative", "une annulation de l'acte", "un jugement supplétif"], c: 0, e: "L'erreur grave exige une rectification judiciaire." },
   ],
