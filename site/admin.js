@@ -112,7 +112,7 @@ function loadAdmin() {
   adminRun.loading = true; adminRun.err = ''; drawAdmin(); adminStop();
   AUTH().adminList().then(async list => { adminRun.list = list; adminRun.rulesOk = await AUTH().certRulesOk(); adminLive();
     adminRun.registry = null; if (adminRun.rulesOk) { try { adminRun.registry = await AUTH().adminRegistry(); } catch (e) {} }
-    adminRun.msgs = []; if (adminRun.rulesOk && AUTH().adminMessages) { try { adminRun.msgs = await AUTH().adminMessages(); } catch (e) {} } adminRun.loading = false; setAdminCached(true); drawAdmin(); if (typeof renderDrawer === 'function') renderDrawer(); })
+    adminRun.msgs = []; if (adminRun.rulesOk && AUTH().adminMessages) { try { adminRun.msgs = await AUTH().adminMessages(); } catch (e) {} } adminRun.acces = {}; if (adminRun.rulesOk && AUTH().adminAcces) { try { adminRun.acces = await AUTH().adminAcces(); } catch (e) {} } adminRun.loading = false; setAdminCached(true); drawAdmin(); if (typeof renderDrawer === 'function') renderDrawer(); })
     .catch(e => { adminRun.loading = false; adminRun.list = null;
       adminRun.err = e && /permission/.test(e.code || e.message || '') ? 'denied' : 'network'; if (adminRun.err === 'denied') setAdminCached(false); drawAdmin(); });
 }
@@ -173,9 +173,14 @@ service cloud.firestore {
         && (!('uid' in request.resource.data) || (request.auth != null && request.resource.data.uid == request.auth.uid));
       allow read, delete: if isAdmin();
     }
+    // Parcours ouverts par l'administrateur à un élève, sans le parcours précédent : l'élève lit seulement sa ligne
+    match /acces/{uid} {
+      allow get: if isOwner(uid) || isAdmin();
+      allow list, create, update, delete: if isAdmin();
+    }
     // repère de version des règles (vérifié par la page d'administration)
     match /regles/{v} {
-      allow get: if v == 'v4';
+      allow get: if v == 'v5';
     }
   }
 }`;
@@ -215,7 +220,7 @@ function drawAdmin() {
     <button type="button" class="chip" data-admin-tab="sugg" aria-pressed="${R.tab === 'sugg'}">💡 Suggestions (${suggs.length})</button>
     <button type="button" class="chip" data-admin-tab="msg" aria-pressed="${R.tab === 'msg'}">✉️ Messages (${(R.msgs || []).length})</button></div>`;
   const head = `<span class="eyebrow">Éditions Lisân</span><h1>Administration</h1>
-    ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour pour les certificats et la sécurité renforcée.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
+    ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour (certificats, sécurité renforcée, parcours ouverts à un élève) : copiez-les et publiez-les dans la console Firebase.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
     <div class="stats">${stat(list.length, 'comptes créés')}${stat(all.length, 'inscriptions')}${stat(fresh, 'nouvelles (7 jours)')}${stat(noIns, 'comptes sans inscription')}${stat(today, 'connectés aujourd’hui')}${stat(active, 'actifs (7 jours)')}
       ${stat(certs.length, 'certificats délivrés')}${stat(avis.length ? (avis.reduce((a, r) => a + r.x.note, 0) / avis.length).toFixed(1).replace('.', ',') + ' ★' : '—', avis.length + ' avis')}${stat(suggs.length, 'suggestions')}
       ${SPACES.map(sp => stat(count(sp.id), sp.title, sp.color)).join('')}</div>${tabs}
@@ -370,6 +375,30 @@ function accFiltered() {
   return (adminRun.list || []).filter(u => !q || [u.name, u.email, u.info && u.info.nom, u.info && u.info.prenom].join(' ').toLowerCase().includes(q))
     .sort((a, b) => String(b.createdAt || b.lastLogin || '').localeCompare(String(a.createdAt || a.lastLogin || '')));
 }
+// Ouvrir un parcours à un seul élève, sans qu'il ait réussi le parcours précédent (collection acces, règles v5)
+const ORDERED = () => SUBJECTS.filter(s => !freeOrder(s) && spaceSubjects(s)[0] !== s);
+function accesCtl(u) {
+  if (!adminRun.rulesOk) return '';
+  const on = Object.keys(((adminRun.acces || {})[u.uid] || {}).parcours || {}).filter(id => SUBJECTS.some(s => s.id === id));
+  const opts = ORDERED().filter(s => !on.includes(s.id));
+  return `<div class="adm-acces" data-acces-uid="${esc(u.uid)}">${on.map(id => { const s = SUBJECTS.find(x => x.id === id);
+      return `<span class="tag">🔓 ${esc(s.title)} <button type="button" class="linkbtn" data-acces-off="${esc(id)}" aria-label="Refermer ${esc(s.title)}">refermer</button></span>`; }).join(' ')}
+    ${opts.length ? `<label class="meta">Ouvrir un parcours sans le précédent : <select data-acces-sel>${opts.map(s => `<option value="${esc(s.id)}">${esc(space(spaceOf(s)).title)} · ${esc(s.title)}</option>`).join('')}</select></label>
+    <button type="button" class="btn ghost small" data-acces-on="1">Ouvrir pour cet élève</button>` : ''}<small class="meta" data-acces-msg aria-live="polite"></small></div>`;
+}
+function accesAction(b) {
+  const box = b.closest('[data-acces-uid]'), uid = box.dataset.accesUid, msg = box.querySelector('[data-acces-msg]');
+  const u = (adminRun.list || []).find(x => x.uid === uid) || {};
+  const id = b.dataset.accesOff || box.querySelector('[data-acces-sel]').value, on = !b.dataset.accesOff;
+  const s = SUBJECTS.find(x => x.id === id); b.disabled = true; msg.textContent = 'Enregistrement…';
+  AUTH().adminSetAcces(uid, id, on, u.info ? who(u) : u.name).then(() => {
+    const a = adminRun.acces || (adminRun.acces = {}); const r = a[uid] || (a[uid] = { parcours: {} }); r.parcours = r.parcours || {};
+    if (on) r.parcours[id] = true; else delete r.parcours[id];
+    box.outerHTML = accesCtl(u);
+    const nb = document.querySelector(`[data-acces-uid="${CSS.escape(uid)}"] [data-acces-msg]`);
+    if (nb) nb.textContent = on ? `« ${s.title} » est ouvert pour cet élève : il le verra à sa prochaine connexion ou en actualisant la page.` : `« ${s.title} » est refermé pour cet élève.`;
+  }, () => { b.disabled = false; msg.textContent = 'Échec : vérifiez la connexion, et que les règles Firebase sont à jour.'; });
+}
 function accCards(list) {
   if (!list.length) return '<p class="meta">Aucun compte pour le moment.</p>';
   return list.map(u => { const ids = Object.keys(u.spaces), a = activity(u), wa = waLink(u.info);
@@ -377,7 +406,7 @@ function accCards(list) {
       <small>${esc(u.email || '')}${u.lastLogin ? ' · dernière connexion : ' + whenFr(u.lastLogin) : ''}</small>
       <p>${ids.length ? ids.map(id => `<span class="tag">${space(id).icon} ${esc(space(id).title)}</span>`).join(' ') : '<span class="tag">Aucune inscription : fiche non remplie</span>'}</p>
       <small>${u.done} leçon${u.done > 1 ? 's' : ''} terminée${u.done > 1 ? 's' : ''} · dernière activité : ${dayFr(a.last)}</small>
-      <div class="actions">${wa ? `<a class="btn small" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}?subject=${encodeURIComponent('Lisân Campus')}">E-mail</a>` : ''}</div></article>`; }).join('');
+      <div class="actions">${wa ? `<a class="btn small" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}?subject=${encodeURIComponent('Lisân Campus')}">E-mail</a>` : ''}</div>${accesCtl(u)}</article>`; }).join('');
 }
 function adminCards(rows) {
   if (!rows.length) return '<p class="meta">Aucune inscription pour le moment.</p>';
@@ -391,7 +420,7 @@ function adminCards(rows) {
         ${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}">E-mail</a>` : ''}</div>
       <details><summary>Progression par parcours</summary>${progTable(u, id)}</details>
       <details><summary>Fiche complète</summary>${dl([['Adresse e-mail', u.email], ...infoRows(i), ...answerRows(id, en.reponses), ['Leçons terminées (compte)', String(u.done)],
-        ['Dernière connexion', u.lastLogin ? dateFr(u.lastLogin) : '—']])}</details></article>`; }).join('');
+        ['Dernière connexion', u.lastLogin ? dateFr(u.lastLogin) : '—']])}</details>${SUBJECTS.some(s => spaceOf(s) === id && !freeOrder(s)) ? accesCtl(u) : ''}</article>`; }).join('');
 }
 
 // ---------- export : Excel (feuille « Tous » + une feuille par espace) et CSV
@@ -477,6 +506,8 @@ document.addEventListener('click', e => {
     z.insertAdjacentHTML('beforeend', `<span class="meta">Annuler définitivement le certificat ${esc(n)} ? Il ne sera plus reconnu à la vérification.</span><button type="button" class="btn bad small" data-revoke-yes="${esc(n)}">Oui, annuler</button>`); rv.remove(); return; }
   const ry = e.target.closest('[data-revoke-yes]');
   if (ry) { ry.disabled = true; AUTH().adminRevoke(ry.dataset.revokeYes).then(loadAdmin, loadAdmin); return; }
+  const ac_ = e.target.closest('[data-acces-on],[data-acces-off]');
+  if (ac_) { accesAction(ac_); return; }
   const fb_ = e.target.closest('[data-felic]');
   if (fb_) { felicAction(fb_); return; }
   const tb = e.target.closest('[data-admin-tab]');

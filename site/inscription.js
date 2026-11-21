@@ -152,7 +152,7 @@ function infoFieldsets(i, opts = {}) {
     </fieldset>
     <fieldset class="group"><legend>Pour mieux vous connaître</legend>
       ${fieldSelect('source', 'Comment avez-vous connu Lisân Campus ?', SOURCES, i.source)}
-      ${opts.news !== false ? fieldCheck('news', 'Je souhaite recevoir les nouveautés des Éditions Lisân (nouveaux cours, nouveaux livres).', i.news, false) : ''}
+      ${opts.news !== false ? fieldCheck('news', 'Je souhaite être informé(e) des nouveautés de Lisân Campus : nouveaux cours, nouveaux livres, nouvelles fonctions du site (ce ne sont pas des publicités).', i.news, false) : ''}
     </fieldset>`;
 }
 function bindInfoFields(f) {
@@ -176,7 +176,7 @@ function readInfo(f) {
   const minor = (ageOf(g('naissance')) ?? 99) < 18;
   return { civilite: (f.querySelector('[name=civilite]:checked') || {}).value || '', prenom: prenomFmt(g('prenom')), nom: g('nom').replace(/\s+/g, ' ').toUpperCase(),
     naissance: g('naissance'), ind: g('ind'), tel: g('tel').replace(/[^\d]/g, ''), pays: g('pays'), paysAutre: g('pays') === 'Autre pays' ? g('paysAutre') : '', ville: g('ville'),
-    statut: (f.querySelector('[name=statut]:checked') || {}).value || '', parcours: readParcours(f), source: g('source'), news: !!(f.elements.news && f.elements.news.checked),
+    statut: (f.querySelector('[name=statut]:checked') || {}).value || '', parcours: readParcours(f), source: g('source'), news: !!(f.elements.news && f.elements.news.checked), newsAsk: new Date().toISOString().slice(0, 10),   // question posée dans sa forme claire
     tuteur: minor ? { nom: g('tNom'), tel: g('tTel').replace(/[^\d+]/g, ''), accord: !!f.elements.tAccord.checked } : null };
 }
 // toutes les clés sont écrites (vides si la question ne concerne pas la situation choisie) : une ancienne réponse ne reste jamais dans la fiche

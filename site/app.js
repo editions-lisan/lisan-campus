@@ -541,10 +541,13 @@ const spaceSubjects = s => SUBJECTS.filter(x => spaceOf(x) === spaceOf(s));
 const subjectPassed = s => firstUndone(s) === -1 && (typeof quizOk === 'function' ? quizOk(s) : (state.quiz[s.id] || 0) >= PASS());
 function prevSubject(s) { const ss = spaceSubjects(s), k = ss.indexOf(s); return k > 0 ? ss[k - 1] : null; }
 function blockingSubject(s) { const ss = spaceSubjects(s); for (const x of ss) { if (x === s) return null; if (!subjectPassed(x)) return x; } return null; }
-const subjectOpen = s => freeOrder(s) || !blockingSubject(s);
+// parcours ouvert à un élève par l'administrateur (onglet Comptes de #admin) sans avoir réussi le précédent
+const granted = s => { const A = AUTH(); return !!(A && A.unlocked && A.unlocked(s.id)); };
+const subjectOpen = s => freeOrder(s) || granted(s) || !blockingSubject(s);
 // prochaine étape d'un espace : première leçon non terminée du premier parcours non réussi, sinon son quiz
 function nextStep(spId) {
-  const x = SUBJECTS.filter(s => spaceOf(s) === spId).find(s => !subjectPassed(s)); if (!x) return null;
+  const todo = SUBJECTS.filter(s => spaceOf(s) === spId && !subjectPassed(s));
+  const x = todo.find(granted) || todo[0]; if (!x) return null;          // un parcours ouvert par l'administrateur passe en premier
   const f = firstUndone(x);
   return f === -1 ? { s: x, href: '#q-' + x.id, label: `Évaluation : ${x.title}` } : { s: x, href: `#l-${x.id}.${x.lessons[f].id}`, label: `${x.title} — ${/^\d/.test(x.lessons[f].title) ? '' : `leçon ${f + 1} : `}${x.lessons[f].title}` };
 }
@@ -722,6 +725,24 @@ const nf = n => n.toLocaleString('fr-FR');
 // découpe un titre en mots animés un à un (la virgule reste collée au mot précédent)
 const words = (t, i0) => t.split(' ').filter(Boolean).map((w, k) => `<span class="wd" style="--i:${i0 + k}">${esc(w)}</span>`).join(' ');
 // tableau de bord de l'accueil : série de jours, objectif du jour, révisions à faire
+// la question « recevoir les nouveautés » a pu être prise pour de la publicité : on la repose une fois, clairement,
+// à l'élève connecté qui avait répondu non (réponse gardée dans sa fiche, newsAsk)
+function newsAsk() {
+  const A = AUTH(), i = A && A.user() && A.info && A.info();
+  if (!i || i.news || i.newsAsk) return '';
+  return `<section class="notice news-ask" id="news-ask"><b>📬 Voulez-vous être informé(e) des nouveautés de Lisân Campus ?</b>
+    <p>Nouveaux cours, nouveaux livres, nouvelles fonctions du site, par WhatsApp ou par e-mail. Ce ne sont pas des publicités, et vous pouvez changer d’avis à tout moment dans « Mes informations ».</p>
+    <div class="actions"><button type="button" class="btn small" data-news="1">Oui, me tenir informé(e)</button><button type="button" class="btn ghost small" data-news="0">Non merci</button></div></section>`;
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-news]'); if (!b) return;
+  const A = AUTH(), i = A && A.info && A.info(); if (!i) return;
+  const yes = b.dataset.news === '1', box = document.getElementById('news-ask');
+  b.disabled = true;
+  A.saveInfo(Object.assign({}, i, { news: yes, newsAsk: new Date().toISOString().slice(0, 10) })).then(() => {
+    if (box) box.innerHTML = `<b>${yes ? '✅ C’est noté : vous serez informé(e) des nouveautés.' : 'C’est noté.'}</b>`;
+  }, () => { b.disabled = false; });
+});
 function homeDash() {
   const st = streak(), t = state.days[dayKey()] || 0, due = revDue().length, pct = Math.min(100, Math.round(t / DAY_GOAL * 100));
   return `<section class="dash" aria-label="Mon tableau de bord">
@@ -750,7 +771,7 @@ function viewHome() {
       <div class="hero-cta hz" style="--hd:1.05s"><button type="button" class="btn" data-scrollto="espaces">Choisir un espace</button>${last ? `<a class="btn ghost" href="${resumeHref}">Reprendre ma leçon</a>` : '<a class="btn ghost" href="#apropos">Découvrir Lisân</a>'}</div>
     </section>${heroVideo()}</div>
     <section class="kpis" aria-label="Lisân Campus en chiffres">${kpi('🧭', SPACES.length, 'espaces', 'a')}${kpi('📚', totalL, 'leçons', 'n')}${kpi('✍️', nQ, 'questions de quiz', 'i')}${kpi('🃏', nC, 'cartes de révision', 'l')}${kpi('📶', 'Hors ligne', 'fonctionne même sans internet', 'm').replace('<b>', '<b class="txt">')}</section>
-    ${homeDash()}
+    ${homeDash()}${newsAsk()}
     ${doneL || last ? `<section class="mine"><span class="ring" style="--p:${pct}">${pct} %</span><div><b>Votre progression</b><p>${doneL} leçon${doneL > 1 ? 's' : ''} terminée${doneL > 1 ? 's' : ''} sur ${totalL}${last ? ` · dernière leçon : ${esc(last.s.title)}, ${esc(last.l.title)}` : ''}</p></div>${last ? `<a class="btn" href="${resumeHref}">Reprendre</a>` : ''}</section>` : ''}
     <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">${ORN}</span><h2>Les cinq espaces</h2><p>Choisissez votre espace : la première leçon de chaque espace est en accès libre.</p></div>
     <section class="spaces">${SPACES.map(sp => { const p = spaceProgress(sp); const A = AUTH();

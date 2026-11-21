@@ -8,6 +8,7 @@
   const cache = { get(k, d) { try { const v = localStorage.getItem('lc.auth.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
                   set(k, v) { try { localStorage.setItem('lc.auth.' + k, JSON.stringify(v)); } catch (e) {} } };
   let fb = null, user = null, profile = cache.get('profile', null), timer = null, pending = true;
+  let acces = cache.get('acces', null);               // parcours ouverts par l'administrateur pour cet élève (acces/{uid})
   const me = () => user || (pending ? cache.get('user', null) : null);   // élève connu, même avant la réponse de Google
   const LisanAuth = {
     enabled: true,
@@ -18,6 +19,8 @@
     enrolled: id => !!(me() && profile && profile.spaces && profile.spaces[id] && profile.spaces[id].num),
     enrollment: id => (me() && profile && profile.spaces && profile.spaces[id] && profile.spaces[id].num) ? profile.spaces[id] : null,
     info: () => (me() && profile && profile.info) || null,
+    // parcours ouvert à cet élève par l'administrateur, sans avoir réussi le parcours précédent (collection acces)
+    unlocked: id => !!(me() && acces && acces.uid === (me() || {}).uid && acces.parcours && acces.parcours[id]),
     signIn() {
       if (!fb) return Promise.reject(new Error('Connexion indisponible'));
       const p = new fb.auth.GoogleAuthProvider(); p.setCustomParameters({ prompt: 'select_account' });
@@ -94,7 +97,7 @@
       catch (e) { if (/permission/.test((e && (e.code || e.message)) || '')) return false; throw e; }
     },
     async certRulesOk() {                                // les règles Firestore autorisent-elles déjà les certificats ?
-      try { await fb.firestore().collection('regles').doc('v4').get({ source: 'server' }); return true; }
+      try { await fb.firestore().collection('regles').doc('v5').get({ source: 'server' }); return true; }
       catch (e) { return !/permission/.test((e && (e.code || e.message)) || ''); }
     },
     sendMessage(x) {                                     // formulaire de contact : enregistré dans Firebase, lu par l'administrateur
@@ -108,6 +111,15 @@
       return snap.docs.map(d => Object.assign({ id: d.id }, d.data(), { date: iso(d.data().date) })).sort((a, b) => String(b.date).localeCompare(String(a.date)));
     },
     adminDeleteMessage: id => within(fb.firestore().collection('messages').doc(id).delete()),
+    async adminAcces() {                                 // administration : parcours ouverts à des élèves, par compte
+      const snap = await fb.firestore().collection('acces').get({ source: 'server' });
+      const out = {}; snap.docs.forEach(d => { out[d.id] = d.data() || {}; }); return out;
+    },
+    adminSetAcces(uid, subjectId, on, nom) {             // ouvre (ou referme) un parcours pour un seul élève
+      const ref = fb.firestore().collection('acces').doc(uid);
+      return within(ref.set({ parcours: { [subjectId]: on ? true : fb.firestore.FieldValue.delete() }, nom: String(nom || '').slice(0, 80),
+        maj: fb.firestore.FieldValue.serverTimestamp() }, { merge: true }), 15000);
+    },
     suggestions: () => Object.values((me() && profile && profile.sugg) || {}).sort((a, b) => String(b.date).localeCompare(String(a.date))),
     avisFor: key => ((me() && profile && profile.avis) || {})[key] || null,
     giveAvis(x) {                                        // avis de fin de parcours ou d'espace : une entrée par clé, dans la rubrique « suggestions »
@@ -222,6 +234,11 @@
               if (v && v.type === 'avis' && v.cle && v.note) avis[v.cle] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() });
               else if (v && v.texte) sugg[k] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() }); });
             profile = { spaces: sp, info, certs, sugg, avis };
+            // parcours ouverts par l'administrateur (une lecture ; absent pour presque tous les élèves)
+            fb.firestore().collection('acces').doc(u.uid).get().then(s => {
+              const was = JSON.stringify(acces); acces = s.exists ? { uid: u.uid, parcours: (s.data() || {}).parcours || {} } : null;
+              cache.set('acces', acces); if (JSON.stringify(acces) !== was && typeof route === 'function') route();
+            }).catch(() => {});
             cache.set('profile', profile);
             mergeProgress(d.progress);
             await doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp(),
@@ -231,7 +248,7 @@
             setTimeout(() => { if (user && user.uid === u.uid) doc().get().then(sn => { const d = sn.data() || {}; mergeProgress(d.progress);
               doc().set({ ...(d.createdAt ? {} : { createdAt: fb.firestore.FieldValue.serverTimestamp() }), progress: progressData() }, { merge: true }).catch(() => {}); }).catch(() => {}); }, 20000);
           }
-        } else { profile = null; cache.set('profile', null); }
+        } else { profile = null; cache.set('profile', null); acces = null; cache.set('acces', null); }
         if (first) { first = false; res(); } else if (typeof route === 'function') route();
       });
     });
