@@ -216,6 +216,8 @@ const frNorm = t => String(t)
   .replace(/(\d|\))₁₀/g, '$1 en base dix').replace(/₁₀/g, ' en base dix')
   .replace(/(\d|n)([⁰¹²³⁴⁵⁶⁷⁸⁹]+)/g, (m, b, e) => b + ' puissance ' + [...e].map(c => '⁰¹²³⁴⁵⁶⁷⁸⁹'.indexOf(c)).join(''))
   .replace(/#([0-9A-F]{6})\b/g, (m, d) => 'dièse ' + d.split('').join(' ')).replace(/\b([0-9A-F]{2}(?::[0-9A-F]{2}){5})\b/g, m => m.split(':').map(x => x.split('').join(' ')).join(', ')).replace(/\s\+\s/g, ' plus ').replace(/\s÷\s/g, ' divisé par ').replace(/\s×\s/g, ' fois ')
+  .replace(/(\d)\s?(Go|Mo|Ko|To)\b/g, (m, d, u) => d + ' ' + { Go: 'gigaoctets', Mo: 'mégaoctets', Ko: 'kilooctets', To: 'téraoctets' }[u])
+  .replace(/\b(GHz|MHz|kHz)\b/g, u => ({ GHz: 'gigahertz', MHz: 'mégahertz', kHz: 'kilohertz' })[u]).replace(/\bFCFA\b/g, 'francs CFA')
   .replace(/\bn°\s*/g, 'numéro ').replace(/\s=\s/g, ' égale ').replace(/\s−\s/g, ' moins ').replace(/\s*→\s*/g, ', ');
 const pronLex = t => String(t).replace(/[^\s()«»"“”,.;:!?]+/g, w => { const m = w.match(ELIS), pre = m ? m[0] : '', x0 = w.slice(pre.length), lx = AR_LEX[lexKey(x0)];
   return lx ? pre + (/^['’‘ʿʾ]?\p{Lu}/u.test(x0) ? lx.charAt(0).toUpperCase() + lx.slice(1) : lx) : w; });
@@ -814,7 +816,7 @@ const NB_FR = ['zéro', 'une', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept',
 const guideVideo = () => `<div class="gv-frame"><video class="gv" controls preload="none" playsinline poster="media/guide-poster.webp" controlslist="nodownload"
     aria-label="Mode d’emploi de Lisân Campus en vidéo : créer son compte, s’inscrire, suivre une leçon et obtenir son certificat"><source src="media/guide-720.mp4" type="video/mp4"><source src="media/guide-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo du mode d’emploi">${HV_ICON.play}<span>Regarder · ${GUIDE_DUR}</span></button></div>`;
 // vidéo « Réviser le droit (L1) avec Lisân Campus » (outils/video/droit), en tête de l'espace Droit
-const DROIT_DUR = '1 min 14';
+const DROIT_DUR = '1 min 13';
 const droitVideo = () => `<div class="gv-frame"><video class="gv" controls preload="none" playsinline poster="media/droit-poster.webp" controlslist="nodownload"
     aria-label="Réviser le droit de première année avec Lisân Campus : écouter les leçons, s’exercer, cas pratiques, évaluations, cours en PDF"><source src="media/droit-720.mp4" type="video/mp4"><source src="media/droit-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo des révisions de droit">${HV_ICON.play}<span>Regarder · ${DROIT_DUR}</span></button></div>`;
 const droitRevisions = () => `<section class="guide droit-rev">${droitVideo()}<div class="guide-txt"><h2>Réviser le droit, même sans coin calme</h2><ul>

@@ -1,18 +1,18 @@
 // produit par voix.py à partir de scenes.json et captures.json : ne pas modifier à la main
 window.STEPS = 7;
-window.T = 73.855;
+window.T = 73.125;
 window.SCENES = [
  {
   "kind": "intro",
   "caption": "Semaine de révisions, puis les compos : révisez tout le programme de L1 Droit avec Lisân Campus.",
   "t0": 0.0,
-  "d": 11.258,
-  "speech": 9.858
+  "d": 11.112,
+  "speech": 9.712
  },
  {
   "step": 1,
   "title": "Toutes nos matières",
-  "caption": "Introduction au droit, droit civil, organisation judiciaire, droit constitutionnel, méthodologie… 177 leçons claires, tirées des cours.",
+  "caption": "Introduction au droit, droit civil, organisation judiciaire, droit constitutionnel, méthodologie… 189 leçons claires, tirées des cours.",
   "shots": [
    {
     "img": "espace",
@@ -22,14 +22,14 @@ window.SCENES = [
    },
    {
     "img": "espace",
-    "y0": 1295,
-    "y1": 2575,
+    "y0": 2457,
+    "y1": 3737,
     "at": 0.36
    }
   ],
-  "t0": 11.258,
-  "d": 12.649,
-  "speech": 11.849
+  "t0": 11.112,
+  "d": 12.678,
+  "speech": 11.878
  },
  {
   "step": 2,
@@ -54,9 +54,9 @@ window.SCENES = [
     "at": 0.42
    }
   ],
-  "t0": 23.907,
-  "d": 7.821,
-  "speech": 7.021
+  "t0": 23.79,
+  "d": 7.629,
+  "speech": 6.829
  },
  {
   "step": 3,
@@ -66,13 +66,13 @@ window.SCENES = [
    {
     "img": "mini",
     "y0": 4059,
-    "y1": 4857,
+    "y1": 4961,
     "at": 0
    }
   ],
-  "t0": 31.728,
-  "d": 4.466,
-  "speech": 3.666
+  "t0": 31.419,
+  "d": 4.526,
+  "speech": 3.726
  },
  {
   "step": 4,
@@ -98,9 +98,9 @@ window.SCENES = [
     "at": 0.7
    }
   ],
-  "t0": 36.194,
-  "d": 8.815,
-  "speech": 8.015
+  "t0": 35.945,
+  "d": 8.544,
+  "speech": 7.744
  },
  {
   "step": 5,
@@ -131,9 +131,9 @@ window.SCENES = [
     "at": 0.55
    }
   ],
-  "t0": 45.009,
-  "d": 7.709,
-  "speech": 6.909
+  "t0": 44.489,
+  "d": 7.662,
+  "speech": 6.862
  },
  {
   "step": 6,
@@ -158,9 +158,9 @@ window.SCENES = [
     "at": 0.46
    }
   ],
-  "t0": 52.718,
-  "d": 6.258,
-  "speech": 5.458
+  "t0": 52.151,
+  "d": 6.547,
+  "speech": 5.747
  },
  {
   "step": 7,
@@ -174,15 +174,15 @@ window.SCENES = [
     "at": 0
    }
   ],
-  "t0": 58.975,
-  "d": 5.582,
-  "speech": 4.782
+  "t0": 58.698,
+  "d": 5.458,
+  "speech": 4.658
  },
  {
   "kind": "outro",
   "caption": "",
-  "t0": 64.558,
-  "d": 9.297,
-  "speech": 7.297
+  "t0": 64.156,
+  "d": 8.969,
+  "speech": 6.969
  }
 ];
