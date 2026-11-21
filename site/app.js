@@ -814,7 +814,7 @@ const NB_FR = ['zéro', 'une', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept',
 const guideVideo = () => `<div class="gv-frame"><video class="gv" controls preload="none" playsinline poster="media/guide-poster.webp" controlslist="nodownload"
     aria-label="Mode d’emploi de Lisân Campus en vidéo : créer son compte, s’inscrire, suivre une leçon et obtenir son certificat"><source src="media/guide-720.mp4" type="video/mp4"><source src="media/guide-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo du mode d’emploi">${HV_ICON.play}<span>Regarder · ${GUIDE_DUR}</span></button></div>`;
 // vidéo « Réviser le droit (L1) avec Lisân Campus » (outils/video/droit), en tête de l'espace Droit
-const DROIT_DUR = '1 min 13';
+const DROIT_DUR = '1 min 14';
 const droitVideo = () => `<div class="gv-frame"><video class="gv" controls preload="none" playsinline poster="media/droit-poster.webp" controlslist="nodownload"
     aria-label="Réviser le droit de première année avec Lisân Campus : écouter les leçons, s’exercer, cas pratiques, évaluations, cours en PDF"><source src="media/droit-720.mp4" type="video/mp4"><source src="media/droit-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo des révisions de droit">${HV_ICON.play}<span>Regarder · ${DROIT_DUR}</span></button></div>`;
 const droitRevisions = () => `<section class="guide droit-rev">${droitVideo()}<div class="guide-txt"><h2>Réviser le droit, même sans coin calme</h2><ul>

@@ -4,7 +4,7 @@
 |---|---|---|---|
 | Présentation (62 s, 1280 × 720, musique) | `campus-720` et `campus-480` (MP4 et WebM), `poster.webp` | accueil, lecture automatique sans le son | `index.html` (animation `render(t)`), `son.py` (bande-son) |
 | Mode d'emploi (≈ 1 min 40, 720 × 1280, voix commentée et sous-titres) | `guide-720` (MP4 et WebM), `guide-poster.webp` | accueil (« Le mode d'emploi en vidéo ») et page `#guide` | dossier `guide/` |
-| Réviser le droit (1 min 13, 720 × 1280, voix, sous-titres, code QR) | `droit-720` (MP4 et WebM), `droit-poster.webp` | en tête de l'espace Droit ; à envoyer sur WhatsApp | dossier `droit/` |
+| Réviser le droit (1 min 14, 720 × 1280, voix, sous-titres, code QR) | `droit-720` (MP4 et WebM), `droit-poster.webp` | en tête de l'espace Droit ; à envoyer sur WhatsApp | dossier `droit/` |
 
 **Règle : à chaque nouvelle fonctionnalité ou nouveauté visible par les élèves, mettre à jour l'une ou l'autre vidéo selon le besoin, dans le même envoi.**
 - Nouveau parcours, nouvel espace, nouvelle rubrique : la présentation (cartes `CARDS` des « Cinq espaces », scène de l'espace concerné dans `SC`, scènes « Pour bien apprendre » et « Bibliothèque et certificats ») ; si elle change la façon de se servir du site, aussi le mode d'emploi.
