@@ -1,13 +1,13 @@
 // produit par voix.py à partir de scenes.json et captures.json : ne pas modifier à la main
-window.STEPS = 12;
-window.T = 100.71;
+window.STEPS = 13;
+window.T = 110.215;
 window.SCENES = [
  {
   "kind": "intro",
   "caption": "Lisân Campus, le mode d’emploi : votre compte, votre inscription, vos leçons et votre certificat.",
   "t0": 0.0,
-  "d": 8.564,
-  "speech": 7.164
+  "d": 8.082,
+  "speech": 6.682
  },
  {
   "step": 1,
@@ -22,9 +22,9 @@ window.SCENES = [
    }
   ],
   "extra": "desktop",
-  "t0": 8.564,
-  "d": 13.155,
-  "speech": 12.355
+  "t0": 8.082,
+  "d": 13.082,
+  "speech": 12.282
  },
  {
   "step": 2,
@@ -33,8 +33,8 @@ window.SCENES = [
   "shots": [
    {
     "img": "home",
-    "y0": 1486,
-    "y1": 1866,
+    "y0": 1575,
+    "y1": 1955,
     "at": 0
    },
    {
@@ -49,9 +49,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 21.719,
-  "d": 6.602,
-  "speech": 5.802
+  "t0": 21.164,
+  "d": 6.675,
+  "speech": 5.875
  },
  {
   "step": 3,
@@ -70,9 +70,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 28.321,
-  "d": 4.871,
-  "speech": 4.071
+  "t0": 27.84,
+  "d": 5.044,
+  "speech": 4.244
  },
  {
   "step": 4,
@@ -91,9 +91,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 33.192,
-  "d": 6.016,
-  "speech": 5.216
+  "t0": 32.884,
+  "d": 6.163,
+  "speech": 5.363
  },
  {
   "step": 5,
@@ -118,9 +118,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 39.208,
-  "d": 6.323,
-  "speech": 5.523
+  "t0": 39.047,
+  "d": 6.029,
+  "speech": 5.229
  },
  {
   "step": 6,
@@ -134,9 +134,9 @@ window.SCENES = [
     "at": 0
    }
   ],
-  "t0": 45.531,
-  "d": 5.662,
-  "speech": 4.862
+  "t0": 45.076,
+  "d": 5.617,
+  "speech": 4.817
  },
  {
   "step": 7,
@@ -155,9 +155,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 51.193,
-  "d": 6.352,
-  "speech": 5.552
+  "t0": 50.693,
+  "d": 6.303,
+  "speech": 5.503
  },
  {
   "step": 8,
@@ -167,13 +167,13 @@ window.SCENES = [
    {
     "img": "mini",
     "y0": 4626,
-    "y1": 5414,
+    "y1": 5504,
     "at": 0
    }
   ],
-  "t0": 57.545,
-  "d": 7.05,
-  "speech": 6.25
+  "t0": 56.996,
+  "d": 6.986,
+  "speech": 6.186
  },
  {
   "step": 9,
@@ -192,9 +192,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 64.595,
-  "d": 5.113,
-  "speech": 4.313
+  "t0": 63.981,
+  "d": 5.159,
+  "speech": 4.359
  },
  {
   "step": 10,
@@ -224,9 +224,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 69.708,
-  "d": 8.359,
-  "speech": 7.559
+  "t0": 69.141,
+  "d": 8.328,
+  "speech": 7.528
  },
  {
   "step": 10,
@@ -240,9 +240,9 @@ window.SCENES = [
     "at": 0
    }
   ],
-  "t0": 78.067,
-  "d": 5.363,
-  "speech": 4.563
+  "t0": 77.468,
+  "d": 5.386,
+  "speech": 4.586
  },
  {
   "step": 11,
@@ -262,14 +262,41 @@ window.SCENES = [
     "at": 0.45
    }
   ],
-  "t0": 83.429,
-  "d": 6.978,
-  "speech": 6.178
+  "t0": 82.854,
+  "d": 6.699,
+  "speech": 5.899
  },
  {
   "step": 12,
+  "title": "Classement et rappels",
+  "caption": "Gagnez des XP en étudiant, comparez-vous aux autres élèves chaque semaine et programmez un rappel quotidien.",
+  "shots": [
+   {
+    "img": "classement",
+    "y0": 0,
+    "y1": 523,
+    "at": 0
+   },
+   {
+    "img": "rappels",
+    "y0": 961,
+    "y1": 991,
+    "at": 0.6,
+    "tap": [
+     195,
+     1344,
+     0.82
+    ]
+   }
+  ],
+  "t0": 89.553,
+  "d": 9.616,
+  "speech": 8.816
+ },
+ {
+  "step": 13,
   "title": "Le menu",
-  "caption": "Dans le menu : les espaces, la bibliothèque, vos révisions, la recherche et ce mode d’emploi.",
+  "caption": "Dans le menu : les espaces, la bibliothèque, vos révisions, le classement, la recherche et ce mode d’emploi.",
   "shots": [
    {
     "img": "menu",
@@ -278,15 +305,15 @@ window.SCENES = [
     "at": 0
    }
   ],
-  "t0": 90.407,
-  "d": 6.132,
-  "speech": 5.332
+  "t0": 99.169,
+  "d": 6.909,
+  "speech": 6.109
  },
  {
   "kind": "outro",
   "caption": "lisan-campus.pages.dev · Bonne étude !",
-  "t0": 96.539,
-  "d": 4.171,
-  "speech": 2.171
+  "t0": 106.079,
+  "d": 4.136,
+  "speech": 2.136
  }
 ];

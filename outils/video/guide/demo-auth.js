@@ -8,5 +8,8 @@
     certs: () => Object.values(prof.certs), certFor: key => Object.values(prof.certs).find(c => c.key === key) || null, suggestions: () => [], suggest: () => Promise.resolve(),
     issueCert: async c => { const o = Object.assign({}, c, { num: 'LCC-2026-7Q2M9XKD', date: new Date().toISOString() }); prof.certs[o.num] = o; return o; }, getCert: async n => prof.certs[n] || null,
     avisFor: k => prof.avis[k] || null, giveAvis(x) { prof.avis[x.cle] = Object.assign({}, x, { date: new Date().toISOString() }); window.__lastAvis = x; return Promise.resolve(); },
-    adminProbe: async () => false, ready: Promise.resolve() };
+    adminProbe: async () => false,
+    boardList: async sem => [{ uid: 'b1', nom: 'Fatou D.', sem, xp: 640, tot: 2100, serie: 12, esp: ['arabe', 'coran'] }, { uid: 'b2', nom: 'Yao K.', sem, xp: 410, tot: 1250, serie: 7, esp: ['droit'] },
+      { uid: 'b3', nom: 'Aïcha B.', sem, xp: 220, tot: 900, serie: 4, esp: ['islam'] }, { uid: 'b4', nom: 'Ibrahim T.', sem, xp: 95, tot: 300, serie: 2, esp: ['droit', 'ia'] }],
+    boardPut: () => Promise.resolve(), boardLeave: () => Promise.resolve(), ready: Promise.resolve() };
 })();

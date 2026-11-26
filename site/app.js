@@ -8,7 +8,7 @@ const state = {
   done: store.get('done', {}), quiz: store.get('quiz', {}), known: store.get('known', {}),
   words: store.get('words', {}), time: store.get('time', {}), rate: store.get('rate', 1), last: store.get('last', null),
   theme: store.get('theme', 'auto'), size: store.get('size', 'm'),
-  rev: store.get('rev', {}), days: store.get('days', {}), minis: store.get('minis', {}),
+  rev: store.get('rev', {}), days: store.get('days', {}), minis: store.get('minis', {}), xpb: store.get('xpb', {}),
 };
 const save = k => { store.set(k, state[k]); if (window.LisanAuth && window.LisanAuth.onSave) window.LisanAuth.onSave(k, state[k]); };
 
@@ -70,6 +70,8 @@ function studied(sec, now = true) {
   const keys = Object.keys(state.days).sort(); while (keys.length > 120) delete state.days[keys.shift()];
   if (now) save('days');
 }
+// points d'expérience (XP) : bonus du jour (leçon terminée, mini-exercice, évaluation, révision), en plus d'1 XP par minute d'étude
+function xpAdd(n) { const k = dayKey(); state.xpb[k] = (state.xpb[k] || 0) + n; save('xpb'); if (typeof boardTouch === 'function') boardTouch(); if (n >= 10 && typeof xpToast === 'function') xpToast(n); }
 function streak() {
   const d = new Date(); if (!state.days[dayKey(d)]) d.setDate(d.getDate() - 1);
   let n = 0; while (state.days[dayKey(d)] > 0) { n++; d.setDate(d.getDate() - 1); }
@@ -86,7 +88,7 @@ const revDue = () => Object.entries(state.rev).filter(([, r]) => !r.ok && r.due 
 const revOpen = () => Object.values(state.rev).filter(r => !r.ok);
 function revAnswer(id, ok) {
   const r = state.rev[id]; if (!r || r.ok) return;
-  if (ok) { r.box++; if (r.box > REV_GAPS.length) state.rev[id] = { ok: 1, t: Date.now() }; else { const d = new Date(); d.setDate(d.getDate() + REV_GAPS[r.box - 1]); r.due = dayKey(d); r.t = Date.now(); } }
+  if (ok) { xpAdd(2); r.box++; if (r.box > REV_GAPS.length) state.rev[id] = { ok: 1, t: Date.now() }; else { const d = new Date(); d.setDate(d.getDate() + REV_GAPS[r.box - 1]); r.due = dayKey(d); r.t = Date.now(); } }
   else { r.box = 0; r.due = dayKey(); r.t = Date.now(); }
   save('rev');
 }
@@ -750,7 +752,8 @@ function homeDash() {
   return `<section class="dash" aria-label="Mon tableau de bord">
     <div class="dash-c"><span class="dash-i" aria-hidden="true">🔥</span><div><b>${st} jour${st > 1 ? 's' : ''}</b><small>${st ? 'd’étude d’affilée' : 'Étudiez aujourd’hui pour lancer votre série'}</small></div></div>
     <div class="dash-c"><span class="dash-i" aria-hidden="true">🎯</span><div><b>${Math.floor(t / 60)} / ${DAY_GOAL / 60} min</b><small>objectif du jour</small><span class="bar"><i style="width:${pct}%"></i></span></div></div>
-    <a class="dash-c" href="#revisions"><span class="dash-i" aria-hidden="true">🔁</span><div><b>${due} question${due > 1 ? 's' : ''}</b><small>${due ? 'à revoir aujourd’hui' : 'rien à revoir aujourd’hui'}</small></div></a></section>`;
+    <a class="dash-c" href="#revisions"><span class="dash-i" aria-hidden="true">🔁</span><div><b>${due} question${due > 1 ? 's' : ''}</b><small>${due ? 'à revoir aujourd’hui' : 'rien à revoir aujourd’hui'}</small></div></a>
+    ${typeof xpWeek === 'function' ? `<a class="dash-c" href="#classement"><span class="dash-i" aria-hidden="true">🏆</span><div><b>${xpWeek()} XP</b><small>cette semaine · voir le classement</small></div></a>` : ''}</section>`;
 }
 // ornements : l'étoile à huit branches (khatam) des Éditions Lisân
 const ORN = '<svg viewBox="0 0 120 16" width="120" height="16" focusable="false"><path d="M0 8H46M74 8H120" stroke="currentColor" stroke-width="1"/><path d="M8.0 1.0L10.1 3.1L12.9 3.1L12.9 5.9L15.0 8.0L12.9 10.1L12.9 12.9L10.1 12.9L8.0 15.0L5.9 12.9L3.1 12.9L3.1 10.1L1.0 8.0L3.1 5.9L3.1 3.1L5.9 3.1Z" transform="translate(52 0)" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="60" cy="8" r="1.8" fill="currentColor"/></svg>';
@@ -808,10 +811,10 @@ function inAppNotice(el) {
     try { navigator.clipboard.writeText(u).then(() => { c.textContent = 'Adresse copiée : collez-la dans Chrome ou Safari'; }); } catch (e) { c.textContent = u; } };
 }
 // ---------- mode d'emploi en vidéo (format téléphone, outils/video/guide) : accueil et page #guide ; lecture seulement au toucher
-const GUIDE_DUR = '1 min 41';                            // durée de media/guide-720.mp4 (à changer quand la vidéo est refaite)
+const GUIDE_DUR = '1 min 50';                            // durée de media/guide-720.mp4 (à changer quand la vidéo est refaite)
 const GUIDE_STEPS = ['Ouvrez lisan-campus.pages.dev sur téléphone ou sur ordinateur (sur téléphone, ajoutez-le à l’écran d’accueil)', 'Choisissez votre espace', 'Essayez la première leçon, en accès libre',
   'Connectez-vous avec votre compte Google', 'Remplissez votre fiche d’inscription', 'Recevez votre numéro d’inscription', 'Lisez ou écoutez chaque leçon',
-  'Validez la leçon avec le mini-exercice', 'Révisez avec les cartes', 'Passez l’évaluation, donnez votre avis et obtenez votre certificat', 'Suivez l’actualité juridique, expliquée pas à pas', 'Retrouvez tout le reste dans le menu'];
+  'Validez la leçon avec le mini-exercice', 'Révisez avec les cartes', 'Passez l’évaluation, donnez votre avis et obtenez votre certificat', 'Suivez l’actualité juridique, expliquée pas à pas', 'Gagnez des XP, suivez le classement de la semaine et programmez un rappel quotidien', 'Retrouvez tout le reste dans le menu'];
 const NB_FR = ['zéro', 'une', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze'];
 const guideVideo = () => `<div class="gv-frame"><video class="gv" controls preload="none" playsinline poster="media/guide-poster.webp" controlslist="nodownload"
     aria-label="Mode d’emploi de Lisân Campus en vidéo : créer son compte, s’inscrire, suivre une leçon et obtenir son certificat"><source src="media/guide-720.mp4" type="video/mp4"><source src="media/guide-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo du mode d’emploi">${HV_ICON.play}<span>Regarder · ${GUIDE_DUR}</span></button></div>`;
@@ -1303,6 +1306,7 @@ function evalFinish(timeout) {
   const et = document.getElementById('etimer'); if (et) et.hidden = true; const fin = document.querySelector('[data-eval-finish]'); if (fin) fin.closest('.actions').hidden = true;
   const pct = Math.round(R.right / N * 100), key = EVAL_KEY(R.s.id), pass = pct >= PASS();
   if (state.quiz[key] === undefined || pct > state.quiz[key]) { state.quiz[key] = pct; save('quiz'); }
+  xpAdd(Math.round(pct / 5) + (pass ? 30 : 0));
   const w = evalWait(); if (pass) delete w[R.s.id]; else w[R.s.id] = Date.now() + EVAL_WAIT; store.set('evalwait', w);
   document.getElementById('qs-t').textContent = `${R.right} / ${N} bonnes réponses`; document.getElementById('qs-m').textContent = `Score : ${pct} %`;
   const qr = document.getElementById('qresult');
@@ -1430,6 +1434,7 @@ function viewSettings() {
       <div class="actions"><button type="button" class="btn small" data-install="1">Installer l’application</button></div>
       <p class="meta" id="install-msg"></p>
     </section>
+    ${typeof remindPanel === 'function' ? remindPanel() : ''}
     ${A ? `<section class="panel"><h2>Compte</h2><p>Gérez votre connexion et vos inscriptions dans <a href="#compte">Mon compte</a>.</p></section>` : ''}
     <section class="panel"><h2>Ma progression</h2>
       <p>Leçons terminées, scores des quiz et cartes sues sont enregistrés sur cet appareil${A ? ' et, si vous êtes connecté, sur votre compte' : ''}.</p>
@@ -1482,7 +1487,7 @@ const PAGES = {
     { box: 'Les contenus de droit résument des cours et des textes publics : vérifiez toujours avec vos enseignants.', title: 'À savoir', kind: 'marge' },
   ] },
   confidentialite: { title: 'Politique de confidentialité', body: [
-    { p: '*Dernière mise à jour : 19 novembre 2026.*' },
+    { p: '*Dernière mise à jour : 26 novembre 2026.*' },
     { p: 'Les Éditions Lisân attachent une grande importance à la protection de vos données personnelles, conformément à la **loi ivoirienne n° 2013-450 du 19 juin 2013** relative à la protection des données à caractère personnel.' },
     { h: '1. Responsable du traitement' },
     { p: 'Éditions Lisân, représentées par Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Contact : la page [Contact](#contact) du site.' },
@@ -1492,6 +1497,8 @@ const PAGES = {
       '**Si vous vous inscrivez à un espace** : votre fiche d’inscription (civilité, nom, prénoms, date de naissance, téléphone, pays de résidence, situation actuelle et, si vous choisissez de les indiquer, votre ville, votre établissement, votre filière, votre niveau d’études, votre classe, votre formation, votre profession, votre projet d’études et l’année prévue pour le commencer ou le reprendre, ainsi que la manière dont vous avez connu le site ; pour les moins de 18 ans, le nom et le téléphone d’un parent ou tuteur), vos réponses aux questions de l’espace, vos inscriptions et votre progression.',
       '**Si vous obtenez un certificat** : vos civilité, prénom et nom, le parcours réussi, le nombre de leçons, le score à l’évaluation et la date. Ces informations sont inscrites au registre des certificats : **toute personne qui connaît le numéro du certificat** (ou scanne son code QR) peut les consulter, afin de vérifier qu’il est authentique. Aucune autre donnée n’y figure.',
       '**Si vous envoyez une suggestion** : son texte, son type et la leçon concernée, enregistrés avec votre fiche pour que nous puissions vous répondre.',
+      '**Si vous choisissez d’apparaître dans le classement de la semaine** (facultatif, désactivé par défaut) : le nom affiché que vous choisissez (par défaut votre prénom et l’initiale de votre nom), vos points d’expérience de la semaine et au total, votre série de jours d’étude et les espaces où vous êtes inscrit. Ces informations sont visibles par les **élèves connectés** à Lisân Campus, pour encourager chacun ; aucune autre donnée n’est montrée. Vous pouvez quitter le classement à tout moment depuis sa page : votre ligne est alors effacée.',
+      '**Si vous activez les rappels d’étude** : l’heure choisie et le jour de votre dernière étude restent **sur votre appareil** (le téléphone affiche lui-même le rappel) ; le rappel ajouté à votre agenda est un fichier que vous enregistrez vous-même. Rien n’est transmis aux Éditions Lisân.',
       '**Si vous donnez votre avis** à la fin d’un parcours ou d’un espace : votre note (de 1 à 5 étoiles), vos impressions et vos suggestions d’amélioration, enregistrées avec votre fiche. Elles servent à améliorer les cours ; la note n’a aucune incidence sur le certificat.',
       '**Qui y a accès** : seuls les Éditions Lisân, administrateur du site, consultent les comptes, les fiches d’inscription et la progression enregistrée dans les comptes (leçons terminées, résultats aux évaluations, temps d’étude), pour gérer les inscriptions, suivre et encourager les élèves et les contacter au sujet de leurs cours.',
       '**Si vous nous écrivez** par le formulaire de contact : votre nom, votre adresse e-mail et votre message, uniquement pour vous répondre.'] },
@@ -1587,6 +1594,7 @@ function route() {
   else if (h === 'bibliotheque' || (h.startsWith('bibliotheque-') && space(h.slice(13)))) { html = viewLibrary(); if (h !== 'bibliotheque') after = () => { const el = document.getElementById('lib-' + h.slice(13)); if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 60); }; }
   else if (h.startsWith('lire-') && typeof readTarget === 'function' && readTarget(h)) { const t = readTarget(h); html = viewReader(t); after = () => bindReader(t); }
   else if (h === 'revisions') html = viewRevisions();
+  else if (h === 'classement' && typeof viewBoard === 'function') { html = viewBoard(); after = bindBoard; }
   else if (h === 'recherche') { html = viewSearch(); after = () => { const i = document.getElementById('ssearch'); let t; i.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => drawSearch(i.value), 150); }); drawSearch(''); }; }
   else if (h === 'glossaire') { html = viewGlossary(); after = () => { drawGlossary(''); document.getElementById('gsearch').addEventListener('input', e => drawGlossary(e.target.value)); }; }
   else if (h === 'parametres') { html = viewSettings(); after = voiceStatus; }
@@ -1740,6 +1748,7 @@ function renderDrawer() {
       <div class="dr-sec">Outils</div>
       ${item('bibliotheque', '📚', 'Bibliothèque')}
       ${item('revisions', '🔁', 'Mes révisions' + (revDue().length ? ` (${revDue().length})` : ''))}
+      ${typeof viewBoard === 'function' ? item('classement', '🏆', 'Classement de la semaine') : ''}
       ${item('recherche', '🔍', 'Rechercher dans les leçons')}
       ${item('glossaire', '🔎', 'Glossaire')}
       ${A ? item('compte', '👤', 'Mon compte') : ''}
@@ -1895,7 +1904,7 @@ document.addEventListener('click', e => {
     if (state.done[k]) { if (m) m.textContent = 'Cette leçon est terminée : elle reste ouverte pour la relire quand vous voulez.'; return; }
     if (miniNeeded(k)) { if (m) m.textContent = 'Pour terminer la leçon et passer à la suivante, réussissez le mini-exercice : toutes les réponses doivent être justes. Vous pouvez le recommencer autant de fois que nécessaire.';
       const mi = document.querySelector('.mini'); if (mi) { mi.scrollIntoView({ behavior: smooth(), block: 'start' }); mi.classList.remove('nudge'); void mi.offsetWidth; mi.classList.add('nudge'); } return; }
-    state.done[k] = 1; save('done'); if (m) m.textContent = '';
+    state.done[k] = 1; save('done'); xpAdd(20); if (m) m.textContent = '';
     doneBtnState(dt); const nb = document.querySelector('[data-next]'); if (nb) nb.classList.toggle('is-locked', !state.done[k]);
     if (state.done[k]) confetti(dt); return; }
   const mk = t.closest('.mark');
@@ -1920,7 +1929,7 @@ document.addEventListener('click', e => {
     const all = sec.querySelectorAll('.q'), done = sec.querySelectorAll('.q[data-ok]');
     if (done.length === all.length) { const r = sec.querySelectorAll('.q[data-ok="1"]').length, end = sec.querySelector('.mini-end');
       end.innerHTML = `<b>${r} / ${all.length}</b> ${r === all.length ? '— parfait, vous avez bien retenu la leçon.' : '— relisez les passages concernés, puis recommencez : il faut toutes les bonnes réponses pour valider le mini-exercice et passer à la suite.'}${r === all.length ? '' : ' <button type="button" class="btn ghost small" data-mini-again>Recommencer</button>'}`;
-      end.hidden = false; if (r === all.length) { confetti(end); state.minis[sec.dataset.mini] = 1; save('minis'); const db = document.querySelector('[data-done]'); if (db) doneBtnState(db);
+      end.hidden = false; if (r === all.length) { confetti(end); if (!state.minis[sec.dataset.mini]) xpAdd(10); state.minis[sec.dataset.mini] = 1; save('minis'); const db = document.querySelector('[data-done]'); if (db) doneBtnState(db);
         end.insertAdjacentHTML('beforeend', ' <span class="ok-t">Mini-exercice validé : vous pouvez terminer la leçon.</span>'); } }
     return; }
   if (t.closest('[data-mini-again]')) { const sec = t.closest('.mini'); sec.outerHTML = viewMini(sec.dataset.mini); return; }

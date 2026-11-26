@@ -75,6 +75,9 @@ const meta = {};
   await go('#actualites'); await shot('actus', { list: '.actus' });
   await go('#actu-loi-finances-2027-commission'); await shot('actu', { steps: '.psteps', comprendre: '.cq', test: '.atest' });
   // 12. le menu
+  await p.evaluate(() => { store.set('board.demo', 'Habiba Z.'); state.days[dayKey()] = Math.max(state.days[dayKey()] || 0, 1500); save('days'); });
+  await go('#classement', 2200); await shot('classement', { list: '.b-rows', trophies: '.b-trophies' });
+  await go('#parametres'); await shot('rappels', { remind: '#remind', ics: '[data-rem="ics"]' });
   await go('#accueil', 2500); await p.click('#menu-btn'); await p.waitForTimeout(800); await shot('menu', {}, { view: true });
   fs.writeFileSync(path.join(__dirname, 'captures.json'), JSON.stringify(meta, null, 1));
   if (errs.length) console.log('erreurs de la page :', errs);

@@ -189,9 +189,23 @@ service cloud.firestore {
     match /maitre/{doc=**} {
       allow read, write: if isAdmin();
     }
+    // Classement de la semaine (facultatif) : visible par les élèves connectés ; chacun n'écrit que sa ligne
+    match /classement/{uid} {
+      allow read: if request.auth != null;
+      allow create, update: if isOwner(uid)
+        && request.resource.data.keys().hasOnly(['nom', 'sem', 'xp', 'tot', 'serie', 'esp', 'maj'])
+        && request.resource.data.nom is string && request.resource.data.nom.size() > 0 && request.resource.data.nom.size() <= 24
+        && request.resource.data.sem is string && request.resource.data.sem.matches('[0-9]{4}-S[0-9]{2}')
+        && request.resource.data.xp is int && request.resource.data.xp >= 0 && request.resource.data.xp <= 30000
+        && request.resource.data.tot is int && request.resource.data.tot >= 0 && request.resource.data.tot <= 5000000
+        && request.resource.data.serie is int && request.resource.data.serie >= 0 && request.resource.data.serie <= 4000
+        && (!('esp' in request.resource.data) || (request.resource.data.esp is list && request.resource.data.esp.size() <= 8))
+        && request.resource.data.maj == request.time;
+      allow delete: if isOwner(uid) || isAdmin();
+    }
     // repère de version des règles (vérifié par la page d'administration)
     match /regles/{v} {
-      allow get: if v == 'v6';
+      allow get: if v == 'v7';
     }
   }
 }`;
@@ -222,7 +236,7 @@ function drawAdmin() {
   const stat = (n, t, c) => `<div class="stat${c ? ' c-' + c : ''}"><b>${n}</b><span>${esc(t)}</span></div>`;
   const active = list.filter(u => activity(u).week > 0).length;
   const today = list.filter(u => u.lastLogin && new Date(u.lastLogin).toDateString() === new Date().toDateString()).length;
-  const tabs = `<div class="chips adm-tabs" role="group" aria-label="Rubrique"><button type="button" class="chip" data-admin-tab="ins" aria-pressed="${R.tab === 'ins'}">👥 Inscrits (${all.length})</button>
+  const tabs = `<div class="chips adm-tabs" role="group" aria-label="Rubrique"><button type="button" class="chip" data-admin-tab="ins" aria-pressed="${R.tab === 'ins'}">👥 Inscrits (${new Set(all.map(r => r.u.uid)).size})</button>
     <button type="button" class="chip" data-admin-tab="prog" aria-pressed="${R.tab === 'prog'}">📈 Progression</button>
     <button type="button" class="chip" data-admin-tab="acc" aria-pressed="${R.tab === 'acc'}">👤 Comptes (${list.length})</button>
     <button type="button" class="chip" data-admin-tab="cert" aria-pressed="${R.tab === 'cert'}">🎓 Certificats (${certs.length})</button>
@@ -231,10 +245,10 @@ function drawAdmin() {
     <button type="button" class="chip" data-admin-tab="sugg" aria-pressed="${R.tab === 'sugg'}">💡 Suggestions (${suggs.length})</button>
     <button type="button" class="chip" data-admin-tab="msg" aria-pressed="${R.tab === 'msg'}">✉️ Messages (${(R.msgs || []).length})</button></div>`;
   const head = `<span class="eyebrow">Éditions Lisân</span><h1>Administration</h1>
-    ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour (certificats, sécurité renforcée, parcours ouverts à un élève, livrets du maître) : copiez-les et publiez-les dans la console Firebase.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
+    ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour (certificats, sécurité renforcée, parcours ouverts à un élève, livrets du maître, classement de la semaine) : copiez-les et publiez-les dans la console Firebase.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
     <div class="stats">${stat(list.length, 'comptes créés')}${stat(all.length, 'inscriptions')}${stat(fresh, 'nouvelles (7 jours)')}${stat(noIns, 'comptes sans inscription')}${stat(today, 'connectés aujourd’hui')}${stat(active, 'actifs (7 jours)')}
       ${stat(certs.length, 'certificats délivrés')}${stat(avis.length ? (avis.reduce((a, r) => a + r.x.note, 0) / avis.length).toFixed(1).replace('.', ',') + ' ★' : '—', avis.length + ' avis')}${stat(suggs.length, 'suggestions')}
-      ${SPACES.map(sp => stat(count(sp.id), sp.title, sp.color)).join('')}</div>${tabs}
+      </div><p class="adm-spc">${SPACES.map(sp => `<span class="tag">${sp.icon} ${esc(sp.title)} : <b>${count(sp.id)}</b></span>`).join(' ')}</p>${tabs}
     <p class="meta adm-live" id="adm-live" aria-live="polite">${adminLiveLine()}</p>
     <div class="actions"><button type="button" class="btn small" data-admin="xlsx">⬇ Télécharger en Excel</button>${R.tab === 'sugg' ? '<button type="button" class="btn ghost small" data-admin="sugdoc">⬇ Document des suggestions</button>' : ''}${R.tab === 'ins' ? '<button type="button" class="btn ghost small" data-admin="csv">⬇ CSV</button>' : ''}
       <button type="button" class="btn ghost small" data-admin="reload">↻ Actualiser</button></div>`;
@@ -254,7 +268,7 @@ function drawAdmin() {
     box.innerHTML = `${head}
       <div class="chips" role="group" aria-label="Filtrer par espace"><button type="button" class="chip" data-admin-sp="all" aria-pressed="${R.sp === 'all'}">Tous</button>
         ${SPACES.map(sp => `<button type="button" class="chip" data-admin-sp="${sp.id}" aria-pressed="${R.sp === sp.id}">${sp.icon} ${esc(sp.title)}</button>`).join('')}</div>
-      <p class="meta" id="admin-msg" aria-live="polite">${pr.length} inscription${pr.length > 1 ? 's' : ''}, de la personne qui a utilisé le site le plus récemment à la plus ancienne. La progression est celle que le site a synchronisée (élève connecté).</p>
+      <p class="meta" id="admin-msg" aria-live="polite">${insMsg(pr)} De la personne qui a utilisé le site le plus récemment à la plus ancienne ; le détail de chaque espace se déroule. La progression est celle que le site a synchronisée (élève connecté).</p>
       <div class="adm-list">${progCards(pr)}</div>`;
     return;
   }
@@ -266,11 +280,11 @@ function drawAdmin() {
     <div class="chips" role="group" aria-label="Filtrer par espace"><button type="button" class="chip" data-admin-sp="all" aria-pressed="${R.sp === 'all'}">Tous (${all.length})</button>
       ${SPACES.map(sp => `<button type="button" class="chip" data-admin-sp="${sp.id}" aria-pressed="${R.sp === sp.id}">${sp.icon} ${esc(sp.title)} (${count(sp.id)})</button>`).join('')}</div>
     <input class="search" id="admin-q" type="search" placeholder="Rechercher : nom, téléphone, ville, numéro…" value="${esc(R.q)}" aria-label="Rechercher un inscrit">
-    <p class="meta" id="admin-msg" aria-live="polite">${rows.length} inscription${rows.length > 1 ? 's' : ''} affichée${rows.length > 1 ? 's' : ''}. L’export Excel contient tous les inscrits, avec une feuille par espace.</p>
+    <p class="meta" id="admin-msg" aria-live="polite">${insMsg(rows)} Touchez un espace pour voir l’inscription et la progression. L’export Excel contient tous les inscrits, avec une feuille par espace.</p>
     <div class="adm-list" id="adm-list">${adminCards(rows)}</div>`;
   const q = document.getElementById('admin-q');
   q.addEventListener('input', () => { R.q = q.value; document.getElementById('adm-list').innerHTML = adminCards(adminFiltered());
-    const n = adminFiltered().length; document.getElementById('admin-msg').textContent = `${n} inscription${n > 1 ? 's' : ''} affichée${n > 1 ? 's' : ''}.`; });
+    document.getElementById('admin-msg').textContent = insMsg(adminFiltered()); });
 }
 function adminCerts() { const out = []; (adminRun.list || []).forEach(u => (u.certs || []).forEach(c => out.push({ u, c }))); return out.sort((a, b) => String(b.c.date).localeCompare(String(a.c.date))); }
 function adminAvis() { const out = []; (adminRun.list || []).forEach(u => (u.avis || []).forEach(x => out.push({ u, x }))); return out.sort((a, b) => String(b.x.date).localeCompare(String(a.x.date))); }
@@ -370,18 +384,21 @@ function suggCards(rows) {
 }
 function progRows() {
   return adminRows().filter(r => adminRun.sp === 'all' || r.id === adminRun.sp)
-    .map(r => Object.assign({ p: progOf(r.u, r.id), a: activity(r.u) }, r))
-    .map(r => Object.assign({ t: lastUse(r.u) }, r))
+    .map(r => Object.assign({ p: progOf(r.u, r.id), a: activity(r.u), t: lastUse(r.u) }, r))
     .sort((x, y) => y.t - x.t || String(x.u.uid).localeCompare(String(y.u.uid)) || y.p.d - x.p.d);
 }
 function progCards(rows) {
   if (!rows.length) return '<p class="meta">Aucune inscription pour le moment.</p>';
-  return rows.map(({ u, id, p, a }) => { const sp = space(id);
-    return `<article class="adm-card c-${sp.color}"><div class="adm-top"><b>${esc(who(u))}</b><span class="tag">${sp.icon} ${esc(sp.title)}</span></div>
+  return byPerson(rows).map(({ u, items }) => { const a = items[0].a, one = items.length === 1;
+    const d = items.reduce((n, r) => n + r.p.d, 0), n = items.reduce((k, r) => k + r.p.n, 0), sec = items.reduce((k, r) => k + r.p.sec, 0);
+    const passed = items.reduce((k, r) => k + r.p.passed, 0), pct = n ? Math.round(d / n * 100) : 0;
+    return `<article class="adm-card c-${one ? space(items[0].id).color : 'a'}"><div class="adm-top"><b>${esc(who(u))}</b><span>${items.map(r => `<span class="tag" title="${esc(space(r.id).title)}">${space(r.id).icon}${one ? ' ' + esc(space(r.id).title) : ''}</span>`).join(' ')}</span></div>
       <small class="adm-seen">🕒 Dernière utilisation : <b>${useFr(u)}</b></small>
-      ${progBar(p.pct)}<p><b>${p.d} / ${p.n} leçons</b> (${p.pct} %) · ${p.passed} / ${p.parc.length} parcours réussi${p.passed > 1 ? 's' : ''} · ${fmtDur(p.sec)} d’étude</p>
-      <small>${p.cur ? 'En cours : ' + esc(p.cur.s.title) + ` (${p.cur.d} / ${p.cur.n})` : 'Tous les parcours sont réussis'} · cette semaine : ${fmtDur(a.week)} · série : ${a.streak} jour${a.streak > 1 ? 's' : ''} · dernier jour d’étude : ${dayFr(a.last)}</small>
-      <details><summary>Détail par parcours</summary>${progTable(u, id)}</details></article>`; }).join('');
+      ${progBar(pct)}<p><b>${d} / ${n} leçons</b> (${pct} %) · ${passed} parcours réussi${passed > 1 ? 's' : ''} · ${fmtDur(sec)} d’étude${one ? '' : ` · ${items.length} espaces`}</p>
+      <small>Cette semaine : ${fmtDur(a.week)} · série : ${a.streak} jour${a.streak > 1 ? 's' : ''} · dernier jour d’étude : ${dayFr(a.last)}</small>
+      ${items.map(({ id, p }) => { const sp = space(id);
+        return `<details class="adm-sp"><summary><b>${sp.icon} ${esc(sp.title)}</b><small>${p.d} / ${p.n} leçons (${p.pct} %) · ${p.cur ? 'en cours : ' + esc(p.cur.s.title) : 'tous les parcours sont réussis'}</small></summary>
+          <div>${progBar(p.pct)}<p>${p.passed} / ${p.parc.length} parcours réussi${p.passed > 1 ? 's' : ''} · ${fmtDur(p.sec)} d’étude</p>${progTable(u, id)}</div></details>`; }).join('')}</article>`; }).join('');
 }
 function accFiltered() {
   const q = adminRun.cq.trim().toLowerCase();
@@ -421,19 +438,26 @@ function accCards(list) {
       <small>${u.done} leçon${u.done > 1 ? 's' : ''} terminée${u.done > 1 ? 's' : ''} · dernière activité : ${dayFr(a.last)}</small>
       <div class="actions">${wa ? `<a class="btn small" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}?subject=${encodeURIComponent('Lisân Campus')}">E-mail</a>` : ''}</div>${accesCtl(u)}</article>`; }).join('');
 }
+// une fiche par compte : identité et contacts une seule fois, puis chaque inscription (espace) à dérouler
+const insMsg = rows => { const p = new Set(rows.map(r => r.u.uid)).size; return `${p} personne${p > 1 ? 's' : ''} · ${rows.length} inscription${rows.length > 1 ? 's' : ''}.`; };
+function byPerson(rows) {
+  const m = new Map(); rows.forEach(r => { if (!m.has(r.u.uid)) m.set(r.u.uid, { u: r.u, items: [] }); m.get(r.u.uid).items.push(r); }); return [...m.values()];
+}
 function adminCards(rows) {
   if (!rows.length) return '<p class="meta">Aucune inscription pour le moment.</p>';
-  return rows.map(({ u, id, en }) => { const i = u.info || {}, sp = space(id), a = ageOf(i.naissance), wa = waLink(i);
-    return `<article class="adm-card c-${sp.color}">
-      <div class="adm-top"><b>${esc(civ(i))} ${esc(String(i.nom || '').toUpperCase())} ${esc(prenomFmt(i.prenom || u.name))}</b><span class="tag">${sp.icon} ${esc(sp.title)}</span></div>
-      <small>N° ${esc(en.num)} · inscrit le ${dateFr(en.date)}</small>
-      ${progLine(u, id)}
+  return byPerson(rows).map(({ u, items }) => { const i = u.info || {}, a = ageOf(i.naissance), wa = waLink(i), one = items.length === 1;
+    const sps = items.map(r => space(r.id)), color = one ? sps[0].color : 'a';
+    return `<article class="adm-card c-${color}">
+      <div class="adm-top"><b>${esc(civ(i))} ${esc(String(i.nom || '').toUpperCase())} ${esc(prenomFmt(i.prenom || u.name))}</b><span>${sps.map(sp => `<span class="tag" title="${esc(sp.title)}">${sp.icon}${one ? ' ' + esc(sp.title) : ''}</span>`).join(' ')}</span></div>
+      <small>${items.length} inscription${one ? '' : 's'} · ${u.lastLogin ? 'dernière connexion : ' + whenFr(u.lastLogin) : 'jamais reconnecté'}</small>
       <p>${[a !== null ? a + ' ans' : '', STATUT_OLD[i.statut] || i.statut, [i.ville, paysOf(i)].filter(Boolean).join(', ')].filter(Boolean).map(esc).join(' · ')}</p>
       <div class="actions">${wa ? `<a class="btn small" href="${wa}" target="_blank" rel="noopener">WhatsApp</a>` : ''}${i.tel ? `<a class="btn ghost small" href="${telLink(i)}">Appeler ${esc(telFr(i.ind, i.tel))}</a>` : ''}
         ${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}">E-mail</a>` : ''}</div>
-      <details><summary>Progression par parcours</summary>${progTable(u, id)}</details>
-      <details><summary>Fiche complète</summary>${dl([['Adresse e-mail', u.email], ...infoRows(i), ...answerRows(id, en.reponses), ['Leçons terminées (compte)', String(u.done)],
-        ['Dernière connexion', u.lastLogin ? dateFr(u.lastLogin) : '—']])}</details>${SUBJECTS.some(s => spaceOf(s) === id && !freeOrder(s)) ? accesCtl(u) : ''}</article>`; }).join('');
+      ${items.map(({ id, en }) => { const sp = space(id), p = progOf(u, id);
+        return `<details class="adm-sp"><summary><b>${sp.icon} ${esc(sp.title)}</b><small>N° ${esc(en.num)} · inscrit le ${dateFr(en.date)} · ${p.d} / ${p.n} leçons (${p.pct} %)</small></summary>
+          <div>${progLine(u, id)}${progTable(u, id)}${dl(answerRows(id, en.reponses))}${SUBJECTS.some(s => spaceOf(s) === id && !freeOrder(s)) ? accesCtl(u) : ''}</div></details>`; }).join('')}
+      <details><summary>Fiche complète</summary>${dl([['Adresse e-mail', u.email], ...infoRows(i), ['Leçons terminées (compte)', String(u.done)],
+        ['Dernière connexion', u.lastLogin ? dateFr(u.lastLogin) : '—']])}</details></article>`; }).join('');
 }
 
 // ---------- export : Excel (feuille « Tous » + une feuille par espace) et CSV
