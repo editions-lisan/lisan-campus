@@ -1074,6 +1074,18 @@ a.dash-c:hover { border-color: var(--accent); }
 }
 .lib-nav .chip img.emo, .lib-sec > h2 img.emo, .lib-ic img.emo, .lib-link img.emo { font-size: inherit; }
 .lib-nav .chip { display: inline-flex; align-items: center; gap: 6px; }
+.lib-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0 4px; }
+.lib-tabs .chip { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; text-decoration: none; flex: none; }
+.lib-tabs .chip.on { background: var(--accent); color: var(--surface); border-color: var(--accent); }
+.lib-tabs .chip img.emo { font-size: inherit; }
+.lib-cons { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 14px; }
+.lib-cons-h { display: flex; gap: 12px; align-items: flex-start; }
+.lib-cons h3 { margin: 0 0 2px; font-size: 1.08rem; }
+.lib-cons p { margin: 8px 0; }
+.lib-cons .meta { margin: 0; }
+.lib-cons-fr { font-size: 14px; color: var(--muted); border-left: 3px solid var(--accent); padding-left: 10px; }
+.lib-cons-f { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; margin-top: 10px; }
+.lib-cons-t { display: flex; flex-wrap: wrap; gap: 6px; }
 .lib-res .lib-dt b { color: var(--muted); }
 
 /* ===== Tirer pour actualiser : le logo tourne, la page reste où elle est */

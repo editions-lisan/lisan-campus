@@ -1054,23 +1054,47 @@ function libDocRow(file, d, spId) {
     : `<a class="btn ghost small" href="#inscription-${spId}">S’inscrire pour lire</a>`;
   return `<div class="lib-doc"><span class="lib-ic" aria-hidden="true">${DOC_ICON[d.k] || '📄'}</span><div class="lib-dt">${d.kind ? `<span class="tag">${esc(d.kind)}</span>` : ''}<b>${esc(d.name)}</b><small>${esc([d.desc, meta].filter(Boolean).join(' · '))}</small></div><div class="lib-act">${act}</div></div>`;
 }
-function viewLibrary() {
-  const L = window.LIVRES || [], D = window.DOCS || [];
-  const groups = SPACES.map(sp => ({ sp, books: L.filter(b => b.space === sp.id), docs: D.filter(d => d.space === sp.id) })).filter(g => g.books.length || g.docs.length);
+// Bibliothèque en rubriques : « Tout » (vue par espace, adresse #bibliotheque et #bibliotheque-<espace>), « Éditions Lisân »
+// (livres de la collection et documents de cours rédigés par les Éditions Lisân), « Textes officiels » (Constitution, codes…)
+// et « Livres conseillés » (window.CONSEILS : ouvrages protégés, présentés sans téléchargement) : #bibliotheque~<rubrique>.
+const LIB_OFFICIEL = ['Code', 'Texte officiel'];
+const LIB_TABS = [['tout', '📚', 'Tout'], ['lisan', '📗', 'Éditions Lisân'], ['textes', '⚖️', 'Textes officiels'], ['conseils', '🎓', 'Livres conseillés']];
+const libDocLine = d => libDocRow('livres/' + d.file + (d.v ? '?v=' + d.v : ''), { k: d.kind || 'cours', kind: d.kind, name: d.title, desc: d.desc, pages: d.pages, mb: d.mb }, d.space);
+function libConseil(c) {
+  const tags = [c.niveau, ...(c.matieres || [])].filter(Boolean).map(t => `<span class="tag">${esc(t)}</span>`).join('');
+  return `<article class="lib-cons"><div class="lib-cons-h"><span class="lib-ic" aria-hidden="true">📕</span><div><h3>${esc(c.titre)}</h3>
+      <p class="meta">${esc(c.auteurs)} · ${esc(c.editeur)}${c.edition ? ' · ' + esc(c.edition) : ''}</p></div></div>
+    <p>${esc(c.resume)}</p><p><b>Pour l’étudiant :</b> ${esc(c.interet)}</p>
+    ${c.droit === 'fr' ? '<p class="lib-cons-fr">Ouvrage écrit pour le droit français : vérifiez toujours la règle applicable en Côte d’Ivoire dans les textes ivoiriens et dans les leçons du Campus.</p>' : ''}
+    <div class="lib-cons-f"><div class="lib-cons-t">${tags}</div>${c.lien ? `<a class="btn ghost small" href="${esc(c.lien.url)}" target="_blank" rel="noopener noreferrer">${esc(c.lien.label)} ↗</a>` : ''}</div></article>`;
+}
+function viewLibrary(tab = 'tout') {
+  if (!LIB_TABS.some(t => t[0] === tab)) tab = 'tout';
+  const L = window.LIVRES || [], D = window.DOCS || [], C = window.CONSEILS || [];
+  const docsOf = d => tab === 'textes' ? LIB_OFFICIEL.includes(d.kind) : tab === 'lisan' ? !LIB_OFFICIEL.includes(d.kind) : true;
+  const groups = SPACES.map(sp => ({ sp, books: tab === 'textes' ? [] : L.filter(b => b.space === sp.id), docs: D.filter(d => d.space === sp.id && docsOf(d)) })).filter(g => g.books.length || g.docs.length);
   const A = AUTH(), u = A && A.user();
   if (u && !libAdmin() && typeof probeAdmin === 'function') setTimeout(() => probeAdmin(() => { if (/^#bibliotheque/.test(location.hash)) route(); }), 0);
-  return `${crumbs(['Bibliothèque'])}
-      ${libAdmin() ? '<p class="meta">Compte d’administration : tous les livres de la collection sont aussi téléchargeables.</p>' : ''}
-    <div class="subject-head c-a"><span class="eyebrow">Éditions Lisân</span><h1>📚 Bibliothèque</h1>
-      <p class="lead">Les livres de la collection, avec le livre de l’élève et le cahier d’exercices, à lire en ligne sur le site, et les documents des cours de droit, à lire ou à télécharger en PDF. Le livret du maître est réservé aux enseignants et aux animateurs.</p>
-      ${A && !u ? `<p class="meta">La lecture demande la connexion Google et l’inscription à l’espace concerné. <button type="button" class="linkbtn" data-auth="signin">Se connecter</button></p>` : ''}</div>
-    <nav class="lib-nav" aria-label="Rayons">${groups.map(g => `<button type="button" class="chip" data-scrollto="lib-${g.sp.id}">${g.sp.icon} ${esc(g.sp.title)}</button>`).join('')}</nav>
+  const LEAD = {
+    tout: 'Les livres de la collection, avec le livre de l’élève et le cahier d’exercices, à lire en ligne sur le site, les documents des cours de droit et les textes officiels, à lire ou à télécharger en PDF. Le livret du maître est réservé aux enseignants et aux animateurs.',
+    lisan: 'Les ressources conçues par les Éditions Lisân : les livres de la collection, à lire en ligne, et les documents des cours, rédigés à partir des leçons du Campus, à lire ou à télécharger.',
+    textes: 'Les textes officiels en vigueur, à lire ou à télécharger : chaque document indique sa date de mise à jour et, quand un texte a changé, ce qui est encore applicable.',
+    conseils: 'Des ouvrages de référence recommandés aux étudiants. Ils sont protégés par le droit d’auteur et ne se téléchargent pas ici : empruntez-les à la bibliothèque de votre université ou procurez-les auprès de l’éditeur ou d’une librairie.' };
+  const tabs = `<nav class="lib-tabs" aria-label="Rubriques de la bibliothèque">${LIB_TABS.map(([id, ic, t]) => `<a class="chip${id === tab ? ' on' : ''}" href="#bibliotheque${id === 'tout' ? '' : '~' + id}"${id === tab ? ' aria-current="page"' : ''}>${ic} ${t}</a>`).join('')}</nav>`;
+  const body = tab === 'conseils' ? `<section class="lib-sec" id="lib-conseils"><h2>🎓 Livres conseillés</h2>${C.map(libConseil).join('')}</section>` : `
+    ${groups.length > 1 ? `<nav class="lib-nav" aria-label="Rayons">${groups.map(g => `<button type="button" class="chip" data-scrollto="lib-${g.sp.id}">${g.sp.icon} ${esc(g.sp.title)}</button>`).join('')}</nav>` : ''}
     ${groups.map(g => `<section class="lib-sec" id="lib-${g.sp.id}"><h2>${g.sp.icon} ${esc(g.sp.title)}</h2>
       ${g.books.map(b => `<article class="lib-book"><img class="lib-cover" src="livres/couv/Lisan_${b.id}_eleve.webp" alt="Couverture : ${esc(b.title)}" loading="lazy" width="160" height="226">
         <div class="lib-info"><h3>${esc(b.title)}</h3><p class="meta">${esc(b.sub)} · Éditions Lisân</p>
         ${b.docs.map(d => libDocRow(`livres/Lisan_${b.id}_${d.k}.pdf`, Object.assign({ book: b.id }, d), b.space)).join('')}</div></article>`).join('')}
-      ${g.docs.length ? `<article class="lib-book lib-docs"><div class="lib-info"><h3>Documents de cours</h3>${g.docs.map(d => libDocRow('livres/' + d.file + (d.v ? '?v=' + d.v : ''), { k: d.kind || 'cours', kind: d.kind, name: d.title, desc: d.desc, pages: d.pages, mb: d.mb }, d.space)).join('')}</div></article>` : ''}
+      ${g.docs.length ? `<article class="lib-book lib-docs"><div class="lib-info"><h3>${tab === 'textes' ? 'Textes officiels' : 'Documents de cours'}</h3>${g.docs.map(libDocLine).join('')}</div></article>` : ''}
     </section>`).join('')}`;
+  return `${crumbs(['Bibliothèque'])}
+      ${libAdmin() && tab !== 'conseils' ? '<p class="meta">Compte d’administration : tous les livres de la collection sont aussi téléchargeables.</p>' : ''}
+    <div class="subject-head c-a"><span class="eyebrow">Éditions Lisân</span><h1>📚 Bibliothèque</h1>
+      <p class="lead">${LEAD[tab]}</p>
+      ${A && !u && tab !== 'conseils' ? `<p class="meta">La lecture demande la connexion Google et l’inscription à l’espace concerné. <button type="button" class="linkbtn" data-auth="signin">Se connecter</button></p>` : ''}</div>
+    ${tabs}${body}`;
 }
 function findLesson(key) {
   const [sid, lid] = key.split('.');
@@ -1559,6 +1583,7 @@ function route() {
     if (g) html = g; else { html = viewLesson(f); keep = true; after = afterLesson; } }
   else if (h.startsWith('q-') && subj(h.slice(2))) { const s = subj(h.slice(2)); html = authGate(s) || (inOrder(s, 'quiz') ? viewQuiz(s) : viewGate(s, 'order', 'quiz')); }
   else if (h.startsWith('f-') && subj(h.slice(2))) { const s = subj(h.slice(2)); const g = authGate(s); if (g) html = g; else { html = viewFlash(s); after = () => { drawFlash(); checkArVoice(); }; } }
+  else if (h.startsWith('bibliotheque~')) html = viewLibrary(h.slice(13));
   else if (h === 'bibliotheque' || (h.startsWith('bibliotheque-') && space(h.slice(13)))) { html = viewLibrary(); if (h !== 'bibliotheque') after = () => { const el = document.getElementById('lib-' + h.slice(13)); if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 60); }; }
   else if (h.startsWith('lire-') && typeof readTarget === 'function' && readTarget(h)) { const t = readTarget(h); html = viewReader(t); after = () => bindReader(t); }
   else if (h === 'revisions') html = viewRevisions();

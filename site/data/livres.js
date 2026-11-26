@@ -225,3 +225,38 @@ window.DOCS = [
  { space: "droit", kind: "Code", title: "Code civil I : droit des personnes et de la famille", desc: "Compilation de 2021, avec une première page qui indique l’état de chaque partie : mariage, filiation, minorité et successions à jour (lois de 2019) ; nom, divorce, adoption et libéralités remplacés depuis ; état civil modifié en 2025", file: "droit/code-civil-i.pdf", v: "2289e5fd", pages: 333, mb: 1.4 },
  { space: "droit", kind: "Code", title: "Code civil II : droit des biens et des obligations", desc: "Texte de référence", file: "droit/code-civil-ii.pdf", v: "0fad8604", pages: 341, mb: 1.2 }
 ];
+
+// Livres conseillés (rubrique « Livres conseillés » de la bibliothèque, #bibliotheque~conseils) : ouvrages protégés par le droit
+// d'auteur, présentés mais jamais déposés sur le site. Liens vers des présentations publiques de l'ouvrage, jamais vers une copie.
+// droit : 'fr' quand l'ouvrage décrit le droit français (à vérifier en droit ivoirien), 'gen' pour une méthode valable partout.
+window.CONSEILS = [
+ { titre: "Lexique des termes juridiques", auteurs: "Serge Guinchard et Thierry Debard (dir.)", editeur: "Dalloz, collection « Lexiques »", edition: "Nouvelle édition chaque année ; 33e édition : 2025-2026",
+   resume: "Le dictionnaire de référence des étudiants en droit : plusieurs milliers de termes classés de A à Z, définis en quelques lignes, avec des renvois entre notions voisines.",
+   interet: "À garder près de soi dès la première année : chercher chaque mot technique rencontré en cours ou en TD, et vérifier le sens exact d'une notion avant une copie.",
+   niveau: "L1 à Master", matieres: ["Toutes les matières", "Introduction au droit"], droit: "fr",
+   lien: { url: "https://export.side.fr/9782247240258-lexique-des-termes-juridiques-2025-2026-33e-éd", label: "Fiche de la 33e édition (distributeur)" } },
+ { titre: "Lexique de droit constitutionnel", auteurs: "Pierre Avril et Jean Gicquel", editeur: "PUF, collection « Que sais-je ? »", edition: "6e édition (la plus récente repérée)",
+   resume: "Un petit lexique des notions du droit constitutionnel et des institutions politiques : constitution, régimes, séparation des pouvoirs, procédure parlementaire, contrôle de constitutionnalité.",
+   interet: "Pour réviser le droit constitutionnel de L1 et retrouver la définition précise d'une notion ; les exemples viennent surtout de la Constitution française de 1958.",
+   niveau: "L1, L2", matieres: ["Droit constitutionnel"], droit: "fr",
+   lien: { url: "https://openlibrary.org/works/OL27737686W", label: "Notice du livre (Open Library)" } },
+ { titre: "Lexique de science politique", auteurs: "Olivier Nay (dir.)", editeur: "Dalloz, collection « Lexiques »", edition: "5e édition, 2025",
+   resume: "Les concepts de la science politique (État, pouvoir, démocratie, partis, élections, opinion publique, relations internationales) et les principaux auteurs, présentés et situés.",
+   interet: "Pour le droit constitutionnel et les institutions politiques, et pour préparer une dissertation qui demande des notions de science politique.",
+   niveau: "L1 à Master", matieres: ["Droit constitutionnel", "Science politique"], droit: "gen",
+   lien: { url: "https://univ-droit.fr/recherche/actualites-de-la-recherche/parutions/59937-lexique-de-science-politique", label: "Présentation (Portail universitaire du droit)" } },
+ { titre: "Je veux réussir mon droit : méthodes de travail et clés du succès", auteurs: "Isabelle Defrénois-Souleau", editeur: "Dalloz", edition: "Édition 2026",
+   resume: "Un guide de méthode pour les études de droit : prendre des notes, apprendre ses cours, lire une décision, rédiger une dissertation, un commentaire et un cas pratique, préparer les examens.",
+   interet: "Pour bien démarrer la première année et corriger sa façon de travailler ; il complète les leçons de Méthodologie du Campus.",
+   niveau: "L1, L2", matieres: ["Méthodologie"], droit: "gen",
+   lien: { url: "https://actualitte.com/livres/906642/extraits/je-veux-reussir-mon-droit-isabelle-defrenois-souleau-isabelle-defrenois-souleau-9782247249442", label: "Présentation et extrait (ActuaLitté)" } },
+ { titre: "Méthodologie des exercices juridiques", auteurs: "Christophe Doubovetzky", editeur: "Gualino, collection « En poche »", edition: "11e édition, 2026",
+   resume: "Six fiches courtes : la dissertation, le commentaire de texte, le commentaire d'arrêt, le cas pratique, la question à réponse courte et les règles communes à tous les exercices.",
+   interet: "Un format de poche à relire la veille d'un TD ou d'un examen pour retrouver les étapes de chaque exercice.",
+   niveau: "L1 à L3", matieres: ["Méthodologie"], droit: "gen",
+   lien: { url: "https://univ-droit.fr/recherche/actualites-de-la-recherche/parutions/63978-methodologie-des-exercices-juridiques-9782297291248", label: "Présentation (Portail universitaire du droit)" } },
+ { titre: "Conseils et méthodes pour réussir ses études de droit", auteurs: "Aurélie Angué", editeur: "Publié par l'auteure", edition: "Livre numérique et broché",
+   resume: "Des conseils d'organisation pour l'étudiant en droit : gérer la masse de travail, apprendre les cours, préparer les TD et les examens, garder le rythme sur l'année.",
+   interet: "Pour l'organisation personnelle et la motivation, en complément d'un ouvrage de méthode des exercices.",
+   niveau: "L1", matieres: ["Méthodologie"], droit: "gen" },
+];
