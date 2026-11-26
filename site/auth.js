@@ -97,7 +97,7 @@
       catch (e) { if (/permission/.test((e && (e.code || e.message)) || '')) return false; throw e; }
     },
     async certRulesOk() {                                // les règles Firestore autorisent-elles déjà les certificats ?
-      try { await fb.firestore().collection('regles').doc('v5').get({ source: 'server' }); return true; }
+      try { await fb.firestore().collection('regles').doc('v6').get({ source: 'server' }); return true; }
       catch (e) { return !/permission/.test((e && (e.code || e.message)) || ''); }
     },
     sendMessage(x) {                                     // formulaire de contact : enregistré dans Firebase, lu par l'administrateur
@@ -111,6 +111,30 @@
       return snap.docs.map(d => Object.assign({ id: d.id }, d.data(), { date: iso(d.data().date) })).sort((a, b) => String(b.date).localeCompare(String(a.date)));
     },
     adminDeleteMessage: id => within(fb.firestore().collection('messages').doc(id).delete()),
+    // Livrets du maître (administrateur seul, règles v6) : le PDF est rangé dans Firestore en morceaux de 700 Ko,
+    // maitre/{livre} (parts, size, name, at) et maitre/{livre}/parts/{i} (d : octets) ; il n'est jamais déposé sur le site public.
+    async adminMaitreInfo() {
+      const snap = await fb.firestore().collection('maitre').get({ source: 'server' });
+      const out = {}; snap.docs.forEach(d => { const x = d.data() || {}; out[d.id] = { parts: x.parts || 0, size: x.size || 0, name: x.name || '', at: iso(x.at) }; }); return out;
+    },
+    async adminMaitreGet(id) {
+      const ref = fb.firestore().collection('maitre').doc(id), m = (await ref.get({ source: 'server' })).data();
+      if (!m || !m.parts) return null;
+      const snaps = await Promise.all(Array.from({ length: m.parts }, (_, i) => ref.collection('parts').doc(String(i)).get({ source: 'server' })));
+      const bufs = snaps.map(s => s.data().d.toUint8Array()), out = new Uint8Array(bufs.reduce((n, b) => n + b.length, 0));
+      let o = 0; bufs.forEach(b => { out.set(b, o); o += b.length; }); return out;
+    },
+    async adminMaitrePut(id, buf, name, prog) {
+      const CH = 700000, N = Math.ceil(buf.length / CH), ref = fb.firestore().collection('maitre').doc(id);
+      const old = (await ref.get({ source: 'server' })).data();
+      for (let i = 0; i < N; i++) {
+        await within(ref.collection('parts').doc(String(i)).set({ d: fb.firestore.Blob.fromUint8Array(buf.subarray(i * CH, (i + 1) * CH)) }), 120000);
+        if (prog) prog(i + 1, N);
+      }
+      await within(ref.set({ parts: N, size: buf.length, name: String(name || '').slice(0, 120), at: fb.firestore.FieldValue.serverTimestamp() }), 30000);
+      for (let i = N; old && i < (old.parts || 0); i++) { try { await ref.collection('parts').doc(String(i)).delete(); } catch (e) {} }
+      return N;
+    },
     async adminAcces() {                                 // administration : parcours ouverts à des élèves, par compte
       const snap = await fb.firestore().collection('acces').get({ source: 'server' });
       const out = {}; snap.docs.forEach(d => { out[d.id] = d.data() || {}; }); return out;

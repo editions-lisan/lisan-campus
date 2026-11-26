@@ -9,7 +9,8 @@ let reader = null;                                       // { doc, id, scale, ob
 function readTarget(h) {                                // « lire-<livre>~<k> » → { b, d, file }
   const [bid, k] = h.slice(5).split('~');
   const b = (window.LIVRES || []).find(x => x.id === bid), d = b && b.docs.find(x => x.k === k);
-  if (!b || !d || d.k === 'maitre') return null;
+  if (!b || !d) return null;
+  if (d.k === 'maitre') return libAdmin() ? { b, d, maitre: true, file: '', id: b.id + '~maitre' } : null;   // administration seulement (maitreRow)
   return { b, d, file: `livres/Lisan_${b.id}_${d.k}.pdf`, id: b.id + '~' + d.k };
 }
 function viewReader(t) {
@@ -23,7 +24,7 @@ function viewReader(t) {
       <a class="rd-back" href="#bibliotheque-${sp.id}" aria-label="Retour à la bibliothèque">‹</a>
       <div class="rd-t"><b>${esc(t.b.title)}</b><small>${esc(t.d.name)}</small></div>
       <span class="rd-n" id="rd-n" aria-live="polite">…</span>
-      <button type="button" class="rd-z" data-rd="out" aria-label="Réduire">−</button><button type="button" class="rd-z" data-rd="in" aria-label="Agrandir">+</button>${libAdmin() ? `<a class="rd-z rd-dl" href="${t.file}" download="${t.file.split('/').pop()}" aria-label="Télécharger le PDF" title="Télécharger le PDF">⤓</a>` : ''}
+      <button type="button" class="rd-z" data-rd="out" aria-label="Réduire">−</button><button type="button" class="rd-z" data-rd="in" aria-label="Agrandir">+</button>${libAdmin() && t.maitre ? `<button type="button" class="rd-z rd-dl" data-maitre-dl="${t.b.id}" aria-label="Télécharger le PDF" title="Télécharger le PDF">⤓</button>` : libAdmin() ? `<a class="rd-z rd-dl" href="${t.file}" download="${t.file.split('/').pop()}" aria-label="Télécharger le PDF" title="Télécharger le PDF">⤓</a>` : ''}
     </div>
     <p class="meta rd-note">${libAdmin() ? 'Compte d’administration : ce livre est aussi téléchargeable (bouton ⤓).' : 'Les livres des Éditions Lisân se lisent en ligne, sur le site ; ils ne sont pas téléchargeables.'} Votre page est retenue pour la prochaine lecture.</p>
     <div class="rd-pages" id="rd-pages"><p class="lead rd-wait">Ouverture du livre…</p></div></div>`;
@@ -43,7 +44,9 @@ function closeReader() {
 function bindReader(t) {
   const box = document.getElementById('rd-pages'); if (!box) return;
   const me = reader = { id: t.id, scale: 1, pages: [], cur: 1 };
-  loadPdfJs().then(lib => lib.getDocument({ url: t.file, isEvalSupported: false, rangeChunkSize: 262144, disableAutoFetch: true }).promise).then(async doc => {
+  const src = t.maitre ? AUTH().adminMaitreGet(t.b.id).then(data => { if (!data) throw new Error('absent'); return { data, isEvalSupported: false }; })
+    : Promise.resolve({ url: t.file, isEvalSupported: false, rangeChunkSize: 262144, disableAutoFetch: true });
+  Promise.all([loadPdfJs(), src]).then(([lib, o]) => lib.getDocument(o).promise).then(async doc => {
     if (reader !== me) { doc.destroy(); return; }
     me.doc = doc;
     const first = await doc.getPage(1), vp = first.getViewport({ scale: 1 });

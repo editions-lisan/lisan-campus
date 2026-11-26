@@ -118,8 +118,8 @@ function adminToast(t) {
 function loadAdmin() {
   adminRun.loading = true; adminRun.err = ''; drawAdmin(); adminStop();
   AUTH().adminList().then(async list => { adminRun.list = list; adminRun.rulesOk = await AUTH().certRulesOk(); adminLive();
-    adminRun.registry = null; if (adminRun.rulesOk) { try { adminRun.registry = await AUTH().adminRegistry(); } catch (e) {} }
-    adminRun.msgs = []; if (adminRun.rulesOk && AUTH().adminMessages) { try { adminRun.msgs = await AUTH().adminMessages(); } catch (e) {} } adminRun.acces = {}; if (adminRun.rulesOk && AUTH().adminAcces) { try { adminRun.acces = await AUTH().adminAcces(); } catch (e) {} } adminRun.loading = false; setAdminCached(true); drawAdmin(); if (typeof renderDrawer === 'function') renderDrawer(); })
+    adminRun.registry = null; try { adminRun.registry = await AUTH().adminRegistry(); } catch (e) {}
+    adminRun.msgs = []; if (AUTH().adminMessages) { try { adminRun.msgs = await AUTH().adminMessages(); } catch (e) {} } adminRun.acces = {}; adminRun.accesOk = false; if (AUTH().adminAcces) { try { adminRun.acces = await AUTH().adminAcces(); adminRun.accesOk = true; } catch (e) {} } adminRun.loading = false; setAdminCached(true); drawAdmin(); if (typeof renderDrawer === 'function') renderDrawer(); })
     .catch(e => { adminRun.loading = false; adminRun.list = null;
       adminRun.err = e && /permission/.test(e.code || e.message || '') ? 'denied' : 'network'; if (adminRun.err === 'denied') setAdminCached(false); drawAdmin(); });
 }
@@ -185,9 +185,13 @@ service cloud.firestore {
       allow get: if isOwner(uid) || isAdmin();
       allow list, create, update, delete: if isAdmin();
     }
+    // Livrets du maître : déposés et lus par l'administrateur seul (fichier découpé en morceaux), jamais publics
+    match /maitre/{doc=**} {
+      allow read, write: if isAdmin();
+    }
     // repère de version des règles (vérifié par la page d'administration)
     match /regles/{v} {
-      allow get: if v == 'v5';
+      allow get: if v == 'v6';
     }
   }
 }`;
@@ -227,7 +231,7 @@ function drawAdmin() {
     <button type="button" class="chip" data-admin-tab="sugg" aria-pressed="${R.tab === 'sugg'}">💡 Suggestions (${suggs.length})</button>
     <button type="button" class="chip" data-admin-tab="msg" aria-pressed="${R.tab === 'msg'}">✉️ Messages (${(R.msgs || []).length})</button></div>`;
   const head = `<span class="eyebrow">Éditions Lisân</span><h1>Administration</h1>
-    ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour (certificats, sécurité renforcée, parcours ouverts à un élève) : copiez-les et publiez-les dans la console Firebase.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
+    ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour (certificats, sécurité renforcée, parcours ouverts à un élève, livrets du maître) : copiez-les et publiez-les dans la console Firebase.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
     <div class="stats">${stat(list.length, 'comptes créés')}${stat(all.length, 'inscriptions')}${stat(fresh, 'nouvelles (7 jours)')}${stat(noIns, 'comptes sans inscription')}${stat(today, 'connectés aujourd’hui')}${stat(active, 'actifs (7 jours)')}
       ${stat(certs.length, 'certificats délivrés')}${stat(avis.length ? (avis.reduce((a, r) => a + r.x.note, 0) / avis.length).toFixed(1).replace('.', ',') + ' ★' : '—', avis.length + ' avis')}${stat(suggs.length, 'suggestions')}
       ${SPACES.map(sp => stat(count(sp.id), sp.title, sp.color)).join('')}</div>${tabs}
@@ -387,7 +391,7 @@ function accFiltered() {
 // Ouvrir un parcours à un seul élève, sans qu'il ait réussi le parcours précédent (collection acces, règles v5)
 const ORDERED = () => SUBJECTS.filter(s => !freeOrder(s) && spaceSubjects(s)[0] !== s);
 function accesCtl(u) {
-  if (!adminRun.rulesOk) return '';
+  if (!adminRun.rulesOk && !adminRun.accesOk) return '';
   const on = Object.keys(((adminRun.acces || {})[u.uid] || {}).parcours || {}).filter(id => SUBJECTS.some(s => s.id === id));
   const opts = ORDERED().filter(s => !on.includes(s.id));
   return `<div class="adm-acces" data-acces-uid="${esc(u.uid)}">${on.map(id => { const s = SUBJECTS.find(x => x.id === id);
