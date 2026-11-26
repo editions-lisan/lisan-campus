@@ -1,7 +1,7 @@
 // Lisân Campus : lecture hors connexion.
 // Changez VERSION à chaque mise à jour du site pour renouveler le cache.
-const VERSION = 'lisan-campus-2026-11-26e';
-const CORE = ['./', 'styles.css', 'app.js', 'config.js', 'auth.js', 'inscription.js', 'admin.js', 'certificats.js', 'boot.js', 'ptr.js', 'emoji.js', 'vendor/qrcode.min.js', 'logo.png',
+const VERSION = 'lisan-campus-2026-11-26f';
+const CORE = ['./', 'styles.css', 'app.js', 'classement.js', 'config.js', 'auth.js', 'inscription.js', 'admin.js', 'certificats.js', 'boot.js', 'ptr.js', 'emoji.js', 'vendor/qrcode.min.js', 'logo.png',
   'data/droit.js', 'data/romans.js', 'data/ia.js', 'data/arabe.js', 'data/coran.js', 'data/coran2.js', 'data/islam.js', 'data/mini.js', 'data/livres.js', 'data/actus.js', 'lecteur.js', 'data/audio.js', 'fonts/LisanNaskh-R.woff2', 'fonts/LisanNaskh-B.woff2', 'fonts/AmiriQuran.woff2',
   'fonts/literata-600.woff2', 'fonts/literata-800.woff2', 'fonts/literata-600-ext.woff2', 'fonts/literata-800-ext.woff2', 'fonts/atkinson-400.woff2', 'fonts/atkinson-700.woff2', 'fonts/atkinson-400i.woff2',
   'fonts/atkinson-400-ext.woff2', 'fonts/atkinson-700-ext.woff2', 'fonts/atkinson-400i-ext.woff2',
@@ -13,7 +13,7 @@ self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(CORE.map(u => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', e => {
-  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== VERSION && k !== 'lc-prefs').map(k => caches.delete(k)))).then(() => self.clients.claim()));
 });
 self.addEventListener('fetch', e => {
   const req = e.request;
@@ -52,4 +52,23 @@ self.addEventListener('fetch', e => {
       return hit || net;
     })));
   }
+});
+
+// Rappels d'étude : le navigateur réveille le service worker de temps en temps (synchronisation périodique,
+// Android avec l'application installée) ; si l'élève n'a pas encore étudié aujourd'hui et que l'heure choisie
+// est passée, une notification est affichée. Préférences écrites par la page (classement.js) dans le cache « lc-prefs ».
+self.addEventListener('periodicsync', e => { if (e.tag === 'lc-rappel') e.waitUntil(remind()); });
+async function remind() {
+  const c = await caches.open('lc-prefs'), r = await c.match('/__lc-prefs'); if (!r) return;
+  const p = await r.json(), now = new Date(), p2 = n => String(n).padStart(2, '0');
+  const today = `${now.getFullYear()}-${p2(now.getMonth() + 1)}-${p2(now.getDate())}`;
+  if (!p.on || p.studied === today || p.notified === today || now.getHours() < p.hour || now.getHours() >= 23) return;
+  const body = p.serie > 0 ? `Votre série de ${p.serie} jour${p.serie > 1 ? 's' : ''} vous attend : dix minutes suffisent aujourd'hui.` : 'Dix minutes aujourd’hui pour avancer dans vos cours et lancer votre série.';
+  await self.registration.showNotification('Lisân Campus · votre séance du jour', { body, icon: 'icon-192.png', badge: 'favicon-32.png', tag: 'lc-rappel', data: { url: './#accueil' } });
+  p.notified = today; await c.put('/__lc-prefs', new Response(JSON.stringify(p), { headers: { 'Content-Type': 'application/json' } }));
+}
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = (e.notification.data && e.notification.data.url) || './';
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => { const w = list[0]; return w ? w.focus() : self.clients.openWindow(url); }));
 });

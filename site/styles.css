@@ -1013,7 +1013,7 @@ img.emo.flag { width: 1.4em; height: 1.05em; vertical-align: -.12em; border-radi
 .mini .q { background: var(--surface); }
 .mini-end { font-size: 16px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
 /* tableau de bord de l'accueil, révisions, recherche */
-.dash { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0; }
+.dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 18px 0; }
 .dash-c { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 16px; background: var(--surface); border: 1px solid var(--edge); color: var(--ink); text-decoration: none; min-width: 0; }
 a.dash-c:hover { border-color: var(--accent); }
 .dash-i { font-size: 28px; flex: none; }
@@ -1334,3 +1334,59 @@ article.lesson .speaking { background: color-mix(in srgb, var(--sc, var(--accent
 .adm-acces select { max-width: 100%; font: inherit; padding: 4px 6px; border-radius: 8px; }
 .news-ask { margin: 18px 0; } .news-ask p { margin: 6px 0 10px; }
 .droit-rev { margin-bottom: 18px; } .droit-rev ul { margin: 6px 0 0; padding-left: 20px; display: grid; gap: 6px; } .droit-rev h2 { margin: 0 0 4px; }
+
+/* ---------- classement de la semaine (classement.js) */
+.board .b-head h1 { margin: 2px 0 4px; }
+.b-trophies { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin: 14px 0 18px; align-items: end; }
+.b-tr { text-align: center; opacity: .9; }
+.b-tr.off { opacity: .32; filter: grayscale(.6); }
+.b-tr svg { width: 100%; max-width: 64px; height: auto; display: block; margin: 0 auto; }
+.b-tr.on svg { max-width: 84px; filter: drop-shadow(0 6px 10px rgba(20, 28, 46, .18)); animation: b-pop .6s ease-out; }
+.b-tr small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.b-tr.on small { color: var(--ink); font-weight: 700; }
+@keyframes b-pop { from { transform: scale(.6); opacity: 0; } to { transform: none; opacity: 1; } }
+.b-me-top { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; text-align: center; }
+.b-me-top b { display: block; font-family: var(--font-display); font-size: 1.35rem; }
+.b-me-top small { color: var(--muted); }
+.b-week { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; height: 92px; margin-top: 14px; align-items: end; }
+.b-day { position: relative; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+.b-day i { width: 70%; min-height: 3px; border-radius: 6px 6px 2px 2px; background: var(--accent); opacity: .75; }
+.b-day.today i { background: var(--saffron); opacity: 1; }
+.b-day.fut i { opacity: .15; }
+.b-day small { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.b-day em { position: absolute; top: -2px; font-style: normal; font-size: 11px; color: var(--muted); }
+.b-list { margin: 14px 0; }
+.b-rows { list-style: none; margin: 8px 0 0; padding: 0; border: 1px solid var(--edge); border-radius: 16px; overflow: hidden; background: var(--surface); }
+.b-row { display: grid; grid-template-columns: 34px 44px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 10px 14px; border-top: 1px solid var(--edge); }
+.b-row:first-child { border-top: 0; }
+.b-row.me { background: var(--accent-soft); }
+.b-rank { text-align: center; color: var(--muted); font-weight: 700; }
+.b-medal { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; font-weight: 800; font-size: 14px; color: #5a3d00; background: #f5c542; box-shadow: inset 0 -3px 0 rgba(0, 0, 0, .15); }
+.b-medal.m2 { background: #cfd6e2; color: #3d4757; }
+.b-medal.m3 { background: #e3a26b; color: #57300f; }
+.b-av { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-weight: 800; color: #fff; background: hsl(var(--h) 55% 45%); font-size: 15px; }
+.b-name { min-width: 0; }
+.b-name b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.b-name b small { font-weight: 400; color: var(--muted); }
+.b-name > small { color: var(--muted); font-size: 13px; }
+.b-xp { font-weight: 800; font-variant-numeric: tabular-nums; }
+.b-del { font-size: 12px; }
+.b-join .b-field { display: block; font-weight: 700; margin: 10px 0 4px; }
+.b-join .b-field input { display: block; width: 100%; max-width: 360px; margin-top: 6px; padding: 10px 12px; border-radius: 10px; border: 1px solid var(--edge); background: var(--surface); color: var(--ink); font: inherit; }
+.b-join .check { display: flex; gap: 8px; align-items: flex-start; margin: 10px 0; }
+.b-join .check input { margin-top: 4px; }
+.b-help table { width: 100%; }
+@media (max-width: 520px) { .b-row { grid-template-columns: 30px 38px minmax(0, 1fr) auto; padding: 9px 10px; } .b-av { width: 38px; height: 38px; font-size: 13px; } .b-del { grid-column: 3 / -1; justify-self: start; } }
+/* administration : une fiche par compte, inscriptions à dérouler */
+.adm-sp { border: 1px solid var(--edge); border-radius: 12px; margin: 8px 0; background: var(--bg); }
+.adm-sp > summary { padding: 10px 12px; cursor: pointer; display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.adm-sp > summary small { color: var(--muted); }
+.adm-sp[open] > summary { border-bottom: 1px solid var(--edge); }
+.adm-sp > div { padding: 8px 12px 12px; }
+.board .emo, .adm-sp .emo, .adm-top .tag .emo { font-size: 1em; }
+.b-me-top .emo, .b-head .emo { font-size: 1.05em; }
+
+.xp-toast { position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%); z-index: 90; padding: 8px 18px; border-radius: 999px; background: #7c4dde; color: #fff; font-weight: 800; font-size: 1.1rem; box-shadow: 0 10px 24px rgba(60, 30, 120, .3); animation: xp-up 1.9s ease-out forwards; pointer-events: none; }
+@keyframes xp-up { 0% { opacity: 0; transform: translate(-50%, 20px) scale(.8); } 15% { opacity: 1; transform: translate(-50%, 0) scale(1.08); } 70% { opacity: 1; transform: translate(-50%, -18px) scale(1); } 100% { opacity: 0; transform: translate(-50%, -44px); } }
+@media (prefers-reduced-motion: reduce) { .xp-toast { animation-duration: 1.2s; } }
+.adm-spc { display: flex; flex-wrap: wrap; gap: 6px; margin: -4px 0 12px; }

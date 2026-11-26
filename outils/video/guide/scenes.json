@@ -1,64 +1,288 @@
 {
  "note": "Vidéo du mode d'emploi : une scène par étape. caption = sous-titre affiché ; say = texte lu par la voix (prononciation adaptée : Lissâne, point dève…). shots : capture (img/g_<img>.png), défilement de y0 à y1 en pixels CSS (nombre, ou « clé.top|cy ± n » d'après captures.json), début du plan dans la scène (at, de 0 à 1) ; tap : [x, y, moment] = doigt qui touche l'écran ; extra : élément ajouté (desktop).",
- "steps": 12,
+ "steps": 13,
  "scenes": [
-  { "kind": "intro",
-    "caption": "Lisân Campus, le mode d’emploi : votre compte, votre inscription, vos leçons et votre certificat.",
-    "say": "Lissâne Campus : le mode d'emploi. En moins de deux minutes : votre compte, votre inscription, vos leçons, et votre certificat." },
-  { "step": 1, "title": "Ouvrez le site",
-    "caption": "Ouvrez lisan-campus.pages.dev sur téléphone ou sur ordinateur : même compte, même progression. Sur téléphone, ajoutez-le à l’écran d’accueil.",
-    "say": "Ouvrez lissâne campus, point pages, point dève, sur votre téléphone ou sur votre ordinateur : c'est le même compte, et la même progression. Sur téléphone, ajoutez le site à l'écran d'accueil : il s'ouvre comme une application.",
-    "shots": [{ "img": "home", "y0": 0, "y1": 120, "at": 0 }], "extra": "desktop" },
-  { "step": 2, "title": "Choisissez votre espace",
-    "caption": "Choisissez votre espace : l’arabe, le Coran, l’islam en famille, le droit ou l’intelligence artificielle.",
-    "say": "Choisissez votre espace : l'arabe, le Coran, l'islam en famille, le droit, ou l'intelligence artificielle.",
-    "shots": [{ "img": "home", "y0": "espaces.top-120", "y1": "espaces.top+260", "at": 0 }, { "img": "espace", "y0": 0, "y1": 160, "at": 0.55, "tap": [195, "next.cy", 0.75] }] },
-  { "step": 3, "title": "Première leçon libre",
-    "caption": "La première leçon de chaque espace est en accès libre : essayez-la avant de vous inscrire.",
-    "say": "Dans chaque espace, la première leçon est libre : essayez-la avant de vous inscrire.",
-    "shots": [{ "img": "parcours", "y0": 0, "y1": "lessons.top-260", "at": 0, "tap": [195, "lessons.top+40", 0.8] }] },
-  { "step": 4, "title": "Connectez-vous",
-    "caption": "Pour continuer, connectez-vous avec votre compte Google. C’est gratuit, sans mot de passe à retenir.",
-    "say": "Pour continuer, connectez-vous avec votre compte Google. C'est gratuit, et sans mot de passe à retenir.",
-    "shots": [{ "img": "gate", "y0": 0, "y1": 0, "at": 0, "tap": ["btn.cx", "btn.cy", 0.6] }] },
-  { "step": 5, "title": "Remplissez votre fiche",
-    "caption": "Remplissez votre fiche : nom et adresse viennent de Google. Complétez le reste, puis vérifiez.",
-    "say": "Remplissez votre fiche : votre nom et votre adresse viennent de Google. Complétez le reste, puis vérifiez.",
-    "shots": [{ "img": "fiche", "y0": 0, "y1": 1500, "at": 0 }, { "img": "verif", "y0": 0, "y1": "send.top-560", "at": 0.6, "tap": ["send.cx", "send.cy", 0.9] }] },
-  { "step": 6, "title": "Inscription confirmée",
-    "caption": "C’est confirmé ! Vous recevez votre numéro d’inscription, et toutes les leçons de l’espace s’ouvrent.",
-    "say": "C'est confirmé ! Vous recevez votre numéro d'inscription, et toutes les leçons de l'espace s'ouvrent.",
-    "shots": [{ "img": "confirm", "y0": 0, "y1": 360, "at": 0 }] },
-  { "step": 7, "title": "Lisez ou écoutez",
-    "caption": "Lisez chaque leçon, ou écoutez-la : la voix continue même écran éteint, et le passage lu s’affiche en couleur.",
-    "say": "Lisez chaque leçon, ou écoutez-la : la voix continue même écran éteint, et le passage lu s'affiche en couleur.",
-    "shots": [{ "img": "lecon", "y0": 0, "y1": 520, "at": 0, "tap": ["listen.cx", "listen.cy", 0.22] }] },
-  { "step": 8, "title": "Validez la leçon",
-    "caption": "À la fin, un mini-exercice de trois questions. Tout est juste ? La leçon est terminée et la suivante s’ouvre.",
-    "say": "À la fin, un mini-exercice de trois questions. Tout est juste ? La leçon est terminée, et la suivante s'ouvre.",
-    "shots": [{ "img": "mini", "y0": "mini.top-60", "y1": "end.top-520", "at": 0 }] },
-  { "step": 9, "title": "Révisez avec les cartes",
-    "caption": "Révisez avec les cartes : touchez la carte pour voir la réponse, puis dites si vous la saviez.",
-    "say": "Révisez avec les cartes : touchez la carte pour voir la réponse, puis dites si vous la saviez.",
-    "shots": [{ "img": "cartes", "y0": 0, "y1": 120, "at": 0, "tap": ["card.cx", "card.cy", 0.35] }] },
-  { "step": 10, "title": "Évaluation et avis",
-    "caption": "Toutes les leçons terminées ? Passez l’évaluation : avec 80 %, le parcours est réussi. Donnez votre avis en quelques étoiles…",
-    "say": "Toutes les leçons terminées ? Passez l'évaluation : avec quatre-vingts pour cent, le parcours est réussi. Donnez alors votre avis, en quelques étoiles…",
-    "shots": [{ "img": "fini", "y0": 0, "y1": 220, "at": 0, "tap": ["eval.cx", "eval.cy", 0.2] }, { "img": "avis", "y0": 0, "y1": 260, "at": 0.55, "tap": ["star5.cx", "star5.cy", 0.7] }] },
-  { "step": 10, "title": "Votre certificat",
-    "caption": "… et recevez votre certificat de réussite, vérifiable en ligne grâce à son code QR.",
-    "say": "… et recevez votre certificat de réussite, vérifiable en ligne grâce à son code QR.",
-    "shots": [{ "img": "certificat", "y0": 0, "y1": 60, "at": 0 }] },
-  { "step": 11, "title": "L’actualité juridique",
-    "caption": "Suivez l’actualité juridique : chaque information est expliquée pas à pas, reliée au cours, avec un petit test.",
-    "say": "Suivez aussi l'actualité juridique : chaque information est expliquée pas à pas, reliée au cours, avec un petit test.",
-    "shots": [{ "img": "actus", "y0": 0, "y1": 420, "at": 0 }, { "img": "actu", "y0": "steps.top-260", "y1": "comprendre.top+80", "at": 0.45 }] },
-  { "step": 12, "title": "Le menu",
-    "caption": "Dans le menu : les espaces, la bibliothèque, vos révisions, la recherche et ce mode d’emploi.",
-    "say": "Dans le menu : les espaces, la bibliothèque, vos révisions, la recherche, et ce mode d'emploi.",
-    "shots": [{ "img": "menu", "y0": 0, "y1": 0, "at": 0 }] },
-  { "kind": "outro",
-    "caption": "lisan-campus.pages.dev · Bonne étude !",
-    "say": "Lissâne Campus. Bonne étude !" }
+  {
+   "kind": "intro",
+   "caption": "Lisân Campus, le mode d’emploi : votre compte, votre inscription, vos leçons et votre certificat.",
+   "say": "Lissâne Campus : le mode d'emploi. En moins de deux minutes : votre compte, votre inscription, vos leçons, et votre certificat."
+  },
+  {
+   "step": 1,
+   "title": "Ouvrez le site",
+   "caption": "Ouvrez lisan-campus.pages.dev sur téléphone ou sur ordinateur : même compte, même progression. Sur téléphone, ajoutez-le à l’écran d’accueil.",
+   "say": "Ouvrez lissâne campus, point pages, point dève, sur votre téléphone ou sur votre ordinateur : c'est le même compte, et la même progression. Sur téléphone, ajoutez le site à l'écran d'accueil : il s'ouvre comme une application.",
+   "shots": [
+    {
+     "img": "home",
+     "y0": 0,
+     "y1": 120,
+     "at": 0
+    }
+   ],
+   "extra": "desktop"
+  },
+  {
+   "step": 2,
+   "title": "Choisissez votre espace",
+   "caption": "Choisissez votre espace : l’arabe, le Coran, l’islam en famille, le droit ou l’intelligence artificielle.",
+   "say": "Choisissez votre espace : l'arabe, le Coran, l'islam en famille, le droit, ou l'intelligence artificielle.",
+   "shots": [
+    {
+     "img": "home",
+     "y0": "espaces.top-120",
+     "y1": "espaces.top+260",
+     "at": 0
+    },
+    {
+     "img": "espace",
+     "y0": 0,
+     "y1": 160,
+     "at": 0.55,
+     "tap": [
+      195,
+      "next.cy",
+      0.75
+     ]
+    }
+   ]
+  },
+  {
+   "step": 3,
+   "title": "Première leçon libre",
+   "caption": "La première leçon de chaque espace est en accès libre : essayez-la avant de vous inscrire.",
+   "say": "Dans chaque espace, la première leçon est libre : essayez-la avant de vous inscrire.",
+   "shots": [
+    {
+     "img": "parcours",
+     "y0": 0,
+     "y1": "lessons.top-260",
+     "at": 0,
+     "tap": [
+      195,
+      "lessons.top+40",
+      0.8
+     ]
+    }
+   ]
+  },
+  {
+   "step": 4,
+   "title": "Connectez-vous",
+   "caption": "Pour continuer, connectez-vous avec votre compte Google. C’est gratuit, sans mot de passe à retenir.",
+   "say": "Pour continuer, connectez-vous avec votre compte Google. C'est gratuit, et sans mot de passe à retenir.",
+   "shots": [
+    {
+     "img": "gate",
+     "y0": 0,
+     "y1": 0,
+     "at": 0,
+     "tap": [
+      "btn.cx",
+      "btn.cy",
+      0.6
+     ]
+    }
+   ]
+  },
+  {
+   "step": 5,
+   "title": "Remplissez votre fiche",
+   "caption": "Remplissez votre fiche : nom et adresse viennent de Google. Complétez le reste, puis vérifiez.",
+   "say": "Remplissez votre fiche : votre nom et votre adresse viennent de Google. Complétez le reste, puis vérifiez.",
+   "shots": [
+    {
+     "img": "fiche",
+     "y0": 0,
+     "y1": 1500,
+     "at": 0
+    },
+    {
+     "img": "verif",
+     "y0": 0,
+     "y1": "send.top-560",
+     "at": 0.6,
+     "tap": [
+      "send.cx",
+      "send.cy",
+      0.9
+     ]
+    }
+   ]
+  },
+  {
+   "step": 6,
+   "title": "Inscription confirmée",
+   "caption": "C’est confirmé ! Vous recevez votre numéro d’inscription, et toutes les leçons de l’espace s’ouvrent.",
+   "say": "C'est confirmé ! Vous recevez votre numéro d'inscription, et toutes les leçons de l'espace s'ouvrent.",
+   "shots": [
+    {
+     "img": "confirm",
+     "y0": 0,
+     "y1": 360,
+     "at": 0
+    }
+   ]
+  },
+  {
+   "step": 7,
+   "title": "Lisez ou écoutez",
+   "caption": "Lisez chaque leçon, ou écoutez-la : la voix continue même écran éteint, et le passage lu s’affiche en couleur.",
+   "say": "Lisez chaque leçon, ou écoutez-la : la voix continue même écran éteint, et le passage lu s'affiche en couleur.",
+   "shots": [
+    {
+     "img": "lecon",
+     "y0": 0,
+     "y1": 520,
+     "at": 0,
+     "tap": [
+      "listen.cx",
+      "listen.cy",
+      0.22
+     ]
+    }
+   ]
+  },
+  {
+   "step": 8,
+   "title": "Validez la leçon",
+   "caption": "À la fin, un mini-exercice de trois questions. Tout est juste ? La leçon est terminée et la suivante s’ouvre.",
+   "say": "À la fin, un mini-exercice de trois questions. Tout est juste ? La leçon est terminée, et la suivante s'ouvre.",
+   "shots": [
+    {
+     "img": "mini",
+     "y0": "mini.top-60",
+     "y1": "end.top-520",
+     "at": 0
+    }
+   ]
+  },
+  {
+   "step": 9,
+   "title": "Révisez avec les cartes",
+   "caption": "Révisez avec les cartes : touchez la carte pour voir la réponse, puis dites si vous la saviez.",
+   "say": "Révisez avec les cartes : touchez la carte pour voir la réponse, puis dites si vous la saviez.",
+   "shots": [
+    {
+     "img": "cartes",
+     "y0": 0,
+     "y1": 120,
+     "at": 0,
+     "tap": [
+      "card.cx",
+      "card.cy",
+      0.35
+     ]
+    }
+   ]
+  },
+  {
+   "step": 10,
+   "title": "Évaluation et avis",
+   "caption": "Toutes les leçons terminées ? Passez l’évaluation : avec 80 %, le parcours est réussi. Donnez votre avis en quelques étoiles…",
+   "say": "Toutes les leçons terminées ? Passez l'évaluation : avec quatre-vingts pour cent, le parcours est réussi. Donnez alors votre avis, en quelques étoiles…",
+   "shots": [
+    {
+     "img": "fini",
+     "y0": 0,
+     "y1": 220,
+     "at": 0,
+     "tap": [
+      "eval.cx",
+      "eval.cy",
+      0.2
+     ]
+    },
+    {
+     "img": "avis",
+     "y0": 0,
+     "y1": 260,
+     "at": 0.55,
+     "tap": [
+      "star5.cx",
+      "star5.cy",
+      0.7
+     ]
+    }
+   ]
+  },
+  {
+   "step": 10,
+   "title": "Votre certificat",
+   "caption": "… et recevez votre certificat de réussite, vérifiable en ligne grâce à son code QR.",
+   "say": "… et recevez votre certificat de réussite, vérifiable en ligne grâce à son code QR.",
+   "shots": [
+    {
+     "img": "certificat",
+     "y0": 0,
+     "y1": 60,
+     "at": 0
+    }
+   ]
+  },
+  {
+   "step": 11,
+   "title": "L’actualité juridique",
+   "caption": "Suivez l’actualité juridique : chaque information est expliquée pas à pas, reliée au cours, avec un petit test.",
+   "say": "Suivez aussi l'actualité juridique : chaque information est expliquée pas à pas, reliée au cours, avec un petit test.",
+   "shots": [
+    {
+     "img": "actus",
+     "y0": 0,
+     "y1": 420,
+     "at": 0
+    },
+    {
+     "img": "actu",
+     "y0": "steps.top-260",
+     "y1": "comprendre.top+80",
+     "at": 0.45
+    }
+   ]
+  },
+  {
+   "step": 12,
+   "title": "Classement et rappels",
+   "caption": "Gagnez des XP en étudiant, comparez-vous aux autres élèves chaque semaine et programmez un rappel quotidien.",
+   "say": "Chaque leçon, chaque exercice vous rapporte des points d'expérience. Comparez-vous aux autres élèves dans le classement de la semaine, et programmez un rappel quotidien pour garder votre série.",
+   "shots": [
+    {
+     "img": "classement",
+     "y0": 0,
+     "y1": "list.top-120",
+     "at": 0
+    },
+    {
+     "img": "rappels",
+     "y0": "remind.top-90",
+     "y1": "remind.top-60",
+     "at": 0.6,
+     "tap": [
+      195,
+      "ics.cy",
+      0.82
+     ]
+    }
+   ]
+  },
+  {
+   "step": 13,
+   "title": "Le menu",
+   "caption": "Dans le menu : les espaces, la bibliothèque, vos révisions, le classement, la recherche et ce mode d’emploi.",
+   "say": "Dans le menu : les espaces, la bibliothèque, vos révisions, le classement, la recherche, et ce mode d'emploi.",
+   "shots": [
+    {
+     "img": "menu",
+     "y0": 0,
+     "y1": 0,
+     "at": 0
+    }
+   ]
+  },
+  {
+   "kind": "outro",
+   "caption": "lisan-campus.pages.dev · Bonne étude !",
+   "say": "Lissâne Campus. Bonne étude !"
+  }
  ]
 }

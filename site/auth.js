@@ -97,9 +97,17 @@
       catch (e) { if (/permission/.test((e && (e.code || e.message)) || '')) return false; throw e; }
     },
     async certRulesOk() {                                // les règles Firestore autorisent-elles déjà les certificats ?
-      try { await fb.firestore().collection('regles').doc('v6').get({ source: 'server' }); return true; }
+      try { await fb.firestore().collection('regles').doc('v7').get({ source: 'server' }); return true; }
       catch (e) { return !/permission/.test((e && (e.code || e.message)) || ''); }
     },
+    // classement de la semaine (collection classement/{uid}) : lu par les élèves connectés, écrit par chacun pour sa ligne
+    async boardList(sem) {
+      const snap = await fb.firestore().collection('classement').where('sem', '==', sem).limit(500).get();
+      return snap.docs.map(d => Object.assign({ uid: d.id }, d.data()));
+    },
+    boardPut(rec) { if (!user) return Promise.reject(new Error('non connecté'));
+      return within(fb.firestore().collection('classement').doc(user.uid).set(Object.assign({}, rec, { maj: fb.firestore.FieldValue.serverTimestamp() }))); },
+    boardLeave(uid) { if (!user) return Promise.resolve(); return within(fb.firestore().collection('classement').doc(uid || user.uid).delete()); },
     sendMessage(x) {                                     // formulaire de contact : enregistré dans Firebase, lu par l'administrateur
       const rec = { nom: String(x.nom || '').slice(0, 100), email: String(x.email || '').slice(0, 150), sujet: String(x.sujet || '').slice(0, 80),
         message: String(x.message || '').slice(0, 4000), date: fb.firestore.FieldValue.serverTimestamp() };
@@ -172,12 +180,12 @@
         else throw e;
       }
       profile = null; cache.set('profile', null); cache.set('user', null);
-      ['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis'].forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null);
+      ['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis', 'xpb'].forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null);
     },
     // progression : envoyée au compte, regroupée (3 s après une leçon, un exercice, une carte ; au plus une fois par minute pour le
     // temps d'étude), et envoyée aussitôt quand on quitte l'application : peu d'écritures, même avec beaucoup d'élèves en même temps
     onSave(k, v) {
-      if (!user || !['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis'].includes(k)) return;
+      if (!user || !['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis', 'xpb'].includes(k)) return;
       const due = Date.now() + (k === 'time' || k === 'days' ? 60000 : 3000);
       if (timer && due >= dueAt) return;                 // un envoi est déjà prévu plus tôt : il emportera aussi ce changement
       clearTimeout(timer); dueAt = due; timer = setTimeout(flush, due - Date.now());
@@ -210,7 +218,7 @@
   // tout ce qui suit l'élève d'un appareil à l'autre (les questions à revoir sont limitées aux 400 plus récentes)
   function progressData() {
     const rev = Object.entries(state.rev || {}).sort((a, b) => (b[1].t || 0) - (a[1].t || 0)).slice(0, 400);
-    return { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time, days: state.days || {}, minis: state.minis || {}, rev: Object.fromEntries(rev), at: fb.firestore.FieldValue.serverTimestamp() };   // at : heure du dernier envoi (ordre de l'onglet Progression)
+    return { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time, days: state.days || {}, minis: state.minis || {}, xpb: state.xpb || {}, rev: Object.fromEntries(rev), at: fb.firestore.FieldValue.serverTimestamp() };   // at : heure du dernier envoi (ordre de l'onglet Progression)
   }
   function mergeProgress(remote) {
     if (!remote) return;
@@ -218,6 +226,9 @@
     const dy = Object.assign({}, remote.days || {});
     Object.entries(state.days || {}).forEach(([k, v]) => { if (dy[k] === undefined || v > dy[k]) dy[k] = v; });
     state.days = dy; store.set('days', dy);
+    const xb = Object.assign({}, remote.xpb || {});
+    Object.entries(state.xpb || {}).forEach(([k, v]) => { if (xb[k] === undefined || v > xb[k]) xb[k] = v; });
+    state.xpb = xb; store.set('xpb', xb);
     const rv = Object.assign({}, remote.rev || {});
     Object.entries(state.rev || {}).forEach(([k, v]) => { if (rv[k] === undefined || (v.t || 0) >= (rv[k].t || 0)) rv[k] = v; });
     state.rev = rv; store.set('rev', rv);
