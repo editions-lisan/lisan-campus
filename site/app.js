@@ -990,7 +990,7 @@ function libLink(spId) {
   return `<a class="lib-link" href="#bibliotheque-${spId}"><span aria-hidden="true">📚</span><span><b>${t}</b><small>${esc(sub)}</small></span></a>`;
 }
 // Compte d'administration (vérifié par la règle Firestore isAdmin, voir probeAdmin() dans admin.js) : tous les livres
-// sont aussi téléchargeables, sans inscription aux espaces ; le livret du maître, lui, n'est jamais mis en ligne.
+// sont aussi téléchargeables, sans inscription aux espaces ; le livret du maître n'est jamais dans livres/ : voir maitreRow().
 const libAdmin = () => { const A = AUTH(); return !!(A && A.user() && typeof isAdminCached === 'function' && isAdminCached()); };
 function libAccess(spId) {
   const A = AUTH(); if (!A) return 'ok';
@@ -998,7 +998,53 @@ function libAccess(spId) {
   if (!A.user()) return 'signin';
   return A.enrolled(spId) ? 'ok' : 'enroll';
 }
+// Livret du maître, pour le compte d'administration seulement : déposé par l'administrateur depuis son appareil et rangé
+// dans Firestore (règles v6, lecture et écriture par l'administrateur seul) ; il n'est jamais placé dans livres/ ni visible des élèves.
+let MAITRE = { state: 'idle', info: {}, up: {} };            // state : idle | load | ok | rules
+function maitreLoad() {
+  const A = AUTH(); if (!A || !A.adminMaitreInfo || MAITRE.state === 'load') return;
+  MAITRE.state = 'load';
+  A.adminMaitreInfo().then(info => { MAITRE = Object.assign(MAITRE, { state: 'ok', info }); })
+    .catch(e => { MAITRE.state = /permission/i.test((e && (e.code || e.message)) || '') ? 'rules' : 'idle'; })
+    .then(() => { if (/^#bibliotheque/.test(location.hash)) route(); });
+}
+function maitreRow(d) {
+  const lock = '<span class="lib-ic" aria-hidden="true">📘</span>', name = `<b>${esc(d.name)}</b>`;
+  if (MAITRE.state === 'idle') setTimeout(maitreLoad, 0);
+  if (MAITRE.state !== 'ok') return `<div class="lib-doc lib-res">${lock}<div class="lib-dt">${name}<small>${MAITRE.state === 'rules'
+    ? 'Compte d’administration : pour déposer et lire les livrets du maître, publiez d’abord les nouvelles règles Firebase (page Administration, bandeau rouge).'
+    : 'Compte d’administration : vérification du livret…'}</small></div></div>`;
+  const m = MAITRE.info[d.book], up = MAITRE.up[d.book];
+  const pick = label => `<label class="btn ghost small lib-up">${label}<input type="file" accept="application/pdf,.pdf" data-maitre-up="${esc(d.book)}" hidden></label>`;
+  const info = up ? `Envoi en cours : ${up}` : m ? `Réservé au compte d’administration · ${(m.size / 1048576).toFixed(1).replace('.', ',')} Mo${m.at ? ' · déposé le ' + new Date(m.at).toLocaleDateString('fr-FR') : ''}`
+    : 'Réservé au compte d’administration : déposez le PDF du livret depuis votre appareil ; il restera invisible pour les élèves.';
+  const act = up ? '' : m ? `<a class="btn small" href="#lire-${esc(d.book)}~maitre">Lire en ligne</a><button type="button" class="btn ghost small" data-maitre-dl="${esc(d.book)}">Télécharger</button>${pick('Remplacer')}` : pick('Déposer le PDF');
+  return `<div class="lib-doc">${lock}<div class="lib-dt"><span class="tag">Administration</span>${name}<small>${esc(info)}</small></div><div class="lib-act">${act}</div></div>`;
+}
+function maitreDownload(id, btn) {
+  const A = AUTH(); if (!A || !A.adminMaitreGet) return;
+  if (btn) { btn.disabled = true; btn.textContent = 'Préparation…'; }
+  A.adminMaitreGet(id).then(buf => {
+    if (!buf) throw new Error('absent');
+    const url = URL.createObjectURL(new Blob([buf], { type: 'application/pdf' })), a = document.createElement('a');
+    a.href = url; a.download = `Lisan_${id}_maitre.pdf`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }).catch(() => { if (typeof adminToast === 'function') adminToast('Le livret n’a pas pu être téléchargé. Réessayez.'); })
+    .then(() => { if (btn) { btn.disabled = false; btn.textContent = 'Télécharger'; } });
+}
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-maitre-dl]'); if (b) maitreDownload(b.dataset.maitreDl, b); });
+document.addEventListener('change', e => {
+  const inp = e.target; if (!inp || !inp.dataset || !inp.dataset.maitreUp) return;
+  const id = inp.dataset.maitreUp, f = inp.files && inp.files[0], A = AUTH(); if (!f || !A || !A.adminMaitrePut) return;
+  if (!/\.pdf$/i.test(f.name) && f.type !== 'application/pdf') { if (typeof adminToast === 'function') adminToast('Choisissez un fichier PDF.'); return; }
+  if (f.size > 40 * 1048576) { if (typeof adminToast === 'function') adminToast('Fichier trop lourd (40 Mo au plus).'); return; }
+  MAITRE.up[id] = 'lecture du fichier…'; route();
+  f.arrayBuffer().then(ab => A.adminMaitrePut(id, new Uint8Array(ab), f.name, (i, n) => { MAITRE.up[id] = `${i} / ${n}`; if (/^#bibliotheque/.test(location.hash)) route(); }))
+    .then(() => { delete MAITRE.up[id]; MAITRE.state = 'idle'; if (typeof adminToast === 'function') adminToast('Livret du maître déposé.'); })
+    .catch(() => { delete MAITRE.up[id]; if (typeof adminToast === 'function') adminToast('L’envoi a échoué. Vérifiez la connexion, puis réessayez.'); })
+    .then(() => { if (/^#bibliotheque/.test(location.hash)) route(); else maitreLoad(); });
+});
 function libDocRow(file, d, spId) {
+  if (d.k === 'maitre' && d.book && libAdmin()) return maitreRow(d);
   if (d.k === 'maitre') return `<div class="lib-doc lib-res"><span class="lib-ic" aria-hidden="true">🔒</span><div class="lib-dt"><b>${esc(d.name)}</b><small>Réservé aux enseignants et aux animateurs : il n’est pas proposé en ligne.</small></div><div class="lib-act"><a class="btn ghost small" href="#contact">Le demander</a></div></div>`;
   const acc = libAccess(spId), meta = [d.pages ? d.pages + ' pages' : '', d.mb ? String(d.mb).replace('.', ',') + ' Mo' : ''].filter(Boolean).join(' · ');
   // livres des Éditions Lisân : lecture en ligne seulement (lecteur du site) ; documents de cours : lecture et téléchargement
