@@ -4670,7 +4670,7 @@ const M_CONST = {
   M_CONST.lessons.push(
     { id: "constitution", title: "La Constitution (1) : approches juridiques", body: [
       { p: "**Tout État possède une constitution** : même dans une tyrannie, pour peu qu'il existe un minimum de rationalité politique, une règle gouverne l'exercice du pouvoir. Surtout, l'État contemporain est une **personne morale** ; or le propre d'une personne morale est de n'exister qu'**en vertu d'un statut** (comme une société commerciale n'existe que par ses statuts). **Le statut de l'État, c'est sa constitution.** Ce chapitre précise la notion de constitution (définition et formes), puis son élaboration, sa révision et le contrôle de constitutionnalité." },
-      { box: "Le texte intégral de la Constitution ivoirienne du 8 novembre 2016, à jour de la révision du 19 mars 2020, est dans la [bibliothèque](#bibliotheque-droit), avec un sommaire détaillé. Garde-le sous la main pour lire les articles cités dans le cours.", title: "Le texte de la Constitution", kind: "marge" },
+      { box: "Le texte intégral de la Constitution ivoirienne du 8 novembre 2016, à jour des révisions du 19 mars 2020 et du 25 juillet 2023, est dans la [bibliothèque](#bibliotheque-droit), avec un sommaire détaillé. Garde-le sous la main pour lire les articles cités dans le cours.", title: "Le texte de la Constitution", kind: "marge" },
       { h: "Section 1. Les approches juridiques de la constitution" },
       { p: "La constitution peut se définir d'un point de vue **matériel** (ce qu'elle contient) et d'un point de vue **formel** (sa forme et sa valeur)." },
       { h: "§ 1. La constitution, statut de l'État et instrument de limitation du pouvoir" },
@@ -5569,5 +5569,31 @@ const M_CONST = {
     ["DVD", "Environ 4,7 Go, 6 fois un CD ; lecteur, graveur ou lecteur-graveur"],
     ["Lecteur de carte flash", "Lit les cartes SD, mini SD, MMC, Compact Flash"],
     ["Système d'exploitation (OS)", "Logiciel qui pilote le matériel et reçoit les instructions : Windows, Mac OS, Linux"],
+  );
+})();
+
+// Entraînement aux examens : questions tirées des sujets d'examen corrigés (recueil livres/droit/sujets-examen-corriges-l1.pdf)
+(function () {
+  M_DC.quiz.push(
+    { q: "Le jugement déclaratif d'absence, devenu définitif…", a: ["dissout le mariage de l'absent", "suspend seulement le mariage", "ouvre la succession de l'absent", "n'a aucun effet sur le mariage"], c: 0, e: "Le conjoint peut se remarier ; la succession ne s'ouvre qu'avec le jugement déclaratif de décès (loi n° 2022-885)." },
+    { q: "L'absent qui revient après le jugement déclaratif de décès…", a: ["recouvre ses biens dans l'état où ils se trouvent, mais son mariage reste dissous", "reprend tous ses biens et son mariage", "ne peut plus rien réclamer", "obtient l'annulation des ventes de ses biens"], c: 0, e: "Il recouvre ses biens, le prix de ceux qui ont été vendus ou les biens acquis avec ce prix (article 12)." },
+    { q: "Pour recueillir un droit né avant sa naissance, l'enfant doit être conçu à ce moment et…", a: ["naître vivant", "naître vivant et viable", "être reconnu par son père", "naître dans le mariage"], c: 0, e: "Depuis la loi n° 2019-573, la viabilité n'est plus exigée." },
+    { q: "La loi présume que l'enfant a été conçu…", a: ["entre le 300e et le 180e jour avant sa naissance", "entre le 280e et le 200e jour avant sa naissance", "dans les 9 mois précédant sa naissance", "à la date déclarée par la mère"], c: 0, e: "Article 4.1° de la loi n° 2019-571 relative à la filiation." },
+    { q: "Une personne qui disparaît dans le naufrage d'une pirogue, corps introuvable, est…", a: ["un disparu : le tribunal peut déclarer directement son décès", "un absent : il faut d'abord une présomption d'absence", "réputée vivante pendant 10 ans", "déclarée décédée par l'officier de l'état civil"], c: 0, e: "Article 13 de la loi n° 2022-885 : circonstances de nature à mettre sa vie en danger." },
+    { q: "Révéler la maladie d'une personne célèbre sans son accord est…", a: ["une atteinte à sa vie privée, qui oblige à réparer", "permis, car la personne est connue", "permis si l'information est exacte", "une simple maladresse sans conséquence"], c: 0, e: "La notoriété ne supprime pas la vie privée ; réparation sur le fondement de l'article 1382 du Code civil." },
+    { q: "Une particule omise lors de la déclaration de naissance se rétablit par…", a: ["une rectification judiciaire de l'acte", "une rectification administrative", "une simple déclaration en mairie", "un changement de nom"], c: 0, e: "C'est une erreur grave : seule la rectification judiciaire convient." },
+    { q: "Une femme qui se marie…", a: ["a l'usage du nom de son mari, sans y être obligée", "doit porter le nom de son mari", "perd son nom de jeune fille", "transmet son nom à ses enfants à la place du père"], c: 0, e: "Article 55 de la loi relative au mariage : c'est un usage, non une obligation." },
+    { q: "Un défendeur domicilié à Cocody est en principe assigné…", a: ["devant le tribunal de son domicile", "devant le tribunal du demandeur", "devant n'importe quel tribunal", "devant le tribunal du lieu où il travaille"], c: 0, e: "Article 11 du Code de procédure civile, sauf domicile élu." },
+    { q: "Une naissance ni déclarée ni collectée dans les délais est constatée par…", a: ["un jugement supplétif d'acte de naissance", "un acte de notoriété définitif", "une déclaration tardive en mairie", "un certificat médical"], c: 0, e: "Le jugement, rendu par le tribunal du lieu de naissance, tient lieu d'acte." },
+    { q: "Le contrat de travail d'un mineur de 15 ans est conclu…", a: ["par son représentant légal", "par le mineur seul", "par le mineur assisté de son représentant", "par l'inspecteur du travail"], c: 0, e: "Article 35 de la loi relative à la minorité ; à partir de 16 ans, le mineur conclut lui-même, assisté." },
+    { q: "La nullité d'une vente conclue seule par un mineur peut être invoquée…", a: ["par le mineur seulement, dans les 5 ans", "par l'acheteur comme par le mineur", "par toute personne intéressée", "sans limite de temps"], c: 0, e: "Nullité relative (article 40 de la loi relative à la minorité)." },
+  );
+  M_CONST.quiz.push(
+    { q: "Un traité régulièrement ratifié a…", a: ["une autorité supérieure à celle des lois, sous réserve de réciprocité", "une autorité supérieure à la Constitution", "la même valeur qu'une loi ordinaire", "la valeur d'un décret"], c: 0, e: "Article 123 de la Constitution." },
+    { q: "Si un traité comporte une clause contraire à la Constitution…", a: ["sa ratification n'est possible qu'après révision de la Constitution", "il est ratifié et la Constitution cesse de s'appliquer", "le Président le ratifie seul", "il est soumis au référendum obligatoire"], c: 0, e: "Article 122 de la Constitution." },
+    { q: "Les bulletins blancs et nuls…", a: ["ne comptent pas parmi les suffrages exprimés", "comptent comme des suffrages exprimés", "sont ajoutés à la liste arrivée en tête", "comptent seulement au second tour"], c: 0, e: "Les sièges se répartissent sur les seuls suffrages exprimés." },
+    { q: "La représentation proportionnelle à la plus forte moyenne…", a: ["favorise les grandes listes", "favorise les petites listes", "donne tous les sièges à la liste arrivée en tête", "ne tient pas compte du quotient électoral"], c: 0, e: "Le plus fort reste est plus favorable aux petites listes." },
+    { q: "« La souveraineté appartient au peuple » : c'est l'article…", a: ["50 de la Constitution", "1er de la Constitution", "123 de la Constitution", "177 de la Constitution"], c: 0, e: "Le peuple l'exerce par le référendum et par ses représentants élus (article 51)." },
+    { q: "La théorie de la souveraineté nationale conduit à…", a: ["la démocratie représentative et au mandat représentatif", "la démocratie directe et au mandat impératif", "la suppression des élections", "l'électorat-droit de chaque citoyen"], c: 0, e: "La nation, entité abstraite, ne s'exprime que par ses représentants (Sieyès)." },
   );
 })();

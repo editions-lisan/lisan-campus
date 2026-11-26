@@ -10,6 +10,7 @@ const SITE = path.join(__dirname, '../../site');
 const OUT = path.join(SITE, 'livres/droit');
 const WORK = path.join(require('os').tmpdir(), 'lisan-cours'); fs.mkdirSync(WORK, { recursive: true });
 const EXTRA = require('./complements.js');
+const ANNALES = require('../annales/annales.js');
 
 // ---------- matières du site
 const ctx = { window: {}, console }; vm.createContext(ctx);
@@ -37,6 +38,9 @@ const DOCS = [
       ['Travaux dirigés', ['td1', 'td2', 'td3', 'x:proces']],
     ],
     annexes: [['Annexe 1 · Le polycopié du cours (texte intégral)', 'cours-droit-civil-personnes.pdf'], ['Annexe 2 · Les fiches de travaux dirigés (énoncés)', 'td-droit-civil-personnes-2026-2027.pdf']] },
+  { id: 'annales', m: ANNALES, file: 'sujets-examen-corriges-l1.pdf', title: "Sujets d'examen corrigés", sub: 'Droit des personnes · Droit constitutionnel', parts: ANNALES.parts,
+    cn: 'Méthode, sept cas pratiques et trois exercices corrigés, sujets de dissertation avec plans',
+    note: "Ce recueil prépare aux examens de première année : des cas pratiques et des exercices écrits pour Lisân Campus, sur les problèmes de droit les plus souvent posés, avec un corrigé rédigé selon le droit ivoirien en vigueur, et une sélection de sujets de dissertation reliés aux leçons du site à revoir. Il se travaille avec les leçons, les mini-exercices et les évaluations de lisan-campus.pages.dev." },
   { id: 'dm', m: S.M_DM, file: 'cours-droit-musulman.pdf', title: 'Droit musulman', sub: 'La Charia et les sources du droit musulman',
     parts: [
       ['Chapitre 1 · Définitions et compréhension de la Charia', ['charia']],
@@ -160,10 +164,10 @@ function build(d) {
 <script src="file://${path.join(DEPS, 'pagedjs/dist/paged.polyfill.js')}"></script></head><body>
 <section class="cover"><div class="band">${KHATAM}<p class="lvl">Licence 1 · Droit</p><h1 class="ct">${esc(d.title)}</h1><p class="cs">${esc(d.sub)}</p></div>
 <div class="cbot"><p class="cby">Conception, rédaction et direction pédagogique : Éditions Lisân</p><p class="cy">${ANNEE}</p>
-<p class="cn">Cours complet · ${nb} leçons, exercices corrigés et lexique</p>
+<p class="cn">${d.cn ? esc(d.cn) : `Cours complet · ${nb} leçons, exercices corrigés et lexique`}</p>
 <div class="brand"><img src="file://${path.join(SITE, 'logo.png')}" alt=""><div><b>Lisân Campus</b><span>Éditions Lisân</span></div></div></div></section>
 <section class="front"><h2 class="fh">Sommaire</h2><ol class="toc">${tocHTML}</ol>
-<p class="note">Ce document rassemble le cours de la matière tel qu'il est enseigné sur Lisân Campus : chaque leçon, ses encadrés et ses exercices avec leur corrigé. Il se lit en complément des leçons à écouter, des mini-exercices, des cartes de révision et de l'évaluation du parcours, sur lisan-campus.pages.dev.</p></section>
+<p class="note">${d.note ? esc(d.note) : "Ce document rassemble le cours de la matière tel qu'il est enseigné sur Lisân Campus : chaque leçon, ses encadrés et ses exercices avec leur corrigé. Il se lit en complément des leçons à écouter, des mini-exercices, des cartes de révision et de l'évaluation du parcours, sur lisan-campus.pages.dev."}</p></section>
 ${body}</body></html>`;
 }
 
