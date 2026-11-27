@@ -8,6 +8,12 @@
   const cache = { get(k, d) { try { const v = localStorage.getItem('lc.auth.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
                   set(k, v) { try { localStorage.setItem('lc.auth.' + k, JSON.stringify(v)); } catch (e) {} } };
   let fb = null, user = null, profile = cache.get('profile', null), timer = null, pending = true;
+  const lastUser = cache.get('user', null);              // élève de la dernière visite (avant la réponse de Google)
+  // progression : jamais envoyée au compte avant d'avoir été lue sur le serveur (synced = uid lu) ; la progression gardée sur l'appareil
+  // appartient à un compte (lc.auth.owner) : si un autre compte se connecte sur cet appareil, elle est d'abord vidée
+  let synced = null, retryN = 0;
+  const PKEYS = ['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis', 'xpb'];
+  function clearLocal() { PKEYS.forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null); }
   let acces = cache.get('acces', null);               // parcours ouverts par l'administrateur pour cet élève (acces/{uid})
   const me = () => user || (pending ? cache.get('user', null) : null);   // élève connu, même avant la réponse de Google
   const LisanAuth = {
@@ -30,7 +36,18 @@
         alertMsg('La connexion n’a pas abouti. Vérifiez votre connexion internet et réessayez.'); throw e;
       });
     },
-    signOut() { return fb ? fb.auth().signOut() : Promise.resolve(); },
+    async signOut() {
+      if (!fb) return;
+      let ok = false;
+      if (user && synced === user.uid) {                 // dernier envoi de la progression avant de partir
+        clearTimeout(timer); timer = null; dueAt = 0;
+        ok = await Promise.race([doc().set({ progress: progressData() }, { merge: true }).then(() => true, () => false), new Promise(r => setTimeout(() => r(false), 10000))]);
+      }
+      await fb.auth().signOut();
+      // envoi confirmé : la progression est en sécurité dans le compte, l'appareil repart de zéro (elle reviendra à la reconnexion) ;
+      // sinon (hors connexion) elle reste sur l'appareil et sera réunie au compte à la prochaine connexion
+      if (ok) { clearLocal(); cache.set('owner', ''); }
+    },
     enroll(id, info, reponses) {                         // fiche personnelle + inscription à un espace
       if (!user) return Promise.reject(new Error('non connecté'));
       const num = numero(id), date = new Date().toISOString();
@@ -189,13 +206,13 @@
         if (e && /requires-recent-login/.test(e.code || '')) { const p = new fb.auth.GoogleAuthProvider(); await user.reauthenticateWithPopup(p); await user.delete(); }
         else throw e;
       }
-      profile = null; cache.set('profile', null); cache.set('user', null);
-      ['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis', 'xpb'].forEach(k => { state[k] = {}; store.set(k, {}); }); state.last = null; store.set('last', null);
+      profile = null; cache.set('profile', null); cache.set('user', null); cache.set('owner', ''); synced = null;
+      clearLocal();
     },
     // progression : envoyée au compte, regroupée (3 s après une leçon, un exercice, une carte ; au plus une fois par minute pour le
     // temps d'étude), et envoyée aussitôt quand on quitte l'application : peu d'écritures, même avec beaucoup d'élèves en même temps
     onSave(k, v) {
-      if (!user || !['done', 'quiz', 'known', 'words', 'time', 'days', 'rev', 'minis', 'xpb'].includes(k)) return;
+      if (!user || synced !== user.uid || !PKEYS.includes(k)) return;   // pas encore lue sur le serveur : envoyée juste après la lecture
       const due = Date.now() + (k === 'time' || k === 'days' ? 60000 : 3000);
       if (timer && due >= dueAt) return;                 // un envoi est déjà prévu plus tôt : il emportera aussi ce changement
       clearTimeout(timer); dueAt = due; timer = setTimeout(flush, due - Date.now());
@@ -213,7 +230,7 @@
   }
   const doc = () => fb.firestore().collection('users').doc(user.uid);
   let dueAt = 0;
-  function flush() { clearTimeout(timer); timer = null; dueAt = 0; if (user && fb) doc().set({ progress: progressData() }, { merge: true }).catch(() => {}); }
+  function flush() { clearTimeout(timer); timer = null; dueAt = 0; if (user && fb && synced === user.uid) doc().set({ progress: progressData() }, { merge: true }).catch(() => {}); }
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && timer) flush(); });
   window.addEventListener('pagehide', () => { if (timer) flush(); });
   // une écriture sans réponse du serveur au bout de 10 s (hors connexion) reste en file d'attente : on continue
@@ -228,7 +245,12 @@
   // tout ce qui suit l'élève d'un appareil à l'autre (les questions à revoir sont limitées aux 400 plus récentes)
   function progressData() {
     const rev = Object.entries(state.rev || {}).sort((a, b) => (b[1].t || 0) - (a[1].t || 0)).slice(0, 400);
-    return { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time, days: state.days || {}, minis: state.minis || {}, xpb: state.xpb || {}, rev: Object.fromEntries(rev), at: fb.firestore.FieldValue.serverTimestamp() };   // at : heure du dernier envoi (ordre de l'onglet Progression)
+    const all = { done: state.done, quiz: state.quiz, known: state.known, words: state.words, time: state.time, days: state.days, minis: state.minis, xpb: state.xpb, rev: Object.fromEntries(rev) };
+    // une liste vide n'est jamais envoyée : avec « merge », elle remplacerait celle du compte (perte de la progression) ;
+    // les listes non vides sont fusionnées entrée par entrée avec celles du compte
+    const out = {}; Object.entries(all).forEach(([k, v]) => { if (v && typeof v === 'object' && Object.keys(v).length) out[k] = v; });
+    out.at = fb.firestore.FieldValue.serverTimestamp();   // at : heure du dernier envoi (ordre de l'onglet Progression)
+    return out;
   }
   function mergeProgress(remote) {
     if (!remote) return;
@@ -250,6 +272,43 @@
     Object.entries(state.quiz || {}).forEach(([k, v]) => { if (q[k] === undefined || v > q[k]) q[k] = v; });
     state.quiz = q; store.set('quiz', q);
   }
+  // lecture du compte sur le serveur (jamais la copie de l'appareil) : fiche, inscriptions, certificats, avis, puis progression réunie
+  // (compte + appareil) et renvoyée ; en cas d'échec (réseau lent, hors connexion), nouvel essai à 20 s, 1 min, 3 min, puis toutes les 5 min,
+  // et rien n'est envoyé au compte d'ici là
+  async function syncAccount(u) {
+    let snap = null;
+    try { snap = await within(doc().get({ source: 'server' }), 15000); } catch (e) { snap = null; }
+    if (!user || user.uid !== u.uid) return;
+    if (!snap || !snap.data) {
+      try { const c = await doc().get({ source: 'cache' }); if (c && c.exists) readProfile(c.data() || {}); } catch (e) {}   // affichage des inscriptions en attendant
+      const wait = [20000, 60000, 180000][retryN] || 300000; retryN++;
+      setTimeout(() => { if (user && user.uid === u.uid && synced !== u.uid) syncAccount(u); }, wait);
+      return;
+    }
+    retryN = 0;
+    const d = snap.exists ? snap.data() : {};
+    readProfile(d);
+    fb.firestore().collection('acces').doc(u.uid).get().then(s => {   // parcours ouverts par l'administrateur (une lecture)
+      const was = JSON.stringify(acces); acces = s.exists ? { uid: u.uid, parcours: (s.data() || {}).parcours || {} } : null;
+      cache.set('acces', acces); if (JSON.stringify(acces) !== was && typeof route === 'function') route();
+    }).catch(() => {});
+    mergeProgress(d.progress);
+    synced = u.uid; cache.set('owner', u.uid);
+    doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp(),
+      ...(d.createdAt ? {} : { createdAt: fb.firestore.FieldValue.serverTimestamp() }),
+      progress: progressData() }, { merge: true }).catch(() => {});
+    if (typeof route === 'function' && d.progress && document.body.classList.contains('ready')) setTimeout(() => { if (!document.querySelector('#view input:focus, #view textarea:focus')) route(); }, 0);
+  }
+  function readProfile(d) {
+    const sp = {};
+    Object.entries(d.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date) || new Date().toISOString(), reponses: v.reponses || {} }; });
+    const info = d.profile ? Object.assign({}, d.profile) : null; if (info) delete info.updatedAt;
+    const certs = {}; Object.entries(d.certificats || {}).forEach(([k, v]) => { if (v && v.num) certs[k] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() }); });
+    const sugg = {}, avis = {}; Object.entries(d.suggestions || {}).forEach(([k, v]) => {
+      if (v && v.type === 'avis' && v.cle && v.note) avis[v.cle] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() });
+      else if (v && v.texte) sugg[k] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() }); });
+    profile = { spaces: sp, info, certs, sugg, avis }; cache.set('profile', profile);
+  }
   window.LisanAuth = LisanAuth;
   LisanAuth.ready = (async () => {
     await load(BASE + 'firebase-app-compat.js');
@@ -265,35 +324,15 @@
         user = u; pending = false;
         cache.set('user', u ? { uid: u.uid, displayName: u.displayName || '', email: u.email || '', photoURL: u.photoURL || '' } : null);
         if (u) {
+          if (synced && synced !== u.uid) synced = null;
+          const owner = cache.get('owner', '') || (lastUser && lastUser.uid) || '';
+          if (owner && owner !== u.uid) clearLocal();      // progression d'un autre compte sur cet appareil : elle est déjà dans son compte
           // le compte apparaît tout de suite dans l'administration, même si la suite est lente (réseau faible)
           doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp() }, { merge: true }).catch(() => {});
-          try {
-            const snap = await within(doc().get(), 15000);
-            if (!snap || !snap.data) throw new Error('lecture trop lente');
-            const d = snap.exists ? snap.data() : {};
-            const sp = {};
-            Object.entries(d.spaces || {}).forEach(([k, v]) => { if (v && typeof v === 'object' && v.num) sp[k] = { num: v.num, date: iso(v.date) || new Date().toISOString(), reponses: v.reponses || {} }; });
-            const info = d.profile ? Object.assign({}, d.profile) : null; if (info) delete info.updatedAt;
-            const certs = {}; Object.entries(d.certificats || {}).forEach(([k, v]) => { if (v && v.num) certs[k] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() }); });
-            const sugg = {}, avis = {}; Object.entries(d.suggestions || {}).forEach(([k, v]) => {
-              if (v && v.type === 'avis' && v.cle && v.note) avis[v.cle] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() });
-              else if (v && v.texte) sugg[k] = Object.assign({}, v, { date: iso(v.date) || new Date().toISOString() }); });
-            profile = { spaces: sp, info, certs, sugg, avis };
-            // parcours ouverts par l'administrateur (une lecture ; absent pour presque tous les élèves)
-            fb.firestore().collection('acces').doc(u.uid).get().then(s => {
-              const was = JSON.stringify(acces); acces = s.exists ? { uid: u.uid, parcours: (s.data() || {}).parcours || {} } : null;
-              cache.set('acces', acces); if (JSON.stringify(acces) !== was && typeof route === 'function') route();
-            }).catch(() => {});
-            cache.set('profile', profile);
-            mergeProgress(d.progress);
-            await doc().set({ name: u.displayName || '', email: u.email || '', photo: u.photoURL || '', lastLogin: fb.firestore.FieldValue.serverTimestamp(),
-              ...(d.createdAt ? {} : { createdAt: fb.firestore.FieldValue.serverTimestamp() }),
-              progress: progressData() }, { merge: true });
-          } catch (e) {                                  // hors connexion ou réseau lent : on garde les inscriptions en cache, et on réessaie plus tard
-            setTimeout(() => { if (user && user.uid === u.uid) doc().get().then(sn => { const d = sn.data() || {}; mergeProgress(d.progress);
-              doc().set({ ...(d.createdAt ? {} : { createdAt: fb.firestore.FieldValue.serverTimestamp() }), progress: progressData() }, { merge: true }).catch(() => {}); }).catch(() => {}); }, 20000);
-          }
-        } else { profile = null; cache.set('profile', null); acces = null; cache.set('acces', null); }
+          await syncAccount(u);
+        }
+
+        else { profile = null; cache.set('profile', null); acces = null; cache.set('acces', null); synced = null; }
         if (first) { first = false; res(); } else if (typeof route === 'function') route();
       });
     });

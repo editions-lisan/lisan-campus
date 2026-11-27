@@ -1428,8 +1428,8 @@ function viewSettings() {
     ${typeof remindPanel === 'function' ? remindPanel() : ''}
     ${A ? `<section class="panel"><h2>Compte</h2><p>Gérez votre connexion et vos inscriptions dans <a href="#compte">Mon compte</a>.</p></section>` : ''}
     <section class="panel"><h2>Ma progression</h2>
-      <p>Leçons terminées, scores des quiz et cartes sues sont enregistrés sur cet appareil${A ? ' et, si vous êtes connecté, sur votre compte' : ''}.</p>
-      <div class="actions" id="reset-zone"><button type="button" class="btn ghost small" data-reset="ask">Effacer ma progression</button></div>
+      <p>Leçons terminées, scores des quiz et cartes sues sont enregistrés sur cet appareil${A ? ' et, si vous êtes connecté, dans votre compte' : ''}.</p>
+      ${AUTH() && AUTH().user() ? '<p class="meta">Votre progression est enregistrée dans votre compte : vous la retrouvez sur tous vos appareils, et après une déconnexion, dès que vous vous reconnectez.</p>' : '<div class="actions" id="reset-zone"><button type="button" class="btn ghost small" data-reset="ask">Effacer ma progression</button></div>'}
     </section>`;
 }
 function voiceStatus() {
