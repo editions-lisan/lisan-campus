@@ -11,6 +11,7 @@ const OUT = path.join(SITE, 'livres/droit');
 const WORK = path.join(require('os').tmpdir(), 'lisan-cours'); fs.mkdirSync(WORK, { recursive: true });
 const EXTRA = require('./complements.js');
 const ANNALES = require('../annales/annales.js');
+const EXAMENS = require('../annales/examens.js');
 
 // ---------- matières du site
 const ctx = { window: {}, console }; vm.createContext(ctx);
@@ -41,6 +42,9 @@ const DOCS = [
   { id: 'annales', m: ANNALES, file: 'sujets-examen-corriges-l1.pdf', title: "Sujets d'examen corrigés", sub: 'Droit des personnes · Droit constitutionnel', parts: ANNALES.parts,
     cn: 'Méthode, sept cas pratiques et trois exercices corrigés, sujets de dissertation avec plans',
     note: "Ce recueil prépare aux examens de première année : des cas pratiques et des exercices écrits pour Lisân Campus, sur les problèmes de droit les plus souvent posés, avec un corrigé rédigé selon le droit ivoirien en vigueur, et une sélection de sujets de dissertation reliés aux leçons du site à revoir. Il se travaille avec les leçons, les mini-exercices et les évaluations de lisan-campus.pages.dev." },
+  { id: 'examens', m: EXAMENS, file: 'annales-examens-l1-corrigees.pdf', title: 'Annales des examens de Licence 1', sub: 'Vingt sujets classés par matière et leur corrigé général', parts: EXAMENS.parts,
+    cn: 'Quatorze matières · sujets de 2021-2022 à 2024-2025 · notions qui reviennent · corrigé complet',
+    note: "Ces annales réunissent les sujets réellement posés en première année de droit, classés par matière, avec l'analyse des notions qui reviennent et un corrigé général rédigé selon le droit ivoirien en vigueur. Elles se travaillent avec les leçons, les mini-exercices et les évaluations de lisan-campus.pages.dev." },
   { id: 'dm', m: S.M_DM, file: 'cours-droit-musulman.pdf', title: 'Droit musulman', sub: 'La Charia et les sources du droit musulman',
     parts: [
       ['Chapitre 1 · Définitions et compréhension de la Charia', ['charia']],

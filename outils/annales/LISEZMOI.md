@@ -7,3 +7,12 @@ Recueil des Éditions Lisân : `site/livres/droit/sujets-examen-corriges-l1.pdf`
 - Fabrication : `DEPS=/chemin/node_modules node outils/cours/build_cours.js annales`, puis `node outils/cours/versions.js`.
 - Les questions d'entraînement tirées du recueil sont ajoutées aux évaluations du Droit civil et du Droit constitutionnel (bloc « Entraînement aux examens » à la fin de `site/data/droit.js`).
 - À compléter au second semestre : droit de la famille, droit constitutionnel 2 (institutions ivoiriennes), histoire du droit, économie politique.
+
+# Annales des examens de Licence 1 (avec corrigé)
+
+Document des Éditions Lisân : `site/livres/droit/annales-examens-l1-corrigees.pdf` (bibliothèque, rubrique « Exercices »).
+
+- Vingt sujets réellement posés en L1 Droit (2021-2022 à 2024-2025), classés par matière, doublons regroupés : `examens_sujets.js`. Aucun nom d'enseignant ni d'étudiant ; noms d'emprunt dans les cas pratiques ; décisions de justice reproduites ; l'extrait de manuel du sujet 10 est seulement résumé avec sa référence.
+- Corrigé général : `examens_corr_a.js` (sujets 1 à 8), `examens_corr_b.js` (9 à 15), `examens_corr_c.js` (16 à 20), selon les leçons du site et le droit ivoirien en vigueur ; pour chaque arrêt français, un encadré « Et en Côte d'Ivoire ? ».
+- Plan et présentation (mode d'emploi, notions qui reviennent) : `examens.js`.
+- Fabrication : `DEPS=/chemin/node_modules node outils/cours/build_cours.js examens`, puis `node outils/cours/versions.js`.
