@@ -251,13 +251,14 @@ function drawAdmin() {
     <button type="button" class="chip" data-admin-tab="sugg" aria-pressed="${R.tab === 'sugg'}">💡 Suggestions (${suggs.length})</button>
     <button type="button" class="chip" data-admin-tab="msg" aria-pressed="${R.tab === 'msg'}">✉️ Messages (${(R.msgs || []).length})</button></div>`;
   const head = `<span class="eyebrow">Éditions Lisân</span><h1>Administration</h1>
-    ${R.rulesOk ? '' : `<div class="notice bad-n">Les règles Firebase doivent être mises à jour (certificats, sécurité renforcée, parcours ouverts à un élève, livrets du maître, classement de la semaine) : copiez-les et publiez-les dans la console Firebase.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
+    ${R.rulesOk === true ? '' : `<div class="notice bad-n">${R.rulesOk === false ? 'Les règles Firebase doivent être mises à jour (certificats, parcours ouverts à un élève, livrets du maître, classement de la semaine, félicitations et mises à jour envoyées)' : 'Impossible de vérifier les règles Firebase pour le moment (connexion) : par précaution, republiez-les'} : copiez-les et publiez-les dans la console Firebase.</div>${rulesBox(A, { title: 'Mettre à jour les règles', open: true })}`}
     <div class="stats">${stat(list.length, 'comptes créés')}${stat(all.length, 'inscriptions')}${stat(fresh, 'nouvelles (7 jours)')}${stat(noIns, 'comptes sans inscription')}${stat(today, 'connectés aujourd’hui')}${stat(active, 'actifs (7 jours)')}
       ${stat(certs.length, 'certificats délivrés')}${stat(avis.length ? (avis.reduce((a, r) => a + r.x.note, 0) / avis.length).toFixed(1).replace('.', ',') + ' ★' : '—', avis.length + ' avis')}${stat(suggs.length, 'suggestions')}
       </div><p class="adm-spc">${SPACES.map(sp => `<span class="tag">${sp.icon} ${esc(sp.title)} : <b>${count(sp.id)}</b></span>`).join(' ')}</p>${tabs}
     <p class="meta adm-live" id="adm-live" aria-live="polite">${adminLiveLine()}</p>
     <div class="actions"><button type="button" class="btn small" data-admin="xlsx">⬇ Télécharger en Excel</button>${R.tab === 'sugg' ? '<button type="button" class="btn ghost small" data-admin="sugdoc">⬇ Document des suggestions</button>' : ''}${R.tab === 'ins' ? '<button type="button" class="btn ghost small" data-admin="csv">⬇ CSV</button>' : ''}
-      <button type="button" class="btn ghost small" data-admin="reload">↻ Actualiser</button></div>`;
+      <button type="button" class="btn ghost small" data-admin="reload">↻ Actualiser</button></div>
+    ${R.rulesOk === true ? rulesBox(A, { title: '🔐 Règles Firebase : à jour (version v8) — les copier pour les republier' }) : ''}`;
   if (R.tab === 'cert') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${certs.length} certificat${certs.length > 1 ? 's' : ''} délivré${certs.length > 1 ? 's' : ''}.</p><div class="adm-list">${certCards(certs)}</div>`; return; }
   if (R.tab === 'msg') { const ms = R.msgs || [];
     box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${ms.length} message${ms.length > 1 ? 's' : ''} reçu${ms.length > 1 ? 's' : ''} par le formulaire de contact.</p><div class="adm-list">${msgCards(ms)}</div>`; return; }

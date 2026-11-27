@@ -98,7 +98,7 @@
     },
     async certRulesOk() {                                // les règles Firestore autorisent-elles déjà les certificats ?
       try { await fb.firestore().collection('regles').doc('v8').get({ source: 'server' }); return true; }
-      catch (e) { return !/permission/.test((e && (e.code || e.message)) || ''); }
+      catch (e) { return /permission/.test((e && (e.code || e.message)) || '') ? false : null; }   // null : vérification impossible (réseau)
     },
     // classement de la semaine (collection classement/{uid}) : lu par les élèves connectés, écrit par chacun pour sa ligne
     async boardList(sem) {
