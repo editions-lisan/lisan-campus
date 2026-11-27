@@ -237,6 +237,7 @@ function drawAdmin() {
   const noIns = list.filter(u => !Object.keys(u.spaces).length).length;
   const rows = adminFiltered(), certs = adminCerts(), suggs = adminSuggs(), avis = adminAvis();
   const felic = R.felic = felicRows();
+  const majR = R.maj = majRows(), majTodo = majR.filter(r => !r.sent && !r.stop).length;
   const stat = (n, t, c) => `<div class="stat${c ? ' c-' + c : ''}"><b>${n}</b><span>${esc(t)}</span></div>`;
   const active = list.filter(u => activity(u).week > 0).length;
   const today = list.filter(u => u.lastLogin && new Date(u.lastLogin).toDateString() === new Date().toDateString()).length;
@@ -245,6 +246,7 @@ function drawAdmin() {
     <button type="button" class="chip" data-admin-tab="acc" aria-pressed="${R.tab === 'acc'}">👤 Comptes (${list.length})</button>
     <button type="button" class="chip" data-admin-tab="cert" aria-pressed="${R.tab === 'cert'}">🎓 Certificats (${certs.length})</button>
     <button type="button" class="chip" data-admin-tab="felic" aria-pressed="${R.tab === 'felic'}">🎉 Félicitations${felic.filter(r => !r.sent).length ? ` (${felic.filter(r => !r.sent).length} à envoyer)` : ''}</button>
+    <button type="button" class="chip" data-admin-tab="maj" aria-pressed="${R.tab === 'maj'}">📬 Mises à jour${majTodo ? ` (${majTodo} à envoyer)` : ''}</button>
     <button type="button" class="chip" data-admin-tab="avis" aria-pressed="${R.tab === 'avis'}">⭐ Avis (${avis.length})</button>
     <button type="button" class="chip" data-admin-tab="sugg" aria-pressed="${R.tab === 'sugg'}">💡 Suggestions (${suggs.length})</button>
     <button type="button" class="chip" data-admin-tab="msg" aria-pressed="${R.tab === 'msg'}">✉️ Messages (${(R.msgs || []).length})</button></div>`;
@@ -276,6 +278,7 @@ function drawAdmin() {
       <div class="adm-list">${progCards(pr)}</div>`;
     return;
   }
+  if (R.tab === 'maj') { box.innerHTML = `${head}${majPanel(majR)}`; return; }
   if (R.tab === 'felic') { const todo = felic.filter(r => !r.sent).length;
     box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${felic.length} réussite${felic.length > 1 ? 's' : ''} (parcours et espaces), dont ${todo} à féliciter. Le message est prêt et modifiable : envoyez-le sur WhatsApp ou par e-mail. Une fois envoyé, il est grisé pour cette personne et cette réussite seulement, sur tous vos appareils${adminRun.felicOk ? '' : ' (pour l’instant sur cet appareil : republiez les règles Firestore pour l’enregistrer en ligne)'} ; chaque nouvelle réussite reste à féliciter.</p><div class="adm-list">${felicCards(felic)}</div>`; return; }
   if (R.tab === 'avis') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${avis.length} avis donné${avis.length > 1 ? 's' : ''} à la fin d’un parcours ou d’un espace.</p>${avisSummary(avis)}<div class="adm-list">${avisCards(avis)}</div>`; return; }
@@ -392,6 +395,67 @@ function felicAction(b) {
   else felicMark(r, k === 'sent', '');
   setTimeout(drawAdmin, k === 'mail' ? 600 : 0);
 }
+// ---------- mises à jour de Lisân Campus : un message à envoyer à chaque inscrit, par WhatsApp ou par e-mail
+// Tous les inscrits les reçoivent, sauf refus : case décochée dans la fiche (maj = false) ou « STOP » reçu (marque « majstop » posée par l'administrateur).
+// Une mise à jour = un identifiant (MAJ.id) : une fois envoyée à une personne, sa ligne est grisée pour cette mise à jour seulement (felicitations/{uid}, ev « maj:<id> ») ;
+// une nouvelle mise à jour (nouvel identifiant) rend tout le monde de nouveau destinataire.
+const MAJ = { id: '2026-11-27', titre: 'Mise à jour de Lisân Campus', texte: `Lisân Campus a été mis à jour :
+
+• Un accueil personnel : la leçon à reprendre, les objectifs du jour, votre série et vos points d’expérience.
+• Chaque parcours devient un chemin d’étoiles, de la première leçon jusqu’à l’évaluation et au certificat.
+• « Mes progrès » : vos chiffres, votre régularité et seize distinctions à obtenir.
+• Une barre de navigation en bas de l’écran : Accueil, Apprendre, Réviser, Bibliothèque, Progrès.
+• Le classement de la semaine (facultatif) et un rappel quotidien à l’heure de votre choix.
+• En droit : des sujets d’examen corrigés, la Charte des Nations Unies et le Statut de la Cour internationale de Justice.
+• Le mode d’emploi en vidéo, refait pour tout montrer.
+
+Ouvrez le site : https://lisan-campus.pages.dev
+Si l’application est installée, touchez le logo en haut de l’écran pour recevoir la dernière version.` };
+const MAJ_DRAFT = 'lc.maj.draft';
+const majDraft = () => { try { const d = JSON.parse(localStorage.getItem(MAJ_DRAFT) || 'null'); if (d && d.id === MAJ.id) return d.t; } catch (e) {} return MAJ.texte; };
+function majRows() {
+  const sent = felicSent(), ev = 'maj:' + MAJ.id;
+  return (adminRun.list || []).filter(u => u.info && (waLink(u.info) || u.email) && Object.keys(u.spaces || {}).length).map(u => {
+    const x = sent[u.uid + '|' + ev], st = sent[u.uid + '|majstop'];
+    return { k: u.uid + '|' + ev, ev, u, sent: x ? x.d || 1 : 0, via: x ? x.via : '', stop: u.info.maj === false ? 'fiche' : st ? 'stop' : '' };
+  }).sort((a, b) => (!!a.stop - !!b.stop) || (!!a.sent - !!b.sent) || who(a.u).localeCompare(who(b.u), 'fr'));
+}
+const majText = (r, t) => `Bonjour ${civ(r.u.info) === 'Mme' ? 'Madame' : 'Monsieur'} ${prenomFmt((r.u.info || {}).prenom || r.u.name || '')},\n\n${t}\n\nLes Éditions Lisân\n\nPour ne plus recevoir ces messages, répondez « STOP ».`;
+function majPanel(rows) {
+  const ok = rows.filter(r => !r.stop), todo = ok.filter(r => !r.sent), done = ok.filter(r => r.sent), off = rows.filter(r => r.stop);
+  const mails = todo.filter(r => r.u.email).map(r => r.u.email);
+  const card = (r) => { const n = rows.indexOf(r), wa = waLink(r.u.info), dis = r.sent || r.stop ? ' disabled aria-disabled="true"' : '';
+    return `<article class="adm-card${r.sent || r.stop ? ' felic-sent' : ''}"><div class="adm-top"><b>${esc(who(r.u))}</b><span class="tag">${Object.keys(r.u.spaces).map(id => (space(id) || {}).icon || '').join(' ')}</span></div>
+      <small>${esc([telFr((r.u.info || {}).ind, (r.u.info || {}).tel), r.u.email].filter(Boolean).join(' · '))}</small>
+      ${r.sent ? `<p class="felic-done">✓ Mise à jour envoyée le ${dateFr(r.sent)}${r.via ? ' (' + esc(r.via) + ')' : ''}</p>` : ''}
+      ${r.stop ? `<p class="meta">${r.stop === 'fiche' ? 'A refusé les mises à jour dans sa fiche.' : 'A répondu « STOP » : ne plus lui envoyer de mises à jour.'}</p>` : ''}
+      <div class="actions">${wa ? `<button type="button" class="btn small" data-maj="wa" data-n="${n}"${dis}>Envoyer sur WhatsApp</button>` : ''}${r.u.email ? `<button type="button" class="btn ${wa ? 'ghost ' : ''}small" data-maj="mail" data-n="${n}"${dis}>Envoyer par e-mail</button>` : ''}
+        ${r.stop === 'stop' ? `<button type="button" class="linkbtn small-l" data-maj="unstop" data-n="${n}">Reprendre les envois</button>` : r.stop ? '' : r.sent ? `<button type="button" class="linkbtn small-l" data-maj="unsent" data-n="${n}">Le message n’est pas parti : le rétablir</button>`
+          : `<button type="button" class="linkbtn small-l" data-maj="sent" data-n="${n}">Déjà envoyé autrement</button><button type="button" class="linkbtn small-l" data-maj="stop" data-n="${n}">A répondu « STOP »</button>`}</div></article>`; };
+  return `<p class="meta" id="admin-msg" aria-live="polite">Mise à jour du ${dateFr(MAJ.id)} : ${ok.length} destinataire${ok.length > 1 ? 's' : ''} (tous les inscrits joignables, sauf refus), dont ${todo.length} à qui l’envoyer. Chaque envoi est grisé pour cette personne et cette mise à jour seulement ; une prochaine mise à jour rendra tout le monde de nouveau destinataire.</p>
+    <details class="adm-sp" open><summary>Le message (modifiable ; « Bonjour Madame / Monsieur … » et la ligne « STOP » sont ajoutés pour chaque personne)</summary>
+      <textarea class="felic-t" id="maj-t" rows="16" aria-label="Message de mise à jour">${esc(majDraft())}</textarea>
+      <div class="actions"><button type="button" class="btn ghost small" data-maj="reset">Revenir au message proposé</button>
+      ${mails.length ? `<button type="button" class="btn ghost small" data-maj="bcc">Copier les ${mails.length} adresses e-mail (pour un envoi groupé en copie cachée)</button>` : ''}</div></details>
+    <div class="adm-list">${todo.length ? todo.map(card).join('') : '<p class="meta">La mise à jour a été envoyée à tous les destinataires.</p>'}
+      ${done.length ? `<details class="felic-old"><summary>Déjà envoyée (${done.length})</summary>${done.map(card).join('')}</details>` : ''}
+      ${off.length ? `<details class="felic-old"><summary>Ne reçoivent pas les mises à jour (${off.length})</summary>${off.map(card).join('')}</details>` : ''}</div>`;
+}
+function majAction(b) {
+  const k = b.dataset.maj, ta = document.getElementById('maj-t');
+  if (k === 'reset') { try { localStorage.removeItem(MAJ_DRAFT); } catch (e) {} if (ta) ta.value = MAJ.texte; return; }
+  if (k === 'bcc') { const rows = (adminRun.maj || []).filter(r => !r.sent && !r.stop && r.u.email), list = rows.map(r => r.u.email).join(', ');
+    try { navigator.clipboard.writeText(list).then(() => { b.textContent = 'Adresses copiées ✓'; }); } catch (e) {} return; }
+  const r = (adminRun.maj || [])[+b.dataset.n]; if (!r) return;
+  if ((r.sent || r.stop) && !['unsent', 'unstop'].includes(k)) return;
+  const txt = majText(r, ta ? ta.value : majDraft());
+  if (k === 'wa') { window.open(waLink(r.u.info) + '?text=' + encodeURIComponent(txt), '_blank', 'noopener'); felicMark(r, true, FELIC_VIA.wa); }
+  else if (k === 'mail') { location.href = `mailto:${r.u.email}?subject=${encodeURIComponent(MAJ.titre)}&body=${encodeURIComponent(txt)}`; felicMark(r, true, FELIC_VIA.mail); }
+  else if (k === 'sent' || k === 'unsent') felicMark(r, k === 'sent', '');
+  else if (k === 'stop' || k === 'unstop') felicMark({ k: r.u.uid + '|majstop', ev: 'majstop', u: r.u }, k === 'stop', '');
+  setTimeout(drawAdmin, k === 'mail' ? 600 : 0);
+}
+document.addEventListener('input', e => { if (e.target.id === 'maj-t') { try { localStorage.setItem(MAJ_DRAFT, JSON.stringify({ id: MAJ.id, t: e.target.value })); } catch (x) {} } });
 function adminSuggs() { const out = []; (adminRun.list || []).forEach(u => (u.sugg || []).forEach(x => out.push({ u, x }))); return out.sort((a, b) => String(b.x.date).localeCompare(String(a.x.date))); }
 const who = u => { const i = u.info || {}; return `${civ(i)} ${String(i.nom || '').toUpperCase()} ${prenomFmt(i.prenom || u.name)}`.trim(); };
 function certCards(rows) {
@@ -496,11 +560,11 @@ function adminCards(rows) {
 
 // ---------- export : Excel (feuille « Tous » + une feuille par espace) et CSV
 const COLS = [['N° d’inscription', 14], ['Espace', 18], ['Date d’inscription', 14], ['Civilité', 9], ['Nom', 16], ['Prénoms', 18], ['Date de naissance', 14], ['Âge', 6],
-  ['Téléphone', 16], ['Lien WhatsApp', 30], ['E-mail', 28], ['Pays', 14], ['Ville', 14], ['Situation', 30], ['Détails du parcours', 44], ['Connu par', 20], ['Nouveautés', 10], ['Parent ou tuteur', 20], ['Tél. parent', 14]];
+  ['Téléphone', 16], ['Lien WhatsApp', 30], ['E-mail', 28], ['Pays', 14], ['Ville', 14], ['Situation', 30], ['Détails du parcours', 44], ['Connu par', 20], ['Mises à jour', 12], ['Parent ou tuteur', 20], ['Tél. parent', 14]];
 function baseLine({ u, id, en }) {
   const i = u.info || {}, a = ageOf(i.naissance), d = en.date ? new Date(en.date) : null;
   return [en.num, space(id).title, d ? d.toLocaleDateString('fr-FR') : '', i.civilite || '', String(i.nom || '').toUpperCase(), prenomFmt(i.prenom || u.name), i.naissance ? new Date(i.naissance + 'T00:00:00').toLocaleDateString('fr-FR') : '',
-    a === null ? '' : a, telFr(i.ind, i.tel), waLink(i), u.email, paysOf(i) || '', i.ville || '', STATUT_OLD[i.statut] || i.statut || '', parcoursText(i), i.source || '', i.news ? 'Oui' : 'Non',
+    a === null ? '' : a, telFr(i.ind, i.tel), waLink(i), u.email, paysOf(i) || '', i.ville || '', STATUT_OLD[i.statut] || i.statut || '', parcoursText(i), i.source || '', i.maj === false ? 'Non' : 'Oui',
     i.tuteur ? i.tuteur.nom : '', i.tuteur ? i.tuteur.tel : ''];
 }
 const answersText = (id, rep) => answerRows(id, rep).map(([k, v]) => `${k} : ${v}`).join(' | ');
@@ -579,6 +643,7 @@ document.addEventListener('click', e => {
   if (ry) { ry.disabled = true; AUTH().adminRevoke(ry.dataset.revokeYes).then(loadAdmin, loadAdmin); return; }
   const ac_ = e.target.closest('[data-acces-on],[data-acces-off]');
   if (ac_) { accesAction(ac_); return; }
+  const mj_ = e.target.closest('[data-maj]'); if (mj_) { majAction(mj_); return; }
   const fb_ = e.target.closest('[data-felic]');
   if (fb_) { felicAction(fb_); return; }
   const tb = e.target.closest('[data-admin-tab]');

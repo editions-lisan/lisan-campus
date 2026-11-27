@@ -103,7 +103,7 @@ function defaultInfo() {
   const A = AUTH(), u = A && A.user(), saved = A && A.info && A.info();
   if (saved) { const i = Object.assign({}, saved); if (STATUT_OLD[i.statut]) { if (i.statut === 'Parent') i.parcours = Object.assign({ precision: 'Parent' }, i.parcours); i.statut = STATUT_OLD[i.statut]; } return i; }
   const n = splitName(u && u.displayName);
-  return { civilite: '', prenom: n.prenom, nom: n.nom, naissance: '', ind: '+225', tel: '', pays: 'Côte d’Ivoire', paysAutre: '', ville: '', statut: '', parcours: {}, source: '', news: false, tuteur: null };
+  return { civilite: '', prenom: n.prenom, nom: n.nom, naissance: '', ind: '+225', tel: '', pays: 'Côte d’Ivoire', paysAutre: '', ville: '', statut: '', parcours: {}, source: '', news: false, maj: true, tuteur: null };
 }
 
 // ---------- champs
@@ -152,7 +152,7 @@ function infoFieldsets(i, opts = {}) {
     </fieldset>
     <fieldset class="group"><legend>Pour mieux vous connaître</legend>
       ${fieldSelect('source', 'Comment avez-vous connu Lisân Campus ?', SOURCES, i.source)}
-      ${opts.news !== false ? fieldCheck('news', 'Je souhaite être informé(e) des nouveautés de Lisân Campus : nouveaux cours, nouveaux livres, nouvelles fonctions du site (ce ne sont pas des publicités).', i.news, false) : ''}
+      ${opts.news !== false ? fieldCheck('maj', 'Recevoir les mises à jour de Lisân Campus par WhatsApp ou par e-mail : cours, livres et fonctions du site (jamais de publicité). Vous pouvez décocher cette case à tout moment.', i.maj !== false, false) : ''}
     </fieldset>`;
 }
 function bindInfoFields(f) {
@@ -171,12 +171,16 @@ function bindCond(f) {
     const parentHidden = c.parentElement && c.parentElement.closest('.cond[hidden]'); c.hidden = !!parentHidden || !vals.includes(val(c.dataset.dep)); });
   f.addEventListener('change', sync); sync();
 }
+const prevInfo = () => { const A = AUTH(); return (A && A.info && A.info()) || {}; };
+const majPrev = () => prevInfo().maj !== false;
 function readInfo(f) {
   const g = k => (f.elements[k] && f.elements[k].value || '').trim();
   const minor = (ageOf(g('naissance')) ?? 99) < 18;
   return { civilite: (f.querySelector('[name=civilite]:checked') || {}).value || '', prenom: prenomFmt(g('prenom')), nom: g('nom').replace(/\s+/g, ' ').toUpperCase(),
     naissance: g('naissance'), ind: g('ind'), tel: g('tel').replace(/[^\d]/g, ''), pays: g('pays'), paysAutre: g('pays') === 'Autre pays' ? g('paysAutre') : '', ville: g('ville'),
-    statut: (f.querySelector('[name=statut]:checked') || {}).value || '', parcours: readParcours(f), source: g('source'), news: !!(f.elements.news && f.elements.news.checked), newsAsk: new Date().toISOString().slice(0, 10),   // question posée dans sa forme claire
+    statut: (f.querySelector('[name=statut]:checked') || {}).value || '', parcours: readParcours(f), source: g('source'),
+    // mises à jour du site : envoyées à tous les inscrits, sauf refus (case décochée : maj = false) ; l'ancienne réponse « nouveautés » (news) est gardée telle quelle
+    maj: f.elements.maj ? !!f.elements.maj.checked : majPrev(), majVu: new Date().toISOString().slice(0, 10), news: !!(prevInfo().news), newsAsk: prevInfo().newsAsk || '',
     tuteur: minor ? { nom: g('tNom'), tel: g('tTel').replace(/[^\d+]/g, ''), accord: !!f.elements.tAccord.checked } : null };
 }
 // toutes les clés sont écrites (vides si la question ne concerne pas la situation choisie) : une ancienne réponse ne reste jamais dans la fiche
@@ -218,7 +222,7 @@ function infoRows(i) {
   Object.entries(i.parcours || {}).forEach(([k, v]) => { if (v && PARCOURS_LABEL[k]) rows.push([PARCOURS_LABEL[k], v]); });
   if (i.source) rows.push(['Connu par', i.source]);
   if (i.tuteur) rows.push(['Parent ou tuteur', `${i.tuteur.nom} · ${telFr('', i.tuteur.tel)}${i.tuteur.accord ? ' · accord donné' : ''}`]);
-  rows.push(['Recevoir les nouveautés', i.news ? 'Oui' : 'Non']);
+  rows.push(['Recevoir les mises à jour', i.maj === false ? 'Non' : 'Oui']);
   return rows;
 }
 const dl = rows => `<dl class="recap">${rows.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v || '—')}</dd></div>`).join('')}</dl>`;
@@ -297,7 +301,7 @@ function drawEnroll() {
     ${done ? `<div class="notice ok big-ok"><b>✓ Bienvenue, ${esc(prenomFmt(info.prenom).split(' ')[0])} !</b> Votre inscription à l’espace « ${esc(sp.title)} » est enregistrée. Toutes les leçons de cet espace sont maintenant ouvertes.</div>` : ''}
     <section class="panel fiche"><div class="fiche-head"><img src="logo.png" alt="" width="44" height="44"><div><b>Lisân Campus · Éditions Lisân</b><small>Fiche d’inscription</small></div></div>
       ${dl([['Numéro d’inscription', en.num || R.num], ['Espace', sp.title], ['Date d’inscription', dateFr(en.date || R.date || new Date().toISOString())],
-        ['Adresse e-mail', A.user().email], ...infoRows(info).filter(r => r[0] !== 'Recevoir les nouveautés'), ...answerRows(R.id, en.reponses || R.rep)])}
+        ['Adresse e-mail', A.user().email], ...infoRows(info).filter(r => r[0] !== 'Recevoir les mises à jour'), ...answerRows(R.id, en.reponses || R.rep)])}
       <p class="meta">Conservez votre numéro d’inscription : il vous sera demandé si vous nous écrivez au sujet de votre inscription.</p></section>
     <div class="actions noprint">${firstSub ? `<a class="btn" href="#m-${firstSub.id}">${done ? 'Commencer' : 'Continuer'} mes leçons</a>` : ''}<a class="btn ghost" href="#espace-${sp.id}">Voir l’espace</a>
       <button type="button" class="btn ghost" data-print="1">Imprimer ma fiche</button><a class="btn ghost" href="#compte">Mon compte</a></div>`;

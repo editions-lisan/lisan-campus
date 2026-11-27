@@ -729,22 +729,22 @@ const nf = n => n.toLocaleString('fr-FR');
 // découpe un titre en mots animés un à un (la virgule reste collée au mot précédent)
 const words = (t, i0) => t.split(' ').filter(Boolean).map((w, k) => `<span class="wd" style="--i:${i0 + k}">${esc(w)}</span>`).join(' ');
 // tableau de bord de l'accueil : voir campus.js (campusTop, objectifs du jour, parcours)
-// la question « recevoir les nouveautés » a pu être prise pour de la publicité : on la repose une fois, clairement,
-// à l'élève connecté qui avait répondu non (réponse gardée dans sa fiche, newsAsk)
+// mises à jour de Lisân Campus (cours, livres, fonctions du site) : envoyées par WhatsApp ou par e-mail à tous les inscrits ;
+// l'élève connecté en est informé une fois sur l'accueil et peut les refuser (maj = false), ici ou dans « Mes informations »
 function newsAsk() {
   const A = AUTH(), i = A && A.user() && A.info && A.info();
-  if (!i || i.news || i.newsAsk) return '';
-  return `<section class="notice news-ask" id="news-ask"><b>📬 Voulez-vous être informé(e) des nouveautés de Lisân Campus ?</b>
-    <p>Nouveaux cours, nouveaux livres, nouvelles fonctions du site, par WhatsApp ou par e-mail. Ce ne sont pas des publicités, et vous pouvez changer d’avis à tout moment dans « Mes informations ».</p>
-    <div class="actions"><button type="button" class="btn small" data-news="1">Oui, me tenir informé(e)</button><button type="button" class="btn ghost small" data-news="0">Non merci</button></div></section>`;
+  if (!i || i.majVu || i.maj === false) return '';
+  return `<section class="notice news-ask" id="news-ask"><b>📬 Les mises à jour de Lisân Campus</b>
+    <p>Nous vous envoyons les mises à jour de Lisân Campus par WhatsApp ou par e-mail : cours, livres et fonctions du site. Jamais de publicité. Vous pouvez les refuser ici ou à tout moment dans « Mes informations ».</p>
+    <div class="actions"><button type="button" class="btn small" data-news="1">D’accord</button><button type="button" class="btn ghost small" data-news="0">Je ne souhaite pas les recevoir</button></div></section>`;
 }
 document.addEventListener('click', e => {
   const b = e.target.closest('[data-news]'); if (!b) return;
   const A = AUTH(), i = A && A.info && A.info(); if (!i) return;
   const yes = b.dataset.news === '1', box = document.getElementById('news-ask');
   b.disabled = true;
-  A.saveInfo(Object.assign({}, i, { news: yes, newsAsk: new Date().toISOString().slice(0, 10) })).then(() => {
-    if (box) box.innerHTML = `<b>${yes ? '✅ C’est noté : vous serez informé(e) des nouveautés.' : 'C’est noté.'}</b>`;
+  A.saveInfo(Object.assign({}, i, { maj: yes, majVu: new Date().toISOString().slice(0, 10) })).then(() => {
+    if (box) box.innerHTML = `<b>${yes ? '✅ C’est noté : vous recevrez les mises à jour de Lisân Campus.' : 'C’est noté : vous ne recevrez pas les mises à jour. Vous pouvez changer d’avis dans « Mes informations ».'}</b>`;
   }, () => { b.disabled = false; });
 });
 // ornements : l'étoile à huit branches (khatam) des Éditions Lisân
@@ -1493,7 +1493,7 @@ const PAGES = {
       '**Si vous donnez votre avis** à la fin d’un parcours ou d’un espace : votre note (de 1 à 5 étoiles), vos impressions et vos suggestions d’amélioration, enregistrées avec votre fiche. Elles servent à améliorer les cours ; la note n’a aucune incidence sur le certificat.',
       '**Qui y a accès** : seuls les Éditions Lisân, administrateur du site, consultent les comptes, les fiches d’inscription et la progression enregistrée dans les comptes (leçons terminées, résultats aux évaluations, temps d’étude), pour gérer les inscriptions, suivre et encourager les élèves et les contacter au sujet de leurs cours.',
       '**Si vous nous écrivez** par le formulaire de contact : votre nom, votre adresse e-mail et votre message, uniquement pour vous répondre.'] },
-    { p: 'Ces données servent à **gérer vos inscriptions**, à **adapter les cours** à nos élèves et à **vous contacter au sujet de vos cours**. Vous ne recevez nos nouveautés que si vous l’avez demandé dans votre fiche. Vos données ne sont **ni vendues, ni cédées**.' },
+    { p: 'Ces données servent à **gérer vos inscriptions**, à **adapter les cours** à nos élèves et à **vous contacter au sujet de vos cours**. Nous vous envoyons les **mises à jour de Lisân Campus** (cours, livres, fonctions du site, jamais de publicité) par WhatsApp ou par e-mail ; vous pouvez les refuser à tout moment en décochant la case dans « Mes informations » ou en répondant « STOP » à un message. Vos données ne sont **ni vendues, ni cédées**.' },
     { p: 'Lisân Campus n’utilise **ni publicité, ni cookies de suivi, ni outil de mesure d’audience**.' },
     { h: '3. Les prestataires' },
     { ul: ['**Cloudflare** (hébergement du site).',
