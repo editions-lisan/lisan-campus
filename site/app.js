@@ -802,7 +802,7 @@ function inAppNotice(el) {
     try { navigator.clipboard.writeText(u).then(() => { c.textContent = 'Adresse copiée : collez-la dans Chrome ou Safari'; }); } catch (e) { c.textContent = u; } };
 }
 // ---------- mode d'emploi en vidéo (format téléphone, outils/video/guide) : accueil et page #guide ; lecture seulement au toucher
-const GUIDE_DUR = '1 min 50';                            // durée de media/guide-720.mp4 (à changer quand la vidéo est refaite)
+const GUIDE_DUR = '1 min 59';                            // durée de media/guide-720.mp4 (à changer quand la vidéo est refaite)
 const GUIDE_STEPS = ['Ouvrez lisan-campus.pages.dev sur téléphone ou sur ordinateur (sur téléphone, ajoutez-le à l’écran d’accueil)', 'Choisissez votre espace', 'Essayez la première leçon, en accès libre',
   'Connectez-vous avec votre compte Google', 'Remplissez votre fiche d’inscription', 'Recevez votre numéro d’inscription', 'Lisez ou écoutez chaque leçon',
   'Validez la leçon avec le mini-exercice', 'Révisez avec les cartes', 'Passez l’évaluation, donnez votre avis et obtenez votre certificat', 'Suivez l’actualité juridique, expliquée pas à pas', 'Suivez votre campus : objectifs du jour, série, XP, progrès et distinctions ; comparez-vous chaque semaine et programmez un rappel', 'Naviguez avec la barre du bas (Accueil, Apprendre, Réviser, Bibliothèque, Progrès) ; tout le reste est dans le menu'];
