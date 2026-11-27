@@ -1,13 +1,13 @@
 // produit par voix.py à partir de scenes.json et captures.json : ne pas modifier à la main
 window.STEPS = 13;
-window.T = 110.215;
+window.T = 119.096;
 window.SCENES = [
  {
   "kind": "intro",
   "caption": "Lisân Campus, le mode d’emploi : votre compte, votre inscription, vos leçons et votre certificat.",
   "t0": 0.0,
-  "d": 8.082,
-  "speech": 6.682
+  "d": 8.394,
+  "speech": 6.994
  },
  {
   "step": 1,
@@ -22,9 +22,9 @@ window.SCENES = [
    }
   ],
   "extra": "desktop",
-  "t0": 8.082,
-  "d": 13.082,
-  "speech": 12.282
+  "t0": 8.394,
+  "d": 12.816,
+  "speech": 12.016
  },
  {
   "step": 2,
@@ -33,8 +33,8 @@ window.SCENES = [
   "shots": [
    {
     "img": "home",
-    "y0": 1575,
-    "y1": 1955,
+    "y0": 3682,
+    "y1": 4062,
     "at": 0
    },
    {
@@ -49,9 +49,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 21.164,
-  "d": 6.675,
-  "speech": 5.875
+  "t0": 21.21,
+  "d": 6.914,
+  "speech": 6.114
  },
  {
   "step": 3,
@@ -70,9 +70,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 27.84,
-  "d": 5.044,
-  "speech": 4.244
+  "t0": 28.124,
+  "d": 4.856,
+  "speech": 4.056
  },
  {
   "step": 4,
@@ -91,9 +91,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 32.884,
-  "d": 6.163,
-  "speech": 5.363
+  "t0": 32.981,
+  "d": 6.041,
+  "speech": 5.241
  },
  {
   "step": 5,
@@ -118,9 +118,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 39.047,
-  "d": 6.029,
-  "speech": 5.229
+  "t0": 39.022,
+  "d": 6.341,
+  "speech": 5.541
  },
  {
   "step": 6,
@@ -134,9 +134,9 @@ window.SCENES = [
     "at": 0
    }
   ],
-  "t0": 45.076,
-  "d": 5.617,
-  "speech": 4.817
+  "t0": 45.363,
+  "d": 5.818,
+  "speech": 5.018
  },
  {
   "step": 7,
@@ -155,9 +155,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 50.693,
-  "d": 6.303,
-  "speech": 5.503
+  "t0": 51.181,
+  "d": 6.346,
+  "speech": 5.546
  },
  {
   "step": 8,
@@ -167,13 +167,13 @@ window.SCENES = [
    {
     "img": "mini",
     "y0": 4626,
-    "y1": 5504,
+    "y1": 5509,
     "at": 0
    }
   ],
-  "t0": 56.996,
-  "d": 6.986,
-  "speech": 6.186
+  "t0": 57.526,
+  "d": 6.913,
+  "speech": 6.113
  },
  {
   "step": 9,
@@ -192,9 +192,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 63.981,
-  "d": 5.159,
-  "speech": 4.359
+  "t0": 64.439,
+  "d": 5.148,
+  "speech": 4.348
  },
  {
   "step": 10,
@@ -224,9 +224,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 69.141,
-  "d": 8.328,
-  "speech": 7.528
+  "t0": 69.587,
+  "d": 8.712,
+  "speech": 7.912
  },
  {
   "step": 10,
@@ -240,9 +240,9 @@ window.SCENES = [
     "at": 0
    }
   ],
-  "t0": 77.468,
-  "d": 5.386,
-  "speech": 4.586
+  "t0": 78.299,
+  "d": 5.235,
+  "speech": 4.435
  },
  {
   "step": 11,
@@ -262,58 +262,76 @@ window.SCENES = [
     "at": 0.45
    }
   ],
-  "t0": 82.854,
-  "d": 6.699,
-  "speech": 5.899
+  "t0": 83.534,
+  "d": 6.778,
+  "speech": 5.978
  },
  {
   "step": 12,
-  "title": "Classement et rappels",
-  "caption": "Gagnez des XP en étudiant, comparez-vous aux autres élèves chaque semaine et programmez un rappel quotidien.",
+  "title": "Votre campus et vos progrès",
+  "caption": "Votre campus : objectifs du jour, série et XP, puis vos progrès et vos distinctions. Comparez-vous chaque semaine et programmez un rappel.",
   "shots": [
+   {
+    "img": "campus",
+    "y0": 0,
+    "y1": 0,
+    "at": 0
+   },
+   {
+    "img": "progres",
+    "y0": 227,
+    "y1": 2123,
+    "at": 0.25
+   },
    {
     "img": "classement",
     "y0": 0,
     "y1": 523,
-    "at": 0
+    "at": 0.55
    },
    {
     "img": "rappels",
     "y0": 961,
     "y1": 991,
-    "at": 0.6,
+    "at": 0.78,
     "tap": [
      195,
      1344,
-     0.82
+     0.92
     ]
    }
   ],
-  "t0": 89.553,
-  "d": 9.616,
-  "speech": 8.816
+  "t0": 90.312,
+  "d": 14.076,
+  "speech": 13.276
  },
  {
   "step": 13,
-  "title": "Le menu",
-  "caption": "Dans le menu : les espaces, la bibliothèque, vos révisions, le classement, la recherche et ce mode d’emploi.",
+  "title": "La navigation",
+  "caption": "En bas de l’écran : Accueil, Apprendre, Réviser, Bibliothèque et Progrès. Tout le reste est dans le menu.",
   "shots": [
+   {
+    "img": "apprendre",
+    "y0": 0,
+    "y1": 0,
+    "at": 0
+   },
    {
     "img": "menu",
     "y0": 0,
     "y1": 0,
-    "at": 0
+    "at": 0.62
    }
   ],
-  "t0": 99.169,
-  "d": 6.909,
-  "speech": 6.109
+  "t0": 104.388,
+  "d": 10.56,
+  "speech": 9.76
  },
  {
   "kind": "outro",
   "caption": "lisan-campus.pages.dev · Bonne étude !",
-  "t0": 106.079,
-  "d": 4.136,
-  "speech": 2.136
+  "t0": 114.948,
+  "d": 4.148,
+  "speech": 2.148
  }
 ];

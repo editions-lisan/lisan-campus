@@ -42,9 +42,10 @@
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#accueil" data-home aria-label="Lisân Campus — accueil"><img class="brand-logo" src="logo.png" alt="Logo des Éditions Lisân" width="46" height="46"><span class="brand-t"><small>Éditions Lisân</small><b>Lisân <span>Campus</span></b></span></a>
-    <nav class="quick" aria-label="Accès rapide"><a href="#accueil">Accueil</a><a href="#recherche">Rechercher</a><a href="#revisions">Révisions</a><a href="#bibliotheque">Bibliothèque</a><a href="#verifier">Certificats</a></nav>
+    <nav class="quick" aria-label="Accès rapide"><a href="#accueil">Accueil</a><a href="#apprendre">Apprendre</a><a href="#revisions">Réviser</a><a href="#bibliotheque">Bibliothèque</a><a href="#progression">Progrès</a></nav>
     <div class="tools">
       <button type="button" class="pill" id="install-btn" data-install="1" hidden>Installer</button>
+      <a class="icon-btn" href="#recherche" aria-label="Rechercher dans les leçons"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg></a>
       <button type="button" class="menu-btn" id="menu-btn" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="drawer">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg><span>Menu</span></button>
     </div>
@@ -55,6 +56,7 @@
 <aside class="drawer" id="drawer" hidden></aside>
 <div class="wrap install-help" id="ios-help" hidden><div class="notice"></div></div>
 <main><div class="wrap" id="view"><div class="boot-wait" role="status"><i aria-hidden="true"></i><span>Chargement…</span></div></div></main>
+<nav class="tabbar" id="tabbar" aria-label="Navigation principale"></nav>
 <button type="button" class="totop" id="totop" aria-label="Revenir en haut de la page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 14l6-6 6 6"/></svg></button>
 <footer class="site"><div class="wrap">
   <div class="ft-grid">
@@ -92,6 +94,7 @@
 <script src="lecteur.js"></script>
 <script src="data/audio.js"></script>
 <script src="classement.js"></script>
+<script src="campus.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

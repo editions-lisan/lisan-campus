@@ -87,7 +87,7 @@ function revAdd(q, src) {
 const revDue = () => Object.entries(state.rev).filter(([, r]) => !r.ok && r.due <= dayKey());
 const revOpen = () => Object.values(state.rev).filter(r => !r.ok);
 function revAnswer(id, ok) {
-  const r = state.rev[id]; if (!r || r.ok) return;
+  const r = state.rev[id]; if (!r || r.ok) return; questAdd('rev');
   if (ok) { xpAdd(2); r.box++; if (r.box > REV_GAPS.length) state.rev[id] = { ok: 1, t: Date.now() }; else { const d = new Date(); d.setDate(d.getDate() + REV_GAPS[r.box - 1]); r.due = dayKey(d); r.t = Date.now(); } }
   else { r.box = 0; r.due = dayKey(); r.t = Date.now(); }
   save('rev');
@@ -728,7 +728,7 @@ const BOOKS = [['je-lis-l-arabe', 'Je lis l’arabe !', 'Niveau 0 · les lettres
 const nf = n => n.toLocaleString('fr-FR');
 // découpe un titre en mots animés un à un (la virgule reste collée au mot précédent)
 const words = (t, i0) => t.split(' ').filter(Boolean).map((w, k) => `<span class="wd" style="--i:${i0 + k}">${esc(w)}</span>`).join(' ');
-// tableau de bord de l'accueil : série de jours, objectif du jour, révisions à faire
+// tableau de bord de l'accueil : voir campus.js (campusTop, objectifs du jour, parcours)
 // la question « recevoir les nouveautés » a pu être prise pour de la publicité : on la repose une fois, clairement,
 // à l'élève connecté qui avait répondu non (réponse gardée dans sa fiche, newsAsk)
 function newsAsk() {
@@ -747,55 +747,46 @@ document.addEventListener('click', e => {
     if (box) box.innerHTML = `<b>${yes ? '✅ C’est noté : vous serez informé(e) des nouveautés.' : 'C’est noté.'}</b>`;
   }, () => { b.disabled = false; });
 });
-function homeDash() {
-  const st = streak(), t = state.days[dayKey()] || 0, due = revDue().length, pct = Math.min(100, Math.round(t / DAY_GOAL * 100));
-  return `<section class="dash" aria-label="Mon tableau de bord">
-    <div class="dash-c"><span class="dash-i" aria-hidden="true">🔥</span><div><b>${st} jour${st > 1 ? 's' : ''}</b><small>${st ? 'd’étude d’affilée' : 'Étudiez aujourd’hui pour lancer votre série'}</small></div></div>
-    <div class="dash-c"><span class="dash-i" aria-hidden="true">🎯</span><div><b>${Math.floor(t / 60)} / ${DAY_GOAL / 60} min</b><small>objectif du jour</small><span class="bar"><i style="width:${pct}%"></i></span></div></div>
-    <a class="dash-c" href="#revisions"><span class="dash-i" aria-hidden="true">🔁</span><div><b>${due} question${due > 1 ? 's' : ''}</b><small>${due ? 'à revoir aujourd’hui' : 'rien à revoir aujourd’hui'}</small></div></a>
-    ${typeof xpWeek === 'function' ? `<a class="dash-c" href="#classement"><span class="dash-i" aria-hidden="true">🏆</span><div><b>${xpWeek()} XP</b><small>cette semaine · voir le classement</small></div></a>` : ''}</section>`;
-}
 // ornements : l'étoile à huit branches (khatam) des Éditions Lisân
 const ORN = '<svg viewBox="0 0 120 16" width="120" height="16" focusable="false"><path d="M0 8H46M74 8H120" stroke="currentColor" stroke-width="1"/><path d="M8.0 1.0L10.1 3.1L12.9 3.1L12.9 5.9L15.0 8.0L12.9 10.1L12.9 12.9L10.1 12.9L8.0 15.0L5.9 12.9L3.1 12.9L3.1 10.1L1.0 8.0L3.1 5.9L3.1 3.1L5.9 3.1Z" transform="translate(52 0)" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="60" cy="8" r="1.8" fill="currentColor"/></svg>';
 const ROSETTE = '<svg class="rosette" viewBox="0 0 200 200" aria-hidden="true" focusable="false"><circle class="d" pathLength="1" cx="100" cy="100" r="97" style="--i:0"/><circle class="d" pathLength="1" cx="100" cy="100" r="90" style="--i:1"/><path class="d" pathLength="1" d="M134.4 16.9L134.4 183.1M183.1 65.6L65.6 183.1M183.1 134.4L16.9 134.4M134.4 183.1L16.9 65.6M65.6 183.1L65.6 16.9M16.9 134.4L134.4 16.9M16.9 65.6L183.1 65.6M65.6 16.9L183.1 134.4" style="--i:2"/><path class="d" pathLength="1" d="M100.0 42.0L117.0 59.0L141.0 59.0L141.0 83.0L158.0 100.0L141.0 117.0L141.0 141.0L117.0 141.0L100.0 158.0L83.0 141.0L59.0 141.0L59.0 117.0L42.0 100.0L59.0 83.0L59.0 59.0L83.0 59.0Z" style="--i:3"/><path class="d" pathLength="1" d="M113.0 68.6L118.4 81.6L131.4 87.0L126.0 100.0L131.4 113.0L118.4 118.4L113.0 131.4L100.0 126.0L87.0 131.4L81.6 118.4L68.6 113.0L74.0 100.0L68.6 87.0L81.6 81.6L87.0 68.6L100.0 74.0Z" style="--i:4"/><circle class="d" pathLength="1" cx="129.1" cy="29.8" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="170.2" cy="70.9" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="170.2" cy="129.1" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="129.1" cy="170.2" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="70.9" cy="170.2" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="29.8" cy="129.1" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="29.8" cy="70.9" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="70.9" cy="29.8" r="5" style="--i:5"/><circle class="d" pathLength="1" cx="100" cy="100" r="12" style="--i:6"/></svg>';
 function viewHome() {
-  const last = lastLesson();
-  // reprendre : la dernière leçon si elle n'est pas terminée, sinon la prochaine étape de son espace
-  const ns = last && state.done[last.s.id + '/' + last.l.id] ? nextStep(spaceOf(last.s)) : null;
-  const resumeHref = ns ? ns.href : last ? '#' + state.last.route : '#accueil';
+  const last = lastLesson(), A = AUTH();
   const totalL = SUBJECTS.reduce((a, s) => a + s.lessons.length, 0);
   const doneL = SUBJECTS.reduce((a, s) => a + subjectProgress(s).d, 0);
   const nQ = SUBJECTS.reduce((a, s) => a + s.quiz.length, 0), nC = SUBJECTS.reduce((a, s) => a + s.cards.length, 0);
-  const pct = totalL ? Math.round(doneL / totalL * 100) : 0;
+  // nouveau visiteur (aucune leçon, pas connecté) : la présentation d'abord ; sinon le tableau de bord personnel d'abord
+  const fresh = !last && !doneL && !(A && A.user());
   const kpi = (ic, b, t, c) => `<div class="kpi" style="--kc:var(--s-${c})"><i aria-hidden="true">${ic}</i><b${typeof b === 'number' ? ` data-count="${b}"` : ''}>${typeof b === 'number' ? nf(b) : b}</b><span>${t}</span></div>`;
   const step = (ic, t, d) => `<div class="step"><span class="ic" aria-hidden="true">${ic}</span><h3>${t}</h3><p>${d}</p></div>`;
-  return `<div class="home-hero">${ROSETTE}<section class="hero">
+  const kpis = `<section class="kpis" aria-label="Lisân Campus en chiffres">${kpi('🧭', SPACES.length, 'espaces', 'a')}${kpi('📚', totalL, 'leçons', 'n')}${kpi('✍️', nQ, 'questions de quiz', 'i')}${kpi('🃏', nC, 'cartes de révision', 'l')}${kpi('📶', 'Hors ligne', 'fonctionne même sans internet', 'm').replace('<b>', '<b class="txt">')}</section>`;
+  const hero = `<div class="home-hero">${ROSETTE}<section class="hero">
       <span class="eyebrow hz" style="--hd:.05s">Éditions Lisân · la langue qui ouvre les portes</span>
       <h1>${words('Apprendre, réviser et', 0)} <em>${words('se', 3)}</em> <span class="nw"><em>${words('former', 4)}</em>${words(',', 5)}</span> ${words('à son rythme', 6)}</h1>
       <p class="lead hz" style="--hd:.85s">L’arabe du niveau 0 au niveau 3, la lecture du Coran, la Licence 1 Droit et une formation à l’intelligence artificielle : des leçons courtes, la voix pour écouter, des quiz corrigés et des cartes de révision, sur téléphone et même hors connexion.</p>
-      <div class="hero-cta hz" style="--hd:1.05s"><button type="button" class="btn" data-scrollto="espaces">Choisir un espace</button>${last ? `<a class="btn ghost" href="${resumeHref}">Reprendre ma leçon</a>` : '<a class="btn ghost" href="#apropos">Découvrir Lisân</a>'}</div>
-    </section>${heroVideo()}</div>
-    <section class="kpis" aria-label="Lisân Campus en chiffres">${kpi('🧭', SPACES.length, 'espaces', 'a')}${kpi('📚', totalL, 'leçons', 'n')}${kpi('✍️', nQ, 'questions de quiz', 'i')}${kpi('🃏', nC, 'cartes de révision', 'l')}${kpi('📶', 'Hors ligne', 'fonctionne même sans internet', 'm').replace('<b>', '<b class="txt">')}</section>
-    ${homeDash()}${newsAsk()}
-    ${doneL || last ? `<section class="mine"><span class="ring" style="--p:${pct}">${pct} %</span><div><b>Votre progression</b><p>${doneL} leçon${doneL > 1 ? 's' : ''} terminée${doneL > 1 ? 's' : ''} sur ${totalL}${last ? ` · dernière leçon : ${esc(last.s.title)}, ${esc(last.l.title)}` : ''}</p></div>${last ? `<a class="btn" href="${resumeHref}">Reprendre</a>` : ''}</section>` : ''}
-    <div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">${ORN}</span><h2>Les cinq espaces</h2><p>Choisissez votre espace : la première leçon de chaque espace est en accès libre.</p></div>
-    <section class="spaces">${SPACES.map(sp => { const p = spaceProgress(sp); const A = AUTH();
+      <div class="hero-cta hz" style="--hd:1.05s"><button type="button" class="btn" data-scrollto="espaces">Choisir un espace</button><a class="btn ghost" href="#apropos">Découvrir Lisân</a></div>
+    </section>${heroVideo(!fresh)}</div>`;
+  const campus = `<div class="campus">${campusTop()}${campusResume()}${campusQuests()}${campusPath()}${campusLeague()}${campusShortcuts()}</div>`;
+  const spaces = `<div class="sec-h" id="espaces"><span class="orn" aria-hidden="true">${ORN}</span><h2>Les cinq espaces</h2><p>Choisissez votre espace : la première leçon de chaque espace est en accès libre.</p></div>
+    <section class="spaces">${SPACES.map(sp => { const p = spaceProgress(sp);
       const ins = A && A.user() ? (A.enrolled(sp.id) ? '<span class="tag ok">Inscrit</span>' : '<span class="tag">Non inscrit</span>') : '';
       return `<a class="spacecard c-${sp.color}" href="#espace-${sp.id}"><span class="sp-icon" aria-hidden="true">${sp.icon}</span>
         <span class="eyebrow">${esc(sp.eyebrow)}</span><h2>${esc(sp.title)}</h2><p>${esc(sp.lead)}</p>
         <div class="bar"><i style="width:${p.pct}%"></i></div><span class="meta">${p.count} parcours · ${p.d} / ${p.n} leçons ${ins}</span>
         <span class="go">Entrer <span aria-hidden="true">→</span></span></a>`; }).join('')}
-    </section>
-    <div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Comment ça marche ?</h2></div>
+    </section>`;
+  const steps = `<div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Comment ça marche ?</h2></div>
     <section class="steps">${step('🧭', 'Choisissez un espace', 'L’arabe, le Coran, le droit ou l’intelligence artificielle : commencez par la première leçon, en accès libre, puis suivez les étapes dans l’ordre.')}
       ${step('🎧', 'Apprenez et écoutez', 'Des leçons courtes, lues à voix haute, sur téléphone ou sur ordinateur, même sans connexion.')}
       ${step('✅', 'Vérifiez vos acquis', 'Un mini-exercice corrigé après chaque leçon ; vos erreurs reviennent dans « Mes révisions » jusqu’à ce qu’elles soient acquises.')}
-      ${step('🎓', 'Recevez votre certificat', 'Toutes les leçons terminées et l’évaluation finale réussie à 80 % : votre certificat, vérifiable en ligne.')}</section>
-    ${actusHome()}
-    ${guideHome()}
-    <div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Les livres des Éditions Lisân</h2><p>Les espaces « Apprendre l’arabe », « Lire le Coran pas à pas » et « Vivre l’islam en famille » accompagnent ces livres.</p></div>
+      ${step('🎓', 'Recevez votre certificat', 'Toutes les leçons terminées et l’évaluation finale réussie à 80 % : votre certificat, vérifiable en ligne.')}</section>`;
+  const books = `<div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Les livres des Éditions Lisân</h2><p>Les espaces « Apprendre l’arabe », « Lire le Coran pas à pas » et « Vivre l’islam en famille » accompagnent ces livres.</p></div>
     <section class="books" aria-label="Les livres">${BOOKS.map(([f, t, d, h]) => { const inner = `<img src="img/${f}.webp" alt="Couverture du livre « ${esc(t)} »" width="150" height="212" loading="lazy" decoding="async"><b>${esc(t)}</b><small>${esc(d)}</small>`;
       return h ? `<a class="book" href="#${h}">${inner}</a>` : `<div class="book">${inner}</div>`; }).join('')}</section>`;
+  if (fresh) return `${hero}${kpis}${newsAsk()}${campus}${spaces}${steps}${actusHome()}${guideHome()}${books}`;
+  return `${newsAsk()}${campus}${spaces}${actusHome()}${guideHome()}${books}
+    <div class="sec-h"><span class="orn" aria-hidden="true">${ORN}</span><h2>Lisân Campus en une minute</h2><p>Les livres des Éditions Lisân, les cinq espaces, les outils pour apprendre, la bibliothèque et les certificats.</p></div>
+    ${hero}${kpis}`;
 }
 // ---------- navigateur intégré à une application (Facebook, Instagram, TikTok…) : Google y refuse la connexion ;
 // on explique comment ouvrir le site dans Chrome ou Safari au lieu de laisser la connexion échouer
@@ -811,10 +802,10 @@ function inAppNotice(el) {
     try { navigator.clipboard.writeText(u).then(() => { c.textContent = 'Adresse copiée : collez-la dans Chrome ou Safari'; }); } catch (e) { c.textContent = u; } };
 }
 // ---------- mode d'emploi en vidéo (format téléphone, outils/video/guide) : accueil et page #guide ; lecture seulement au toucher
-const GUIDE_DUR = '1 min 50';                            // durée de media/guide-720.mp4 (à changer quand la vidéo est refaite)
+const GUIDE_DUR = '1 min 59';                            // durée de media/guide-720.mp4 (à changer quand la vidéo est refaite)
 const GUIDE_STEPS = ['Ouvrez lisan-campus.pages.dev sur téléphone ou sur ordinateur (sur téléphone, ajoutez-le à l’écran d’accueil)', 'Choisissez votre espace', 'Essayez la première leçon, en accès libre',
   'Connectez-vous avec votre compte Google', 'Remplissez votre fiche d’inscription', 'Recevez votre numéro d’inscription', 'Lisez ou écoutez chaque leçon',
-  'Validez la leçon avec le mini-exercice', 'Révisez avec les cartes', 'Passez l’évaluation, donnez votre avis et obtenez votre certificat', 'Suivez l’actualité juridique, expliquée pas à pas', 'Gagnez des XP, suivez le classement de la semaine et programmez un rappel quotidien', 'Retrouvez tout le reste dans le menu'];
+  'Validez la leçon avec le mini-exercice', 'Révisez avec les cartes', 'Passez l’évaluation, donnez votre avis et obtenez votre certificat', 'Suivez l’actualité juridique, expliquée pas à pas', 'Suivez votre campus : objectifs du jour, série, XP, progrès et distinctions ; comparez-vous chaque semaine et programmez un rappel', 'Naviguez avec la barre du bas (Accueil, Apprendre, Réviser, Bibliothèque, Progrès) ; tout le reste est dans le menu'];
 const NB_FR = ['zéro', 'une', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf', 'dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze'];
 const guideVideo = () => `<div class="gv-frame"><video class="gv" controls preload="none" playsinline poster="media/guide-poster.webp" controlslist="nodownload"
     aria-label="Mode d’emploi de Lisân Campus en vidéo : créer son compte, s’inscrire, suivre une leçon et obtenir son certificat"><source src="media/guide-720.mp4" type="video/mp4"><source src="media/guide-720.webm" type="video/webm"></video><button type="button" class="gv-play" aria-label="Lire la vidéo du mode d’emploi">${HV_ICON.play}<span>Regarder · ${GUIDE_DUR}</span></button></div>`;
@@ -931,8 +922,8 @@ function heroAuto() {
   const c = navigator.connection; let reduce = false; try { reduce = matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
   return !reduce && !(c && c.saveData);
 }
-function heroVideo() {
-  const auto = heroAuto();
+function heroVideo(noAuto) {
+  const auto = !noAuto && heroAuto();
   return `<section class="hero-video" aria-label="Présentation de Lisân Campus en vidéo"><div class="hv-frame">
     <video id="hv" ${auto ? 'autoplay preload="auto"' : 'preload="none"'} muted loop playsinline poster="media/poster.webp" disablepictureinpicture
       aria-label="Lisân Campus en une minute : les livres des Éditions Lisân, les cinq espaces, les outils pour apprendre, la bibliothèque et les certificats">
@@ -1487,12 +1478,12 @@ const PAGES = {
     { box: 'Les contenus de droit résument des cours et des textes publics : vérifiez toujours avec vos enseignants.', title: 'À savoir', kind: 'marge' },
   ] },
   confidentialite: { title: 'Politique de confidentialité', body: [
-    { p: '*Dernière mise à jour : 26 novembre 2026.*' },
+    { p: '*Dernière mise à jour : 27 novembre 2026.*' },
     { p: 'Les Éditions Lisân attachent une grande importance à la protection de vos données personnelles, conformément à la **loi ivoirienne n° 2013-450 du 19 juin 2013** relative à la protection des données à caractère personnel.' },
     { h: '1. Responsable du traitement' },
     { p: 'Éditions Lisân, représentées par Mouhamadou CISSEMA, Abidjan, Côte d’Ivoire. Contact : la page [Contact](#contact) du site.' },
     { h: '2. Les données que nous traitons' },
-    { ul: ['**Votre progression** (leçons terminées, mini-exercices réussis, temps de lecture de chaque leçon, temps d’étude de chaque jour, questions à revoir, scores, cartes sues) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Sans connexion, ils ne nous sont pas transmis ; si vous vous connectez, votre progression est aussi enregistrée dans votre compte pour la retrouver sur tous vos appareils.',
+    { ul: ['**Votre progression** (leçons terminées, mini-exercices réussis, temps de lecture de chaque leçon, temps d’étude de chaque jour, questions à revoir, scores, cartes sues, compteurs des objectifs du jour ; les distinctions de « Mes progrès » sont calculées à partir de ces données, rien de plus n’est enregistré) et **vos réglages** sont enregistrés **sur votre appareil**, dans le stockage du navigateur. Sans connexion, ils ne nous sont pas transmis ; si vous vous connectez, votre progression est aussi enregistrée dans votre compte pour la retrouver sur tous vos appareils.',
       '**Si vous vous connectez avec Google** : le nom, l’adresse e-mail et la photo de votre compte Google.',
       '**Si vous vous inscrivez à un espace** : votre fiche d’inscription (civilité, nom, prénoms, date de naissance, téléphone, pays de résidence, situation actuelle et, si vous choisissez de les indiquer, votre ville, votre établissement, votre filière, votre niveau d’études, votre classe, votre formation, votre profession, votre projet d’études et l’année prévue pour le commencer ou le reprendre, ainsi que la manière dont vous avez connu le site ; pour les moins de 18 ans, le nom et le téléphone d’un parent ou tuteur), vos réponses aux questions de l’espace, vos inscriptions et votre progression.',
       '**Si vous obtenez un certificat** : vos civilité, prénom et nom, le parcours réussi, le nombre de leçons, le score à l’évaluation et la date. Ces informations sont inscrites au registre des certificats : **toute personne qui connaît le numéro du certificat** (ou scanne son code QR) peut les consulter, afin de vérifier qu’il est authentique. Aucune autre donnée n’y figure.',
@@ -1593,6 +1584,8 @@ function route() {
   else if (h.startsWith('bibliotheque~')) html = viewLibrary(h.slice(13));
   else if (h === 'bibliotheque' || (h.startsWith('bibliotheque-') && space(h.slice(13)))) { html = viewLibrary(); if (h !== 'bibliotheque') after = () => { const el = document.getElementById('lib-' + h.slice(13)); if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 60); }; }
   else if (h.startsWith('lire-') && typeof readTarget === 'function' && readTarget(h)) { const t = readTarget(h); html = viewReader(t); after = () => bindReader(t); }
+  else if (h === 'apprendre' || (h.startsWith('apprendre-') && space(h.slice(10)))) html = viewApprendre(h.slice(10));
+  else if (h === 'progression') html = viewProgression();
   else if (h === 'revisions') html = viewRevisions();
   else if (h === 'classement' && typeof viewBoard === 'function') { html = viewBoard(); after = bindBoard; }
   else if (h === 'recherche') { html = viewSearch(); after = () => { const i = document.getElementById('ssearch'); let t; i.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => drawSearch(i.value), 150); }); drawSearch(''); }; }
@@ -1617,8 +1610,7 @@ function route() {
   V.classList.remove('enter', 'leave'); void V.offsetWidth; if (V.firstElementChild && !V.querySelector('.home-hero')) V.classList.add('enter');
   revealAll();
   document.body.classList.toggle('reading', h.startsWith('l-') && keep);
-  document.querySelectorAll('.quick a').forEach(a => { const on = a.getAttribute('href') === '#' + h || (h === 'accueil' && a.getAttribute('href') === '#accueil') || (h.startsWith('verifier') && a.getAttribute('href') === '#verifier');
-    if (on) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current'); });
+  tabbarUpdate(h);
   if (after) after();
   if (h.startsWith('l-') && keep) lessonListenUi();
   lpUpdate();
@@ -1743,6 +1735,8 @@ function renderDrawer() {
       : `<button type="button" class="dr-login" data-auth="signin">Se connecter avec Google</button>`) : ''}
     <nav aria-label="Menu principal">
       ${item('accueil', '🏠', 'Accueil')}
+      ${item('apprendre', '🧭', 'Apprendre : le campus')}
+      ${item('progression', '⭐', 'Mes progrès et distinctions')}
       <div class="dr-sec">Les espaces</div>
       ${SPACES.map(sp => item('espace-' + sp.id, sp.icon, sp.title)).join('')}
       <div class="dr-sec">Outils</div>
@@ -1904,7 +1898,7 @@ document.addEventListener('click', e => {
     if (state.done[k]) { if (m) m.textContent = 'Cette leçon est terminée : elle reste ouverte pour la relire quand vous voulez.'; return; }
     if (miniNeeded(k)) { if (m) m.textContent = 'Pour terminer la leçon et passer à la suivante, réussissez le mini-exercice : toutes les réponses doivent être justes. Vous pouvez le recommencer autant de fois que nécessaire.';
       const mi = document.querySelector('.mini'); if (mi) { mi.scrollIntoView({ behavior: smooth(), block: 'start' }); mi.classList.remove('nudge'); void mi.offsetWidth; mi.classList.add('nudge'); } return; }
-    state.done[k] = 1; save('done'); xpAdd(20); if (m) m.textContent = '';
+    state.done[k] = 1; save('done'); xpAdd(20); questAdd('lecon'); if (m) m.textContent = '';
     doneBtnState(dt); const nb = document.querySelector('[data-next]'); if (nb) nb.classList.toggle('is-locked', !state.done[k]);
     if (state.done[k]) confetti(dt); return; }
   const mk = t.closest('.mark');
@@ -1929,7 +1923,7 @@ document.addEventListener('click', e => {
     const all = sec.querySelectorAll('.q'), done = sec.querySelectorAll('.q[data-ok]');
     if (done.length === all.length) { const r = sec.querySelectorAll('.q[data-ok="1"]').length, end = sec.querySelector('.mini-end');
       end.innerHTML = `<b>${r} / ${all.length}</b> ${r === all.length ? '— parfait, vous avez bien retenu la leçon.' : '— relisez les passages concernés, puis recommencez : il faut toutes les bonnes réponses pour valider le mini-exercice et passer à la suite.'}${r === all.length ? '' : ' <button type="button" class="btn ghost small" data-mini-again>Recommencer</button>'}`;
-      end.hidden = false; if (r === all.length) { confetti(end); if (!state.minis[sec.dataset.mini]) xpAdd(10); state.minis[sec.dataset.mini] = 1; save('minis'); const db = document.querySelector('[data-done]'); if (db) doneBtnState(db);
+      end.hidden = false; if (r === all.length) { confetti(end); questAdd('mini'); if (!state.minis[sec.dataset.mini]) xpAdd(10); state.minis[sec.dataset.mini] = 1; save('minis'); const db = document.querySelector('[data-done]'); if (db) doneBtnState(db);
         end.insertAdjacentHTML('beforeend', ' <span class="ok-t">Mini-exercice validé : vous pouvez terminer la leçon.</span>'); } }
     return; }
   if (t.closest('[data-mini-again]')) { const sec = t.closest('.mini'); sec.outerHTML = viewMini(sec.dataset.mini); return; }
