@@ -84,6 +84,8 @@ const meta = {};
     for (let i = 1; i < 6; i++) state.days[k(i)] = Math.max(state.days[k(i)] || 0, 700 + i * 90); save('days');
     const S = SUBJECTS.find(s => s.id === 'dc'); S.lessons.slice(0, 3).forEach(l => { state.done['dc/' + l.id] = 1; state.minis['dc/' + l.id] = 1; }); save('done'); save('minis');
     state.last = { route: 'l-dc.' + S.lessons[3].id, y: 0 }; save('last'); store.set('campus.sp', 'droit'); });
+  // plans « écran » : hauteur visible du téléphone de la vidéo (706 px à 388 px de large), pour que la barre du bas soit dans le cadre
+  await p.setViewportSize({ width: 390, height: 710 });
   await go('#accueil', 2500); await shot('campus', {}, { view: true });
   await go('#progression', 1500); await shot('progres', { badges: '.bdgs', stats: '.pg-stats' });
   // 13. la navigation : la barre du bas (page « Apprendre »), puis le menu

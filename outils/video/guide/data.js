@@ -1,13 +1,13 @@
 // produit par voix.py à partir de scenes.json et captures.json : ne pas modifier à la main
 window.STEPS = 13;
-window.T = 118.715;
+window.T = 119.096;
 window.SCENES = [
  {
   "kind": "intro",
   "caption": "Lisân Campus, le mode d’emploi : votre compte, votre inscription, vos leçons et votre certificat.",
   "t0": 0.0,
-  "d": 8.199,
-  "speech": 6.799
+  "d": 8.394,
+  "speech": 6.994
  },
  {
   "step": 1,
@@ -22,9 +22,9 @@ window.SCENES = [
    }
   ],
   "extra": "desktop",
-  "t0": 8.199,
-  "d": 12.993,
-  "speech": 12.193
+  "t0": 8.394,
+  "d": 12.816,
+  "speech": 12.016
  },
  {
   "step": 2,
@@ -49,9 +49,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 21.191,
-  "d": 6.633,
-  "speech": 5.833
+  "t0": 21.21,
+  "d": 6.914,
+  "speech": 6.114
  },
  {
   "step": 3,
@@ -70,9 +70,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 27.825,
-  "d": 4.925,
-  "speech": 4.125
+  "t0": 28.124,
+  "d": 4.856,
+  "speech": 4.056
  },
  {
   "step": 4,
@@ -91,9 +91,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 32.75,
-  "d": 6.025,
-  "speech": 5.225
+  "t0": 32.981,
+  "d": 6.041,
+  "speech": 5.241
  },
  {
   "step": 5,
@@ -118,9 +118,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 38.775,
-  "d": 6.248,
-  "speech": 5.448
+  "t0": 39.022,
+  "d": 6.341,
+  "speech": 5.541
  },
  {
   "step": 6,
@@ -134,9 +134,9 @@ window.SCENES = [
     "at": 0
    }
   ],
-  "t0": 45.023,
-  "d": 5.783,
-  "speech": 4.983
+  "t0": 45.363,
+  "d": 5.818,
+  "speech": 5.018
  },
  {
   "step": 7,
@@ -155,9 +155,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 50.806,
-  "d": 6.377,
-  "speech": 5.577
+  "t0": 51.181,
+  "d": 6.346,
+  "speech": 5.546
  },
  {
   "step": 8,
@@ -167,13 +167,13 @@ window.SCENES = [
    {
     "img": "mini",
     "y0": 4626,
-    "y1": 5495,
+    "y1": 5509,
     "at": 0
    }
   ],
-  "t0": 57.183,
-  "d": 6.811,
-  "speech": 6.011
+  "t0": 57.526,
+  "d": 6.913,
+  "speech": 6.113
  },
  {
   "step": 9,
@@ -192,9 +192,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 63.994,
-  "d": 5.28,
-  "speech": 4.48
+  "t0": 64.439,
+  "d": 5.148,
+  "speech": 4.348
  },
  {
   "step": 10,
@@ -224,9 +224,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 69.274,
-  "d": 8.545,
-  "speech": 7.745
+  "t0": 69.587,
+  "d": 8.712,
+  "speech": 7.912
  },
  {
   "step": 10,
@@ -240,9 +240,9 @@ window.SCENES = [
     "at": 0
    }
   ],
-  "t0": 77.82,
-  "d": 5.377,
-  "speech": 4.577
+  "t0": 78.299,
+  "d": 5.235,
+  "speech": 4.435
  },
  {
   "step": 11,
@@ -262,9 +262,9 @@ window.SCENES = [
     "at": 0.45
    }
   ],
-  "t0": 83.196,
-  "d": 7.081,
-  "speech": 6.281
+  "t0": 83.534,
+  "d": 6.778,
+  "speech": 5.978
  },
  {
   "step": 12,
@@ -301,9 +301,9 @@ window.SCENES = [
     ]
    }
   ],
-  "t0": 90.277,
-  "d": 13.646,
-  "speech": 12.846
+  "t0": 90.312,
+  "d": 14.076,
+  "speech": 13.276
  },
  {
   "step": 13,
@@ -323,15 +323,15 @@ window.SCENES = [
     "at": 0.62
    }
   ],
-  "t0": 103.923,
-  "d": 10.412,
-  "speech": 9.612
+  "t0": 104.388,
+  "d": 10.56,
+  "speech": 9.76
  },
  {
   "kind": "outro",
   "caption": "lisan-campus.pages.dev · Bonne étude !",
-  "t0": 114.335,
-  "d": 4.38,
-  "speech": 2.38
+  "t0": 114.948,
+  "d": 4.148,
+  "speech": 2.148
  }
 ];
