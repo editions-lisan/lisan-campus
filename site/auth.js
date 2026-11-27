@@ -97,7 +97,7 @@
       catch (e) { if (/permission/.test((e && (e.code || e.message)) || '')) return false; throw e; }
     },
     async certRulesOk() {                                // les règles Firestore autorisent-elles déjà les certificats ?
-      try { await fb.firestore().collection('regles').doc('v7').get({ source: 'server' }); return true; }
+      try { await fb.firestore().collection('regles').doc('v8').get({ source: 'server' }); return true; }
       catch (e) { return !/permission/.test((e && (e.code || e.message)) || ''); }
     },
     // classement de la semaine (collection classement/{uid}) : lu par les élèves connectés, écrit par chacun pour sa ligne
@@ -142,6 +142,16 @@
       await within(ref.set({ parts: N, size: buf.length, name: String(name || '').slice(0, 120), at: fb.firestore.FieldValue.serverTimestamp() }), 30000);
       for (let i = N; old && i < (old.parts || 0); i++) { try { await ref.collection('parts').doc(String(i)).delete(); } catch (e) {} }
       return N;
+    },
+    // félicitations déjà envoyées : une ligne par élève (felicitations/{uid}), une entrée par événement (ev : { 'p:<parcours>' | 'e:<espace>' : { d, via } })
+    async adminFelic() {
+      const snap = await fb.firestore().collection('felicitations').get({ source: 'server' });
+      const out = {}; snap.docs.forEach(d => { out[d.id] = (d.data() || {}).ev || {}; }); return out;
+    },
+    adminSetFelic(uid, ev, val) {                        // val = { d, via } pour marquer l'envoi, null pour le retirer
+      const ref = fb.firestore().collection('felicitations').doc(uid);
+      return within(ref.set({ ev: { [ev]: val ? { d: +val.d || Date.now(), via: String(val.via || '').slice(0, 12) } : fb.firestore.FieldValue.delete() },
+        maj: fb.firestore.FieldValue.serverTimestamp() }, { merge: true }), 15000);
     },
     async adminAcces() {                                 // administration : parcours ouverts à des élèves, par compte
       const snap = await fb.firestore().collection('acces').get({ source: 'server' });
