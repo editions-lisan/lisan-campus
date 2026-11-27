@@ -242,40 +242,58 @@
   },
   {
    "step": 12,
-   "title": "Classement et rappels",
-   "caption": "Gagnez des XP en étudiant, comparez-vous aux autres élèves chaque semaine et programmez un rappel quotidien.",
-   "say": "Chaque leçon, chaque exercice vous rapporte des points d'expérience. Comparez-vous aux autres élèves dans le classement de la semaine, et programmez un rappel quotidien pour garder votre série.",
+   "title": "Votre campus et vos progrès",
+   "caption": "Votre campus : objectifs du jour, série et XP, puis vos progrès et vos distinctions. Comparez-vous chaque semaine et programmez un rappel.",
+   "say": "Sur l'accueil, votre campus : vos objectifs du jour, votre série, vos points d'expérience, et la leçon à reprendre. Dans « Progrès », vos chiffres et vos distinctions. Comparez-vous aux autres élèves chaque semaine, et programmez un rappel quotidien.",
    "shots": [
+    {
+     "img": "campus",
+     "y0": 0,
+     "y1": 0,
+     "at": 0
+    },
+    {
+     "img": "progres",
+     "y0": "stats.top-120",
+     "y1": "badges.top+40",
+     "at": 0.25
+    },
     {
      "img": "classement",
      "y0": 0,
      "y1": "list.top-120",
-     "at": 0
+     "at": 0.55
     },
     {
      "img": "rappels",
      "y0": "remind.top-90",
      "y1": "remind.top-60",
-     "at": 0.6,
+     "at": 0.78,
      "tap": [
       195,
       "ics.cy",
-      0.82
+      0.92
      ]
     }
    ]
   },
   {
    "step": 13,
-   "title": "Le menu",
-   "caption": "Dans le menu : les espaces, la bibliothèque, vos révisions, le classement, la recherche et ce mode d’emploi.",
-   "say": "Dans le menu : les espaces, la bibliothèque, vos révisions, le classement, la recherche, et ce mode d'emploi.",
+   "title": "La navigation",
+   "caption": "En bas de l’écran : Accueil, Apprendre, Réviser, Bibliothèque et Progrès. Tout le reste est dans le menu.",
+   "say": "En bas de l'écran : Accueil, Apprendre, Réviser, Bibliothèque, et Progrès. Chaque parcours y est un chemin d'étoiles, jusqu'au certificat. Tout le reste est dans le menu.",
    "shots": [
+    {
+     "img": "apprendre",
+     "y0": 0,
+     "y1": 0,
+     "at": 0
+    },
     {
      "img": "menu",
      "y0": 0,
      "y1": 0,
-     "at": 0
+     "at": 0.62
     }
    ]
   },

@@ -4,7 +4,7 @@
 const fs=require('fs'),path=require('path');
 const SITE=path.resolve(__dirname,'../../site');
 const RE=/(?:\p{Regional_Indicator}{2}|\p{Extended_Pictographic}(?:️|\p{Emoji_Modifier})?(?:‍\p{Extended_Pictographic}(?:️|\p{Emoji_Modifier})?)*)/gu;
-const files=['app.js','certificats.js','admin.js','inscription.js','auth.js','boot.js','index.html',...fs.readdirSync(SITE+'/data').map(f=>'data/'+f)];
+const files=['app.js','campus.js','classement.js','certificats.js','admin.js','inscription.js','auth.js','boot.js','index.html',...fs.readdirSync(SITE+'/data').map(f=>'data/'+f)];
 const chars=JSON.parse(fs.readFileSync('package/chars.json'));const icons=JSON.parse(fs.readFileSync('package/icons.json'));
 const hex=s=>[...s].map(c=>c.codePointAt(0).toString(16)).filter(h=>h!=='fe0f').join('-');
 const seen=new Map();
