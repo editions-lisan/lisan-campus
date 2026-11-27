@@ -2,7 +2,7 @@
 // Points d'expérience (XP) : 1 XP par minute d'étude (state.days), plus des bonus enregistrés jour par jour dans
 // state.xpb (leçon terminée 20, mini-exercice réussi 10, évaluation jusqu'à 20 + 30 si réussie, révision juste 2 : xpAdd() dans app.js).
 // Le classement est facultatif : l'élève connecté choisit d'y apparaître (collection Firestore classement/{uid},
-// visible par les élèves connectés ; règles regles/v7). Les rappels restent sur l'appareil (service worker, agenda).
+// visible par les élèves connectés ; règles regles/v7, puis v8). Les rappels restent sur l'appareil (service worker, agenda).
 
 const XP_RULES = [['⏱️', 'Chaque minute d’étude', '1 XP'], ['✅', 'Une leçon terminée', '20 XP'], ['🧩', 'Un mini-exercice réussi', '10 XP'],
   ['📝', 'Une évaluation', 'jusqu’à 20 XP, + 30 si réussie'], ['🔁', 'Une question de révision juste', '2 XP']];

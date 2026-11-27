@@ -2,7 +2,7 @@
 
 | Vidéo | Fichiers | Où | Source |
 |---|---|---|---|
-| Présentation (62 s, 1280 × 720, musique) | `campus-720` et `campus-480` (MP4 et WebM), `poster.webp` | accueil, lecture automatique sans le son | `index.html` (animation `render(t)`), `son.py` (bande-son) |
+| Présentation (76 s, 1280 × 720, musique) | `campus-720` et `campus-480` (MP4 et WebM), `poster.webp` | accueil, lecture automatique sans le son | `index.html` (animation `render(t)`), `son.py` (bande-son) |
 | Mode d'emploi (≈ 1 min 50, 720 × 1280, voix commentée et sous-titres) | `guide-720` (MP4 et WebM), `guide-poster.webp` | accueil (« Le mode d'emploi en vidéo ») et page `#guide` | dossier `guide/` |
 | Réviser le droit (1 min 13, 720 × 1280, voix, sous-titres, code QR) | `droit-720` (MP4 et WebM), `droit-poster.webp` | en tête de l'espace Droit ; à envoyer sur WhatsApp | dossier `droit/` |
 
@@ -16,12 +16,13 @@
 - voix du mode d'emploi : `pip install sherpa-onnx==1.12.40 soundfile`, puis la voix `vits-piper-fr_FR-siwis-medium.tar.bz2` (publications « tts-models » du dépôt k2-fsa/sherpa-onnx, comme pour `outils/audio`).
 
 ## Présentation
-Onze scènes, minutage dans `S` (`index.html`) : la marque ; les huit livres de la collection et le kit (livre de l'élève, cahier, livret du maître) ; les cinq espaces (`CARDS`, nombre de leçons) ; une scène par espace — arabe, Coran (niveaux 1 et 2), islam, droit (dix matières, roman, actualité commentée), IA (huit parcours) — puis « Pour bien apprendre » (tuiles) et « Bibliothèque et certificats », toutes décrites dans `SC` (sur-titre, titre, lignes, étiquettes, tuiles, captures du téléphone et leur défilement) ; l'adresse du site. Les hauteurs se placent seules (`layout()`), selon que le titre tient sur une ou deux lignes.
-1. Captures du téléphone `img/s_*.jpg` : pages du site au format téléphone (390 px, page entière, 1 500 px de haut), réduites à 580 × 2231 ; à refaire quand les écrans changent beaucoup ;
+Vidéo intemporelle : elle présente ce que le Campus offre, sans jamais parler de nouveauté, de version ni de mise à jour. Identité du site (ivoire, bleu nuit, émeraude, or champagne, étoile à huit branches). Douze scènes, minutage dans `S` (`index.html`) : l'ouverture (l'étoile se trace autour du logo) ; « Un campus numérique » (apprendre, lire, s'exercer, progresser, et les chiffres réels du Campus dans `FIGS` : espaces, parcours, leçons, questions d'évaluation, cartes — à recompter quand les contenus changent) ; les cinq espaces (`CARDS`, nombre de leçons) ; puis les scènes de `SC`, texte à gauche et téléphone à droite : le tableau de bord de l'accueil, le parcours en étoiles (dessiné en direct : `PN`), les leçons (écoute, mini-exercice), la langue arabe et les sciences islamiques (trois encadrés et les huit couvertures), la Licence 1 de droit, la formation à l'IA, « Réviser et progresser » (tuiles), « Bibliothèque et certificats » ; la fin sur l'adresse du site. Les hauteurs se placent seules (`layout()`).
+1. `NODE_PATH=$(npm root -g) node captures_pres.js` : captures du site actuel au format téléphone (390 px, 1 500 px de haut, réduites à 580 × 2231) dans `img/s_*.jpg`, avec l'élève de démonstration Habiba ZABRE (`guide/demo-auth.js`) et une progression de démonstration ; à refaire quand les écrans changent ;
 2. modifier `index.html` ; vérifier quelques instants avec `index.html#30` dans un navigateur ;
-3. `node render.js index.html 1280 720 /tmp/campus-master.mp4 2.6 /tmp/poster.jpg` ;
-4. `python3 son.py /tmp/campus.wav` (même minutage : reporter tout changement de `S` dans `S` et `ESP` de `son.py`) ;
-5. `sh encode.sh /tmp/campus-master.mp4 /tmp/campus.wav campus 1280 720 854 480` (la version 480 p, lue sur téléphone, est plus compressée), puis `poster.jpg` → `site/media/poster.webp`.
+3. `NODE_PATH=$(npm root -g) node cues.js` : exporte le minutage et les repères (titres, éléments, étoiles) dans `cues.json`, que suit la bande-son ;
+4. `node render.js index.html 1280 720 /tmp/campus-master.mp4 3.2 /tmp/poster.jpg` ;
+5. `python3 son.py /tmp/campus.wav` ;
+6. `sh encode.sh /tmp/campus-master.mp4 /tmp/campus.wav campus 1280 720 854 480` (la version 480 p, lue sur téléphone, est plus compressée), puis `poster.jpg` → `site/media/poster.webp`.
 
 ## Mode d'emploi (`guide/`)
 1. `node guide/captures.js` : captures du site actuel au format téléphone, avec l'élève de démonstration Habiba ZABRE (`guide/demo-auth.js` remplace la connexion Google ; aucune donnée réelle), dans `guide/img/` (non suivi par git), et positions utiles dans `guide/captures.json` ;

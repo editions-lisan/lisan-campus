@@ -119,7 +119,7 @@ function loadAdmin() {
   adminRun.loading = true; adminRun.err = ''; drawAdmin(); adminStop();
   AUTH().adminList().then(async list => { adminRun.list = list; adminRun.rulesOk = await AUTH().certRulesOk(); adminLive();
     adminRun.registry = null; try { adminRun.registry = await AUTH().adminRegistry(); } catch (e) {}
-    adminRun.msgs = []; if (AUTH().adminMessages) { try { adminRun.msgs = await AUTH().adminMessages(); } catch (e) {} } adminRun.acces = {}; adminRun.accesOk = false; if (AUTH().adminAcces) { try { adminRun.acces = await AUTH().adminAcces(); adminRun.accesOk = true; } catch (e) {} } adminRun.loading = false; setAdminCached(true); drawAdmin(); if (typeof renderDrawer === 'function') renderDrawer(); })
+    adminRun.msgs = []; if (AUTH().adminMessages) { try { adminRun.msgs = await AUTH().adminMessages(); } catch (e) {} } await felicLoad(); adminRun.acces = {}; adminRun.accesOk = false; if (AUTH().adminAcces) { try { adminRun.acces = await AUTH().adminAcces(); adminRun.accesOk = true; } catch (e) {} } adminRun.loading = false; setAdminCached(true); drawAdmin(); if (typeof renderDrawer === 'function') renderDrawer(); })
     .catch(e => { adminRun.loading = false; adminRun.list = null;
       adminRun.err = e && /permission/.test(e.code || e.message || '') ? 'denied' : 'network'; if (adminRun.err === 'denied') setAdminCached(false); drawAdmin(); });
 }
@@ -203,9 +203,13 @@ service cloud.firestore {
         && request.resource.data.maj == request.time;
       allow delete: if isOwner(uid) || isAdmin();
     }
+    // Félicitations déjà envoyées (une ligne par élève, une entrée par parcours ou espace réussi) : administrateur seul
+    match /felicitations/{uid} {
+      allow read, write: if isAdmin();
+    }
     // repère de version des règles (vérifié par la page d'administration)
     match /regles/{v} {
-      allow get: if v == 'v7';
+      allow get: if v == 'v8';
     }
   }
 }`;
@@ -273,7 +277,7 @@ function drawAdmin() {
     return;
   }
   if (R.tab === 'felic') { const todo = felic.filter(r => !r.sent).length;
-    box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${felic.length} réussite${felic.length > 1 ? 's' : ''} (parcours et espaces), dont ${todo} à féliciter. Le message est prêt et modifiable : envoyez-le sur WhatsApp ou par e-mail ; il est alors marqué comme envoyé sur cet appareil.</p><div class="adm-list">${felicCards(felic)}</div>`; return; }
+    box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${felic.length} réussite${felic.length > 1 ? 's' : ''} (parcours et espaces), dont ${todo} à féliciter. Le message est prêt et modifiable : envoyez-le sur WhatsApp ou par e-mail. Une fois envoyé, il est grisé pour cette personne et cette réussite seulement, sur tous vos appareils${adminRun.felicOk ? '' : ' (pour l’instant sur cet appareil : republiez les règles Firestore pour l’enregistrer en ligne)'} ; chaque nouvelle réussite reste à féliciter.</p><div class="adm-list">${felicCards(felic)}</div>`; return; }
   if (R.tab === 'avis') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${avis.length} avis donné${avis.length > 1 ? 's' : ''} à la fin d’un parcours ou d’un espace.</p>${avisSummary(avis)}<div class="adm-list">${avisCards(avis)}</div>`; return; }
   if (R.tab === 'sugg') { box.innerHTML = `${head}<p class="meta" id="admin-msg" aria-live="polite">${suggs.length} suggestion${suggs.length > 1 ? 's' : ''}, de la plus récente à la plus ancienne.</p><div class="adm-list">${suggCards(suggs)}</div>`; return; }
   box.innerHTML = `${head}
@@ -306,20 +310,42 @@ function avisCards(rows) {
     ${x.impressions || x.ameliorations ? `<div class="actions">${waLink(u.info) ? `<a class="btn small" href="${waLink(u.info)}" target="_blank" rel="noopener">Répondre sur WhatsApp</a>` : ''}${u.email ? `<a class="btn ghost small" href="mailto:${esc(u.email)}?subject=${encodeURIComponent('Votre avis sur Lisân Campus')}">Répondre par e-mail</a>` : ''}</div>` : ''}</article>`).join('');
 }
 // ---------- félicitations : un message prêt à envoyer (WhatsApp, e-mail) à chaque élève qui a réussi un parcours ou tout un espace
-const FELIC_KEY = 'lc.felic';                            // messages déjà envoyés (sur cet appareil)
-const felicSent = () => { try { return JSON.parse(localStorage.getItem(FELIC_KEY) || '{}') || {}; } catch (e) { return {}; } };
-const felicMark = (k, on) => { const m = felicSent(); if (on) m[k] = Date.now(); else delete m[k]; try { localStorage.setItem(FELIC_KEY, JSON.stringify(m)); } catch (e) {} };
+// Une fois les félicitations envoyées à une personne pour un événement (parcours réussi « p:<parcours> », espace réussi « e:<espace> »),
+// la carte est grisée et rangée dans « Déjà félicités » : la marque porte sur le couple personne + événement, jamais au-delà.
+// Elle est enregistrée dans Firestore (felicitations/{uid}, administrateur seul) pour valoir sur tous les appareils, et gardée sur l'appareil en secours.
+const FELIC_KEY = 'lc.felic';                            // copie sur l'appareil : { '<uid>|<événement>': date } ou { d, via }
+const felicLocal = () => { try { return JSON.parse(localStorage.getItem(FELIC_KEY) || '{}') || {}; } catch (e) { return {}; } };
+const felicLocalSet = (k, v) => { const m = felicLocal(); if (v) m[k] = v; else delete m[k]; try { localStorage.setItem(FELIC_KEY, JSON.stringify(m)); } catch (e) {} };
+const felicVal = v => !v ? null : typeof v === 'number' ? { d: v, via: '' } : { d: +v.d || 0, via: v.via || '' };
+function felicSent() {                                   // marques réunies : Firestore d'abord, l'appareil ensuite
+  const out = {}; Object.entries(felicLocal()).forEach(([k, v]) => { const x = felicVal(v); if (x) out[k] = x; });
+  Object.entries(adminRun.felicDone || {}).forEach(([uid, ev]) => Object.entries(ev || {}).forEach(([e, v]) => { const x = felicVal(v); if (x) out[uid + '|' + e] = x; }));
+  return out;
+}
+async function felicLoad() {                             // lecture des marques ; les marques laissées sur cet appareil sont recopiées dans Firestore
+  adminRun.felicOk = false; if (!AUTH() || !AUTH().adminFelic) return;
+  try { adminRun.felicDone = await AUTH().adminFelic(); adminRun.felicOk = true; } catch (e) { adminRun.felicDone = adminRun.felicDone || {}; return; }
+  for (const [k, v] of Object.entries(felicLocal())) { const i = k.indexOf('|'), uid = k.slice(0, i), ev = k.slice(i + 1), x = felicVal(v);
+    if (x && uid && ev && !((adminRun.felicDone[uid] || {})[ev])) { try { await AUTH().adminSetFelic(uid, ev, x); (adminRun.felicDone[uid] = adminRun.felicDone[uid] || {})[ev] = x; } catch (e) { break; } } }
+}
+function felicMark(r, on, via) {
+  const x = on ? { d: Date.now(), via: via || '' } : null;
+  felicLocalSet(r.k, x);
+  const m = adminRun.felicDone || (adminRun.felicDone = {}); m[r.u.uid] = m[r.u.uid] || {}; if (x) m[r.u.uid][r.ev] = x; else delete m[r.u.uid][r.ev];
+  if (AUTH() && AUTH().adminSetFelic) AUTH().adminSetFelic(r.u.uid, r.ev, x).catch(() => {});
+}
+const FELIC_VIA = { wa: 'WhatsApp', mail: 'e-mail', main: '' };
 const FELIC_DOUA = { arabe: 'Qu’Allah bénisse vos efforts et vous accorde la réussite (Bârakallâhu fîk).', coran: 'Qu’Allah bénisse vos efforts et fasse du Coran la lumière de votre cœur (Bârakallâhu fîk).', islam: 'Qu’Allah bénisse vos efforts et vous accorde la science utile (Bârakallâhu fîk).' };
 function felicRows() {                                   // une ligne par parcours réussi, et par espace réussi en entier (plusieurs parcours)
   const out = [], sent = felicSent();
   (adminRun.list || []).forEach(u => Object.keys(u.spaces).forEach(id => {
     const sp = space(id); if (!sp) return; const p = progOf(u, id), cert = key => (u.certs || []).find(c => c.key === key) || null;
     const next = p.parc.find(y => !y.ok);
-    p.parc.filter(x => x.ok).forEach(x => out.push({ k: u.uid + '|p:' + x.s.id, u, sp, kind: 'p', s: x.s, best: x.best, c: cert('p:' + x.s.id), next: next && next.s, all: p.passed === p.parc.length && p.parc.length > 1 }));
-    if (p.parc.length > 1 && p.passed === p.parc.length) out.push({ k: u.uid + '|e:' + id, u, sp, kind: 'e', n: p.parc.length, c: cert('e:' + id) });
+    p.parc.filter(x => x.ok).forEach(x => out.push({ k: u.uid + '|p:' + x.s.id, ev: 'p:' + x.s.id, u, sp, kind: 'p', s: x.s, best: x.best, c: cert('p:' + x.s.id), next: next && next.s, all: p.passed === p.parc.length && p.parc.length > 1 }));
+    if (p.parc.length > 1 && p.passed === p.parc.length) out.push({ k: u.uid + '|e:' + id, ev: 'e:' + id, u, sp, kind: 'e', n: p.parc.length, c: cert('e:' + id) });
   }));
-  out.forEach(r => { r.sent = sent[r.k] || 0; });
-  return out.sort((a, b) => (!!a.sent - !!b.sent) || String((b.c || {}).date || '').localeCompare(String((a.c || {}).date || '')));
+  out.forEach(r => { const x = sent[r.k]; r.sent = x ? x.d || 1 : 0; r.via = x ? x.via : ''; });
+  return out.sort((a, b) => (!!a.sent - !!b.sent) || (a.sent ? b.sent - a.sent : String((b.c || {}).date || '').localeCompare(String((a.c || {}).date || ''))));
 }
 function felicText(r) {
   const i = r.u.info || {}, nom = `${i.civilite === 'Madame' ? 'Madame' : i.civilite ? 'Monsieur' : ''} ${prenomFmt(i.prenom || r.u.name)} ${String(i.nom || '').toUpperCase()}`.replace(/\s+/g, ' ').trim();
@@ -338,24 +364,32 @@ function felicText(r) {
   return L.join('\n');
 }
 const felicSubject = r => r.kind === 'e' ? `Félicitations : espace « ${r.sp.title} » réussi — Lisân Campus` : `Félicitations : parcours « ${r.s.title} » réussi — Lisân Campus`;
+function felicCard(r, n) {
+  const wa = waLink(r.u.info), off = r.sent ? ' disabled aria-disabled="true"' : '';
+  const what = r.kind === 'e' || r.s.title === r.sp.title ? (r.kind === 'e' ? r.sp.title : r.s.title) : r.s.title + ' · ' + r.sp.title;
+  return `<article class="adm-card c-${r.sp.color}${r.sent ? ' felic-sent' : ''}"><div class="adm-top"><b>${esc(who(r.u))}</b><span class="tag">${r.kind === 'e' ? '🏅 Espace réussi' : '🎓 Parcours réussi'}</span></div>
+      <small>${esc(what)}${r.c ? ' · certificat n° ' + esc(r.c.num) + ' du ' + dateFr(r.c.date) : ' · certificat pas encore demandé'}</small>
+      ${r.sent ? `<p class="felic-done">✓ Félicitations envoyées le ${dateFr(r.sent)}${r.via ? ' (' + esc(r.via) + ')' : ''} pour cette réussite</p>` : ''}
+      <details${r.sent ? '' : ' open'}><summary>${r.sent ? 'Message envoyé' : 'Message de félicitations'}</summary><textarea class="felic-t" id="felic-${n}" rows="12" aria-label="Message de félicitations (modifiable)"${r.sent ? ' readonly' : ''}>${esc(felicText(r))}</textarea></details>
+      <div class="actions">${wa ? `<button type="button" class="btn small" data-felic="wa" data-n="${n}"${off}>Envoyer sur WhatsApp</button>` : ''}${r.u.email ? `<button type="button" class="btn ${wa ? 'ghost ' : ''}small" data-felic="mail" data-n="${n}"${off}>Envoyer par e-mail</button>` : ''}
+        <button type="button" class="btn ghost small" data-felic="copy" data-n="${n}"${off}>Copier</button>
+        ${r.sent ? `<button type="button" class="linkbtn small-l" data-felic="unsent" data-n="${n}">Le message n’est pas parti : le rétablir</button>` : `<button type="button" class="linkbtn small-l" data-felic="sent" data-n="${n}">Déjà envoyé autrement : marquer comme envoyé</button>`}</div></article>`;
+}
 function felicCards(rows) {
   if (!rows.length) return '<p class="meta">Aucun parcours réussi pour le moment.</p>';
-  return rows.map((r, n) => { const wa = waLink(r.u.info);
-    return `<article class="adm-card c-${r.sp.color}${r.sent ? ' felic-sent' : ''}"><div class="adm-top"><b>${esc(who(r.u))}</b><span class="tag">${r.kind === 'e' ? '🏅 Espace réussi' : '🎓 Parcours réussi'}</span></div>
-      <small>${esc(r.kind === 'e' || r.s.title === r.sp.title ? (r.kind === 'e' ? r.sp.title : r.s.title) : r.s.title + ' · ' + r.sp.title)}${r.c ? ' · certificat n° ' + esc(r.c.num) + ' du ' + dateFr(r.c.date) : ' · certificat pas encore demandé'}${r.sent ? ' · <b>message envoyé le ' + dateFr(r.sent) + '</b>' : ''}</small>
-      <details${r.sent ? '' : ' open'}><summary>Message de félicitations</summary><textarea class="felic-t" id="felic-${n}" rows="12" aria-label="Message de félicitations (modifiable)">${esc(felicText(r))}</textarea></details>
-      <div class="actions">${wa ? `<button type="button" class="btn small" data-felic="wa" data-n="${n}">Envoyer sur WhatsApp</button>` : ''}${r.u.email ? `<button type="button" class="btn ${wa ? 'ghost ' : ''}small" data-felic="mail" data-n="${n}">Envoyer par e-mail</button>` : ''}
-        <button type="button" class="btn ghost small" data-felic="copy" data-n="${n}">Copier</button>
-        <button type="button" class="linkbtn small-l" data-felic="${r.sent ? 'unsent' : 'sent'}" data-n="${n}">${r.sent ? 'Marquer comme non envoyé' : 'Marquer comme envoyé'}</button></div></article>`; }).join('');
+  const todo = [], done = []; rows.forEach((r, n) => (r.sent ? done : todo).push(felicCard(r, n)));
+  return `${todo.length ? todo.join('') : '<p class="meta">Toutes les réussites ont reçu leurs félicitations. Une nouvelle réussite (autre parcours, autre espace, autre élève) apparaîtra ici automatiquement.</p>'}
+    ${done.length ? `<details class="felic-old"><summary>Déjà félicités (${done.length})</summary>${done.join('')}</details>` : ''}`;
 }
 function felicAction(b) {
   const rows = adminRun.felic || [], r = rows[+b.dataset.n]; if (!r) return;
   const ta = document.getElementById('felic-' + b.dataset.n), txt = ta ? ta.value : felicText(r), k = b.dataset.felic;
-  if (k === 'wa') { window.open(waLink(r.u.info) + '?text=' + encodeURIComponent(txt), '_blank', 'noopener'); felicMark(r.k, true); }
-  else if (k === 'mail') { location.href = `mailto:${r.u.email}?subject=${encodeURIComponent(felicSubject(r))}&body=${encodeURIComponent(txt)}`; felicMark(r.k, true); }
+  if (r.sent && k !== 'unsent') return;                  // déjà félicité pour cette réussite : rien à renvoyer
+  if (k === 'wa') { window.open(waLink(r.u.info) + '?text=' + encodeURIComponent(txt), '_blank', 'noopener'); felicMark(r, true, FELIC_VIA.wa); }
+  else if (k === 'mail') { location.href = `mailto:${r.u.email}?subject=${encodeURIComponent(felicSubject(r))}&body=${encodeURIComponent(txt)}`; felicMark(r, true, FELIC_VIA.mail); }
   else if (k === 'copy') { const done = () => { b.textContent = 'Copié ✓'; };
     try { navigator.clipboard.writeText(txt).then(done, () => { ta.select(); b.textContent = 'Sélectionné : copiez'; }); } catch (e) { if (ta) ta.select(); } return; }
-  else felicMark(r.k, k === 'sent');
+  else felicMark(r, k === 'sent', '');
   setTimeout(drawAdmin, k === 'mail' ? 600 : 0);
 }
 function adminSuggs() { const out = []; (adminRun.list || []).forEach(u => (u.sugg || []).forEach(x => out.push({ u, x }))); return out.sort((a, b) => String(b.x.date).localeCompare(String(a.x.date))); }

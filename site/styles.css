@@ -1719,3 +1719,9 @@ a.pg-st:hover { border-color: color-mix(in srgb, var(--k) 45%, var(--line)); }
 @media (prefers-reduced-motion: reduce) { .cm-toast, .cm-toast-k { animation-duration: .01s; } }
 /* tailles des émoticônes dans les nouveaux composants */
 .ctop .emo, .cresume .emo, .ccampus .emo, .pg-card .emo, .appr .emo { line-height: 1; }
+/* félicitations déjà envoyées : grisées, rangées à part */
+.adm-card.felic-sent { opacity: .62; filter: saturate(.4); }
+.adm-card.felic-sent .btn[disabled] { opacity: .5; cursor: not-allowed; box-shadow: none; }
+.felic-done { margin: 6px 0 0; font-weight: 700; color: var(--good); font-size: 14px; }
+.felic-old { margin-top: 14px; } .felic-old > summary { cursor: pointer; font-weight: 700; padding: 10px 0; color: var(--muted); }
+.felic-old > .adm-card { margin-top: 10px; }
