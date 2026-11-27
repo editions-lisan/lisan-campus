@@ -6,213 +6,247 @@
 <link rel="stylesheet" href="../fonts/fontsource-atkinson-hyperlegible-5.1.0/package/700.css">
 <link rel="stylesheet" href="../fonts/fontsource-atkinson-hyperlegible-5.1.0/package/400-italic.css">
 <style>
+/* Vidéo de présentation de Lisân Campus (1280 × 720, 76 s) : l'identité du site (ivoire, bleu nuit, émeraude, or champagne,
+   étoile à huit branches) et ses écrans réels (captures img/s_*.jpg faites par captures_pres.js).
+   Présentation intemporelle : elle montre ce que le Campus offre, sans parler de nouveauté ni de version. */
 @font-face { font-family: "Lisan Naskh"; src: url(../../site/fonts/LisanNaskh-R.woff2) format("woff2"); font-weight: 400; }
 @font-face { font-family: "Lisan Naskh"; src: url(../../site/fonts/LisanNaskh-B.woff2) format("woff2"); font-weight: 700; }
+:root { --night: #0f1a35; --night2: #1b2a5c; --ivory: #f4f1e9; --surface: #fffdf8; --ink: #121a2c; --muted: #596173; --gold: #c39a45; --gold2: #e5c87e; --champ: #f3e7c6; --em: #0f7a58; --line: #e2dccd; }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: #000; }
-#stage { position: relative; width: 1280px; height: 720px; overflow: hidden; font-family: "Atkinson Hyperlegible", sans-serif; color: #fff; background: #16204a; }
+#stage { position: relative; width: 1280px; height: 720px; overflow: hidden; font-family: "Atkinson Hyperlegible", sans-serif; color: var(--ink); background: var(--ivory); }
 .abs { position: absolute; will-change: transform, opacity; }
-.bg-navy { inset: 0; background: radial-gradient(1200px 700px at 30% 20%, #2a3a7a 0%, #1e2a5a 45%, #131b3f 100%); }
-.bg-light { inset: 0; background: linear-gradient(160deg, #f6f7fb 0%, #eef1f4 55%, #e4e9f2 100%); opacity: 0; }
-#pattern { inset: -200px; opacity: .10; }
-#blob { left: 760px; top: -260px; width: 820px; height: 820px; border-radius: 50%; opacity: 0; }
-#blob2 { left: -220px; top: 520px; width: 420px; height: 420px; border-radius: 50%; opacity: 0; }
-.eyebrow { font-weight: 700; letter-spacing: .22em; text-transform: uppercase; color: #f0b24a; font-size: 21px; }
-h1, h2 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-height: 1.08; }
-/* scène 1 : la marque */
-#logo { left: 50%; top: 112px; width: 150px; height: 150px; margin-left: -75px; filter: drop-shadow(0 18px 30px rgba(0,0,0,.35)); }
-#s1-eyebrow { left: 0; right: 0; top: 290px; text-align: center; }
-#s1-title { left: 0; right: 0; top: 328px; text-align: center; font-size: 96px; }
-#s1-title span, #c-title span { color: #9fbaf5; }
-#s1-ar { left: 0; right: 0; top: 446px; line-height: 1.5; text-align: center; font-family: "Lisan Naskh"; font-size: 54px; direction: rtl; }
-#s1-slogan { left: 0; right: 0; top: 560px; text-align: center; font-size: 30px; font-style: italic; color: #d9e2f7; }
-/* scène 2 : la collection */
-#s2-eyebrow { left: 0; right: 0; top: 46px; text-align: center; }
-#s2-title { left: 80px; right: 80px; top: 80px; text-align: center; font-size: 52px; }
-#s2-sub { left: 80px; right: 80px; top: 150px; text-align: center; font-size: 26px; color: #d9e2f7; }
-.cover { width: 150px; height: 212px; top: 238px; border-radius: 6px; box-shadow: 0 20px 36px rgba(0,0,0,.45); background-size: cover; }
-.chips { left: 0; right: 0; top: 548px; display: flex; justify-content: center; gap: 14px; }
-.chip { position: relative; height: 50px; padding: 0 20px; border-radius: 999px; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.28); display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 700; white-space: nowrap; }
-.chip img { width: 28px; height: 28px; }
-#s2-kit { left: 0; right: 0; top: 622px; text-align: center; font-size: 22px; color: #d9e2f7; }
-/* scène 3 : les espaces */
-#s3-title { left: 0; right: 0; top: 64px; text-align: center; font-size: 56px; color: #141c2e; }
-#s3-sub { left: 0; right: 0; top: 142px; text-align: center; font-size: 27px; color: #586174; }
-#s3-sub b { color: #23468f; }
-.card { top: 226px; width: 224px; height: 346px; background: #fff; border-radius: 22px; border-top: 10px solid var(--c); box-shadow: 0 18px 40px rgba(20,28,46,.12); padding: 24px 22px; color: #141c2e; display: flex; flex-direction: column; gap: 12px; }
-.card .ic { width: 86px; height: 86px; border-radius: 50%; background: color-mix(in srgb, var(--c) 14%, #fff); display: grid; place-items: center; }
-.card .ic img { width: 54px; height: 54px; }
-.card h3 { font-family: "Literata", serif; font-weight: 800; font-size: 25px; line-height: 1.12; margin: 0; color: var(--c); }
-.card p { margin: 0; font-size: 20px; line-height: 1.35; color: #3b4558; }
-.card .n { margin-top: auto; font-weight: 700; font-size: 19px; color: var(--c); }
-/* scènes des espaces : texte à gauche, téléphone à droite */
-.sc-eye { left: 84px; top: 58px; }
-.sc-title { left: 84px; top: 92px; width: 760px; font-size: 52px; color: #141c2e; }
-.sc-title span { color: var(--c); }
-.row { left: 88px; width: 740px; display: flex; align-items: center; gap: 18px; font-size: 27px; font-weight: 700; color: #141c2e; line-height: 1.15; }
-.row img { width: 50px; height: 50px; flex: none; }
-.row small { display: block; font-size: 20px; font-weight: 400; color: #586174; margin-top: 3px; }
-.tag { height: 46px; padding: 0 18px; border-radius: 12px; background: #fff; border-left: 6px solid var(--c); box-shadow: 0 8px 18px rgba(20,28,46,.08); display: flex; align-items: center; font-size: 20px; font-weight: 700; color: #141c2e; white-space: nowrap; }
-.tile { width: 238px; height: 150px; border-radius: 18px; background: #fff; box-shadow: 0 12px 26px rgba(20,28,46,.09); padding: 16px 18px; color: #141c2e; }
-.tile img { width: 40px; height: 40px; }
-.tile b { display: block; font-size: 22px; margin-top: 8px; line-height: 1.12; }
-.tile small { display: block; font-size: 17px; color: #586174; margin-top: 4px; line-height: 1.25; }
-.badge { padding: 6px 16px; border-radius: 999px; background: #c0392b; color: #fff; font-weight: 700; font-size: 18px; letter-spacing: .12em; text-transform: uppercase; }
-.mini-cover { width: 92px; height: 130px; border-radius: 4px; box-shadow: 0 12px 22px rgba(20,28,46,.25); background-size: cover; }
-#cert { left: 520px; top: 470px; width: 300px; height: 196px; border-radius: 10px; background: #fbf7ef; border: 2px solid #c9a24a; box-shadow: 0 18px 36px rgba(20,28,46,.22); color: #1e2a5a; text-align: center; padding: 18px 16px; }
+#bg-night { inset: 0; background: radial-gradient(900px 560px at 78% 8%, rgba(195,154,69,.32), transparent 70%), linear-gradient(150deg, var(--night2), var(--night)); }
+#bg-ivory { inset: 0; background: radial-gradient(1100px 500px at 50% -120px, rgba(195,154,69,.16), transparent 70%), var(--ivory); opacity: 0; }
+#pattern { inset: -240px; opacity: .08; }
+#halo { left: 700px; top: -300px; width: 900px; height: 900px; border-radius: 50%; opacity: 0; }
+.eyebrow { font-weight: 700; letter-spacing: .2em; text-transform: uppercase; font-size: 19px; color: var(--gold); }
+h1, h2, h3 { font-family: "Literata", serif; font-weight: 800; margin: 0; line-height: 1.08; }
+h2 span { color: var(--c, var(--em)); }
+/* 1. ouverture */
+#o-star { left: 500px; top: 34px; width: 280px; height: 280px; }
+#o-star-x { width: 300px; height: 300px; }
+#o-star path { fill: none; stroke: var(--gold2); stroke-width: 1.6; stroke-linejoin: round; }
+#o-logo { left: 565px; top: 99px; width: 150px; height: 150px; border-radius: 34px; filter: drop-shadow(0 18px 30px rgba(0,0,0,.4)); }
+#o-eye { left: 0; right: 0; top: 362px; text-align: center; color: var(--gold2); }
+#o-title { left: 0; right: 0; top: 396px; text-align: center; font-size: 96px; color: #fff; }
+#o-title span, #f-title span { color: var(--gold2); }
+#o-ar { left: 0; right: 0; top: 508px; text-align: center; font-family: "Lisan Naskh"; font-size: 50px; direction: rtl; color: #fff; line-height: 1.5; }
+#o-slogan { left: 0; right: 0; top: 610px; text-align: center; font-size: 28px; font-style: italic; color: rgba(255,255,255,.82); }
+/* 2. le campus */
+#c-eye { left: 0; right: 0; top: 70px; text-align: center; }
+#c-title { left: 40px; right: 40px; top: 106px; text-align: center; font-size: 50px; }
+#c-title span { color: var(--em); }
+.verb { top: 236px; width: 220px; text-align: center; }
+.verb .k { position: relative; width: 132px; height: 132px; margin: 0 auto 14px; }
+.verb .k svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.verb .k img { position: absolute; left: 36px; top: 36px; width: 60px; height: 60px; }
+.verb b { font-family: "Literata", serif; font-size: 30px; display: block; }
+.verb small { display: block; font-size: 19px; color: var(--muted); margin-top: 4px; line-height: 1.3; }
+#figs { left: 0; right: 0; top: 566px; display: flex; justify-content: center; gap: 14px; }
+.fig { position: relative; padding: 12px 22px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 10px 24px rgba(18,26,44,.08); text-align: center; }
+.fig b { display: block; font-family: "Literata", serif; font-size: 34px; color: var(--night); line-height: 1.05; }
+.fig small { font-size: 17px; color: var(--muted); font-weight: 700; }
+/* 3. les cinq espaces */
+#e-eye { left: 0; right: 0; top: 56px; text-align: center; }
+#e-title { left: 0; right: 0; top: 88px; text-align: center; font-size: 56px; }
+#e-sub { left: 0; right: 0; top: 162px; text-align: center; font-size: 25px; color: var(--muted); }
+.card { top: 236px; width: 226px; height: 360px; border-radius: 24px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 18px 40px rgba(18,26,44,.10); padding: 0 20px 22px; overflow: hidden; display: flex; flex-direction: column; gap: 10px; }
+.card .top { margin: 0 -20px 4px; height: 118px; background: linear-gradient(140deg, var(--c), color-mix(in srgb, var(--c) 62%, #000)); position: relative; }
+.card .top svg { position: absolute; right: -26px; top: -26px; width: 120px; height: 120px; opacity: .22; }
+.card .top img { position: absolute; left: 20px; top: 26px; width: 64px; height: 64px; }
+.card h3 { font-size: 24px; line-height: 1.12; color: var(--c); }
+.card p { margin: 0; font-size: 18.5px; line-height: 1.35; color: #3b4558; }
+.card .n { margin-top: auto; font-weight: 700; font-size: 18px; color: var(--c); display: flex; gap: 8px; align-items: center; }
+.card .n i { flex: 1; height: 6px; border-radius: 9px; background: color-mix(in srgb, var(--c) 18%, #fff); }
+/* scènes : texte à gauche, téléphone à droite */
+.sc-eye { left: 84px; top: 60px; }
+.sc-title { left: 84px; top: 94px; width: 780px; font-size: 52px; }
+.row { left: 88px; width: 760px; display: flex; align-items: center; gap: 18px; font-size: 26px; font-weight: 700; line-height: 1.15; }
+.row .ic { width: 58px; height: 58px; flex: none; border-radius: 16px; display: grid; place-items: center; background: color-mix(in srgb, var(--c) 12%, #fff); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--c) 22%, transparent); }
+.row .ic img { width: 36px; height: 36px; }
+.row small { display: block; font-size: 19px; font-weight: 400; color: var(--muted); margin-top: 3px; }
+.tag { height: 44px; padding: 0 16px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); box-shadow: inset 5px 0 0 var(--c), 0 6px 14px rgba(18,26,44,.06); display: flex; align-items: center; font-size: 19px; font-weight: 700; white-space: nowrap; }
+.tile { width: 244px; height: 146px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 12px 26px rgba(18,26,44,.08); padding: 16px 18px; }
+.tile img { width: 38px; height: 38px; }
+.tile b { display: block; font-size: 21px; margin-top: 8px; line-height: 1.12; }
+.tile small { display: block; font-size: 16.5px; color: var(--muted); margin-top: 4px; line-height: 1.25; }
+.sub3 { width: 246px; height: 214px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); box-shadow: 0 12px 26px rgba(18,26,44,.08); padding: 0 16px 16px; overflow: hidden; }
+.sub3 .bar { height: 10px; margin: 0 -16px 14px; background: var(--c); }
+.sub3 img { width: 40px; height: 40px; }
+.sub3 b { display: block; font-family: "Literata", serif; font-size: 22px; color: var(--c); margin: 6px 0 6px; line-height: 1.12; }
+.sub3 small { display: block; font-size: 16.5px; color: #3b4558; line-height: 1.3; }
+.mini-cover { width: 74px; height: 105px; border-radius: 4px; box-shadow: 0 10px 18px rgba(18,26,44,.22); background-size: cover; }
+/* le parcours en étoiles (scène 5) */
+#path { left: 70px; top: 300px; width: 780px; height: 360px; }
+.pk { position: absolute; width: 74px; height: 74px; margin: -37px 0 0 -37px; }
+.pk svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.pk .ico { position: absolute; inset: 0; display: grid; place-items: center; }
+.pk .ico svg { position: static; width: 32px; height: 32px; }
+.pk .ring { position: absolute; inset: -12px; border-radius: 50%; border: 3px solid rgba(15,122,88,.45); opacity: 0; }
+.plab { position: absolute; width: 150px; margin-left: -75px; text-align: center; font-size: 16px; font-weight: 700; color: var(--muted); line-height: 1.2; }
+.plab b { display: block; font-size: 13px; letter-spacing: .1em; text-transform: uppercase; color: var(--gold); }
+/* certificat */
+#cert { left: 548px; top: 456px; width: 300px; height: 196px; border-radius: 12px; background: #fbf7ef; border: 2px solid var(--gold); box-shadow: 0 18px 36px rgba(18,26,44,.22); color: var(--night); text-align: center; padding: 18px 16px; }
 #cert small { display: block; font-size: 13px; letter-spacing: .2em; text-transform: uppercase; color: #9a7a2a; font-weight: 700; }
-#cert b { display: block; font-family: "Literata", serif; font-size: 25px; margin: 6px 0 4px; }
-#cert i { display: block; font-size: 15px; color: #586174; }
-#cert .qr { position: absolute; right: 14px; bottom: 14px; width: 52px; height: 52px; background:
-  conic-gradient(#1e2a5a 25%, transparent 0 50%, #1e2a5a 0 75%, transparent 0) 0 0 / 13px 13px; border: 4px solid #1e2a5a; }
-#cert .seal { position: absolute; left: 16px; bottom: 14px; width: 52px; height: 52px; border-radius: 50%; background: radial-gradient(#f0b24a 55%, #c9a24a 56%); }
+#cert b { display: block; font-family: "Literata", serif; font-size: 23px; margin: 8px 0 4px; line-height: 1.15; }
+#cert i { display: block; font-size: 14px; color: var(--muted); }
+#cert .qr { position: absolute; right: 14px; bottom: 14px; width: 50px; height: 50px; background: conic-gradient(var(--night) 25%, transparent 0 50%, var(--night) 0 75%, transparent 0) 0 0 / 12.5px 12.5px; border: 4px solid var(--night); }
+#cert .seal { position: absolute; left: 16px; bottom: 12px; width: 54px; height: 54px; }
 /* téléphone */
-#phone { left: 892px; top: 40px; width: 318px; height: 640px; border-radius: 46px; background: #0d1226; padding: 14px; box-shadow: 0 30px 60px rgba(20,28,46,.35); }
-#screen { position: relative; width: 290px; height: 612px; border-radius: 34px; overflow: hidden; background: #eef1f4; }
+#phone { left: 900px; top: 40px; width: 318px; height: 640px; border-radius: 46px; background: #0b1022; padding: 14px; box-shadow: 0 30px 60px rgba(18,26,44,.38); }
+#screen { position: relative; width: 290px; height: 612px; border-radius: 34px; overflow: hidden; background: var(--ivory); }
 #screen img { position: absolute; left: 0; top: 0; width: 290px; opacity: 0; }
-#notch { position: absolute; left: 50%; top: 22px; width: 92px; height: 22px; margin-left: -46px; background: #0d1226; border-radius: 12px; z-index: 3; }
+#notch { position: absolute; left: 50%; top: 6px; width: 70px; height: 16px; margin-left: -35px; background: #0b1022; border-radius: 12px; z-index: 3; }
 /* fin */
-#c-logo { left: 84px; top: 92px; width: 116px; height: 116px; }
-#c-title { left: 84px; top: 236px; font-size: 76px; color: #141c2e; }
-#c-title span { color: #23468f; }
-#c-sub { left: 88px; top: 336px; width: 740px; font-size: 28px; color: #3b4558; line-height: 1.35; }
-#cta { left: 88px; top: 470px; height: 72px; padding: 0 30px; border-radius: 999px; background: #1e2a5a; color: #fff; display: flex; align-items: center; gap: 14px; font-size: 30px; font-weight: 700; box-shadow: 0 14px 30px rgba(30,42,90,.3); }
-#cta b { color: #f0b24a; }
-#c-note { left: 92px; top: 570px; width: 760px; font-size: 22px; color: #586174; }
-#c-ar { left: 92px; top: 612px; font-family: "Lisan Naskh"; font-size: 34px; color: #23468f; direction: rtl; }
-#fade { inset: 0; background: #16204a; opacity: 0; }
+#f-logo { left: 84px; top: 84px; width: 118px; height: 118px; border-radius: 28px; }
+#f-title { left: 84px; top: 228px; font-size: 78px; color: #fff; }
+#f-sub { left: 88px; top: 330px; width: 760px; font-size: 27px; color: rgba(255,255,255,.86); line-height: 1.38; }
+#cta { left: 88px; top: 470px; height: 74px; padding: 0 12px 0 30px; border-radius: 999px; background: var(--surface); color: var(--night); display: flex; align-items: center; gap: 18px; font-size: 31px; font-weight: 700; box-shadow: 0 14px 30px rgba(0,0,0,.3); }
+#cta em { font-style: normal; background: linear-gradient(135deg, var(--gold2), var(--gold)); padding: 12px 22px; border-radius: 999px; font-size: 25px; }
+#f-note { left: 92px; top: 574px; width: 800px; font-size: 20px; white-space: nowrap; color: rgba(255,255,255,.72); }
+#f-ar { left: 92px; top: 614px; font-family: "Lisan Naskh"; font-size: 34px; color: var(--gold2); direction: rtl; }
+#fade { inset: 0; background: var(--night); opacity: 0; }
 </style></head><body>
 <div id="stage">
-  <div class="abs bg-navy"></div>
-  <svg id="pattern" class="abs" width="1680" height="1120" aria-hidden="true"><defs><pattern id="st" width="120" height="120" patternUnits="userSpaceOnUse">
-    <g fill="none" stroke="#f0b24a" stroke-width="1.6" transform="translate(60 60)"><rect x="-30" y="-30" width="60" height="60"/><rect x="-30" y="-30" width="60" height="60" transform="rotate(45)"/><circle r="12"/></g>
-    <path d="M0 60H30M90 60H120M60 0V30M60 90V120" stroke="#f0b24a" stroke-width="1.2"/></pattern></defs><rect width="100%" height="100%" fill="url(#st)"/></svg>
-  <div class="abs bg-light" id="light"></div>
-  <div class="abs" id="blob"></div><div class="abs" id="blob2"></div>
+  <div class="abs" id="bg-night"></div>
+  <svg id="pattern" class="abs" width="1760" height="1200" aria-hidden="true"><defs><pattern id="st" width="132" height="132" patternUnits="userSpaceOnUse">
+    <path transform="translate(16 16)" d="M50 2 63 15h22v22l13 13-13 13v22H63L50 98 37 85H15V63L2 50l13-13V15h22z" fill="none" stroke="#c39a45" stroke-width="1.6"/></pattern></defs><rect width="100%" height="100%" fill="url(#st)"/></svg>
+  <div class="abs" id="bg-ivory"></div>
+  <div class="abs" id="halo"></div>
 
-  <!-- scène 1 : la marque -->
-  <img id="logo" class="abs" src="img/logo.png" alt="">
-  <div id="s1-eyebrow" class="abs eyebrow">Éditions Lisân</div>
-  <h1 id="s1-title" class="abs">Lisân <span>Campus</span></h1>
-  <div id="s1-ar" class="abs">لِسَانٌ عَرَبِيٌّ مُبِينٌ</div>
-  <div id="s1-slogan" class="abs">La langue qui ouvre les portes</div>
+  <!-- 1. ouverture -->
+  <svg id="o-star" class="abs" viewBox="0 0 100 100" aria-hidden="true"><path id="o-p1" d="M50 2 63 15h22v22l13 13-13 13v22H63L50 98 37 85H15V63L2 50l13-13V15h22z"/><path id="o-p2" d="M50 12 60 22h18v18l10 10-10 10v18H60L50 88 40 78H22V60L12 50l10-10V22h18z" opacity=".55"/></svg>
+  <img id="o-logo" class="abs" src="img/logo.png" alt="">
+  <div id="o-eye" class="abs eyebrow">Éditions Lisân</div>
+  <h1 id="o-title" class="abs">Lisân <span>Campus</span></h1>
+  <div id="o-ar" class="abs">لِسَانٌ عَرَبِيٌّ مُبِينٌ</div>
+  <div id="o-slogan" class="abs">La langue qui ouvre les portes</div>
 
-  <!-- scène 2 : la collection -->
-  <div id="s2-eyebrow" class="abs eyebrow">La collection</div>
-  <h2 id="s2-title" class="abs">Les livres des Éditions Lisân</h2>
-  <div id="s2-sub" class="abs">Huit livres pour apprendre l’arabe, lire le Coran et vivre l’islam</div>
-  <div id="covers"></div>
-  <div class="abs chips"><div class="chip" id="ch0"><img src="../../site/emoji/1f4d6.svg" alt="">Livre de l’élève</div>
-    <div class="chip" id="ch1"><img src="../../site/emoji/270d.svg" alt="">Cahier d’exercices</div>
-    <div class="chip" id="ch2"><img src="../../site/emoji/1f9d1-1f3fe-200d-1f3eb.svg" alt="">Livret du maître</div></div>
-  <div id="s2-kit" class="abs">Chaque livre en kit complet · à lire en ligne dans la Bibliothèque</div>
+  <!-- 2. le campus -->
+  <div id="c-eye" class="abs eyebrow">Un campus numérique</div>
+  <h2 id="c-title" class="abs">Tout pour apprendre, <span>au même endroit</span></h2>
+  <div id="verbs"></div>
+  <div class="abs" id="figs"></div>
 
-  <!-- scène 3 : les espaces -->
-  <h2 id="s3-title" class="abs">Cinq espaces pour apprendre</h2>
-  <div id="s3-sub" class="abs"><b>Plus de 400 leçons</b> · la première leçon de chaque espace est libre</div>
+  <!-- 3. les espaces -->
+  <div id="e-eye" class="abs eyebrow">Cinq espaces</div>
+  <h2 id="e-title" class="abs">Des univers pour chaque besoin</h2>
+  <div id="e-sub" class="abs">La première leçon de chaque espace est en accès libre</div>
   <div id="cards"></div>
 
-  <!-- scènes 4 à 10 (construites par le script) -->
+  <!-- scènes à texte et téléphone (construites par le script) -->
   <div id="scenes"></div>
-  <div class="abs" id="cert"><small>Certificat de réussite</small><b>Lire le Coran pas à pas 2</b><i>Éditions Lisân · LCC-2026-…</i><span class="seal"></span><span class="qr"></span></div>
+  <div class="abs" id="path"></div>
+  <div class="abs" id="cert"><small>Certificat de réussite</small><b>Introduction au droit</b><i>Éditions Lisân · vérifiable en ligne</i>
+    <svg class="seal" viewBox="0 0 100 100"><path d="M50 2 63 15h22v22l13 13-13 13v22H63L50 98 37 85H15V63L2 50l13-13V15h22z" fill="#c39a45" stroke="#e5c87e" stroke-width="4"/></svg><span class="qr"></span></div>
 
-  <!-- téléphone -->
   <div class="abs" id="phone"><div id="screen"><div id="notch"></div><div id="shots"></div></div></div>
 
   <!-- fin -->
-  <img id="c-logo" class="abs" src="img/logo.png" alt="">
-  <h2 id="c-title" class="abs">Lisân <span>Campus</span></h2>
-  <div id="c-sub" class="abs">L’arabe, le Coran, l’islam, le droit et l’IA : des leçons courtes, à lire et à écouter, à votre rythme.</div>
-  <div class="abs" id="cta">Gratuit · <b>lisan-campus.pages.dev</b></div>
-  <div class="abs" id="c-note">Connexion Google · s’installe comme une application · même hors connexion</div>
-  <div class="abs" id="c-ar">ٱللُّغَةُ ٱلَّتِي تَفْتَحُ ٱلْأَبْوَابَ</div>
+  <img id="f-logo" class="abs" src="img/logo.png" alt="">
+  <h2 id="f-title" class="abs">Lisân <span>Campus</span></h2>
+  <div id="f-sub" class="abs">L’arabe, le Coran, l’islam en famille, la Licence 1 de droit et l’intelligence artificielle : apprendre, lire, s’exercer et progresser, à son rythme.</div>
+  <div class="abs" id="cta">lisan-campus.pages.dev <em>Gratuit</em></div>
+  <div class="abs" id="f-note">Téléphone et ordinateur · s’installe comme une application · hors connexion</div>
+  <div class="abs" id="f-ar">ٱللُّغَةُ ٱلَّتِي تَفْتَحُ ٱلْأَبْوَابَ</div>
 
   <div class="abs" id="fade"></div>
 </div>
 <script>
-// ---------- minutage (secondes) : chaque scène [début, fin]
-const T = 62;
+// ---------- minutage (secondes) : chaque scène [début, fin] ; repris par son.py au moyen de cues.json (node cues.js)
+const T = 76;
 const S = {
-  marque: [0, 3.3], collection: [3.3, 8.7], espaces: [8.7, 13.4], arabe: [13.4, 18.8], coran: [18.8, 24.6], islam: [24.6, 29.6],
-  droit: [29.6, 37.8], ia: [37.8, 43.0], outils: [43.0, 49.0], biblio: [49.0, 54.8], fin: [54.8, 62] };
+  ouverture: [0, 4.2], campus: [4.2, 9.8], espaces: [9.8, 15.2], accueil: [15.2, 21.6], parcours: [21.6, 28.2], lecon: [28.2, 34.6],
+  langue: [34.6, 42.2], droit: [42.2, 50.2], ia: [50.2, 55.4], progres: [55.4, 62.2], biblio: [62.2, 68.8], fin: [68.8, 76] };
 const E = c => `../../site/emoji/${c}.svg`;
-const COVERS = ['je-lis-l-arabe-0', 'je-parle-arabe-1', 'je-parle-arabe-2', 'je-parle-arabe-3', 'lire-le-coran', 'lire-le-coran-2', 'vivre-l-islam-1', 'vivre-l-islam-2']
-  .map(b => `../../site/livres/couv/Lisan_${b}_eleve.webp`);
+const KH = 'M50 2 63 15h22v22l13 13-13 13v22H63L50 98 37 85H15V63L2 50l13-13V15h22z';
+const VERBS = [['#0f7a58', '1f4d6', 'Apprendre', 'des leçons courtes, dans l’ordre'], ['#1f3f86', '1f4da', 'Lire', 'les livres et les textes officiels'],
+  ['#7c4dde', '270d', 'S’exercer', 'exercices, évaluations, révisions'], ['#c39a45', '1f3c6', 'Progresser', 'objectifs, distinctions, certificats']];
+const FIGS = [['5', 'espaces'], ['27', 'parcours'], ['420', 'leçons'], ['821', 'questions d’évaluation'], ['1 595', 'cartes de révision']];
 const CARDS = [
   ['#2b3f8f', '1f4ac', 'Apprendre l’arabe', 'Lire, écrire et parler, du niveau 0 au niveau 3', '53 leçons'],
-  ['#0e6b4f', '1f4d6', 'Lire le Coran pas à pas', 'Les lettres, puis le tajwîd : deux niveaux', '83 leçons'],
+  ['#0e6b4f', '1f4d6', 'Lire le Coran pas à pas', 'Les lettres, puis le tajwîd en 40 leçons', '83 leçons'],
   ['#b0601a', '1f54c', 'Vivre l’islam en famille', 'La pratique et la foi, niveaux 1 et 2', '60 leçons'],
-  ['#23468f', '2696', 'Droit · Licence 1', 'Dix matières et un roman juridique en anglais', '189 leçons'],
-  ['#5a3fc0', '1f916', 'Formation à l’IA avec Claude', 'Huit parcours pour toutes les disciplines', '35 leçons']];
-// scènes des espaces : couleur, sur-titre, titre (partie en couleur entre * *), lignes, éléments en plus, captures du téléphone
+  ['#1f3f86', '2696', 'Droit · Licence 1', 'Dix matières et un roman juridique en anglais', '189 leçons'],
+  ['#5a3fc0', '1f916', 'Formation à l’IA', 'Huit parcours pour toutes les disciplines', '35 leçons']];
+const COVERS = ['je-lis-l-arabe-0', 'je-parle-arabe-1', 'je-parle-arabe-2', 'je-parle-arabe-3', 'lire-le-coran', 'lire-le-coran-2', 'vivre-l-islam-1', 'vivre-l-islam-2']
+  .map(b => `../../site/livres/couv/Lisan_${b}_eleve.webp`);
+// scènes à texte : couleur, sur-titre, titre (partie en couleur entre * *), étiquettes, lignes, tuiles, encadrés, captures du téléphone [image, défilement]
 const SC = [
-  { k: 'arabe', c: '#2b3f8f', eye: 'Apprendre l’arabe', title: 'De la première lettre *à la conversation*',
-    rows: [['1f4da', 'Je lis l’arabe ! puis Je parle arabe !', 'du niveau 0 au niveau 3, avec les livres de la collection'],
-           ['1f4ac', 'Dialogues, grammaire, expressions', 'chaque leçon suit une unité du livre'],
-           ['1f3a8', 'Voyelles en couleur', 'une police dessinée pour bien lire'],
-           ['1f50a', 'Mots et phrases à écouter', 'et un mini-exercice à la fin de chaque leçon']],
-    shots: [['s_arabe', 480]] },
-  { k: 'coran', c: '#0e6b4f', eye: 'Lire le Coran pas à pas', title: 'Lire juste, *réciter avec le tajwîd*', badge: 'Nouveau : niveau 2',
-    rows: [['1f4d6', 'Niveau 1 : les lettres et les signes', '43 leçons, jusqu’à la lecture des versets'],
-           ['1f31f', 'Niveau 2 : le tajwîd en 40 leçons', 'points d’articulation, noûn sâkin, madd, arrêts (Ḥafṣ)'],
-           ['1f3a7', 'Récitation d’al-Ḥouṣarî', 'chaque verset et chaque mot du Coran à écouter'],
-           ['270d', 'Livre, cahier et livret du maître', 'pour la classe, la madrasa ou la maison']],
-    shots: [['s_coran1', 380], ['s_coran', 460]] },
-  { k: 'islam', c: '#b0601a', eye: 'Vivre l’islam en famille', title: 'Pratiquer et comprendre *sa religion*',
-    rows: [['1f54c', 'Niveau 1 : je pratique ma religion', 'la purification, les ablutions, la prière, le jeûne, la zakât, le pèlerinage'],
-           ['1f31f', 'Niveau 2 : je crois et je comprends', 'les piliers de la foi expliqués simplement'],
-           ['1f46a', 'À partager avec les enfants', '60 séances à lire et à écouter ensemble']],
-    shots: [['s_islam', 480]] },
-  { k: 'droit', c: '#23468f', eye: 'Droit · Première année', title: 'La Licence 1 *de droit*',
+  { k: 'accueil', c: '#0f7a58', eye: 'Chaque jour', title: 'Un tableau de bord *personnel*',
+    rows: [['27a1', 'Reprendre là où l’on s’est arrêté', 'la leçon en cours, en un geste'], ['1f3af', 'Des objectifs du jour', 'dix minutes d’étude, une leçon, les révisions'],
+           ['1f525', 'Série, points d’expérience et division', 'la régularité se voit et se récompense'], ['1f501', 'Les questions à revoir', 'au bon moment, pour ne pas oublier']],
+    shots: [['s_campus', 430]] },
+  { k: 'parcours', c: '#c39a45', eye: 'Apprendre pas à pas', title: 'Chaque parcours, *un chemin d’étoiles*',
+    lead: 'Les leçons s’ouvrent l’une après l’autre, jusqu’à l’évaluation et au certificat.', shots: [['s_apprendre', 320]] },
+  { k: 'lecon', c: '#1f3f86', eye: 'Les leçons', title: 'Lire et écouter, *à son rythme*',
+    rows: [['1f3a7', 'Chaque leçon s’écoute', 'sept vitesses, même écran éteint ou dans une autre application'], ['1f4d6', 'Le passage lu est surligné', 'toucher un paragraphe y conduit l’écoute'],
+           ['2705', 'Un mini-exercice de trois questions', 'réussi sans faute, il ouvre la leçon suivante'], ['270d', 'Exercices corrigés et schémas', 'pour s’entraîner et retenir']],
+    shots: [['s_lecon', 470]] },
+  { k: 'langue', c: '#0e6b4f', eye: 'Langue arabe et sciences islamiques', title: 'L’arabe, le Coran *et la foi au quotidien*',
+    subs: [['#2b3f8f', '1f4ac', 'Apprendre l’arabe', 'Du niveau 0 au niveau 3 : lecture, dialogues, grammaire, voyelles en couleur'],
+           ['#0e6b4f', '1f4d6', 'Lire le Coran', 'Les lettres et les signes, puis le tajwîd, avec la récitation d’al-Ḥouṣarî'],
+           ['#b0601a', '1f54c', 'Vivre l’islam en famille', 'La purification, la prière, le jeûne et les piliers de la foi, à partager']],
+    covers: true, shots: [['s_coran', 420], ['s_arabe', 380]] },
+  { k: 'droit', c: '#1f3f86', eye: 'Licence 1 de droit', title: 'Réviser toute *la première année*',
     tags: ['Introduction au droit', 'Droit civil', 'Droit musulman', 'Organisation judiciaire', 'Droit constitutionnel', 'Méthodologie', 'Expression écrite', 'Anglais juridique', 'Informatique', 'Économie politique'],
-    rows: [['270d', 'Exercices corrigés et schémas', 'à la fin de chaque leçon de cours'],
-           ['1f4d6', 'The Missing Will, roman juridique en anglais', 'illustré, à lire et à écouter chapitre par chapitre'],
-           ['1f4f0', 'Actualité juridique commentée', 'chaque information de Côte d’Ivoire expliquée pas à pas, avec un test']],
-    shots: [['s_droit', 380], ['s_roman', 360], ['s_actus', 380]] },
-  { k: 'ia', c: '#5a3fc0', eye: 'Formation à l’IA avec Claude', title: 'Bien se servir de l’IA, *dans toutes les disciplines*',
+    rows: [['1f4dd', 'Exercices d’application et sujets d’examen corrigés', 'la méthode du cas pratique et de la dissertation'],
+           ['1f4f0', 'L’actualité juridique ivoirienne commentée', 'chaque information expliquée pas à pas, avec un test'],
+           ['1f4d5', 'The Missing Will, un roman juridique en anglais', 'à lire et à écouter, chapitre par chapitre']],
+    shots: [['s_droit', 380], ['s_actus', 400]] },
+  { k: 'ia', c: '#5a3fc0', eye: 'Formation à l’IA avec Claude', title: 'L’intelligence artificielle, *bien utilisée*',
     tags: ['Comprendre l’IA', 'Bien demander', 'Étudier avec Claude', 'Enseigner et former', 'Travailler avec Claude', 'L’IA juridique', 'Éthique et sécurité', 'Projets pratiques'],
-    rows: [['1f50d', 'Vérifier ce que dit l’IA', 'repérer les erreurs et les inventions'],
-           ['1f4dd', 'Des consignes prêtes à copier', 'pour réviser, rédiger, préparer un cours']],
-    shots: [['s_ia', 460]] },
-  { k: 'outils', c: '#1d7a45', eye: 'Pour bien apprendre', title: 'Des outils pour *retenir durablement*',
-    tiles: [['1f3a7', 'Écoute des leçons', 'sept vitesses, même écran éteint'],
-            ['2705', 'Mini-exercices', 'trois questions pour valider chaque leçon'],
-            ['1f0cf', 'Cartes de révision', 'retournez, répondez, progressez'],
-            ['1f501', 'Révisions espacées', 'les erreurs reviennent à 1, 3, 7 et 21 jours'],
-            ['1f525', 'Série, XP et distinctions', 'objectifs du jour et classement de la semaine'],
-            ['1f50d', 'Recherche', 'dans toutes les leçons du Campus']],
-    shots: [['s_campus', 240]] },
+    rows: [['1f50d', 'Vérifier ce que dit l’IA', 'repérer les erreurs et les inventions'], ['1f4cb', 'Des consignes prêtes à copier', 'pour réviser, rédiger, préparer un cours']],
+    shots: [['s_ia', 440]] },
+  { k: 'progres', c: '#7c4dde', eye: 'Réviser et progresser', title: 'Retenir durablement, *progresser chaque jour*',
+    tiles: [['1f501', 'Révisions espacées', 'les erreurs reviennent à 1, 3, 7 et 21 jours'], ['1f0cf', 'Cartes de révision', 'retournez, répondez, progressez'],
+            ['1f3c5', 'Distinctions', 'seize distinctions à obtenir par son travail'], ['1f3c6', 'Classement de la semaine', 'facultatif, pour se motiver ensemble'],
+            ['1f514', 'Rappel quotidien', 'à l’heure choisie, sur le téléphone ou l’agenda'], ['1f50e', 'Recherche', 'dans toutes les leçons du Campus']],
+    shots: [['s_progres', 520], ['s_revisions', 200]] },
   { k: 'biblio', c: '#9a6a14', eye: 'Bibliothèque et certificats', title: 'Lire, réussir, *faire reconnaître*',
-    rows: [['1f4da', 'Les livres de la collection en ligne', 'livre de l’élève et cahier d’exercices'],
-           ['1f4c4', 'Les cours de droit en PDF', 'neuf matières, le Code civil, la Constitution à jour de 2023'],
-           ['1f3c5', 'Une évaluation par parcours', '20 questions, 80 % pour réussir, puis votre avis'],
-           ['1f393', 'Un certificat vérifiable', 'numéro unique et code QR']],
-    shots: [['s_biblio', 470]] },
+    rows: [['1f4da', 'Les livres des Éditions Lisân', 'livre de l’élève et cahier d’exercices, à lire en ligne'], ['1f3db', 'Les textes officiels et les cours', 'Constitution, Codes civils, Charte des Nations Unies'],
+           ['1f3af', 'Une évaluation par parcours', '20 questions, 80 % pour réussir'], ['1f393', 'Un certificat vérifiable', 'numéro unique et code QR']],
+    shots: [['s_biblio', 420], ['s_quiz', 260]] },
 ];
 
-// ---------- construction des éléments
+// ---------- construction
 const $ = id => document.getElementById(id);
-const stage = $('stage');
 const add = (parent, html) => { parent.insertAdjacentHTML('beforeend', html); return parent.lastElementChild; };
-COVERS.forEach((src, k) => add($('covers'), `<div class="abs cover" id="cv${k}" style="background-image:url(${src})"></div>`));
-CARDS.forEach(([c, e, h, p, n], k) => add($('cards'), `<div class="abs card" id="k${k}" style="--c:${c}"><div class="ic"><img src="${E(e)}" alt=""></div><h3>${h}</h3><p>${p}</p><div class="n">${n}</div></div>`));
-const SHOTS = [];
+const khatam = (fill, stroke, sw) => `<svg viewBox="0 0 100 100"><path d="${KH}" fill="${fill}" stroke="${stroke || 'none'}" stroke-width="${sw || 0}"/></svg>`;
+VERBS.forEach(([c, e, b, s], k) => add($('verbs'), `<div class="abs verb" id="v${k}"><div class="k">${khatam(`color-mix(in srgb, ${c} 14%, #fffdf8)`, c, 3)}<img src="${E(e)}" alt=""></div><b style="color:${c}">${b}</b><small>${s}</small></div>`));
+FIGS.forEach(([n, t], k) => add($('figs'), `<div class="fig" id="g${k}"><b>${n}</b><small>${t}</small></div>`));
+CARDS.forEach(([c, e, h, p, n], k) => add($('cards'), `<div class="abs card" id="k${k}" style="--c:${c}"><div class="top">${khatam('#fff')}<img src="${E(e)}" alt=""></div><h3>${h}</h3><p>${p}</p><div class="n">${n}<i></i></div></div>`));
+const SHOTS = [], CUES = [];                       // CUES : [temps, sorte, scène] pour la bande-son
 SC.forEach(sc => {
   const box = $('scenes'), id = sc.k, title = sc.title.replace(/\*(.+?)\*/, '<span>$1</span>');
   add(box, `<div class="abs eyebrow sc-eye" id="${id}-eye" style="color:${sc.c}">${sc.eye}</div>`);
   add(box, `<h2 class="abs sc-title" id="${id}-title" style="--c:${sc.c}">${title}</h2>`);
-  if (sc.badge) add(box, `<div class="abs badge" id="${id}-badge" style="left:88px">${sc.badge}</div>`);
-  const cols = (sc.tags || []).length > 8 ? 3 : 2, w = cols === 3 ? 240 : 360;
-  (sc.tags || []).forEach((t, j) => add(box, `<div class="abs tag" id="${id}-tag${j}" style="--c:${sc.c};left:${88 + (j % cols) * (w + 8)}px;width:${w}px;font-size:${cols === 3 ? 18 : 20}px">${t}</div>`));
-  (sc.rows || []).forEach(([e, b, s], j) => add(box, `<div class="abs row" id="${id}-row${j}"><img src="${E(e)}" alt=""><div>${b}<small>${s}</small></div></div>`));
-  (sc.tiles || []).forEach(([e, b, s], j) => add(box, `<div class="abs tile" id="${id}-tile${j}" style="left:${88 + (j % 3) * 254}px"><img src="${E(e)}" alt=""><b>${b}</b><small>${s}</small></div>`));
+  if (sc.lead) add(box, `<div class="abs row" id="${id}-lead" style="font-weight:400;font-size:25px;color:var(--muted);width:760px">${sc.lead}</div>`);
+  const cols = (sc.tags || []).length > 8 ? 3 : 2, w = cols === 3 ? 246 : 370;
+  (sc.tags || []).forEach((t, j) => add(box, `<div class="abs tag" id="${id}-tag${j}" style="--c:${sc.c};left:${88 + (j % cols) * (w + 8)}px;width:${w}px;font-size:${cols === 3 ? 17.5 : 19}px">${t}</div>`));
+  (sc.rows || []).forEach(([e, b, s], j) => add(box, `<div class="abs row" id="${id}-row${j}" style="--c:${sc.c}"><span class="ic"><img src="${E(e)}" alt=""></span><div>${b}<small>${s}</small></div></div>`));
+  (sc.tiles || []).forEach(([e, b, s], j) => add(box, `<div class="abs tile" id="${id}-tile${j}" style="left:${88 + (j % 3) * 260}px"><img src="${E(e)}" alt=""><b>${b}</b><small>${s}</small></div>`));
+  (sc.subs || []).forEach(([c, e, b, s], j) => add(box, `<div class="abs sub3" id="${id}-sub${j}" style="--c:${c};left:${88 + j * 262}px"><div class="bar"></div><img src="${E(e)}" alt=""><b>${b}</b><small>${s}</small></div>`));
+  if (sc.covers) COVERS.forEach((src, j) => add(box, `<div class="abs mini-cover" id="${id}-cv${j}" style="left:${92 + j * 96}px;background-image:url(${src})"></div>`));
   sc.cols = cols;
   const [a, b] = S[id], n = sc.shots.length, d = (b - a) / n;
-  sc.shots.forEach(([img, dist], j) => { SHOTS.push({ id: `sh-${id}-${j}`, a: a + j * d, b: a + (j + 1) * d, dist });
-    add($('shots'), `<img id="sh-${id}-${j}" src="img/${img}.jpg" alt="">`); });
+  sc.shots.forEach(([img, dist], j) => { SHOTS.push({ id: `sh-${id}-${j}`, a: a + j * d, b: a + (j + 1) * d, dist }); add($('shots'), `<img id="sh-${id}-${j}" src="img/${img}.jpg" alt="">`); });
 });
-// accueil sur le téléphone pour la fin
 SHOTS.push({ id: 'sh-fin', a: S.fin[0], b: T + 1, dist: 0 }); add($('shots'), '<img id="sh-fin" src="img/s_home.jpg" alt="">');
+// parcours en étoiles : cinq leçons, l'évaluation, le certificat
+const PN = [['Leçon 1', 'Introduction', 'done'], ['Leçon 2', 'Les caractères', 'done'], ['Leçon 3', 'Les matières', 'done'], ['Leçon 4', 'Votre étape', 'cur'], ['Leçon 5', 'La coutume', 'lock'], ['Évaluation', '20 questions', 'eval'], ['Certificat', 'vérifiable', 'cert']];
+const PX = PN.map((_, i) => 50 + i * 112), PY = PN.map((_, i) => 120 + [0, -46, 10, -40, 14, -36, 0][i]);
+const ICO = { check: '<path d="M5.5 12.5l4.2 4.2 8.8-9.4" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>',
+  play: '<path d="M9 6.5v11l9-5.5z" fill="#fff"/>', lock: '<rect x="5.5" y="10.5" width="13" height="9.5" rx="2" fill="none" stroke="#9a937f" stroke-width="2.2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5" fill="none" stroke="#9a937f" stroke-width="2.2"/>',
+  trophy: '<path d="M8 4.5h8v4a4 4 0 0 1-8 0zM8 6.5H5c0 3 1.5 4.5 3.4 4.8M16 6.5h3c0 3-1.5 4.5-3.4 4.8M12 12.5v3.5M8.5 19.5h7M10 16h4v3.5h-4z" fill="none" stroke="#0f1a35" stroke-width="2" stroke-linejoin="round"/>',
+  seal: '<circle cx="12" cy="9.5" r="5" fill="none" stroke="#0f1a35" stroke-width="2"/><path d="M9 13.8L7.5 20l4.5-2 4.5 2-1.5-6.2" fill="none" stroke="#0f1a35" stroke-width="2" stroke-linejoin="round"/>' };
+let pd = `M${PX[0]} ${PY[0]}`; for (let i = 1; i < PN.length; i++) pd += ` C${PX[i - 1] + 56} ${PY[i - 1]} ${PX[i] - 56} ${PY[i]} ${PX[i]} ${PY[i]}`;
+$('path').innerHTML = `<svg width="780" height="360" style="position:absolute;left:0;top:0;overflow:visible"><path d="${pd}" fill="none" stroke="#d3ccbb" stroke-width="6" stroke-linecap="round" stroke-dasharray=".1 14"/>
+  <path id="pg" d="${pd}" fill="none" stroke="#c39a45" stroke-width="6" stroke-linecap="round"/></svg>` +
+  PN.map(([s, t], i) => `<div class="pk" id="pk${i}" style="left:${PX[i]}px;top:${PY[i]}px"><span class="ring"></span><svg viewBox="0 0 100 100" style="transform:translateY(6px)"><path d="${KH}" fill="#d3ccbb"/></svg><svg viewBox="0 0 100 100"><path class="face" d="${KH}" fill="#e7e2d6"/></svg><span class="ico"></span></div>
+    <div class="plab" id="pl${i}" style="left:${PX[i]}px;top:${PY[i] + 50}px"><b>${s}</b>${t}</div>`).join('');
+const PLEN = $('pg').getTotalLength();
 
 // ---------- animation
 const clamp = x => Math.max(0, Math.min(1, x));
@@ -220,6 +254,7 @@ const ease = x => 1 - Math.pow(1 - x, 3);
 const easeIO = x => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
 const back = x => { const c1 = 1.5, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
 const prog = (t, a, d) => clamp((t - a) / d);
+const cue = (t, k, sc) => CUES.push([+t.toFixed(3), k, sc]);
 // apparition [a, a+d], disparition [o, o+od] ; décalages dx/dy à l'entrée, ox/oy à la sortie, échelle de départ s, rotation r
 function anim(id, t, a, d, o, od, opt = {}) {
   const el = $(id); if (!el) return;
@@ -230,90 +265,122 @@ function anim(id, t, a, d, o, od, opt = {}) {
   el.style.transform = `translate(${dx}px, ${dy}px) scale(${sc}) rotate(${opt.r || 0}deg)`;
 }
 const hex = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16));
-function sceneColor(t) {   // couleur du halo : passe d'une scène à l'autre
-  const L = SC.map(sc => [S[sc.k][0], sc.c]);
-  let c = hex(SC[0].c);
-  for (let i = 0; i < L.length; i++) { const p = easeIO(prog(t, L[i][0] - .4, .8)), n = hex(L[i][1]); c = c.map((v, j) => v + (n[j] - v) * p); }
-  const f = easeIO(prog(t, S.fin[0] - .4, .8)), z = hex('#23468f'); c = c.map((v, j) => v + (z[j] - v) * f);
+function sceneColor(t) {
+  const L = SC.map(sc => [S[sc.k][0], sc.c]); let c = hex('#0f7a58');
+  for (const [a, col] of L) { const p = easeIO(prog(t, a - .4, .8)), n = hex(col); c = c.map((v, j) => v + (n[j] - v) * p); }
   return c.map(Math.round);
 }
-// mise en place verticale selon la hauteur réelle des titres (une ou deux lignes)
 function layout() {
-  SC.forEach(sc => { const id = sc.k; let y = 92 + $(id + '-title').offsetHeight + 20;
-    if (sc.badge) { $(id + '-badge').style.top = y + 'px'; y += 52; }
-    (sc.tags || []).forEach((_, j) => { $(`${id}-tag${j}`).style.top = (y + Math.floor(j / sc.cols) * 54) + 'px'; });
-    if (sc.tags) y += Math.ceil(sc.tags.length / sc.cols) * 54 + 18;
-    (sc.rows || []).forEach((_, j) => { $(`${id}-row${j}`).style.top = (y + j * 86) + 'px'; });
-    (sc.tiles || []).forEach((_, j) => { $(`${id}-tile${j}`).style.top = (y + 8 + Math.floor(j / 3) * 168) + 'px'; });
+  SC.forEach(sc => { const id = sc.k; let y = 94 + $(id + '-title').offsetHeight + 22;
+    if (sc.lead) { $(id + '-lead').style.top = y + 'px'; y += 80; }
+    (sc.tags || []).forEach((_, j) => { $(`${id}-tag${j}`).style.top = (y + Math.floor(j / sc.cols) * 52) + 'px'; });
+    if (sc.tags) y += Math.ceil(sc.tags.length / sc.cols) * 52 + 16;
+    (sc.rows || []).forEach((_, j) => { $(`${id}-row${j}`).style.top = (y + j * (sc.tags ? 78 : 92)) + 'px'; });
+    (sc.tiles || []).forEach((_, j) => { $(`${id}-tile${j}`).style.top = (y + 6 + Math.floor(j / 3) * 164) + 'px'; });
+    (sc.subs || []).forEach((_, j) => { $(`${id}-sub${j}`).style.top = (y + 4) + 'px'; });
+    if (sc.covers) COVERS.forEach((_, j) => { $(`${id}-cv${j}`).style.top = (y + 248) + 'px'; });
   });
 }
 function render(t) {
   layout();
-  $('pattern').style.transform = `translate(${-t * 9}px, ${-t * 5}px) rotate(${t * .4}deg)`;
-  $('light').style.opacity = easeIO(prog(t, S.espaces[0] - .2, .6)) * (1 - easeIO(prog(t, T - .7, .5)));
+  $('pattern').style.transform = `translate(${-t * 8}px, ${-t * 4}px)`;
+  const iv = easeIO(prog(t, S.campus[0] - .35, .7)) * (1 - easeIO(prog(t, S.fin[0] - .4, .7)));
+  $('bg-ivory').style.opacity = iv; $('pattern').style.opacity = .08 + .03 * (1 - iv);
   $('fade').style.opacity = easeIO(prog(t, T - .7, .6));
-  const [r, g, b] = sceneColor(t), bl = easeIO(prog(t, S.arabe[0] - .3, .8)) * (1 - easeIO(prog(t, T - .7, .5)));
-  $('blob').style.background = `radial-gradient(circle, rgba(${r},${g},${b},.20) 0%, rgba(${r},${g},${b},.08) 55%, rgba(${r},${g},${b},0) 70%)`;
-  $('blob').style.opacity = bl; $('blob').style.transform = `translate(${Math.sin(t * .5) * 20}px, ${Math.cos(t * .4) * 16}px)`;
-  $('blob2').style.background = `radial-gradient(circle, rgba(${r},${g},${b},.14) 0%, rgba(${r},${g},${b},0) 70%)`; $('blob2').style.opacity = bl;
+  const [r, g, b] = sceneColor(t), hl = easeIO(prog(t, S.accueil[0] - .3, .8)) * (1 - easeIO(prog(t, S.fin[0] - .4, .6)));
+  $('halo').style.background = `radial-gradient(circle, rgba(${r},${g},${b},.16) 0%, rgba(${r},${g},${b},.06) 55%, rgba(${r},${g},${b},0) 70%)`;
+  $('halo').style.opacity = hl; $('halo').style.transform = `translate(${Math.sin(t * .5) * 18}px, ${Math.cos(t * .4) * 14}px)`;
 
-  // 1. la marque
-  const [, m1] = S.marque;
-  anim('logo', t, .15, .8, m1 - .3, .45, { dy: 0, s: .55, back: true, oy: -40 });
-  anim('s1-eyebrow', t, .75, .6, m1 - .3, .45, { oy: -40 });
-  anim('s1-title', t, .95, .7, m1 - .25, .45, { oy: -40 });
-  anim('s1-ar', t, 1.35, .7, m1 - .2, .45, { oy: -40 });
-  anim('s1-slogan', t, 1.7, .7, m1 - .15, .45, { oy: -40 });
+  // 1. ouverture : l'étoile se trace, le logo apparaît
+  const [, m1] = S.ouverture, dr = easeIO(prog(t, .1, 1.3));
+  ['o-p1', 'o-p2'].forEach((id, k) => { const el = $(id), L = el.getTotalLength(); el.style.strokeDasharray = L; el.style.strokeDashoffset = L * (1 - easeIO(prog(t, .1 + k * .25, 1.3))); });
+  anim('o-star', t, 0, .2, m1 - .35, .45, { dy: 0, s: .9, os: .25 }); $('o-star').style.transform += ` rotate(${t * 6}deg)`;
+  anim('o-logo', t, .55, .8, m1 - .35, .45, { dy: 0, s: .5, back: true, oy: -40 });
+  anim('o-eye', t, 1.1, .6, m1 - .3, .45, { oy: -40 });
+  anim('o-title', t, 1.3, .7, m1 - .3, .45, { oy: -40 });
+  anim('o-ar', t, 1.75, .7, m1 - .25, .45, { oy: -40 });
+  anim('o-slogan', t, 2.15, .7, m1 - .2, .45, { oy: -40 });
 
-  // 2. la collection : huit couvertures en éventail
-  const [a2, b2] = S.collection;
-  anim('s2-eyebrow', t, a2 + .1, .5, b2 - .45, .4, { oy: -30 });
-  anim('s2-title', t, a2 + .2, .6, b2 - .45, .4, { oy: -30 });
-  anim('s2-sub', t, a2 + .45, .6, b2 - .4, .4, { oy: -30 });
-  COVERS.forEach((_, k) => { const el = $('cv' + k), c = k - 3.5;
-    el.style.left = (640 - 75 + c * 138) + 'px'; el.style.top = (238 + Math.abs(c) * Math.abs(c) * 4) + 'px';
-    anim('cv' + k, t, a2 + .35 + k * .11, .75, b2 - .55 + k * .03, .45, { dy: 420, r: c * 3.2, back: true, oy: 340 }); });
-  ['ch0', 'ch1', 'ch2'].forEach((id, k) => anim(id, t, a2 + 1.6 + k * .22, .5, b2 - .45, .4, { dy: 24, oy: 40 }));
-  anim('s2-kit', t, a2 + 2.4, .6, b2 - .45, .4, { dy: 20, oy: 30 });
+  // 2. le campus : quatre verbes et les chiffres du Campus
+  const [a2, b2] = S.campus;
+  anim('c-eye', t, a2 + .15, .5, b2 - .45, .4, { oy: -30 });
+  anim('c-title', t, a2 + .25, .6, b2 - .45, .4, { oy: -30 });
+  VERBS.forEach((_, k) => { $('v' + k).style.left = (140 + k * 260) + 'px'; anim('v' + k, t, a2 + .8 + k * .22, .65, b2 - .5 + k * .04, .4, { dy: 50, s: .8, back: true, oy: 30 }); });
+  FIGS.forEach((_, k) => anim('g' + k, t, a2 + 2.2 + k * .16, .5, b2 - .45, .4, { dy: 24, s: .9, back: true, oy: 24 }));
 
   // 3. les cinq espaces
   const [a3, b3] = S.espaces;
-  anim('s3-title', t, a3 + .2, .6, b3 - .5, .45, { oy: -30 });
-  anim('s3-sub', t, a3 + .45, .6, b3 - .45, .45, { oy: -30 });
-  [36, 280, 524, 768, 1012].forEach((x, k) => { $('k' + k).style.left = x + 'px';
-    anim('k' + k, t, a3 + .6 + k * .16, .7, b3 - .55 + k * .05, .45, { dy: 70, back: true, oy: 40, os: -.04 });
-    if (t > a3 + 1.5 && t < b3 - .55) $('k' + k).style.transform += ` translateY(${Math.sin((t - a3) * 2.2 + k) * 4}px)`; });
+  anim('e-eye', t, a3 + .15, .5, b3 - .5, .45, { oy: -30 });
+  anim('e-title', t, a3 + .25, .6, b3 - .5, .45, { oy: -30 });
+  anim('e-sub', t, a3 + .5, .6, b3 - .45, .45, { oy: -30 });
+  [42, 286, 530, 774, 1018].forEach((x, k) => { $('k' + k).style.left = x + 'px';
+    anim('k' + k, t, a3 + .7 + k * .16, .7, b3 - .55 + k * .05, .45, { dy: 70, back: true, oy: 40, os: -.04 });
+    if (t > a3 + 1.6 && t < b3 - .55) $('k' + k).style.transform += ` translateY(${Math.sin((t - a3) * 2.2 + k) * 4}px)`; });
 
-  // 4 à 10. les espaces et les outils
+  // scènes à texte
   SC.forEach(sc => {
     const [a, b] = S[sc.k], o = b - .5, id = sc.k;
     anim(id + '-eye', t, a + .1, .5, o, .4, { oy: -24 });
     anim(id + '-title', t, a + .2, .6, o, .4, { oy: -24 });
-    anim(id + '-badge', t, a + .9, .5, o, .4, { dy: 0, s: .6, back: true });
-    (sc.tags || []).forEach((_, j) => anim(`${id}-tag${j}`, t, a + .7 + j * .1, .45, o + j * .01, .4, { dy: 18, s: .9, oy: 20 }));
-    const r0 = a + (sc.tags ? .8 + sc.tags.length * .1 : .8);
-    (sc.rows || []).forEach((_, j) => anim(`${id}-row${j}`, t, r0 + j * .38, .5, o + j * .03, .4, { dx: -40, dy: 0, ox: -60 }));
-    (sc.tiles || []).forEach((_, j) => anim(`${id}-tile${j}`, t, a + .8 + j * .22, .55, o + j * .03, .4, { dy: 40, s: .92, back: true, oy: 30 }));
+    anim(id + '-lead', t, a + .6, .6, o, .4, { dy: 18 });
+    (sc.tags || []).forEach((_, j) => anim(`${id}-tag${j}`, t, a + .7 + j * .09, .45, o + j * .01, .4, { dy: 18, s: .9, oy: 20 }));
+    const r0 = a + (sc.tags ? .8 + sc.tags.length * .09 : .8);
+    (sc.rows || []).forEach((_, j) => anim(`${id}-row${j}`, t, r0 + j * .4, .5, o + j * .03, .4, { dx: -40, dy: 0, ox: -60 }));
+    (sc.tiles || []).forEach((_, j) => anim(`${id}-tile${j}`, t, a + .8 + j * .24, .55, o + j * .03, .4, { dy: 40, s: .92, back: true, oy: 30 }));
+    (sc.subs || []).forEach((_, j) => anim(`${id}-sub${j}`, t, a + .8 + j * .3, .6, o + j * .03, .4, { dy: 50, s: .92, back: true, oy: 30 }));
+    if (sc.covers) COVERS.forEach((_, j) => anim(`${id}-cv${j}`, t, a + 2.0 + j * .1, .55, o + j * .02, .4, { dy: 60, r: (j - 3.5) * 2, back: true, oy: 40 }));
   });
-  anim('cert', t, S.biblio[0] + 2.6, .7, S.biblio[1] - .5, .4, { dy: 60, r: -4, back: true, oy: 40 });
-  if (t > S.biblio[0] + 3.3 && t < S.biblio[1] - .5) $('cert').style.transform += ` translateY(${Math.sin((t - S.biblio[0]) * 2) * 3}px)`;
+  // le parcours en étoiles : le tracé doré avance, les étoiles s'allument une à une
+  const [ap, bp] = S.parcours, op = bp - .5;
+  anim('path', t, ap + .5, .5, op, .4, { dy: 20, oy: 20 });
+  const pp = easeIO(prog(t, ap + .9, 3.2));
+  $('pg').style.strokeDasharray = PLEN; $('pg').style.strokeDashoffset = PLEN * (1 - pp * (3 / 6));
+  PN.forEach(([, , st], i) => { const on = prog(t, ap + 1 + i * .45, .35), el = $('pk' + i), face = el.querySelector('.face'), ico = el.querySelector('.ico'), ring = el.querySelector('.ring');
+    const state = on < 1 && st !== 'lock' ? 'lock' : st;
+    const fill = { done: '#0f7a58', cur: '#0f7a58', lock: '#e7e2d6', eval: '#c39a45', cert: '#c39a45' }[state];
+    face.setAttribute('fill', on >= 1 || st === 'lock' ? fill : '#e7e2d6');
+    face.setAttribute('stroke', state === 'done' && on >= 1 ? '#e5c87e' : 'none'); face.setAttribute('stroke-width', '4');
+    el.firstElementChild.nextElementSibling.firstElementChild.setAttribute('fill', on >= 1 && (state === 'done' || state === 'cur') ? '#0a4f39' : on >= 1 && (state === 'eval' || state === 'cert') ? '#8a6a24' : '#d3ccbb');
+    ico.innerHTML = `<svg viewBox="0 0 24 24">${ICO[on >= 1 ? { done: 'check', cur: 'play', lock: 'lock', eval: 'trophy', cert: 'seal' }[state] : 'lock']}</svg>`;
+    el.style.transform = `scale(${(st === 'cur' ? 1.16 : 1) * (1 + .18 * Math.sin(Math.PI * clamp(on)) )})`;
+    ring.style.opacity = st === 'cur' && on >= 1 ? (1 - ((t - ap) * .9 % 1)) * .9 : 0; ring.style.transform = `scale(${.85 + ((t - ap) * .9 % 1) * .5})`;
+    anim('pl' + i, t, ap + 1.1 + i * .45, .4, op, .4, { dy: 10 }); });
 
-  // le téléphone : entre avec l'espace Arabe, reste jusqu'à la fin ; les captures défilent
-  anim('phone', t, S.arabe[0] - .1, .9, T - .7, .5, { dx: 420, dy: 0 });
+  anim('cert', t, S.biblio[0] + 2.8, .7, S.biblio[1] - .5, .4, { dy: 60, r: -4, back: true, oy: 40 });
+  if (t > S.biblio[0] + 3.5 && t < S.biblio[1] - .5) $('cert').style.transform += ` translateY(${Math.sin((t - S.biblio[0]) * 2) * 3}px)`;
+
+  // le téléphone : arrive avec le tableau de bord, s'efface à la fin ; les captures du site défilent
+  anim('phone', t, S.accueil[0] - .1, .9, T - .7, .5, { dx: 420, dy: 0 });
   SHOTS.forEach(({ id, a, b, dist }, k) => { const el = $(id), first = k === 0;
     const vis = (first ? 1 : prog(t, a - .3, .3)) * (1 - prog(t, b - .3, .3));
     el.style.opacity = vis; el.style.transform = `translateY(${-dist * easeIO(prog(t, a + .5, b - a - .9))}px)`; });
 
-  // 11. fin : l'adresse du site
-  const [a11] = S.fin, o11 = T - .75;
-  anim('c-logo', t, a11 + .1, .7, o11, .4, { dy: 0, s: .6, back: true });
-  anim('c-title', t, a11 + .3, .6, o11, .4);
-  anim('c-sub', t, a11 + .6, .6, o11, .4);
-  anim('cta', t, a11 + 1.3, .6, o11, .4, { dy: 20, s: .9, back: true });
-  anim('c-note', t, a11 + 1.9, .6, o11, .4, { dy: 16 });
-  anim('c-ar', t, a11 + 2.3, .6, o11, .4, { dy: 16 });
+  // fin : retour au bleu nuit, l'adresse du site
+  const [af] = S.fin, of = T - .75;
+  anim('f-logo', t, af + .1, .7, of, .4, { dy: 0, s: .6, back: true });
+  anim('f-title', t, af + .3, .6, of, .4);
+  anim('f-sub', t, af + .6, .6, of, .4);
+  anim('cta', t, af + 1.3, .6, of, .4, { dy: 20, s: .9, back: true });
+  anim('f-note', t, af + 1.9, .6, of, .4, { dy: 16 });
+  anim('f-ar', t, af + 2.3, .6, of, .4, { dy: 16 });
 }
-window.render = render; window.T = T; window.S = S;
+// repères de la bande-son (son.py) : changements de scène, titres, éléments qui apparaissent
+(function cues() {
+  Object.entries(S).forEach(([k, [a]]) => { if (a > 0) cue(a, 'scene', k); });
+  cue(.1, 'draw', 'ouverture'); cue(.55, 'big', 'ouverture'); cue(1.3, 'title', 'ouverture');
+  VERBS.forEach((_, k) => cue(S.campus[0] + .8 + k * .22, 'item', 'campus')); FIGS.forEach((_, k) => cue(S.campus[0] + 2.2 + k * .16, 'bell', 'campus'));
+  CARDS.forEach((_, k) => cue(S.espaces[0] + .7 + k * .16, 'item', 'espaces'));
+  SC.forEach(sc => { const [a] = S[sc.k]; cue(a + .2, 'title', sc.k);
+    (sc.tags || []).forEach((_, j) => cue(a + .7 + j * .09, 'bell', sc.k));
+    const r0 = a + (sc.tags ? .8 + sc.tags.length * .09 : .8);
+    (sc.rows || []).forEach((_, j) => cue(r0 + j * .4, 'item', sc.k)); (sc.tiles || []).forEach((_, j) => cue(a + .8 + j * .24, 'item', sc.k));
+    (sc.subs || []).forEach((_, j) => cue(a + .8 + j * .3, 'item', sc.k)); if (sc.covers) COVERS.forEach((_, j) => cue(a + 2.0 + j * .1, 'bell', sc.k)); });
+  PN.forEach((_, i) => cue(S.parcours[0] + 1 + i * .45 + .35, i < 5 ? 'item' : 'big', 'parcours'));
+  cue(S.biblio[0] + 2.8, 'big', 'biblio'); cue(S.accueil[0] - .1, 'slide', 'accueil');
+  cue(S.fin[0] + .1, 'big', 'fin'); cue(S.fin[0] + 1.3, 'item', 'fin');
+  CUES.sort((x, y) => x[0] - y[0]);
+})();
+window.render = render; window.T = T; window.S = S; window.CUES = CUES;
 render(+(location.hash.slice(1) || 2.6));
 </script>
 </body></html>
